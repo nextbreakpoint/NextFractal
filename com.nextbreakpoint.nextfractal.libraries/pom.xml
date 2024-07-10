@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.nextbreakpoint</groupId>
     <artifactId>com.nextbreakpoint.nextfractal.libraries</artifactId>
-    <version>2.2.0</version>
+    <version>2.3.0</version>
     <properties>
         <java.version>21</java.version>
         <java.release>21</java.release>

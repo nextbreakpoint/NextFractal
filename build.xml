@@ -2,7 +2,7 @@
 <project name="NextFractal">
 	<property environment="env" />
 	<property name="openjfx.version" value="21.0.1" />
-	<property name="nextfractal.version" value="2.2.0" />
+	<property name="nextfractal.version" value="2.3.0" />
 	<property name="nextfractal.year" value="2024" />
 	<property name="application" value="NextFractal" />
 	<property name="description" value="NextFractal is an application for creating fractals" />
