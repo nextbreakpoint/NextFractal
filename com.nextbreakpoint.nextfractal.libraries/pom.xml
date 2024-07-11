@@ -5,14 +5,12 @@
     <artifactId>com.nextbreakpoint.nextfractal.libraries</artifactId>
     <version>2.3.0</version>
     <properties>
-        <java.version>21</java.version>
-        <java.release>21</java.release>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>22</java.version>
+        <java.release>22</java.release>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <ffmpeg4java.version>3.1.1-1.1</ffmpeg4java.version>
-        <freeimage4java.version>3.18.0-1.2</freeimage4java.version>
         <antlr4.version>4.13.1</antlr4.version>
         <commonmath3.version>3.6.1</commonmath3.version>
         <richtextfx.version>0.11.2</richtextfx.version>
@@ -22,7 +20,7 @@
         <reactfx.version>2.0-M5</reactfx.version>
         <rxjava.version>2.2.21</rxjava.version>
         <rxjavafx.version>2.2.2</rxjavafx.version>
-        <openjfx.version>21.0.1</openjfx.version>
+        <openjfx.version>22.0.1</openjfx.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-compiler-plugin.version>3.12.0</maven-compiler-plugin.version>
         <maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
@@ -51,7 +49,7 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>[21,)</version>
+                            <version>[22,)</version>
                         </jdk>
                     </toolchains>
                 </configuration>
@@ -73,8 +71,8 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>com.nextbreakpoint,org.antlr,org.apache.commons,io.reactivex.rxjava2,org.reactivestream,org.fxmisc.wellbehaved,org.fxmisc.undo,org.fxmisc.richtext,org.fxmisc.flowless,org.reactfx</includeGroupIds>
-                            <includeArtifactIds>com.nextbreakpoint.ffmpeg4java,com.nextbreakpoint.freeimage4java,antlr4-runtime,commons-math3,rxjava,rxjavafx,reactive-streams,wellbehavedfx,undofx,richtextfx,flowless,reactfx</includeArtifactIds>
+                            <includeGroupIds>org.antlr,org.apache.commons,io.reactivex.rxjava2,org.reactivestream,org.fxmisc.wellbehaved,org.fxmisc.undo,org.fxmisc.richtext,org.fxmisc.flowless,org.reactfx</includeGroupIds>
+                            <includeArtifactIds>antlr4-runtime,commons-math3,rxjava,rxjavafx,reactive-streams,wellbehavedfx,undofx,richtextfx,flowless,reactfx</includeArtifactIds>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                             <excludes>**/*.MF</excludes>
                         </configuration>
@@ -105,8 +103,6 @@
                                     </artifact>
                                     <moduleInfoSource>
                                         module com.nextbreakpoint.nextfractal.libraries {
-                                            exports com.nextbreakpoint.ffmpeg4java;
-                                            exports com.nextbreakpoint.freeimage4java;
                                             exports org.antlr.v4.runtime;
                                             exports org.antlr.v4.runtime.atn;
                                             exports org.antlr.v4.runtime.dfa;
@@ -241,16 +237,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.nextbreakpoint</groupId>
-                <artifactId>com.nextbreakpoint.ffmpeg4java</artifactId>
-                <version>${ffmpeg4java.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.nextbreakpoint</groupId>
-                <artifactId>com.nextbreakpoint.freeimage4java</artifactId>
-                <version>${freeimage4java.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-controls</artifactId>
                 <version>${openjfx.version}</version>
@@ -308,16 +294,6 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.ffmpeg4java</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.freeimage4java</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>

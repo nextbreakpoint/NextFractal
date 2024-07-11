@@ -22,11 +22,35 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-module com.nextbreakpoint.nextfractal.runtime {
-    requires static lombok;
-    requires java.logging;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.core;
-    exports com.nextbreakpoint.nextfractal.runtime.logging;
-    exports com.nextbreakpoint.nextfractal.runtime.export;
+package com.nextbreakpoint.nextfractal.encoder;
+
+import com.nextbreakpoint.freeimage4java.linux.Libfreeimage;
+
+/**
+ * @author Andrea Medeghini
+ */
+public class PNGImageEncoder extends AbstractImageEncoder {
+	public String getSuffix() {
+		return ".png";
+	}
+
+	@Override
+	public String getId() {
+		return "PNG";
+	}
+
+	@Override
+	public String getName() {
+		return "PNG";
+	}
+
+	@Override
+	protected int getFormat() {
+		return Libfreeimage.FIF_PNG();
+	}
+
+	@Override
+	protected boolean isAlphaSupported() {
+		return true;
+	}
 }

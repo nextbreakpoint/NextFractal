@@ -100,6 +100,7 @@ public class ExportPane extends BorderPane {
 		formatCombobox.getStyleClass().add("text-small");
 		formatCombobox.setTooltip(new Tooltip("Select format to export"));
 		formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
+		formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 		formatCombobox.getSelectionModel().select(0);
 
 		VBox formatBox = new VBox(5);
@@ -172,8 +173,8 @@ public class ExportPane extends BorderPane {
 
 		Runnable updateButtonsAndPanels = () -> {
 			boolean selected = captureProperty.getValue();
-			removeButton.setDisable(listView.getItems().size() == 0 || selected);
-			previewButton.setDisable(listView.getItems().size() == 0 || selected);
+			removeButton.setDisable(listView.getItems().isEmpty() || selected);
+			previewButton.setDisable(listView.getItems().isEmpty() || selected);
 			exportButton.setDisable(selected);
 			formatCombobox.setDisable(selected);
 			presetsCombobox.setDisable(selected);
@@ -267,7 +268,7 @@ public class ExportPane extends BorderPane {
             if (newItem != null && (newItem[0] == 0 || newItem[1] == 0)) {
                 widthField.setEditable(true);
                 heightField.setEditable(true);
-                if (listView.getItems().size() == 0) {
+                if (listView.getItems().isEmpty()) {
 					widthField.setText("1024");
 					heightField.setText("768");
 				} else {
@@ -324,11 +325,11 @@ public class ExportPane extends BorderPane {
 
 		removeButton.setOnMouseClicked(e -> {
 			List<Integer> selectedIndices = listView.getSelectionModel().getSelectedIndices().stream().collect(Collectors.toList());
-			if (selectedIndices.size() > 0) {
+			if (!selectedIndices.isEmpty()) {
 				for (int i = selectedIndices.size() - 1; i >= 0; i--) {
 					removeItem(listView, selectedIndices.get(i));
 				}
-				if (listView.getItems().size() == 0) {
+				if (listView.getItems().isEmpty()) {
 					videoProperty.setValue(false);
 				}
 			}
@@ -340,8 +341,8 @@ public class ExportPane extends BorderPane {
 		});
 
 		previewButton.setOnMouseClicked(e -> {
-			if (listView.getItems().size() > 0 && delegate != null) {
-				if (listView.getSelectionModel().getSelectedItems().size() > 0) {
+			if (!listView.getItems().isEmpty() && delegate != null) {
+				if (!listView.getSelectionModel().getSelectedItems().isEmpty()) {
 					delegate.playbackStart(listView.getSelectionModel().getSelectedItems().stream()
 						.map(bitmap -> (Clip) bitmap.getProperty("clip")).collect(Collectors.toList()));
 				} else {
@@ -355,12 +356,15 @@ public class ExportPane extends BorderPane {
 			if (newValue) {
 				formatCombobox.getItems().clear();
 				formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
+				formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 				formatCombobox.getItems().add(new String[] { "Quicktime video", "MOV" });
+				formatCombobox.getItems().add(new String[] { "MP4 video", "MP4" });
 				formatCombobox.getItems().add(new String[] { "AVI video", "AVI" });
 				formatCombobox.getSelectionModel().select(1);
 			} else {
 				formatCombobox.getItems().clear();
 				formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
+				formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 				formatCombobox.getSelectionModel().select(0);
 			}
 			updateButtonsAndPanels.run();
@@ -443,7 +447,7 @@ public class ExportPane extends BorderPane {
 		if (bitmap == null) {
 			return;
 		}
-		if (listView.getItems().size() == 0) {
+		if (listView.getItems().isEmpty()) {
 			videoProperty.setValue(false);
 		}
 		if (delegate != null) {

@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
+            <artifactId>com.nextbreakpoint.nextfractal.encoder</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nextbreakpoint</groupId>
             <artifactId>com.nextbreakpoint.nextfractal.runtime</artifactId>
             <version>${project.version}</version>
         </dependency>

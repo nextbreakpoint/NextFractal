@@ -79,7 +79,7 @@ public class ApplicationUtils {
     public static Optional<? extends Encoder> createEncoder(String format) {
         return tryFindEncoder(format)
                 .observe()
-                .onFailure(e -> log.warning("Can't find encoder for format " + format))
+                .onFailure(e -> log.log(Level.WARNING, "Can't find encoder for format " + format, e))
                 .get()
                 .optional();
     }

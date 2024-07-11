@@ -22,31 +22,30 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.runtime.encode;
+package com.nextbreakpoint.nextfractal.encoder;
+
+import com.nextbreakpoint.freeimage4java.linux.Libfreeimage;
 
 /**
  * @author Andrea Medeghini
  */
-public class AVIVideoEncoder extends AbstractVideoEncoder {
-	protected String getFormatName() {
-		return "avi";
-	}
-
+public class JPEGImageEncoder extends AbstractImageEncoder {
 	public String getSuffix() {
-		return ".avi";
-	}
-
-	public boolean isAlphaSupported() {
-		return false;
+		return ".jpeg";
 	}
 
 	@Override
 	public String getId() {
-		return "AVI";
+		return "JPEG";
 	}
 
 	@Override
 	public String getName() {
-		return "AVI";
+		return "JPEG";
+	}
+
+	@Override
+	protected int getFormat() {
+		return Libfreeimage.FIF_JPEG();
 	}
 }

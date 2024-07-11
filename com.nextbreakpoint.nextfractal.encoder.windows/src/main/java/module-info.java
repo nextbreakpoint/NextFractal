@@ -22,11 +22,18 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-module com.nextbreakpoint.nextfractal.runtime {
+import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.encoder.AVIVideoEncoder;
+import com.nextbreakpoint.nextfractal.encoder.PNGImageEncoder;
+import com.nextbreakpoint.nextfractal.encoder.QuicktimeVideoEncoder;
+
+module com.nextbreakpoint.nextfractal.encoder {
     requires static lombok;
     requires java.logging;
-    requires com.nextbreakpoint.common;
+    requires com.nextbreakpoint.freeimage4java.windows;
+    requires com.nextbreakpoint.ffmpeg4java.windows;
     requires com.nextbreakpoint.nextfractal.core;
-    exports com.nextbreakpoint.nextfractal.runtime.logging;
-    exports com.nextbreakpoint.nextfractal.runtime.export;
+    requires com.nextbreakpoint.nextfractal.libraries;
+    exports com.nextbreakpoint.nextfractal.encoder;
+    provides Encoder with PNGImageEncoder, AVIVideoEncoder, QuicktimeVideoEncoder;
 }

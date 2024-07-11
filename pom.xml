@@ -37,14 +37,16 @@
         <module>com.nextbreakpoint.nextfractal.main</module>
     </modules>
     <properties>
-        <java.version>21</java.version>
-        <java.release>21</java.release>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>22</java.version>
+        <java.release>22</java.release>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <freeimage4java.version>3.18.0-2.1</freeimage4java.version>
+        <ffmpeg4java.version>7.0.1-1.1</ffmpeg4java.version>
         <common.version>3.0.1</common.version>
-        <openjfx.version>21.0.1</openjfx.version>
+        <openjfx.version>22.0.1</openjfx.version>
         <jackson.version>2.16.0</jackson.version>
         <lombok.version>1.18.30</lombok.version>
         <junit.version>5.10.1</junit.version>
@@ -85,7 +87,7 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>[21,)</version>
+                            <version>[22,)</version>
                         </jdk>
                     </toolchains>
                 </configuration>
@@ -175,6 +177,36 @@
     </build>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.nextbreakpoint</groupId>
+                <artifactId>com.nextbreakpoint.ffmpeg4java.macos</artifactId>
+                <version>${ffmpeg4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nextbreakpoint</groupId>
+                <artifactId>com.nextbreakpoint.ffmpeg4java.linux</artifactId>
+                <version>${ffmpeg4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nextbreakpoint</groupId>
+                <artifactId>com.nextbreakpoint.ffmpeg4java.windows</artifactId>
+                <version>${ffmpeg4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nextbreakpoint</groupId>
+                <artifactId>com.nextbreakpoint.freeimage4java.macos</artifactId>
+                <version>${freeimage4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nextbreakpoint</groupId>
+                <artifactId>com.nextbreakpoint.freeimage4java.linux</artifactId>
+                <version>${freeimage4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nextbreakpoint</groupId>
+                <artifactId>com.nextbreakpoint.freeimage4java.windows</artifactId>
+                <version>${freeimage4java.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.nextbreakpoint</groupId>
                 <artifactId>com.nextbreakpoint.common</artifactId>
@@ -268,33 +300,36 @@
     <profiles>
         <profile>
             <id>osx_x86_64</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
-                <build.type>macos_x86_64</build.type>
                 <arch.type>x86_64</arch.type>
                 <os.type>mac</os.type>
                 <os.name>macos</os.name>
             </properties>
-        </profile>
-        <profile>
-            <id>win_x86_64</id>
-            <properties>
-                <build.type>win32_x86_64</build.type>
-                <arch.type>x86_64</arch.type>
-                <os.type>win</os.type>
-                <os.name>windows</os.name>
-            </properties>
+            <modules>
+                <module>com.nextbreakpoint.nextfractal.encoder.macos</module>
+            </modules>
         </profile>
         <profile>
             <id>linux_x86_64</id>
             <properties>
-                <build.type>linux_x86_64</build.type>
                 <arch.type>x86_64</arch.type>
                 <os.type>linux</os.type>
                 <os.name>linux</os.name>
             </properties>
+            <modules>
+                <module>com.nextbreakpoint.nextfractal.encoder.linux</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>windows_x86_64</id>
+            <properties>
+                <arch.type>x86_64</arch.type>
+                <os.type>win</os.type>
+                <os.name>windows</os.name>
+            </properties>
+            <modules>
+                <module>com.nextbreakpoint.nextfractal.encoder.windows</module>
+            </modules>
         </profile>
         <profile>
             <id>ossrh</id>
