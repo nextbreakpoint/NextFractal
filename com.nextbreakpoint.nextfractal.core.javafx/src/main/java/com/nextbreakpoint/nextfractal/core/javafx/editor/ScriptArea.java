@@ -71,10 +71,12 @@ public class ScriptArea extends CodeArea {
     }
 
     private void handleEditorReportChanged(EditorReportChanged event) {
-        internalSource.setValue(true);
-        replaceText(0, getLength(), event.session().getScript());
-        internalSource.setValue(false);
-
+        if (!event.continuous()) {
+            internalSource.setValue(true);
+            replaceText(0, getLength(), event.session().getScript());
+            getUndoManager().forgetHistory();
+            internalSource.setValue(false);
+        }
         updateTextStyles(event.result());
     }
 
