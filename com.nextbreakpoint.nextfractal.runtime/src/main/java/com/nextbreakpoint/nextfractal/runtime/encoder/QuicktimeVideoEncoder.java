@@ -22,41 +22,41 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.encoder;
+package com.nextbreakpoint.nextfractal.runtime.encoder;
 
-import com.nextbreakpoint.ffmpeg4java.macos.AVCodecContext;
+import com.nextbreakpoint.ffmpeg4java.AVCodecContext;
 
 import java.lang.foreign.MemorySegment;
 
-import static com.nextbreakpoint.ffmpeg4java.macos.Libffmpeg_1.AV_CODEC_ID_MPEG4;
-import static com.nextbreakpoint.ffmpeg4java.macos.Libffmpeg_2.FF_PROFILE_MPEG4_MAIN;
+import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_1.AV_CODEC_ID_MPEG2VIDEO;
+import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_2.FF_PROFILE_MPEG2_HIGH;
 
 /**
  * @author Andrea Medeghini
  */
-public class MP4VideoEncoder extends AbstractVideoEncoder {
+public class QuicktimeVideoEncoder extends AbstractVideoEncoder {
 	public String getSuffix() {
-		return ".mp4";
+		return ".mov";
 	}
 
 	@Override
 	public String getId() {
-		return "MP4";
+		return "MOV";
 	}
 
 	@Override
 	public String getName() {
-		return "MPEG4";
+		return "Quicktime";
 	}
 
 	@Override
 	protected int getCodecID() {
-		return AV_CODEC_ID_MPEG4();
+		return AV_CODEC_ID_MPEG2VIDEO();
 	}
 
 	@Override
 	protected String getFormatName() {
-		return "mp4";
+		return "mov";
 	}
 
 	@Override
@@ -66,6 +66,8 @@ public class MP4VideoEncoder extends AbstractVideoEncoder {
 		AVCodecContext.mb_decision(pCodecContext, 2);
 		AVCodecContext.i_quant_factor(pCodecContext, 0.1f);
 		AVCodecContext.b_quant_factor(pCodecContext, 0.1f);
-		AVCodecContext.profile(pCodecContext, FF_PROFILE_MPEG4_MAIN());
+		AVCodecContext.profile(pCodecContext, FF_PROFILE_MPEG2_HIGH());
+//		AVCodecContext.strict_std_compliance(pCodecContext, AVCodecContext.strict_std_compliance(pCodecContext) | FF_COMPLIANCE_VERY_STRICT());
+//	    AVCodecContext.flags(pCodecContext, AVCodecContext.flags(pCodecContext) | AV_CODEC_FLAG_GLOBAL_HEADER());
 	}
 }

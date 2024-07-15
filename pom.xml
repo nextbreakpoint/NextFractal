@@ -43,8 +43,8 @@
         <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <freeimage4java.version>3.18.0-2.1</freeimage4java.version>
-        <ffmpeg4java.version>7.0.1-1.1</ffmpeg4java.version>
+        <freeimage4java.version>3.18.0-2.2</freeimage4java.version>
+        <ffmpeg4java.version>7.0.1-1.2</ffmpeg4java.version>
         <common.version>3.0.1</common.version>
         <openjfx.version>22.0.1</openjfx.version>
         <jackson.version>2.16.0</jackson.version>
@@ -298,39 +298,6 @@
         </dependency>
     </dependencies>
     <profiles>
-        <profile>
-            <id>osx_x86_64</id>
-            <properties>
-                <arch.type>x86_64</arch.type>
-                <os.type>mac</os.type>
-                <os.name>macos</os.name>
-            </properties>
-            <modules>
-                <module>com.nextbreakpoint.nextfractal.encoder.macos</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>linux_x86_64</id>
-            <properties>
-                <arch.type>x86_64</arch.type>
-                <os.type>linux</os.type>
-                <os.name>linux</os.name>
-            </properties>
-            <modules>
-                <module>com.nextbreakpoint.nextfractal.encoder.linux</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>windows_x86_64</id>
-            <properties>
-                <arch.type>x86_64</arch.type>
-                <os.type>win</os.type>
-                <os.name>windows</os.name>
-            </properties>
-            <modules>
-                <module>com.nextbreakpoint.nextfractal.encoder.windows</module>
-            </modules>
-        </profile>
         <profile>
             <id>ossrh</id>
             <activation>

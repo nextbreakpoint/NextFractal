@@ -10,26 +10,50 @@
     <dependencies>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.libraries</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
             <artifactId>com.nextbreakpoint.nextfractal.core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.mandelbrot</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.contextfree</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
     <profiles>
+        <profile>
+            <id>osx_x86_64</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.nextbreakpoint</groupId>
+                    <artifactId>com.nextbreakpoint.ffmpeg4java.macos</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.nextbreakpoint</groupId>
+                    <artifactId>com.nextbreakpoint.freeimage4java.macos</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>linux_x86_64</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.nextbreakpoint</groupId>
+                    <artifactId>com.nextbreakpoint.ffmpeg4java.linux</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.nextbreakpoint</groupId>
+                    <artifactId>com.nextbreakpoint.freeimage4java.linux</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>windows_x86_64</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.nextbreakpoint</groupId>
+                    <artifactId>com.nextbreakpoint.ffmpeg4java.windows</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.nextbreakpoint</groupId>
+                    <artifactId>com.nextbreakpoint.freeimage4java.windows</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>ossrh</id>
             <activation>

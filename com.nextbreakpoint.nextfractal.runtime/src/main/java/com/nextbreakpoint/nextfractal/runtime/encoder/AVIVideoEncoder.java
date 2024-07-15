@@ -22,30 +22,50 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.encoder;
+package com.nextbreakpoint.nextfractal.runtime.encoder;
 
-import com.nextbreakpoint.freeimage4java.linux.Libfreeimage;
+import com.nextbreakpoint.ffmpeg4java.AVCodecContext;
+
+import java.lang.foreign.MemorySegment;
+
+import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_1.AV_CODEC_ID_MPEG4;
+import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_2.FF_PROFILE_MPEG4_SIMPLE;
 
 /**
  * @author Andrea Medeghini
  */
-public class JPEGImageEncoder extends AbstractImageEncoder {
+public class AVIVideoEncoder extends AbstractVideoEncoder {
 	public String getSuffix() {
-		return ".jpeg";
+		return ".avi";
 	}
 
 	@Override
 	public String getId() {
-		return "JPEG";
+		return "AVI";
 	}
 
 	@Override
 	public String getName() {
-		return "JPEG";
+		return "AVI";
 	}
 
 	@Override
-	protected int getFormat() {
-		return Libfreeimage.FIF_JPEG();
+	protected int getCodecID() {
+		return AV_CODEC_ID_MPEG4();
+	}
+
+	@Override
+	protected String getFormatName() {
+		return "avi";
+	}
+
+	@Override
+	protected void configureCodecContext(MemorySegment pCodecContext) {
+		AVCodecContext.gop_size(pCodecContext, 15);
+		AVCodecContext.bit_rate(pCodecContext, 400000);
+		AVCodecContext.mb_decision(pCodecContext, 2);
+		AVCodecContext.i_quant_factor(pCodecContext, 0.1f);
+		AVCodecContext.b_quant_factor(pCodecContext, 0.1f);
+		AVCodecContext.profile(pCodecContext, FF_PROFILE_MPEG4_SIMPLE());
 	}
 }

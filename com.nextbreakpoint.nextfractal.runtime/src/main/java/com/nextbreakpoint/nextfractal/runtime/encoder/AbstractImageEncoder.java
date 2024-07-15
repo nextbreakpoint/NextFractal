@@ -22,9 +22,9 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.encoder;
+package com.nextbreakpoint.nextfractal.runtime.encoder;
 
-import com.nextbreakpoint.freeimage4java.windows.tagRGBQUAD;
+import com.nextbreakpoint.freeimage4java.tagRGBQUAD;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 import com.nextbreakpoint.nextfractal.core.encode.EncoderContext;
 import com.nextbreakpoint.nextfractal.core.encode.EncoderDelegate;
@@ -38,12 +38,12 @@ import java.lang.foreign.MemorySegment;
 import java.util.Objects;
 import java.util.logging.Level;
 
-import static com.nextbreakpoint.freeimage4java.windows.Libfreeimage.FreeImage_Allocate;
-import static com.nextbreakpoint.freeimage4java.windows.Libfreeimage.FreeImage_Initialise;
-import static com.nextbreakpoint.freeimage4java.windows.Libfreeimage.FreeImage_Save;
-import static com.nextbreakpoint.freeimage4java.windows.Libfreeimage.FreeImage_SetPixelColor;
-import static com.nextbreakpoint.freeimage4java.windows.Libfreeimage.FreeImage_Unload;
-import static com.nextbreakpoint.freeimage4java.windows.Libfreeimage.TRUE;
+import static com.nextbreakpoint.freeimage4java.Libfreeimage.FreeImage_Allocate;
+import static com.nextbreakpoint.freeimage4java.Libfreeimage.FreeImage_Initialise;
+import static com.nextbreakpoint.freeimage4java.Libfreeimage.FreeImage_Save;
+import static com.nextbreakpoint.freeimage4java.Libfreeimage.FreeImage_SetPixelColor;
+import static com.nextbreakpoint.freeimage4java.Libfreeimage.FreeImage_Unload;
+import static com.nextbreakpoint.freeimage4java.Libfreeimage.TRUE;
 import static java.lang.foreign.MemorySegment.NULL;
 
 /**

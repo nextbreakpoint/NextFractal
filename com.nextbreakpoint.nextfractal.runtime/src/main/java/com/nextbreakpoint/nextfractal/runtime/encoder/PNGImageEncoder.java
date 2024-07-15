@@ -22,18 +22,35 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
-import com.nextbreakpoint.nextfractal.encoder.AVIVideoEncoder;
-import com.nextbreakpoint.nextfractal.encoder.PNGImageEncoder;
-import com.nextbreakpoint.nextfractal.encoder.QuicktimeVideoEncoder;
+package com.nextbreakpoint.nextfractal.runtime.encoder;
 
-module com.nextbreakpoint.nextfractal.encoder {
-    requires static lombok;
-    requires java.logging;
-    requires com.nextbreakpoint.freeimage4java.linux;
-    requires com.nextbreakpoint.ffmpeg4java.linux;
-    requires com.nextbreakpoint.nextfractal.core;
-    requires com.nextbreakpoint.nextfractal.libraries;
-    exports com.nextbreakpoint.nextfractal.encoder;
-    provides Encoder with PNGImageEncoder, AVIVideoEncoder, QuicktimeVideoEncoder;
+import com.nextbreakpoint.freeimage4java.Libfreeimage;
+
+/**
+ * @author Andrea Medeghini
+ */
+public class PNGImageEncoder extends AbstractImageEncoder {
+	public String getSuffix() {
+		return ".png";
+	}
+
+	@Override
+	public String getId() {
+		return "PNG";
+	}
+
+	@Override
+	public String getName() {
+		return "PNG";
+	}
+
+	@Override
+	protected int getFormat() {
+		return Libfreeimage.FIF_PNG();
+	}
+
+	@Override
+	protected boolean isAlphaSupported() {
+		return true;
+	}
 }
