@@ -42,7 +42,7 @@
             </dependencies>
         </profile>
         <profile>
-            <id>windows_x86_64</id>
+            <id>win_x86_64</id>
             <dependencies>
                 <dependency>
                     <groupId>com.nextbreakpoint</groupId>

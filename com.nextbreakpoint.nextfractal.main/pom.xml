@@ -239,7 +239,7 @@
             </build>
         </profile>
         <profile>
-            <id>windows_x86_64</id>
+            <id>win_x86_64</id>
             <properties>
                 <arch.type>x86_64</arch.type>
                 <os.type>win</os.type>
