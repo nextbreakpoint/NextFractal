@@ -1,6 +1,6 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
@@ -34,11 +34,12 @@ public class ContextFreeParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Try.of(() -> new DSLParser().parse(session.getScript()))
+        return Command.of(() -> new DSLParser().parse(session.getScript()))
                 .map(ContextFreeParserStrategy::processResult)
                 .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.getScript()), result))
-                .mapper(RuntimeException::new)
-                .orThrow();
+                .execute()
+                .orThrow(RuntimeException::new)
+                .get();
     }
 
     private GenericStyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -91,12 +92,15 @@ public class ContextFreeParserStrategy implements ParserStrategy {
         );
     }
 
-    public static DSLParserResult processResult(DSLParserResult result) {
-        return Block.create(DSLParserResult.class)
-                .tryExecute(result)
-                .onFailure(e -> processCompilerErrors(result, e))
-                .mapper(RuntimeException::new)
-                .orThrow();
+    public static DSLParserResult processResult(DSLParserResult parserResult) {
+        return Block.begin(DSLParserResult.class)
+                .end(parserResult)
+                .execute()
+                .observe()
+                .onFailure(e -> processCompilerErrors(parserResult, e))
+                .get()
+                .orThrow(RuntimeException::new)
+                .get();
     }
 
     private static void processCompilerErrors(DSLParserResult result, Exception e) {

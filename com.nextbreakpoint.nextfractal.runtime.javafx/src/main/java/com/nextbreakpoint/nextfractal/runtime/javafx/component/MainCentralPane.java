@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -94,12 +94,12 @@ public class MainCentralPane extends BorderPane {
 
             @Override
             public BrowseBitmap createBitmap(File file, RendererSize size) throws Exception {
-                return ApplicationUtils.createBitmap(file, size).orThrow();
+                return ApplicationUtils.createBitmap(file, size).orThrow().get();
             }
 
 			@Override
 			public GridItemRenderer createRenderer(Bitmap bitmap) throws Exception {
-				return ApplicationUtils.createRenderer(bitmap).orThrow();
+				return ApplicationUtils.createRenderer(bitmap).orThrow().get();
 			}
 		});
 

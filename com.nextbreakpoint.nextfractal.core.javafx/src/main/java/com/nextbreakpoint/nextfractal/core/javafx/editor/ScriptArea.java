@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -71,10 +71,12 @@ public class ScriptArea extends CodeArea {
     }
 
     private void handleEditorReportChanged(EditorReportChanged event) {
-        internalSource.setValue(true);
-        replaceText(0, getLength(), event.session().getScript());
-        internalSource.setValue(false);
-
+        if (!event.continuous()) {
+            internalSource.setValue(true);
+            replaceText(0, getLength(), event.session().getScript());
+            getUndoManager().forgetHistory();
+            internalSource.setValue(false);
+        }
         updateTextStyles(event.result());
     }
 

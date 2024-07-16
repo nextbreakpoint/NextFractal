@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 
 import java.util.Optional;
@@ -47,8 +47,8 @@ public class UIPlugins {
         return factoryStream().filter(plugin -> pluginId.equals(plugin.getId())).findFirst();
     }
 
-    public static Try<? extends UIFactory, Exception> tryFindFactory(String pluginId) {
-        return findFactory(pluginId).map(plugin -> Try.of(() -> plugin)).orElse(Try.failure(new Exception("Factory not found " + pluginId)));
+    public static Either<? extends UIFactory> tryFindFactory(String pluginId) {
+        return findFactory(pluginId).map(Either::success).orElse(Either.failure(new Exception("Factory not found " + pluginId)));
     }
 
     private static ServiceLoader<Encoder> encoderLoader() {
@@ -63,8 +63,8 @@ public class UIPlugins {
         return encoderStream().filter(plugin -> pluginId.equals(plugin.getId())).findFirst();
     }
 
-    public static Try<? extends Encoder, Exception> tryFindEncoder(String format) {
-        return findEncoder(format).map(plugin -> Try.of(() -> plugin)).orElse(Try.failure(new Exception("Encoder not found " + format)));
+    public static Either<? extends Encoder> tryFindEncoder(String format) {
+        return findEncoder(format).map(Either::success).orElse(Either.failure(new Exception("Encoder not found " + format)));
     }
 
     public static Stream<? extends UIFactory> factories() {

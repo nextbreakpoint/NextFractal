@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -45,7 +46,6 @@ import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.render.JavaFXRendererFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
 import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
-import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
@@ -117,8 +117,8 @@ public class MandelbrotUIFactory implements UIFactory {
 	}
 
 	@Override
-	public Try<String, Exception> loadResource(String resourceName) {
-		return Try.of(() -> Objects.requireNonNull(getClass().getResource(resourceName)).toExternalForm());
+	public Either<String> loadResource(String resourceName) {
+		return Command.of(() -> Objects.requireNonNull(getClass().getResource(resourceName)).toExternalForm()).execute();
 	}
 
 	@Override

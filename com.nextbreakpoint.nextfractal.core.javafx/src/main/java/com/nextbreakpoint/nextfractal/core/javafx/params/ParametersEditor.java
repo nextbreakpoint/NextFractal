@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.params;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditor;
 import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory;
@@ -102,7 +103,9 @@ public class ParametersEditor extends VBox {
 	private Optional<AttributeEditor> createAttributeEditor(Attribute attribute, Map<String, AttributeEditor> editors) {
 		final AttributeEditor editor = findAttributeEditorFactory(attribute)
 				.map(plugin -> Objects.requireNonNull(plugin.createAttributeEditor(attribute)))
-				.onFailure(error -> log.log(Level.INFO, "Cannot create attribute editor: {}", attribute))
+				.observe()
+				.onFailure(e -> log.log(Level.INFO, "Cannot create attribute editor: " + attribute.getKey()))
+				.get()
 				.orElse(null);
 
 		if (editor != null) {
@@ -113,8 +116,8 @@ public class ParametersEditor extends VBox {
 		return Optional.ofNullable(editor);
 	}
 
-	private static Try<AttributeEditorFactory, Exception> findAttributeEditorFactory(Attribute attribute) {
+	private static Either<AttributeEditorFactory> findAttributeEditorFactory(Attribute attribute) {
 		return AttributeEditorPlugins.tryFindFactory("key-" + attribute.getKey())
-				.or(() -> AttributeEditorPlugins.tryFindFactory("logical-type-" + attribute.getLogicalType()).orThrow());
+				.or(() -> AttributeEditorPlugins.tryFindFactory("logical-type-" + attribute.getLogicalType()));
 	}
 }

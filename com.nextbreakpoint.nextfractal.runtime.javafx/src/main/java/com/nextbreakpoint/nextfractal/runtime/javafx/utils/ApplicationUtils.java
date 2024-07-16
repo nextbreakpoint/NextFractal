@@ -1,6 +1,7 @@
 package com.nextbreakpoint.nextfractal.runtime.javafx.utils;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.either.Either;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Clip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
@@ -11,6 +12,7 @@ import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import javafx.geometry.Rectangle2D;
@@ -50,34 +52,44 @@ public class ApplicationUtils {
         Plugins.factories().forEach(plugin -> log.fine("Found plugin " + plugin.getId()));
     }
 
-    public static Try<BrowseBitmap, Exception> createBitmap(File file, RendererSize size) {
-        return FileManager.loadBundle(file).flatMap(bundle -> tryFindFactory(bundle.getSession().getPluginId())
-                .flatMap(factory -> Try.of(() -> factory.createBitmap(bundle.getSession(), size))));
+    public static Either<BrowseBitmap> createBitmap(File file, RendererSize size) {
+        return Command.of(FileManager.loadBundle(file))
+                .flatMap(bundle -> Command.of(tryFindFactory(bundle.getSession().getPluginId()))
+                .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.getSession(), size))))
+                .execute();
     }
 
-    public static Try<GridItemRenderer, Exception> createRenderer(Bitmap bitmap) {
-        return tryFindFactory(((Session) bitmap.getProperty("session")).getPluginId())
-                .flatMap(factory -> Try.of(() -> factory.createRenderer(bitmap)));
+    public static Either<GridItemRenderer> createRenderer(Bitmap bitmap) {
+        return Command.of(tryFindFactory(((Session) bitmap.getProperty("session")).getPluginId()))
+                .flatMap(factory -> Command.of(() -> factory.createRenderer(bitmap)))
+                .execute();
     }
 
     public static void loadStyleSheets(Scene scene) {
-        loadResource("/theme.css").ifPresent(resourceURL -> scene.getStylesheets().add((resourceURL)));
+        loadResource("/theme.css").optional().ifPresent(resourceURL -> scene.getStylesheets().add((resourceURL)));
 
-        UIPlugins.factories().map(factory -> factory.loadResource("/" + factory.getId().toLowerCase() + ".css")
-                        .onFailure(e -> log.log(Level.WARNING, "Can't load style sheet " + factory.getId().toLowerCase() + ".css", e)))
-                .forEach(maybeURL -> maybeURL.ifPresent(resourceURL -> scene.getStylesheets().add((resourceURL))));
+        UIPlugins.factories().map(factory -> loadResource(factory, factory.getId().toLowerCase() + ".css"))
+                .forEach(maybeURL -> maybeURL.optional().ifPresent(resourceURL -> scene.getStylesheets().add((resourceURL))));
     }
 
-    public static Try<String, Exception> loadResource(String resourceName) {
-        return Try.of(() -> Objects.requireNonNull(ApplicationUtils.class.getResource(resourceName)).toExternalForm());
+    public static Either<String> loadResource(String resourceName) {
+        return Command.of(() -> Objects.requireNonNull(ApplicationUtils.class.getResource(resourceName)).toExternalForm()).execute();
     }
 
     public static Optional<? extends Encoder> createEncoder(String format) {
-        return tryFindEncoder(format).onFailure(e -> log.warning("Can't find encoder for format " + format)).value();
+        return tryFindEncoder(format)
+                .observe()
+                .onFailure(e -> log.log(Level.WARNING, "Can't find encoder for format " + format, e))
+                .get()
+                .optional();
     }
 
-    public static Try<Session, Exception> createSession(CoreFactory factory) {
-        return Try.of(() -> Objects.requireNonNull(factory.createSession())).onFailure(e -> log.log(Level.WARNING, "Can't create session for " + factory.getId(), e));
+    public static Either<Session> createSession(CoreFactory factory) {
+        return Command.of(() -> Objects.requireNonNull(factory.createSession()))
+                .execute()
+                .observe()
+                .onFailure(e -> log.log(Level.WARNING, "Can't create session for " + factory.getId(), e))
+                .get();
     }
 
     public static ExportSession createExportSession(Encoder encoder, Session session, List<Clip> clips, RendererSize size, File file) throws IOException {
@@ -118,17 +130,21 @@ public class ApplicationUtils {
     }
 
     public static void checkJavaCompiler() {
-        Try.of(() -> Objects.requireNonNull(ToolProvider.getSystemJavaCompiler())).ifFailure(e -> showCompilerAlert());
+        Command.of(() -> Objects.requireNonNull(ToolProvider.getSystemJavaCompiler()))
+                .execute()
+                .observe()
+                .onFailure(e -> showCompilerAlert())
+                .get();
     }
 
     public static String getApplicationName() {
-        return "NextFractal 2.2.0";
+        return "NextFractal 2.3.0";
     }
 
     public static String getNoticeMessage() {
         return """
 
-                NextFractal 2.2.0
+                NextFractal 2.3.0
 
                 https://github.com/nextbreakpoint/nextfractal
 
@@ -176,6 +192,13 @@ public class ApplicationUtils {
             log.severe("Can't read from examples: " + path.getAbsolutePath());
         }
         return path;
+    }
+
+    private static Either<String> loadResource(UIFactory factory, String resourceName) {
+        return factory.loadResource("/" + resourceName)
+                .observe()
+                .onFailure(e -> log.log(Level.WARNING, "Can't load style sheet " + resourceName, e))
+                .get();
     }
 
     private static void showCompilerAlert() {

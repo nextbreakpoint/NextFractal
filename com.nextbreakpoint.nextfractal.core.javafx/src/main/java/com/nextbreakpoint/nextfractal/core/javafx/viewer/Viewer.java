@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -315,7 +315,7 @@ public class Viewer extends BorderPane {
 
 		delegate = null;
 
-		factory = tryFindFactory(session.getPluginId()).orElse(null);
+		factory = tryFindFactory(session.getPluginId()).optional().orElse(null);
 
 		if (factory == null) {
 			return;

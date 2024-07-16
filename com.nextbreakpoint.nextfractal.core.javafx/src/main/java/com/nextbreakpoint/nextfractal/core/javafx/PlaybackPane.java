@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,10 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Clip;
 import com.nextbreakpoint.nextfractal.core.common.ClipProcessor;
-import com.nextbreakpoint.nextfractal.core.common.Frame;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.Frame;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 
@@ -77,14 +78,23 @@ public class PlaybackPane extends Pane {
                 Frame frame = frames.get(frameIndex);
                 if (delegate != null) {
                     if (lastFrame == null || !lastFrame.getPluginId().equals(frame.getPluginId()) || !lastFrame.getScript().equals(frame.getScript())) {
-                        tryFindFactory(frame.getPluginId()).map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
-                            .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
+                        Command.of(tryFindFactory(frame.getPluginId()))
+                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .execute()
+                                .optional()
+                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
                     } else if (!lastFrame.getMetadata().equals(frame.getMetadata())) {
-                        tryFindFactory(frame.getPluginId()).map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
-                            .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
+                        Command.of(tryFindFactory(frame.getPluginId()))
+                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .execute()
+                                .optional()
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
                     } else if (!lastFrame.getMetadata().getTime().equals(frame.getMetadata().getTime())) {
-                        tryFindFactory(frame.getPluginId()).map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
-                            .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, true)));
+                        Command.of(tryFindFactory(frame.getPluginId()))
+                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .execute()
+                                .optional()
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, true)));
                     }
                 }
                 lastFrame = frame;

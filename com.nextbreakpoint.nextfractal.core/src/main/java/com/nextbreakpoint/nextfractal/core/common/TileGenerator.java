@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 
 import javax.imageio.ImageIO;
@@ -105,8 +106,11 @@ public class TileGenerator {
     public static byte[] generateImage(TileRequest request) throws Exception {
         final TileContext context = createTileContext(request);
 
-        final ImageComposer composer = Plugins.tryFindFactory(context.getSession().getPluginId())
-                .map(factory -> factory.createImageComposer(threadFactory, context.getTile(), true)).orThrow();
+        final ImageComposer composer = Command.of(Plugins.tryFindFactory(context.getSession().getPluginId()))
+                .map(factory -> factory.createImageComposer(threadFactory, context.getTile(), true))
+                .execute()
+                .orThrow()
+                .orElse(null);
 
         final IntBuffer pixels = composer.renderImage(context.getSession().getScript(), context.getSession().getMetadata());
 

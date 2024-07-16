@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -22,9 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.runtime.encode;
-
-import com.nextbreakpoint.nextfractal.core.encode.EncoderContext;
+package com.nextbreakpoint.nextfractal.core.encode;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

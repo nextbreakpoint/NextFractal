@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,13 +24,13 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
+import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ListView;
@@ -38,7 +38,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
 import java.nio.IntBuffer;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -92,18 +91,22 @@ public class HistoryPane extends BorderPane {
     }
 
     private void submitItem(Session session, ImageComposer composer) {
-        executor.submit(() -> Try.of(() -> composer.renderImage(session.getScript(), session.getMetadata()))
-            .ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
+        executor.submit(() -> Command.of(() -> composer.renderImage(session.getScript(), session.getMetadata()))
+                .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
     }
 
     private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, RendererSize size) {
         BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
         bitmap.setProperty("session", session);
-        listView.getItems().add(0, bitmap);
+        listView.getItems().addFirst(bitmap);
     }
 
     public void appendSession(Session session) {
-        tryFindFactory(session.getPluginId()).map(this::createImageComposer).ifPresent(composer -> submitItem(session, composer));
+        Command.of(tryFindFactory(session.getPluginId()))
+                .map(this::createImageComposer)
+                .execute()
+                .optional()
+                .ifPresent(composer -> submitItem(session, composer));
     }
 
     private ImageComposer createImageComposer(CoreFactory factory) {
@@ -115,12 +118,16 @@ public class HistoryPane extends BorderPane {
     }
 
     public void dispose() {
-        List<ExecutorService> executors = Arrays.asList(executor);
-        executors.forEach(executor -> executor.shutdownNow());
-        executors.forEach(executor -> await(executor));
+        List<ExecutorService> executors = List.of(executor);
+        executors.forEach(ExecutorService::shutdownNow);
+        executors.forEach(this::await);
     }
 
     private void await(ExecutorService executor) {
-        Try.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS)).onFailure(e -> logger.warning("Await termination timeout")).execute();
+        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
+                .execute()
+                .observe()
+                .onFailure(e -> logger.warning("Await termination timeout"))
+                .get();
     }
 }

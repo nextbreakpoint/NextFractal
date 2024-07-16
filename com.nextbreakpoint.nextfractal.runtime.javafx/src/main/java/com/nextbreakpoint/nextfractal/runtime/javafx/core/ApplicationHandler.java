@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -200,7 +200,9 @@ public class ApplicationHandler {
     }
 
     public void handleGrammarSelected(String grammar) {
-        tryFindFactoryByGrammar(grammar).ifPresent(this::createSession);
+        tryFindFactoryByGrammar(grammar)
+                .optional()
+                .ifPresent(this::createSession);
     }
 
     public void handleDeleteFiles(List<File> files) {
@@ -295,22 +297,30 @@ public class ApplicationHandler {
 
     public void handleLoadFile(File file) {
         FileManager.loadBundle(file)
-                .onSuccess(session -> eventBus.postEvent(CurrentFileChanged.builder().file(file).build()))
+                .observe()
+                .onSuccess(bundle -> eventBus.postEvent(CurrentFileChanged.builder().file(file).build()))
                 .onFailure(e -> showLoadError(file, e))
+                .get()
+                .optional()
                 .ifPresent(bundle -> eventBus.postEvent(SessionBundleLoaded.builder().bundle(bundle).continuous(false).appendToHistory(true).build()));
     }
 
     public void handleSaveFile(File file) {
         FileManager.saveBundle(file, new Bundle(session, clips))
-                .onSuccess(bundle -> eventBus.postEvent(CurrentFileChanged.builder().file(file).build()))
+                .observe()
                 .onFailure(e -> showSaveError(file, e))
-                .ifSuccess(v -> edited = false);
+                .onSuccess(v -> edited = false)
+                .get()
+                .optional()
+                .ifPresent(bundle -> eventBus.postEvent(CurrentFileChanged.builder().file(file).build()));
     }
 
     public void handleStoreFile(File file) {
         FileManager.saveBundle(file, new Bundle(session, clips))
+                .observe()
                 .onFailure(e -> showSaveError(file, e))
-                .ifSuccess(v -> edited = false);
+                .onSuccess(v -> edited = false)
+                .get();
     }
 
     public void handleExportSession(Window window, SessionExportRequested request) {
@@ -352,7 +362,9 @@ public class ApplicationHandler {
     }
 
     private void createSession(CoreFactory factory) {
-        ApplicationUtils.createSession(factory).ifPresent(session -> eventBus.postEvent(SessionDataLoaded.builder().session(session).continuous(false).appendToHistory(true).build()));
+        ApplicationUtils.createSession(factory)
+                .optional()
+                .ifPresent(session -> eventBus.postEvent(SessionDataLoaded.builder().session(session).continuous(false).appendToHistory(true).build()));
     }
 
     private void createExportSession(Encoder encoder, RendererSize size, File file) {

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -22,22 +22,16 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.runtime.encode;
+package com.nextbreakpoint.nextfractal.runtime.encoder;
+
+import com.nextbreakpoint.freeimage4java.Libfreeimage;
 
 /**
  * @author Andrea Medeghini
  */
 public class PNGImageEncoder extends AbstractImageEncoder {
-	protected String getFormatName() {
-		return "PNG";
-	}
-
 	public String getSuffix() {
 		return ".png";
-	}
-
-	public boolean isAlphaSupported() {
-		return true;
 	}
 
 	@Override
@@ -48,5 +42,15 @@ public class PNGImageEncoder extends AbstractImageEncoder {
 	@Override
 	public String getName() {
 		return "PNG";
+	}
+
+	@Override
+	protected int getFormat() {
+		return Libfreeimage.FIF_PNG();
+	}
+
+	@Override
+	protected boolean isAlphaSupported() {
+		return true;
 	}
 }

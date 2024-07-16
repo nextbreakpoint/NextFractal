@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -30,6 +30,7 @@ module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires java.prefs;
     requires java.logging;
     requires javafx.controls;
+    requires com.nextbreakpoint.common;
     requires com.nextbreakpoint.nextfractal.libraries;
     requires com.nextbreakpoint.nextfractal.core;
     requires com.nextbreakpoint.nextfractal.mandelbrot;
