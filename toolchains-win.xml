@@ -6,7 +6,7 @@
             <vendor>temurin</vendor>
         </provides>
         <configuration>
-            <jdkHome>C:\Program Files\Eclipse Adoptium\jdk-22.0.2.13-hotspot</jdkHome>
+            <jdkHome>C:\Users\andrea\Documents\jdk-22.0.1+8</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>

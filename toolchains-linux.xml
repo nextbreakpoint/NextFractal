@@ -6,7 +6,7 @@
             <vendor>temurin</vendor>
         </provides>
         <configuration>
-            <jdkHome>/usr/lib/jvm/temurin-22-jdk</jdkHome>
+            <jdkHome>/home/parallels/Documents/jdk-22.0.1+8</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
