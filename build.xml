@@ -251,7 +251,7 @@
 				<arg value="create" />
 				<arg value="@{basedir}/dist/nextfractal_@{os}_@{arch}_@{version}.dmg" />
 				<arg value="-volname" />
-				<arg value="NextFractal @{version}" />
+				<arg value="NextFractal-@{version}" />
 				<arg value="-fs" />
 				<arg value="HFS+" />
 				<arg value="-srcfolder" />
