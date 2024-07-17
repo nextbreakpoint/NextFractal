@@ -401,6 +401,11 @@
 <!--		<attribute name="todir"/>-->
 		<element name="selectors" implicit="true" optional="true"/>
 		<sequential>
+			<delete failonerror="false">
+				<fileset dir="__tmp__">
+					<selectors/>
+				</fileset>
+			</delete>
 			<mkdir dir="__tmp__"/>
 			<unzip dest="__tmp__" src="@{zip}"/>
 			<delete failonerror="true" file="@{zip}"/>
