@@ -11,9 +11,9 @@ NextFractal is distributed in the hope that it will be useful, but WITHOUT ANY W
 
 You should have received a copy of the GNU General Public License along with NextFractal. If not, see http://www.gnu.org/licenses/.
 
-NextFractal depends on several thirdparty libraries including FreeImage, FFmpeg, ANTLR, and other software from Apache Software Foundation.
+NextFractal depends on several open source libraries including JavaFX, FreeImage, FFmpeg, and ANTLR.
 
-NextFractal contains Java code derived from C/C++ code from applications Xaos and ContextFree.
+NextFractal contains Java code derived from C/C++ code of applications Xaos and ContextFree.
 
 
 ## DESCRIPTION
