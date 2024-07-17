@@ -1,4 +1,4 @@
-# NextFractal 2.2.0
+# NextFractal 2.3.0
 
 Copyright 2015-2024 Andrea Medeghini
 
@@ -11,9 +11,9 @@ NextFractal is distributed in the hope that it will be useful, but WITHOUT ANY W
 
 You should have received a copy of the GNU General Public License along with NextFractal. If not, see http://www.gnu.org/licenses/.
 
-NextFractal depends on several thirdparty libraries including FreeImage, FFmpeg, ANTLR, and other software from Apache Software Foundation.
+NextFractal depends on several open source libraries including JavaFX, FreeImage, FFmpeg, and ANTLR.
 
-NextFractal contains Java code derived from C/C++ code from applications Xaos and ContextFree.
+NextFractal contains Java code derived from C/C++ code of applications Xaos and ContextFree.
 
 
 ## DESCRIPTION
@@ -25,7 +25,7 @@ NextFractal is currently able to interpret two scripting languages: Mandelbrot a
 
 ## SYSTEM REQUIREMENTS
 
-NextFractal has been tested on OS X 14 (Intel), Windows 11, and Linux/Debian 12 and Linux/Fedora 38. NextFractal requires a machine with at least 4-cores CPU and 8Gb RAM.
+NextFractal has been tested on OS X 14 (Intel), Windows 11, and Linux/Ubuntu 22.04. NextFractal requires a machine with at least 4-cores CPU and 8Gb RAM.
 
 
 ## DOCUMENTATION
@@ -39,7 +39,7 @@ Get the code from https://github.com/nextbreakpoint/nextfractal:
 
     git clone https://github.com/nextbreakpoint/nextfractal.git
 
-Install Eclipse Temurin 21 JDK and configure environment variable JAVA_HOME if needed. Install Apache Ant 1.10 and Apache Maven 3.9. Install Xcode and the development command line tools (only for Mac).
+Install Eclipse Temurin 22 JDK and configure the environment variable JAVA_HOME if needed. Install Apache Ant 1.10 and Apache Maven 3.9. Install Xcode and the development command line tools (only for Mac).
 
 Make sure that the toolchains file contains the correct path of the JDK for you operating system. Make sure that both ant and mvn commands are present in the command path.   
 

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 
 import java.util.concurrent.Callable;
 
@@ -40,19 +40,19 @@ public interface Block<V, E extends Exception> {
         return accumulator -> { this.execute(accumulator); block.execute(accumulator); };
     }
 
-    static <V, X extends Exception> Block<V, X> create(Class<V> clazz) {
+    static <V, X extends Exception> Block<V, X> begin(Class<V> clazz) {
         return accumulator -> {};
     }
 
-    static <V, X extends Exception> Block<V, X> create(Block<V, X> block) {
+    static <V, X extends Exception> Block<V, X> begin(Block<V, X> block) {
         return block;
     }
 
-    default Try<V, Exception> tryExecute() {
-        return Try.of(this.toCallable(null));
+    default Command<V> end() {
+        return Command.of(this.toCallable(null));
     }
 
-    default Try<V, Exception> tryExecute(V accumulator) {
-        return Try.of(this.toCallable(accumulator));
+    default Command<V> end(V accumulator) {
+        return Command.of(this.toCallable(accumulator));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 
 import java.util.List;
@@ -49,32 +49,24 @@ public class Plugins {
         return factoryStream().filter(plugin -> pluginId.equals(plugin.getId())).findFirst();
     }
 
-    public static Try<? extends CoreFactory, Exception> tryFindFactory(String pluginId) {
-        return findFactory(pluginId).map(plugin -> Try.of(() -> plugin)).orElse(Try.failure(new Exception("Factory not found " + pluginId)));
+    public static Either<? extends CoreFactory> tryFindFactory(String pluginId) {
+        return findFactory(pluginId).map(Either::success).orElse(Either.failure(new Exception("Factory not found " + pluginId)));
     }
 
     public static Optional<? extends CoreFactory> findFactoryByGrammar(String grammar) {
         return factoryStream().filter(factory -> factory.getGrammar().equals(grammar)).findFirst();
     }
 
-    public static Try<? extends CoreFactory, Exception> tryFindFactoryByGrammar(String grammar) {
-        return findFactoryByGrammar(grammar).map(plugin -> Try.of(() -> plugin)).orElse(Try.failure(new Exception("Factory not found " + grammar)));
-    }
-
-    private static ServiceLoader<Encoder> encoderLoader() {
-        return ServiceLoader.load(Encoder.class);
-    }
-
-    private static Stream<? extends Encoder> encoderStream() {
-        return StreamSupport.stream(encoderLoader().spliterator(), false);
+    public static Either<? extends CoreFactory> tryFindFactoryByGrammar(String grammar) {
+        return findFactoryByGrammar(grammar).map(Either::success).orElse(Either.failure(new Exception("Factory not found " + grammar)));
     }
 
     public static Optional<? extends Encoder> findEncoder(String pluginId) {
         return encoderStream().filter(plugin -> pluginId.equals(plugin.getId())).findFirst();
     }
 
-    public static Try<? extends Encoder, Exception> tryFindEncoder(String format) {
-        return findEncoder(format).map(plugin -> Try.of(() -> plugin)).orElse(Try.failure(new Exception("Encoder not found " + format)));
+    public static Either<? extends Encoder> tryFindEncoder(String format) {
+        return findEncoder(format).map(Either::success).orElse(Either.failure(new Exception("Encoder not found " + format)));
     }
 
     public static List<String> listGrammars() {
@@ -83,5 +75,13 @@ public class Plugins {
 
     public static Stream<? extends CoreFactory> factories() {
         return factoryStream();
+    }
+
+    private static ServiceLoader<Encoder> encoderLoader() {
+        return ServiceLoader.load(Encoder.class);
+    }
+
+    private static Stream<? extends Encoder> encoderStream() {
+        return StreamSupport.stream(encoderLoader().spliterator(), false);
     }
 }

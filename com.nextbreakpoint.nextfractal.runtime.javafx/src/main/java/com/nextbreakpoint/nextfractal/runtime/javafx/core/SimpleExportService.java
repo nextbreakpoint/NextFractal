@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,16 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.encode.EncoderException;
 import com.nextbreakpoint.nextfractal.core.encode.EncoderHandle;
+import com.nextbreakpoint.nextfractal.core.encode.RAFEncoderContext;
 import com.nextbreakpoint.nextfractal.core.export.ExportHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobState;
 import com.nextbreakpoint.nextfractal.core.export.ExportProfileBuilder;
 import com.nextbreakpoint.nextfractal.core.export.ExportRenderer;
 import com.nextbreakpoint.nextfractal.core.export.ExportState;
-import com.nextbreakpoint.nextfractal.runtime.encode.RAFEncoderContext;
 import com.nextbreakpoint.nextfractal.runtime.export.AbstractExportService;
 import com.nextbreakpoint.nextfractal.runtime.export.ExportServiceDelegate;
 import javafx.application.Platform;
@@ -168,9 +168,11 @@ public class SimpleExportService extends AbstractExportService {
 			log.info("Frame " + (exportHandle.getFrameNumber() + 1) + " of " + exportHandle.getFrameCount());
 			final int index = exportHandle.getFrameNumber();
 			tryEncodeFrame(exportHandle, index, 1)
-				.onSuccess(s -> exportHandle.setState(ExportState.COMPLETED))
-				.onFailure(e -> exportHandle.setState(ExportState.FAILED))
-				.execute();
+					.execute()
+					.observe()
+					.onSuccess(s -> exportHandle.setState(ExportState.COMPLETED))
+					.onFailure(e -> exportHandle.setState(ExportState.FAILED))
+					.get();
         } else if (exportHandle.isFrameCompleted()) {
 			final int index = exportHandle.getFrameNumber();
 			int count = 0;
@@ -180,9 +182,11 @@ public class SimpleExportService extends AbstractExportService {
 				count += 1;
 			} while (count < 100 && !isLastFrame(exportHandle) && !isKeyFrame(exportHandle) && !isTimeAnimation(exportHandle));
 			tryEncodeFrame(exportHandle, index, count)
+					.execute()
+					.observe()
 					.onSuccess(s -> exportHandle.setState(ExportState.READY))
 					.onFailure(e -> exportHandle.setState(ExportState.FAILED))
-					.execute();
+					.get();
 		} else {
 			exportHandle.setState(ExportState.SUSPENDED);
         }
@@ -204,8 +208,8 @@ public class SimpleExportService extends AbstractExportService {
 		exportHandle.getJobs().forEach(job -> job.setState(ExportJobState.READY));
 	}
 
-	private Try<ExportHandle, Exception> tryEncodeFrame(ExportHandle exportHandle, int index, int count) {
-		return Try.of(() -> encodeData(exportHandle, index, count));
+	private Command<ExportHandle> tryEncodeFrame(ExportHandle exportHandle, int index, int count) {
+		return Command.of(() -> encodeData(exportHandle, index, count));
 	}
 
 	private List<Future<ExportJobHandle>> removeTerminatedTasks(List<Future<ExportJobHandle>> tasks) {

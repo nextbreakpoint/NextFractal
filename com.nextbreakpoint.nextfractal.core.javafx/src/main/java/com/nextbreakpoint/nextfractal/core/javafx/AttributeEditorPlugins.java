@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.Try;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -47,8 +47,8 @@ public class AttributeEditorPlugins {
         return factoryStream().filter(plugin -> pluginId.equals(plugin.getId())).findFirst();
     }
 
-    public static Try<AttributeEditorFactory, Exception> tryFindFactory(String pluginId) {
-        return findFactory(pluginId).map(plugin -> Try.of(() -> plugin)).orElse(Try.failure(new Exception("Factory not found " + pluginId)));
+    public static Either<AttributeEditorFactory> tryFindFactory(String pluginId) {
+        return findFactory(pluginId).map(Command::value).orElse(Command.error(new Exception("Factory not found " + pluginId))).execute();
     }
 
     public static Stream<AttributeEditorFactory> factories() {

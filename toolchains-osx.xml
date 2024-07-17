@@ -2,11 +2,11 @@
     <toolchain>
         <type>jdk</type>
         <provides>
-            <version>21</version>
+            <version>22</version>
             <vendor>temurin</vendor>
         </provides>
         <configuration>
-            <jdkHome>/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home</jdkHome>
+            <jdkHome>/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>

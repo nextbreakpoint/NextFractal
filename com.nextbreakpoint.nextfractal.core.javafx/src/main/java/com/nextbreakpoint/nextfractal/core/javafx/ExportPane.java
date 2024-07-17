@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,13 +24,13 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Clip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
+import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
@@ -49,7 +49,6 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 import java.nio.IntBuffer;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -101,6 +100,7 @@ public class ExportPane extends BorderPane {
 		formatCombobox.getStyleClass().add("text-small");
 		formatCombobox.setTooltip(new Tooltip("Select format to export"));
 		formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
+		formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 		formatCombobox.getSelectionModel().select(0);
 
 		VBox formatBox = new VBox(5);
@@ -173,8 +173,8 @@ public class ExportPane extends BorderPane {
 
 		Runnable updateButtonsAndPanels = () -> {
 			boolean selected = captureProperty.getValue();
-			removeButton.setDisable(listView.getItems().size() == 0 || selected);
-			previewButton.setDisable(listView.getItems().size() == 0 || selected);
+			removeButton.setDisable(listView.getItems().isEmpty() || selected);
+			previewButton.setDisable(listView.getItems().isEmpty() || selected);
 			exportButton.setDisable(selected);
 			formatCombobox.setDisable(selected);
 			presetsCombobox.setDisable(selected);
@@ -268,7 +268,7 @@ public class ExportPane extends BorderPane {
             if (newItem != null && (newItem[0] == 0 || newItem[1] == 0)) {
                 widthField.setEditable(true);
                 heightField.setEditable(true);
-                if (listView.getItems().size() == 0) {
+                if (listView.getItems().isEmpty()) {
 					widthField.setText("1024");
 					heightField.setText("768");
 				} else {
@@ -325,11 +325,11 @@ public class ExportPane extends BorderPane {
 
 		removeButton.setOnMouseClicked(e -> {
 			List<Integer> selectedIndices = listView.getSelectionModel().getSelectedIndices().stream().collect(Collectors.toList());
-			if (selectedIndices.size() > 0) {
+			if (!selectedIndices.isEmpty()) {
 				for (int i = selectedIndices.size() - 1; i >= 0; i--) {
 					removeItem(listView, selectedIndices.get(i));
 				}
-				if (listView.getItems().size() == 0) {
+				if (listView.getItems().isEmpty()) {
 					videoProperty.setValue(false);
 				}
 			}
@@ -341,8 +341,8 @@ public class ExportPane extends BorderPane {
 		});
 
 		previewButton.setOnMouseClicked(e -> {
-			if (listView.getItems().size() > 0 && delegate != null) {
-				if (listView.getSelectionModel().getSelectedItems().size() > 0) {
+			if (!listView.getItems().isEmpty() && delegate != null) {
+				if (!listView.getSelectionModel().getSelectedItems().isEmpty()) {
 					delegate.playbackStart(listView.getSelectionModel().getSelectedItems().stream()
 						.map(bitmap -> (Clip) bitmap.getProperty("clip")).collect(Collectors.toList()));
 				} else {
@@ -356,12 +356,15 @@ public class ExportPane extends BorderPane {
 			if (newValue) {
 				formatCombobox.getItems().clear();
 				formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
+				formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 				formatCombobox.getItems().add(new String[] { "Quicktime video", "MOV" });
+				formatCombobox.getItems().add(new String[] { "MP4 video", "MP4" });
 				formatCombobox.getItems().add(new String[] { "AVI video", "AVI" });
 				formatCombobox.getSelectionModel().select(1);
 			} else {
 				formatCombobox.getItems().clear();
 				formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
+				formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 				formatCombobox.getSelectionModel().select(0);
 			}
 			updateButtonsAndPanels.run();
@@ -444,7 +447,7 @@ public class ExportPane extends BorderPane {
 		if (bitmap == null) {
 			return;
 		}
-		if (listView.getItems().size() == 0) {
+		if (listView.getItems().isEmpty()) {
 			videoProperty.setValue(false);
 		}
 		if (delegate != null) {
@@ -462,13 +465,17 @@ public class ExportPane extends BorderPane {
 	}
 
 	public void dispose() {
-		List<ExecutorService> executors = Arrays.asList(executor);
-		executors.forEach(executor -> executor.shutdownNow());
-		executors.forEach(executor -> await(executor));
+		List<ExecutorService> executors = List.of(executor);
+		executors.forEach(ExecutorService::shutdownNow);
+		executors.forEach(this::await);
 	}
 
 	private void await(ExecutorService executor) {
-		Try.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS)).onFailure(e -> logger.warning("Await termination timeout")).execute();
+		Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
+				.execute()
+				.observe()
+				.onFailure(e -> logger.warning("Await termination timeout"))
+				.get();
 	}
 
 	public void appendClip(Clip clip) {
@@ -476,11 +483,16 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void addClip(Clip clip, boolean notifyAddClip) {
-		tryFindFactory(clip.getFirstEvent().getPluginId()).map(this::createImageComposer).ifPresent(composer -> submitItem(clip, composer, notifyAddClip));
+		Command.of(tryFindFactory(clip.getFirstEvent().getPluginId()))
+				.map(this::createImageComposer)
+				.execute()
+				.optional()
+				.ifPresent(composer -> submitItem(clip, composer, notifyAddClip));
 	}
 
 	private void submitItem(Clip clip, ImageComposer composer, boolean notifyAddClip) {
-		executor.submit(() -> Try.of(() -> renderImage(clip, composer)).ifPresent(pixels -> Platform.runLater(() -> addItem(listView, clip, pixels, composer.getSize(), notifyAddClip))));
+		executor.submit(() -> Command.of(() -> renderImage(clip, composer))
+				.execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, clip, pixels, composer.getSize(), notifyAddClip))));
 	}
 
 	private IntBuffer renderImage(Clip clip, ImageComposer composer) {

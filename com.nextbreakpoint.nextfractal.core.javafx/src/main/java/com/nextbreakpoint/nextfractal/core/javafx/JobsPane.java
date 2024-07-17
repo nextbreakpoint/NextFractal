@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,14 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
+import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportState;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -222,7 +222,8 @@ public class JobsPane extends BorderPane {
     }
 
     private void submitItem(ExportSession session, ImageComposer composer) {
-        executor.submit(() -> Try.of(() -> renderImage(session, composer)).ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
+        executor.submit(() -> Command.of(() -> renderImage(session, composer))
+                .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
     }
 
     private IntBuffer renderImage(ExportSession session, ImageComposer composer) {
@@ -252,11 +253,19 @@ public class JobsPane extends BorderPane {
     }
 
     private void await(ExecutorService executor) {
-        Try.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS)).onFailure(e -> logger.warning("Await termination timeout")).execute();
+        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
+                .execute()
+                .observe()
+                .onFailure(e -> logger.warning("Await termination timeout"))
+                .get();
     }
 
     public void appendSession(ExportSession session) {
-        tryFindFactory(session.getFrames().get(0).getPluginId()).map(this::createImageComposer).ifPresent(composer -> submitItem(session, composer));
+        Command.of(tryFindFactory(session.getFrames().getFirst().getPluginId()))
+                .map(this::createImageComposer)
+                .execute()
+                .optional()
+                .ifPresent(composer -> submitItem(session, composer));
     }
 
     private ImageComposer createImageComposer(CoreFactory factory) {

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
@@ -61,7 +62,7 @@ public class SessionSourceHandler {
 
         eventBus.subscribe(EditorSourceChanged.class.getSimpleName(), event -> handleSourceChanged(((EditorSourceChanged) event).source()));
 
-        eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> onSessionChanged(((SessionDataLoaded) event).session(), false));
+        eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionLoaded((SessionDataLoaded) event));
 
         eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> executor.shutdown());
     }
@@ -73,11 +74,15 @@ public class SessionSourceHandler {
     }
 
     private void handleSourceChanged(String source) {
-        onSessionChanged(session.withSource(source), true);
+        onSessionChanged(session.withSource(source), true, true);
     }
 
-    private CompletionStage<EditorReportChanged> computeEvent(String text, boolean appendToHistory) {
-        return parserStrategy.compute(executor, createModifiedSession(text)).thenApply(result -> createReportChangedEvent(result, appendToHistory));
+    private void handleSessionLoaded(SessionDataLoaded event) {
+        onSessionChanged(event.session(), false, false);
+    }
+
+    private CompletionStage<EditorReportChanged> computeEvent(String text, boolean continuous, boolean appendToHistory) {
+        return parserStrategy.compute(executor, createModifiedSession(text)).thenApply(result -> createReportChangedEvent(result, continuous, appendToHistory));
     }
 
     private Session createModifiedSession(String text) {
@@ -91,10 +96,10 @@ public class SessionSourceHandler {
         }
     }
 
-    private void onSessionChanged(Session session, boolean appendToHistory) {
+    private void onSessionChanged(Session session, boolean continuous, boolean appendToHistory) {
         updateSession(session);
 
-        computeEvent(session.getScript(), appendToHistory)
+        computeEvent(session.getScript(), continuous, appendToHistory)
                 .whenComplete((newEvent, throwable) -> {
                     if (throwable == null) {
                         Platform.runLater(() -> notifyEvent(newEvent));
@@ -112,16 +117,17 @@ public class SessionSourceHandler {
         this.session = session;
     }
 
-    public static Try<ParserStrategy, Exception> createParserStrategy(Session session) {
-        return tryFindFactory(session.getPluginId())
-                .map(plugin -> Objects.requireNonNull(plugin.createParserStrategy()));
+    private static Either<ParserStrategy> createParserStrategy(Session session) {
+        return Command.of(tryFindFactory(session.getPluginId()))
+                .map(plugin -> Objects.requireNonNull(plugin.createParserStrategy()))
+                .execute();
     }
 
-    private EditorReportChanged createReportChangedEvent(ParserResult result, boolean appendToHistory) {
+    private static EditorReportChanged createReportChangedEvent(ParserResult result, boolean continuous, boolean appendToHistory) {
         return EditorReportChanged.builder()
                 .result(result)
                 .session(result.session())
-                .continuous(false)
+                .continuous(continuous)
                 .appendToHistory(appendToHistory)
                 .build();
     }

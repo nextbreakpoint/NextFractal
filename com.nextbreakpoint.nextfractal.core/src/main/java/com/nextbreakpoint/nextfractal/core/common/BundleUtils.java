@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -37,6 +37,6 @@ public class BundleUtils {
 
         final List<FileEntry> entries = Arrays.asList(manifestEntry, metadataEntry, scriptEntry);
 
-        return FileManager.decodeBundle(entries).orThrow();
+        return FileManager.decodeBundle(entries).orThrow().get();
     }
 }

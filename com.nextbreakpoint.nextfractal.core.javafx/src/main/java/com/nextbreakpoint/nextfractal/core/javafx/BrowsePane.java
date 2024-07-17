@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,14 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.nextfractal.core.common.Block;
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
+import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.SourceError;
 import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.common.Block;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -56,7 +57,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -268,15 +273,19 @@ public class BrowsePane extends BorderPane {
     }
 
     public void dispose() {
-        List<ExecutorService> executors = Arrays.asList(browserExecutor);
-        executors.forEach(executor -> executor.shutdownNow());
-        executors.forEach(executor -> await(executor));
+        List<ExecutorService> executors = List.of(browserExecutor);
+        executors.forEach(ExecutorService::shutdownNow);
+        executors.forEach(this::await);
         stopWatching();
         removeItems();
     }
 
     private void await(ExecutorService executor) {
-        Try.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS)).onFailure(e -> logger.warning("Await termination timeout")).execute();
+        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
+                .execute()
+                .observe()
+                .onFailure(e -> logger.warning("Await termination timeout"))
+                .get();
     }
 
     private void doClose() {
@@ -284,11 +293,11 @@ public class BrowsePane extends BorderPane {
     }
 
     private void doChooseSourceFolder() {
-        Block.create(a -> doSelectSourceFolder(prepareSourceDirectoryChooser())).tryExecute().execute();
+        Block.begin(a -> doSelectSourceFolder(prepareSourceDirectoryChooser())).end().execute();
     }
 
     private void doChooseImportFolder() {
-        Block.create(a -> doSelectImportFolder(prepareImportDirectoryChooser())).tryExecute().execute();
+        Block.begin(a -> doSelectImportFolder(prepareImportDirectoryChooser())).end().execute();
     }
 
     private void doSelectSourceFolder(DirectoryChooser sourceDirectoryChooser) {
@@ -368,7 +377,16 @@ public class BrowsePane extends BorderPane {
     }
 
     private void copyFile(File file, File location) {
-        FileManager.loadBundle(file).ifPresent(session -> FileManager.saveBundle(createFileName(file, location), session));
+        FileManager.loadBundle(file)
+                .optional()
+                .ifPresent(session -> saveFile(session, createFileName(file, location)));
+    }
+
+    private void saveFile(Bundle session, File name) {
+        FileManager.saveBundle(name, session)
+                .observe()
+                .onFailure(e -> logger.log(Level.WARNING, "Can't save file " + name, e))
+                .get();
     }
 
     private File createFileName(File file, File location) {

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -90,9 +90,12 @@ public class MandelbrotSession extends Session {
 	}
 
 	private static String getInitialScript() {
-		return Try.of(() -> SessionUtils.readAll(Objects.requireNonNull(MandelbrotSession.class.getResourceAsStream("/mandelbrot.txt"))))
-				.onFailure(e -> logger.log(Level.WARNING, "Can't load resource /mandelbrot.txt"))
-				.orElse("");
+		return Command.of(() -> SessionUtils.readAll(Objects.requireNonNull(MandelbrotSession.class.getResourceAsStream("/mandelbrot.txt"))))
+				.execute()
+				.observe()
+				.onFailure(e -> logger.log(Level.WARNING, "Can't load resource /mandelbrot.txt", e))
+				.get()
+				.orElse(null);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
@@ -60,11 +60,12 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Try.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.getScript()))
+        return Command.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.getScript()))
                 .map(MandelbrotParserStrategy::processResult)
                 .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.getScript()), result))
-                .mapper(RuntimeException::new)
-                .orThrow();
+                .execute()
+                .orThrow(RuntimeException::new)
+                .get();
     }
 
     private String getClassName() {
@@ -125,22 +126,25 @@ public class MandelbrotParserStrategy implements ParserStrategy {
         );
     }
 
-    public static DSLParserResult processResult(DSLParserResult result) {
-        return Block.create(DSLParserResult.class)
+    public static DSLParserResult processResult(DSLParserResult parserResult) {
+        return Block.begin(DSLParserResult.class)
                 .andThen(MandelbrotParserStrategy::compileOrbit)
                 .andThen(MandelbrotParserStrategy::compileColor)
-                .tryExecute(result)
-                .onFailure(e -> processCompilerErrors(result, e))
-                .mapper(RuntimeException::new)
-                .orThrow();
+                .end(parserResult)
+                .execute()
+                .observe()
+                .onFailure(e -> processCompilerErrors(parserResult, e))
+                .get()
+                .orThrow(RuntimeException::new)
+                .get();
     }
 
     private static void compileOrbit(DSLParserResult result) {
-        Try.of(() -> new DSLCompiler().compileOrbit(result).create()).execute();
+        Command.of(() -> new DSLCompiler().compileOrbit(result).create()).execute();
     }
 
     private static void compileColor(DSLParserResult result) {
-        Try.of(() -> new DSLCompiler().compileColor(result).create()).execute();
+        Command.of(() -> new DSLCompiler().compileColor(result).create()).execute();
     }
 
     private static void processCompilerErrors(DSLParserResult result, Exception e) {

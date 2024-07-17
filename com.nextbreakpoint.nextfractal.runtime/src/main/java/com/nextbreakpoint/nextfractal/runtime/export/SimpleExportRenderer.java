@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.export;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobState;
@@ -66,7 +66,10 @@ public class SimpleExportRenderer implements ExportRenderer {
 	}
 
 	private ImageComposer createImageComposer(ExportJobHandle job) {
-		return tryFindFactory(job.getProfile().getPluginId()).map(plugin -> plugin.createImageComposer(threadFactory, job.getJob().getTile(), false)).orElse(null);
+		return Command.of(tryFindFactory(job.getProfile().getPluginId()))
+				.map(plugin -> plugin.createImageComposer(threadFactory, job.getJob().getTile(), false))
+				.execute()
+				.orElse(null);
 	}
 
 	private class ProcessExportJob implements Callable<ExportJobHandle> {
@@ -79,7 +82,12 @@ public class SimpleExportRenderer implements ExportRenderer {
 
 		@Override
 		public ExportJobHandle call() {
-			return Try.of(() -> processJob(job)).onFailure(this::processError).orElse(job);
+			return Command.of(() -> processJob(job))
+					.execute()
+					.observe()
+					.onFailure(this::processError)
+					.get()
+					.orElse(job);
 		}
 
 		private void processError(Throwable e) {

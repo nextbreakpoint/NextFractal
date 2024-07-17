@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.2.0
+ * NextFractal 2.3.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.Try;
+import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
@@ -84,7 +85,7 @@ public class ContextFreeFactory implements CoreFactory {
 	}
 
 	@Override
-	public Try<String, Exception> loadResource(String resourceName) {
-		return Try.of(() -> Objects.requireNonNull(getClass().getResource(resourceName)).toExternalForm());
+	public Either<String> loadResource(String resourceName) {
+		return Command.of(() -> Objects.requireNonNull(getClass().getResource(resourceName)).toExternalForm()).execute();
 	}
 }
