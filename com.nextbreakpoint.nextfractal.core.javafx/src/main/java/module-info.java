@@ -30,7 +30,7 @@ module com.nextbreakpoint.nextfractal.core.javafx {
     requires java.logging;
     requires javafx.controls;
     requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.libraries;
+    requires com.nextbreakpoint.libraries.richtextfx;
     requires com.nextbreakpoint.nextfractal.core;
     exports com.nextbreakpoint.nextfractal.core.javafx;
     exports com.nextbreakpoint.nextfractal.core.javafx.event;

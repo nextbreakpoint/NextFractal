@@ -36,7 +36,8 @@ module com.nextbreakpoint.nextfractal.mandelbrot {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
     requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.libraries;
+    requires com.nextbreakpoint.libraries.antlr4;
+    requires com.nextbreakpoint.libraries.common.math3;
     requires com.nextbreakpoint.nextfractal.core;
     exports com.nextbreakpoint.nextfractal.mandelbrot.module;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl;

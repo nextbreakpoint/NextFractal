@@ -30,7 +30,6 @@ module com.nextbreakpoint.nextfractal.core {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
     requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.libraries;
     exports com.nextbreakpoint.nextfractal.core.common;
     exports com.nextbreakpoint.nextfractal.core.editor;
     exports com.nextbreakpoint.nextfractal.core.params;

@@ -12,13 +12,12 @@
     <dependencies>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.libraries</artifactId>
+            <artifactId>com.nextbreakpoint.nextfractal.core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.core</artifactId>
-            <version>${project.version}</version>
+            <artifactId>com.nextbreakpoint.libraries.richtextfx</artifactId>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
