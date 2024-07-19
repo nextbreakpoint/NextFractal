@@ -35,11 +35,6 @@
         </dependency>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.core.javafx</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
             <artifactId>com.nextbreakpoint.nextfractal.mandelbrot.javafx</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -47,10 +42,6 @@
             <groupId>com.nextbreakpoint</groupId>
             <artifactId>com.nextbreakpoint.nextfractal.contextfree.javafx</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
         </dependency>
     </dependencies>
 </project>

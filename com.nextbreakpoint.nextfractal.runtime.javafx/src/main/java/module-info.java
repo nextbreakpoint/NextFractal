@@ -24,15 +24,7 @@
  */
 module com.nextbreakpoint.nextfractal.runtime.javafx {
     requires static lombok;
-    requires java.logging;
-    requires java.desktop;
-    requires java.compiler;
-    requires jdk.compiler;
-    requires javafx.controls;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.core;
     requires com.nextbreakpoint.nextfractal.runtime;
-    requires com.nextbreakpoint.nextfractal.core.javafx;
     requires com.nextbreakpoint.nextfractal.mandelbrot.javafx;
     requires com.nextbreakpoint.nextfractal.contextfree.javafx;
     exports com.nextbreakpoint.nextfractal.runtime.javafx;

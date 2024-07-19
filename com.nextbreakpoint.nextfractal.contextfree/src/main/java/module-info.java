@@ -29,14 +29,9 @@ import com.nextbreakpoint.nextfractal.core.common.MetadataCodec;
 
 module com.nextbreakpoint.nextfractal.contextfree {
     requires static lombok;
-    requires java.logging;
-    requires java.desktop;
-    requires com.fasterxml.jackson.databind;
-    requires com.fasterxml.jackson.annotation;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.libraries.antlr4;
+    requires transitive com.nextbreakpoint.nextfractal.core;
+    requires transitive com.nextbreakpoint.libraries.antlr4;
     requires com.nextbreakpoint.libraries.common.math3;
-    requires com.nextbreakpoint.nextfractal.core;
     exports com.nextbreakpoint.nextfractal.contextfree.module;
     exports com.nextbreakpoint.nextfractal.contextfree.core;
     exports com.nextbreakpoint.nextfractal.contextfree.dsl;

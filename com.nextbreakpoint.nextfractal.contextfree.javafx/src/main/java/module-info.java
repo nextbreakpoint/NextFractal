@@ -27,13 +27,9 @@ import com.nextbreakpoint.nextfractal.contextfree.javafx.editors.SeedAttributeEd
 
 module com.nextbreakpoint.nextfractal.contextfree.javafx {
     requires static lombok;
-    requires java.logging;
-    requires javafx.controls;
-    requires com.nextbreakpoint.common;
+    requires transitive com.nextbreakpoint.nextfractal.contextfree;
+    requires transitive com.nextbreakpoint.nextfractal.core.javafx;
     requires com.nextbreakpoint.libraries.richtextfx;
-    requires com.nextbreakpoint.nextfractal.core;
-    requires com.nextbreakpoint.nextfractal.contextfree;
-    requires com.nextbreakpoint.nextfractal.core.javafx;
     provides com.nextbreakpoint.nextfractal.core.javafx.UIFactory with ContextFreeUIFactory;
     provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with SeedAttributeEditorFactory;
 }

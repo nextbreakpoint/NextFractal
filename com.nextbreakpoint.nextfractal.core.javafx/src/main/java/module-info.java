@@ -26,12 +26,10 @@ import com.nextbreakpoint.nextfractal.core.javafx.params.editors.DoubleAttribute
  */
 module com.nextbreakpoint.nextfractal.core.javafx {
     requires static lombok;
-    requires java.prefs;
-    requires java.logging;
-    requires javafx.controls;
-    requires com.nextbreakpoint.common;
+    requires transitive java.prefs;
+    requires transitive javafx.controls;
+    requires transitive com.nextbreakpoint.nextfractal.core;
     requires com.nextbreakpoint.libraries.richtextfx;
-    requires com.nextbreakpoint.nextfractal.core;
     exports com.nextbreakpoint.nextfractal.core.javafx;
     exports com.nextbreakpoint.nextfractal.core.javafx.event;
     exports com.nextbreakpoint.nextfractal.core.javafx.editor;

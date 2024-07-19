@@ -27,14 +27,9 @@ import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotUIFactory;
 
 module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires static lombok;
-    requires java.prefs;
-    requires java.logging;
-    requires javafx.controls;
-    requires com.nextbreakpoint.common;
+    requires transitive com.nextbreakpoint.nextfractal.mandelbrot;
+    requires transitive com.nextbreakpoint.nextfractal.core.javafx;
     requires com.nextbreakpoint.libraries.richtextfx;
-    requires com.nextbreakpoint.nextfractal.core;
-    requires com.nextbreakpoint.nextfractal.mandelbrot;
-    requires com.nextbreakpoint.nextfractal.core.javafx;
     provides com.nextbreakpoint.nextfractal.core.javafx.UIFactory with MandelbrotUIFactory;
     provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with AlgorithmAttributeEditorFactory;
 }

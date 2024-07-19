@@ -29,16 +29,11 @@ import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadataCodec;
 
 module com.nextbreakpoint.nextfractal.mandelbrot {
     requires static lombok;
-    requires java.logging;
-    requires java.desktop;
-    requires java.compiler;
-    requires jdk.compiler;
-    requires com.fasterxml.jackson.databind;
-    requires com.fasterxml.jackson.annotation;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.libraries.antlr4;
+    requires transitive java.compiler;
+    requires transitive jdk.compiler;
+    requires transitive com.nextbreakpoint.nextfractal.core;
+    requires transitive com.nextbreakpoint.libraries.antlr4;
     requires com.nextbreakpoint.libraries.common.math3;
-    requires com.nextbreakpoint.nextfractal.core;
     exports com.nextbreakpoint.nextfractal.mandelbrot.module;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
