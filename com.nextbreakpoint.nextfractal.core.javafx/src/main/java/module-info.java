@@ -29,7 +29,7 @@ module com.nextbreakpoint.nextfractal.core.javafx {
     requires transitive java.prefs;
     requires transitive javafx.controls;
     requires transitive com.nextbreakpoint.nextfractal.core;
-    requires com.nextbreakpoint.libraries.richtextfx;
+    requires com.nextbreakpoint.convertedlibraries.richtextfx;
     exports com.nextbreakpoint.nextfractal.core.javafx;
     exports com.nextbreakpoint.nextfractal.core.javafx.event;
     exports com.nextbreakpoint.nextfractal.core.javafx.editor;

@@ -54,11 +54,11 @@
         </dependency>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.libraries.antlr4</artifactId>
+            <artifactId>com.nextbreakpoint.convertedlibraries.antlr4-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.libraries.common-math3</artifactId>
+            <artifactId>com.nextbreakpoint.convertedlibraries.commons-math3</artifactId>
         </dependency>
     </dependencies>
     <profiles>

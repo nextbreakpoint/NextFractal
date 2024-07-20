@@ -29,7 +29,7 @@ module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires static lombok;
     requires transitive com.nextbreakpoint.nextfractal.mandelbrot;
     requires transitive com.nextbreakpoint.nextfractal.core.javafx;
-    requires com.nextbreakpoint.libraries.richtextfx;
+    requires com.nextbreakpoint.convertedlibraries.richtextfx;
     provides com.nextbreakpoint.nextfractal.core.javafx.UIFactory with MandelbrotUIFactory;
     provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with AlgorithmAttributeEditorFactory;
 }

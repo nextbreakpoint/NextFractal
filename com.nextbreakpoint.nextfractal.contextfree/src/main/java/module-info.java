@@ -30,8 +30,8 @@ import com.nextbreakpoint.nextfractal.core.common.MetadataCodec;
 module com.nextbreakpoint.nextfractal.contextfree {
     requires static lombok;
     requires transitive com.nextbreakpoint.nextfractal.core;
-    requires transitive com.nextbreakpoint.libraries.antlr4;
-    requires com.nextbreakpoint.libraries.common.math3;
+    requires transitive com.nextbreakpoint.convertedlibraries.antlr4.runtime;
+    requires com.nextbreakpoint.convertedlibraries.commons.math3;
     exports com.nextbreakpoint.nextfractal.contextfree.module;
     exports com.nextbreakpoint.nextfractal.contextfree.core;
     exports com.nextbreakpoint.nextfractal.contextfree.dsl;

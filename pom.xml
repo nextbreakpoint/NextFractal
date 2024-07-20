@@ -174,17 +174,17 @@
         <dependencies>
             <dependency>
                 <groupId>com.nextbreakpoint</groupId>
-                <artifactId>com.nextbreakpoint.libraries.antlr4</artifactId>
+                <artifactId>com.nextbreakpoint.convertedlibraries.antlr4-runtime</artifactId>
                 <version>${libraries.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.nextbreakpoint</groupId>
-                <artifactId>com.nextbreakpoint.libraries.common-math3</artifactId>
+                <artifactId>com.nextbreakpoint.convertedlibraries.commons-math3</artifactId>
                 <version>${libraries.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.nextbreakpoint</groupId>
-                <artifactId>com.nextbreakpoint.libraries.richtextfx-with-dependencies</artifactId>
+                <artifactId>com.nextbreakpoint.convertedlibraries.richtextfx-with-dependencies</artifactId>
                 <version>${libraries.version}</version>
             </dependency>
             <dependency>

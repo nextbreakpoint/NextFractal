@@ -29,7 +29,7 @@ module com.nextbreakpoint.nextfractal.contextfree.javafx {
     requires static lombok;
     requires transitive com.nextbreakpoint.nextfractal.contextfree;
     requires transitive com.nextbreakpoint.nextfractal.core.javafx;
-    requires com.nextbreakpoint.libraries.richtextfx;
+    requires com.nextbreakpoint.convertedlibraries.richtextfx;
     provides com.nextbreakpoint.nextfractal.core.javafx.UIFactory with ContextFreeUIFactory;
     provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with SeedAttributeEditorFactory;
 }
