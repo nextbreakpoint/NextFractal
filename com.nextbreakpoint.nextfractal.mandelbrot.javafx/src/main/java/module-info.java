@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.0
+ * NextFractal 2.3.1
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -27,14 +27,9 @@ import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotUIFactory;
 
 module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires static lombok;
-    requires java.prefs;
-    requires java.logging;
-    requires javafx.controls;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.libraries;
-    requires com.nextbreakpoint.nextfractal.core;
-    requires com.nextbreakpoint.nextfractal.mandelbrot;
-    requires com.nextbreakpoint.nextfractal.core.javafx;
+    requires transitive com.nextbreakpoint.nextfractal.mandelbrot;
+    requires transitive com.nextbreakpoint.nextfractal.core.javafx;
+    requires com.nextbreakpoint.convertedlibraries.richtextfx;
     provides com.nextbreakpoint.nextfractal.core.javafx.UIFactory with MandelbrotUIFactory;
     provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with AlgorithmAttributeEditorFactory;
 }

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.nextfractal</artifactId>
-        <version>2.3.0</version>
+        <version>2.3.1</version>
     </parent>
     <artifactId>com.nextbreakpoint.nextfractal.main</artifactId>
     <packaging>pom</packaging>
@@ -13,11 +13,6 @@
         <libraries.path>${project.build.directory}/libs/${os.type}/${arch.type}</libraries.path>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.nextbreakpoint</groupId>
-            <artifactId>com.nextbreakpoint.nextfractal.libraries</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.nextbreakpoint</groupId>
             <artifactId>com.nextbreakpoint.nextfractal.core</artifactId>

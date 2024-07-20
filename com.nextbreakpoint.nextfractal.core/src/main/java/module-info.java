@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.0
+ * NextFractal 2.3.1
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,13 +24,12 @@
  */
 module com.nextbreakpoint.nextfractal.core {
     requires static lombok;
-    requires java.desktop;
-    requires java.logging;
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
-    requires com.fasterxml.jackson.annotation;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.libraries;
+    requires transitive java.desktop;
+    requires transitive java.logging;
+    requires transitive com.fasterxml.jackson.core;
+    requires transitive com.fasterxml.jackson.databind;
+    requires transitive com.fasterxml.jackson.annotation;
+    requires transitive com.nextbreakpoint.common;
     exports com.nextbreakpoint.nextfractal.core.common;
     exports com.nextbreakpoint.nextfractal.core.editor;
     exports com.nextbreakpoint.nextfractal.core.params;

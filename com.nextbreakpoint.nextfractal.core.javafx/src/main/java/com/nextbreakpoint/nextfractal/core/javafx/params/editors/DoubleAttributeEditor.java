@@ -4,11 +4,10 @@ import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.javafx.AdvancedTextField;
 import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditor;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
-import io.reactivex.rxjavafx.observables.JavaFxObservable;
-import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import javafx.scene.control.Tooltip;
+import org.reactfx.EventStreams;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 public class DoubleAttributeEditor extends AttributeEditor {
     private final Attribute attribute;
@@ -24,10 +23,9 @@ public class DoubleAttributeEditor extends AttributeEditor {
         setCenter(textField);
 
         if (!attribute.isReadOnly()) {
-            JavaFxObservable.changesOf(textField.textProperty())
-                    .subscribeOn(JavaFxScheduler.platform())
-                    .throttleWithTimeout(500, TimeUnit.MILLISECONDS)
-                    .subscribe(result -> {
+            EventStreams.changesOf(textField.textProperty())
+                    .successionEnds(Duration.ofMillis(500))
+                    .subscribe(change -> {
                         if (getDelegate() != null) {
                             getDelegate().onEditorChanged(this);
                         }

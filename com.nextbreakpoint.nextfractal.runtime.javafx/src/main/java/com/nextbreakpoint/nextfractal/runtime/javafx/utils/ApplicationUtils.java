@@ -138,13 +138,13 @@ public class ApplicationUtils {
     }
 
     public static String getApplicationName() {
-        return "NextFractal 2.3.0";
+        return "NextFractal 2.3.1";
     }
 
     public static String getNoticeMessage() {
         return """
 
-                NextFractal 2.3.0
+                NextFractal 2.3.1
 
                 https://github.com/nextbreakpoint/nextfractal
 

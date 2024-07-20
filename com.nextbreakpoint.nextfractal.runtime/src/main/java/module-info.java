@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.0
+ * NextFractal 2.3.1
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -31,10 +31,8 @@ import com.nextbreakpoint.nextfractal.runtime.encoder.QuicktimeVideoEncoder;
 
 module com.nextbreakpoint.nextfractal.runtime {
     requires static lombok;
-    requires java.logging;
     requires com.nextbreakpoint.ffmpeg4java;
     requires com.nextbreakpoint.freeimage4java;
-    requires com.nextbreakpoint.common;
     requires com.nextbreakpoint.nextfractal.core;
     exports com.nextbreakpoint.nextfractal.runtime.logging;
     exports com.nextbreakpoint.nextfractal.runtime.export;

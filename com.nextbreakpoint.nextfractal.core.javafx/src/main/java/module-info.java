@@ -1,7 +1,7 @@
 import com.nextbreakpoint.nextfractal.core.javafx.params.editors.DoubleAttributeEditorFactory;
 
 /*
- * NextFractal 2.3.0
+ * NextFractal 2.3.1
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -26,12 +26,10 @@ import com.nextbreakpoint.nextfractal.core.javafx.params.editors.DoubleAttribute
  */
 module com.nextbreakpoint.nextfractal.core.javafx {
     requires static lombok;
-    requires java.prefs;
-    requires java.logging;
-    requires javafx.controls;
-    requires com.nextbreakpoint.common;
-    requires com.nextbreakpoint.nextfractal.libraries;
-    requires com.nextbreakpoint.nextfractal.core;
+    requires transitive java.prefs;
+    requires transitive javafx.controls;
+    requires transitive com.nextbreakpoint.nextfractal.core;
+    requires com.nextbreakpoint.convertedlibraries.richtextfx;
     exports com.nextbreakpoint.nextfractal.core.javafx;
     exports com.nextbreakpoint.nextfractal.core.javafx.event;
     exports com.nextbreakpoint.nextfractal.core.javafx.editor;

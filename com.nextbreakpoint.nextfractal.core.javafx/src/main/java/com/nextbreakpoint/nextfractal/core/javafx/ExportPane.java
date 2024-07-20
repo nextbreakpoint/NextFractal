@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.0
+ * NextFractal 2.3.1
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -360,7 +360,7 @@ public class ExportPane extends BorderPane {
 				formatCombobox.getItems().add(new String[] { "Quicktime video", "MOV" });
 				formatCombobox.getItems().add(new String[] { "MP4 video", "MP4" });
 				formatCombobox.getItems().add(new String[] { "AVI video", "AVI" });
-				formatCombobox.getSelectionModel().select(1);
+				formatCombobox.getSelectionModel().select(2);
 			} else {
 				formatCombobox.getItems().clear();
 				formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });

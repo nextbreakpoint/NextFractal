@@ -2,7 +2,7 @@
 <project name="NextFractal">
 	<property environment="env" />
 	<property name="openjfx.version" value="22.0.1" />
-	<property name="nextfractal.version" value="2.3.0" />
+	<property name="nextfractal.version" value="2.3.1" />
 	<property name="nextfractal.year" value="2024" />
 	<property name="application" value="NextFractal" />
 	<property name="description" value="NextFractal is an application for creating fractals" />
@@ -49,8 +49,6 @@
 			<delete failonerror="true" dir="@{basedir}/dist/@{os}_@{arch}"/>
 			<delete failonerror="true" dir="@{basedir}/build/@{os}_@{arch}"/>
 			<mkdir dir="@{basedir}/build/@{os}_@{arch}"/>
-			<maven basedir="@{basedir}/com.nextbreakpoint.nextfractal.libraries" command="@{command}" goal="clean" options="-t ../toolchains-@{os}.xml" resultproperty="@{resultproperty}" />
-			<maven basedir="@{basedir}/com.nextbreakpoint.nextfractal.libraries" command="@{command}" goal="install" options="-t ../toolchains-@{os}.xml" resultproperty="@{resultproperty}" />
 			<maven basedir="@{basedir}" command="@{command}" goal="clean" options="-t toolchains-@{os}.xml -P @{os}_@{arch}" resultproperty="@{resultproperty}" />
 			<maven basedir="@{basedir}" command="@{command}" goal="package" options="-t toolchains-@{os}.xml -P @{os}_@{arch}" resultproperty="@{resultproperty}" />
 			<copy failonerror="true" todir="@{basedir}/build/@{os}_@{arch}/app/libs" overwrite="true">
@@ -536,8 +534,6 @@
 		</replaceregexp>
 		<maven basedir="${basedir}" command="mvn" goal="versions:set" options="-DnewVersion=${nextfractal.version}" resultproperty="maven.build.result"/>
 		<maven basedir="${basedir}" command="mvn" goal="versions:commit" options="" resultproperty="maven.build.result"/>
-		<maven basedir="${basedir}/com.nextbreakpoint.nextfractal.libraries" command="mvn" goal="versions:set" options="-DnewVersion=${nextfractal.version}" resultproperty="maven.build.result"/>
-		<maven basedir="${basedir}/com.nextbreakpoint.nextfractal.libraries" command="mvn" goal="versions:commit" options="" resultproperty="maven.build.result"/>
 	</target>
 	<target name="change-copyright">
 		<changecopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.core/src/main/java" file="copyright.txt"/>
