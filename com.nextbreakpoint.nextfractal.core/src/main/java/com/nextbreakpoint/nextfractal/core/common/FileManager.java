@@ -283,7 +283,7 @@ public abstract class FileManager {
 
     private static Command<Object> encodeClip(Clip clip) {
         final Map<String, Object> stateMap = new HashMap<>();
-        final List<Either<Object>> results = clip.getEvents().stream()
+        final List<Either<Object>> results = clip.events().stream()
                 .map(clipEvent -> encodeClipEvent(stateMap, clipEvent))
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
@@ -297,21 +297,21 @@ public abstract class FileManager {
         try {
             final Map<String, Object> eventMap = new HashMap<>();
 
-            if (!clipEvent.getPluginId().equals(stateMap.get("pluginId"))) {
-                eventMap.put("pluginId", clipEvent.getPluginId());
+            if (!clipEvent.pluginId().equals(stateMap.get("pluginId"))) {
+                eventMap.put("pluginId", clipEvent.pluginId());
             }
 
-            if (!clipEvent.getScript().equals(stateMap.get("script"))) {
-                eventMap.put("script", clipEvent.getScript());
+            if (!clipEvent.script().equals(stateMap.get("script"))) {
+                eventMap.put("script", clipEvent.script());
             }
 
-            final String metadata = encodeMetadata(clipEvent.getPluginId(), clipEvent.getMetadata()).execute().orThrow().get();
+            final String metadata = encodeMetadata(clipEvent.pluginId(), clipEvent.metadata()).execute().orThrow().get();
 
             if (!metadata.equals(stateMap.get("metadata"))) {
                 eventMap.put("metadata", metadata);
             }
 
-            final Long date = clipEvent.getDate().getTime();
+            final Long date = clipEvent.date().getTime();
 
             if (!date.equals(stateMap.get("date"))) {
                 eventMap.put("date", date);

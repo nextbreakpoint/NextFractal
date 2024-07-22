@@ -50,38 +50,38 @@ public class ClipProcessor {
 
     public List<Frame> generateFrames() {
         List<Frame> frames = new LinkedList<>();
-        if (clips.size() > 0 && clips.get(0).getEvents().size() > 1) {
+        if (clips.size() > 0 && clips.get(0).events().size() > 1) {
             int currentClip = 0;
             int currentEvent = 0;
             float frameIndex = 0;
             float time = 0;
             float prevTime = 0;
-            ClipEvent event = clips.get(0).getEvents().get(0);
-            long baseTime = event.getDate().getTime();
+            ClipEvent event = clips.get(0).events().get(0);
+            long baseTime = event.date().getTime();
             logger.fine("0) clip " + currentClip + ", event " + currentEvent);
             Frame lastFrame = null;
-            while (frameIndex < frameCount && currentClip < clips.size() && currentEvent < clips.get(currentClip).getEvents().size()) {
+            while (frameIndex < frameCount && currentClip < clips.size() && currentEvent < clips.get(currentClip).events().size()) {
                 currentEvent += 1;
-                while (currentClip < clips.size() && currentEvent >= clips.get(currentClip).getEvents().size()) {
+                while (currentClip < clips.size() && currentEvent >= clips.get(currentClip).events().size()) {
                     currentClip += 1;
                     currentEvent = 0;
-                    if (currentClip < clips.size() && clips.get(currentClip).getEvents().size() > 0) {
-                        baseTime = clips.get(currentClip).getEvents().get(0).getDate().getTime();
+                    if (currentClip < clips.size() && !clips.get(currentClip).events().isEmpty()) {
+                        baseTime = clips.get(currentClip).events().get(0).date().getTime();
                         prevTime = time;
                     }
                     lastFrame = null;
                 }
                 logger.fine("1) clip " + currentClip + ", event " + currentEvent);
-                if (currentClip < clips.size() && currentEvent < clips.get(currentClip).getEvents().size()) {
-                    ClipEvent nextEvent = clips.get(currentClip).getEvents().get(currentEvent);
+                if (currentClip < clips.size() && currentEvent < clips.get(currentClip).events().size()) {
+                    ClipEvent nextEvent = clips.get(currentClip).events().get(currentEvent);
                     float frameTime = frameIndex / frameRate;
-                    time = prevTime + (nextEvent.getDate().getTime() - baseTime) / 1000f;
+                    time = prevTime + (nextEvent.date().getTime() - baseTime) / 1000f;
                     while (frameTime - time < 0.01f) {
                         logger.fine("1) frame " + frameIndex + ", time " + frameTime);
-                        Frame frame = new Frame(event.getPluginId(), event.getMetadata(), event.getScript(), true, false);
+                        Frame frame = new Frame(event.pluginId(), event.metadata(), event.script(), true, false);
                         if (lastFrame != null && lastFrame.equals(frame)) {
                             logger.fine("1) not key frame");
-                            frame = new Frame(event.getPluginId(), event.getMetadata(), event.getScript(), false, true);
+                            frame = new Frame(event.pluginId(), event.metadata(), event.script(), false, true);
                         }
                         lastFrame = frame;
                         frames.add(frame);
@@ -92,10 +92,10 @@ public class ClipProcessor {
                 } else {
                     float frameTime = frameIndex / frameRate;
                     logger.fine("2) frame " + frameIndex + ", time " + frameTime);
-                    Frame frame = new Frame(event.getPluginId(), event.getMetadata(), event.getScript(), true, false);
+                    Frame frame = new Frame(event.pluginId(), event.metadata(), event.script(), true, false);
                     if (lastFrame != null && lastFrame.equals(frame)) {
                         logger.fine("2) not key frame");
-                        frame = new Frame(event.getPluginId(), event.getMetadata(), event.getScript(), false, true);
+                        frame = new Frame(event.pluginId(), event.metadata(), event.script(), false, true);
                     }
                     lastFrame = frame;
                     frames.add(frame);

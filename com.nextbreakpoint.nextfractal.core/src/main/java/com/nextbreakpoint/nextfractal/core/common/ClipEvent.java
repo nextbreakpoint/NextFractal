@@ -27,32 +27,11 @@ package com.nextbreakpoint.nextfractal.core.common;
 import java.util.Date;
 import java.util.Objects;
 
-public class ClipEvent {
-    private final Date date;
-    private final String pluginId;
-    private final String script;
-    private final Metadata metadata;
-
+public record ClipEvent(Date date, String pluginId, String script, Metadata metadata) {
     public ClipEvent(Date date, String pluginId, String script, Metadata metadata) {
         this.date = Objects.requireNonNull(date);
         this.pluginId = Objects.requireNonNull(pluginId);
         this.script = Objects.requireNonNull(script);
         this.metadata = Objects.requireNonNull(metadata);
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public String getPluginId() {
-        return pluginId;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public Metadata getMetadata() {
-        return metadata;
     }
 }

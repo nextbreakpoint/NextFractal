@@ -288,7 +288,7 @@ public class ApplicationHandler {
 
     public void handleSessionChanged(Session session) {
         if (capture) {
-            clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
         }
     }
 
@@ -413,7 +413,7 @@ public class ApplicationHandler {
         capture = true;
         clip = new Clip();
         if (session != null) {
-            clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
         }
         eventBus.postEvent(CaptureSessionStarted.builder().clip(clip).build());
     }
@@ -421,7 +421,7 @@ public class ApplicationHandler {
     private void stopCapture() {
         capture = false;
         if (session != null) {
-            clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
         }
         eventBus.postEvent(CaptureSessionStopped.builder().clip(clip).build());
     }

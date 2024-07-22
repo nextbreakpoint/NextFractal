@@ -483,7 +483,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void addClip(Clip clip, boolean notifyAddClip) {
-		Command.of(tryFindFactory(clip.getFirstEvent().getPluginId()))
+		Command.of(tryFindFactory(clip.getFirstEvent().pluginId()))
 				.map(this::createImageComposer)
 				.execute()
 				.optional()
@@ -496,7 +496,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	private IntBuffer renderImage(Clip clip, ImageComposer composer) {
-		return composer.renderImage(clip.getFirstEvent().getScript(), clip.getFirstEvent().getMetadata());
+		return composer.renderImage(clip.getFirstEvent().script(), clip.getFirstEvent().metadata());
 	}
 
 	private ImageComposer createImageComposer(CoreFactory factory) {

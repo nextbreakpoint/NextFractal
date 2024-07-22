@@ -63,7 +63,7 @@ public final class ExportSession {
 		this.tileSize = tileSize;
 		this.quality = 1;
 		this.frameRate = FRAMES_PER_SECOND;
-		if (clips.size() > 0 && clips.get(0).getEvents().size() > 1) {
+		if (!clips.isEmpty() && clips.getFirst().events().size() > 1) {
 			this.frames.addAll(new ClipProcessor(clips, frameRate).generateFrames());
 		} else {
 			frames.add(new Frame(session.getPluginId(), session.getMetadata(), session.getScript(), true, true));

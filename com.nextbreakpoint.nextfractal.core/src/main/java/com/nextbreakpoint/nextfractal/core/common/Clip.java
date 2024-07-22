@@ -26,38 +26,28 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
-//TODO make this class immutable
-public class Clip {
-    private final List<ClipEvent> events = new LinkedList<>();
-
+public record Clip(List<ClipEvent> events) {
     public Clip() {
+        this(List.of());
     }
 
-    public Clip(List<ClipEvent> events) {
-        this.events.addAll(events);
-    }
-
-    public void append(Date date, String pluginId, String script, Metadata metadata) {
+    public Clip append(Date date, String pluginId, String script, Metadata metadata) {
+        final var events = new ArrayList<>(this.events);
         events.add(new ClipEvent(date, pluginId, script, metadata));
+        return new Clip(events);
     }
 
     public ClipEvent getFirstEvent() {
-        return events.get(0);
+        return events.getFirst();
     }
 
     public ClipEvent getLastEvent() {
-        return events.get(events.size() - 1);
+        return events.getLast();
     }
 
-    public Stream<ClipEvent> events() {
-        return events.stream();
-    }
-
-    public List<ClipEvent> getEvents() {
+    public List<ClipEvent> events() {
         return new ArrayList<>(events);
     }
 
@@ -66,6 +56,6 @@ public class Clip {
     }
 
     public long duration() {
-        return events.size() > 1 ? events.get(events.size() - 1).getDate().getTime() - events.get(0).getDate().getTime() : 0;
+        return events.size() > 1 ? getLastEvent().date().getTime() - getFirstEvent().date().getTime() : 0;
     }
 }
