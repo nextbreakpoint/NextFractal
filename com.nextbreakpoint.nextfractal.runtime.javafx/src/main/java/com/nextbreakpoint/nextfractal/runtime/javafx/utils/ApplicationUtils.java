@@ -2,7 +2,7 @@ package com.nextbreakpoint.nextfractal.runtime.javafx.utils;
 
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.Plugins;
@@ -92,10 +92,10 @@ public class ApplicationUtils {
                 .get();
     }
 
-    public static ExportSession createExportSession(Encoder encoder, Session session, List<Clip> clips, RendererSize size, File file) throws IOException {
+    public static ExportSession createExportSession(Encoder encoder, Session session, List<AnimationClip> clips, RendererSize size, File file) throws IOException {
         final String uuid = UUID.randomUUID().toString();
         final File tmpFile = File.createTempFile("export-" + uuid, ".dat");
-        final List<Clip> clipList = encoder.isVideoSupported() ? clips : new LinkedList<>();
+        final List<AnimationClip> clipList = encoder.isVideoSupported() ? clips : new LinkedList<>();
         return new ExportSession(uuid, session, clipList, file, tmpFile, size, 400, encoder);
     }
 

@@ -24,8 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
-import com.nextbreakpoint.nextfractal.core.common.Clip;
-import com.nextbreakpoint.nextfractal.core.common.ClipProcessor;
+import com.nextbreakpoint.nextfractal.core.common.Animation;
+import com.nextbreakpoint.nextfractal.core.common.Constants;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.Frame;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
@@ -35,8 +36,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static com.nextbreakpoint.nextfractal.core.common.ClipProcessor.FRAMES_PER_SECOND;
 
 public final class ExportSession {
 	private static final int BORDER_SIZE = 0;
@@ -53,7 +52,7 @@ public final class ExportSession {
 	private final int frameRate;
 	private final Session session;
 
-	public ExportSession(String sessionId, Session session, List<Clip> clips, File file, File tmpFile, RendererSize size, int tileSize, Encoder encoder) {
+	public ExportSession(String sessionId, Session session, List<AnimationClip> clips, File file, File tmpFile, RendererSize size, int tileSize, Encoder encoder) {
 		this.sessionId = sessionId;
 		this.session = session;
 		this.tmpFile = tmpFile;
@@ -62,9 +61,10 @@ public final class ExportSession {
 		this.encoder = encoder;
 		this.tileSize = tileSize;
 		this.quality = 1;
-		this.frameRate = FRAMES_PER_SECOND;
+		this.frameRate = Constants.FRAMES_PER_SECOND;
 		if (!clips.isEmpty() && clips.getFirst().events().size() > 1) {
-			this.frames.addAll(new ClipProcessor(clips, frameRate).generateFrames());
+			final Animation animation = new Animation(clips, frameRate);
+			this.frames.addAll(animation.generateFrames());
 		} else {
 			frames.add(new Frame(session.getPluginId(), session.getMetadata(), session.getScript(), true, true));
 		}

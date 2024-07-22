@@ -54,7 +54,7 @@ public class JuliaRendererStrategy implements RendererStrategy {
 	 */
 	@Override
 	public int renderColor(RendererState p) {
-		return Colors.color(rendererFractal.renderColor(p.vars()));
+		return Colors.makeColor(rendererFractal.renderColor(p.vars()));
 	}
 
 	/**

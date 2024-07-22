@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
@@ -88,10 +88,10 @@ import static com.nextbreakpoint.nextfractal.runtime.javafx.utils.Constants.PROJ
 public class ApplicationHandler {
     private final PlatformEventBus eventBus;
 
-    private final List<Clip> clips = new ArrayList<>();
+    private final List<AnimationClip> clips = new ArrayList<>();
     private File workspace;
     private Session session;
-    private Clip clip;
+    private AnimationClip clip;
     private boolean capture;
     private boolean edited;
 
@@ -259,23 +259,23 @@ public class ApplicationHandler {
         eventBus.postEvent(SessionDataLoaded.builder().session(bundle.session()).continuous(sessionBundleLoaded.continuous()).appendToHistory(sessionBundleLoaded.appendToHistory()).build());
     }
 
-    public void handleClipAdded(Clip clip) {
+    public void handleClipAdded(AnimationClip clip) {
         clips.add(clip);
         edited = true;
     }
 
-    public void handleClipRemoved(Clip clip) {
+    public void handleClipRemoved(AnimationClip clip) {
         clips.remove(clip);
         edited = true;
     }
 
-    public void handleClipRestored(Clip clip) {
+    public void handleClipRestored(AnimationClip clip) {
         clips.add(clip);
         edited = false;
     }
 
     public void handleClipMoved(int fromIndex, int toIndex) {
-        Clip clip = clips.get(fromIndex);
+        final AnimationClip clip = clips.get(fromIndex);
         clips.remove(fromIndex);
         clips.add(toIndex, clip);
         edited = true;
@@ -288,7 +288,7 @@ public class ApplicationHandler {
 
     public void handleSessionChanged(Session session) {
         if (capture) {
-            clip = clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.appendEvent(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
         }
     }
 
@@ -411,9 +411,9 @@ public class ApplicationHandler {
 
     private void startCapture() {
         capture = true;
-        clip = new Clip();
+        clip = new AnimationClip();
         if (session != null) {
-            clip = clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.appendEvent(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
         }
         eventBus.postEvent(CaptureSessionStarted.builder().clip(clip).build());
     }
@@ -421,7 +421,7 @@ public class ApplicationHandler {
     private void stopCapture() {
         capture = false;
         if (session != null) {
-            clip = clip.append(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.appendEvent(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
         }
         eventBus.postEvent(CaptureSessionStopped.builder().clip(clip).build());
     }

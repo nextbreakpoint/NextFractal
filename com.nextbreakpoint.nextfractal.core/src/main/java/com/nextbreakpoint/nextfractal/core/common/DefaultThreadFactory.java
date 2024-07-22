@@ -26,9 +26,6 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.concurrent.ThreadFactory;
 
-/**
- * @author Andrea Medeghini
- */
 public class DefaultThreadFactory implements ThreadFactory {
 	private final boolean isDaemon;
 	private final int priority;
@@ -37,12 +34,12 @@ public class DefaultThreadFactory implements ThreadFactory {
 
 	/**
 	 * @param name
-	 * @param isDeamon
+	 * @param isDaemon
 	 * @param priority
 	 */
-	public DefaultThreadFactory(final String name, final boolean isDeamon, final int priority) {
+	public DefaultThreadFactory(final String name, final boolean isDaemon, final int priority) {
 		this.name = name;
-		isDaemon = isDeamon;
+		this.isDaemon = isDaemon;
 		this.priority = priority;
 	}
 

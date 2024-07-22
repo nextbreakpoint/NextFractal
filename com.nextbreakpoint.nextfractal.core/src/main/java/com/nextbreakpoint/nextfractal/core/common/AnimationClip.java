@@ -28,26 +28,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public record Clip(List<ClipEvent> events) {
-    public Clip() {
+public record AnimationClip(List<AnimationEvent> events) {
+    public AnimationClip() {
         this(List.of());
     }
 
-    public Clip append(Date date, String pluginId, String script, Metadata metadata) {
+    public AnimationClip appendEvent(Date date, String pluginId, String script, Metadata metadata) {
         final var events = new ArrayList<>(this.events);
-        events.add(new ClipEvent(date, pluginId, script, metadata));
-        return new Clip(events);
+        events.add(new AnimationEvent(date, pluginId, script, metadata));
+        return new AnimationClip(events);
     }
 
-    public ClipEvent getFirstEvent() {
+    public AnimationEvent getFirstEvent() {
         return events.getFirst();
     }
 
-    public ClipEvent getLastEvent() {
+    public AnimationEvent getLastEvent() {
         return events.getLast();
     }
 
-    public List<ClipEvent> events() {
+    public List<AnimationEvent> events() {
         return new ArrayList<>(events);
     }
 

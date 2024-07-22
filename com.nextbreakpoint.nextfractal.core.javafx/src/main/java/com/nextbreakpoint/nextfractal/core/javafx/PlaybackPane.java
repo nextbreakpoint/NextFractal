@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.Clip;
-import com.nextbreakpoint.nextfractal.core.common.ClipProcessor;
+import com.nextbreakpoint.nextfractal.core.common.Animation;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Frame;
 import javafx.application.Platform;
@@ -40,7 +40,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.nextbreakpoint.nextfractal.core.common.ClipProcessor.FRAMES_PER_SECOND;
+import static com.nextbreakpoint.nextfractal.core.common.Constants.FRAMES_PER_SECOND;
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
 public class PlaybackPane extends Pane {
@@ -111,10 +111,11 @@ public class PlaybackPane extends Pane {
         this.delegate = delegate;
     }
 
-    public void setClips(List<Clip> clips) {
+    public void setClips(List<AnimationClip> clips) {
         if (future == null) {
             frames.clear();
-            frames.addAll(new ClipProcessor(clips, FRAMES_PER_SECOND).generateFrames());
+            final Animation animation = new Animation(clips, FRAMES_PER_SECOND);
+            frames.addAll(animation.generateFrames());
         }
     }
 

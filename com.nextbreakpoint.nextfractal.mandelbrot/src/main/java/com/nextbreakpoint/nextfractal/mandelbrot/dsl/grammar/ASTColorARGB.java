@@ -33,7 +33,7 @@ public class ASTColorARGB {
 	private final float[] components;
 
 	public ASTColorARGB(int argb) {
-		components = Colors.color(argb);
+		components = Colors.asFloats(argb);
 	}
 
 	public ASTColorARGB(float a, float r, float g, float b) {
@@ -45,7 +45,7 @@ public class ASTColorARGB {
 	}
 
 	public int getARGB() {
-		return Colors.toARGB(components);
+		return Colors.makeColor(components);
 	}
 
 	@Override

@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 
 import java.util.List;
@@ -36,13 +36,13 @@ public interface ExportDelegate {
 
     void stopCaptureSession();
 
-    void playbackStart(List<Clip> clips);
+    void playbackStart(List<AnimationClip> clips);
 
-    void captureSessionAdded(Clip clip);
+    void captureSessionAdded(AnimationClip clip);
 
-    void captureSessionRemoved(Clip clip);
+    void captureSessionRemoved(AnimationClip clip);
 
-    void captureSessionRestored(Clip clip);
+    void captureSessionRestored(AnimationClip clip);
 
     void captureSessionMoved(int fromIndex, int toIndex);
 }

@@ -1,7 +1,7 @@
 package com.nextbreakpoint.nextfractal.core.event;
 
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import lombok.Builder;
 
 @Builder
-public record CaptureClipRemoved(Clip clip) {}
+public record CaptureClipRemoved(AnimationClip clip) {}

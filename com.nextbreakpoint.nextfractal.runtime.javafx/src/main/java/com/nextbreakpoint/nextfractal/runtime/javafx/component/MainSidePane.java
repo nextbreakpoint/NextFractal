@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx.component;
 
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipAdded;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipMoved;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipRemoved;
@@ -313,24 +313,24 @@ public class MainSidePane extends BorderPane {
             }
 
             @Override
-            public void playbackStart(List<Clip> clips) {
+            public void playbackStart(List<AnimationClip> clips) {
                 if (errorProperty.getValue() == null) {
                     eventBus.postEvent(PlaybackStarted.builder().clips(clips).build());
                 }
             }
 
             @Override
-            public void captureSessionAdded(Clip clip) {
+            public void captureSessionAdded(AnimationClip clip) {
                 eventBus.postEvent(CaptureClipAdded.builder().clip(clip).build());
             }
 
             @Override
-            public void captureSessionRemoved(Clip clip) {
+            public void captureSessionRemoved(AnimationClip clip) {
                 eventBus.postEvent(CaptureClipRemoved.builder().clip(clip).build());
             }
 
             @Override
-            public void captureSessionRestored(Clip clip) {
+            public void captureSessionRestored(AnimationClip clip) {
                 eventBus.postEvent(CaptureClipRestored.builder().clip(clip).build());
             }
 
@@ -429,11 +429,11 @@ public class MainSidePane extends BorderPane {
         }
     }
 
-    private void handleSessionStarted(ExportPane exportPane, ToggleButton exportButton, Clip clip) {
+    private void handleSessionStarted(ExportPane exportPane, ToggleButton exportButton, AnimationClip clip) {
         log.info("Session started");
     }
 
-    private void handleSessionStopped(ExportPane exportPane, ToggleButton exportButton, Clip clip) {
+    private void handleSessionStopped(ExportPane exportPane, ToggleButton exportButton, AnimationClip clip) {
         log.info("Session stopped: clip duration " + clip.duration() + "ms");
         if (!clip.isEmpty()) exportPane.appendClip(clip);
         exportButton.setSelected(true);

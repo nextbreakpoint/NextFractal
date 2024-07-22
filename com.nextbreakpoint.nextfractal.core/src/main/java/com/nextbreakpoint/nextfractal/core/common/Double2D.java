@@ -29,9 +29,6 @@ import lombok.Builder;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
-/**
- * @author Andrea Medeghini
- */
 @Builder(setterPrefix = "with", toBuilder = true)
 public class Double2D implements Serializable, Cloneable {
 	private final double x;
@@ -53,11 +50,17 @@ public class Double2D implements Serializable, Cloneable {
 		this.y = y;
 	}
 
+	/**
+	 * @param v
+	 */
 	public Double2D(double[] v) {
 		this.x = v[0];
 		this.y = v[1];
 	}
 
+	/**
+	 * @param v
+	 */
 	public Double2D(Double[] v) {
 		this.x = v[0];
 		this.y = v[1];

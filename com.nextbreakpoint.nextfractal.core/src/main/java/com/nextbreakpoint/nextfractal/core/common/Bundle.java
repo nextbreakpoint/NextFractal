@@ -27,8 +27,8 @@ package com.nextbreakpoint.nextfractal.core.common;
 import java.util.List;
 import java.util.Objects;
 
-public record Bundle(Session session, List<Clip> clips) {
-    public Bundle(Session session, List<Clip> clips) {
+public record Bundle(Session session, List<AnimationClip> clips) {
+    public Bundle(Session session, List<AnimationClip> clips) {
         this.session = Objects.requireNonNull(session);
         this.clips = Objects.requireNonNull(clips);
     }

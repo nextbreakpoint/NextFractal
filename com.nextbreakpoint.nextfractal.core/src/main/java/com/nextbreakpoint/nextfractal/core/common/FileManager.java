@@ -128,7 +128,7 @@ public abstract class FileManager {
         return Command.of(tryFindFactory(pluginId)).map(factory -> new Bundle(factory.createSession(script, metadata), List.of()));
     }
 
-    private static Command<Bundle> createBundle(Bundle bundle, List<Clip> clips) {
+    private static Command<Bundle> createBundle(Bundle bundle, List<AnimationClip> clips) {
         return Command.of(() -> new Bundle(bundle.session(), clips));
     }
 
@@ -160,7 +160,7 @@ public abstract class FileManager {
                 .orElse(Command.error(new Exception("Metadata entry is required")));
     }
 
-    private static Command<List<Clip>> decodeClips(List<FileEntry> entries) {
+    private static Command<List<AnimationClip>> decodeClips(List<FileEntry> entries) {
         return entries.stream()
                 .filter(entry -> entry.getName().equals("clips"))
                 .findFirst()
@@ -180,34 +180,34 @@ public abstract class FileManager {
         return decodeMetadata(pluginId, new String(data));
     }
 
-    private static Command<List<Clip>> decodeClips(byte[] data) {
+    private static Command<List<AnimationClip>> decodeClips(byte[] data) {
         return Command.of(() -> MAPPER.readTree(data)).flatMap(FileManager::decodeClips);
     }
 
-    private static Command<List<Clip>> decodeClips(JsonNode clips) {
-        final List<Either<Clip>> results = JsonUtils.getClips(clips)
+    private static Command<List<AnimationClip>> decodeClips(JsonNode clips) {
+        final List<Either<AnimationClip>> results = JsonUtils.getClips(clips)
                 .map(FileManager::decodeClip)
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
                 .toList();
-        final Optional<Either<Clip>> error = results.stream().filter(Either::isFailure).findFirst();
-        return error.<Command<List<Clip>>>map(result -> createFailure("Can't decode clips", result))
+        final Optional<Either<AnimationClip>> error = results.stream().filter(Either::isFailure).findFirst();
+        return error.<Command<List<AnimationClip>>>map(result -> createFailure("Can't decode clips", result))
                 .orElseGet(() -> Command.value(results.stream().map(Either::get).toList()));
     }
 
-    private static Command<Clip> decodeClip(JsonNode clip) {
+    private static Command<AnimationClip> decodeClip(JsonNode clip) {
         final Map<String, Object> stateMap = new HashMap<>();
-        final List<Either<ClipEvent>> results = JsonUtils.getEvents(clip.get("events"))
+        final List<Either<AnimationEvent>> results = JsonUtils.getEvents(clip.get("events"))
                 .map(clipEvent -> decodeClipEvent(stateMap, clipEvent))
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
                 .toList();
-        final Optional<Either<ClipEvent>> error = results.stream().filter(Either::isFailure).findFirst();
-        return error.<Command<Clip>>map(result -> createFailure("Can't decode clip", result))
-                .orElseGet(() -> Command.value(new Clip(results.stream().map(Either::get).toList())));
+        final Optional<Either<AnimationEvent>> error = results.stream().filter(Either::isFailure).findFirst();
+        return error.<Command<AnimationClip>>map(result -> createFailure("Can't decode clip", result))
+                .orElseGet(() -> Command.value(new AnimationClip(results.stream().map(Either::get).toList())));
     }
 
-    private static Command<ClipEvent> decodeClipEvent(Map<String, Object> stateMap, JsonNode clipEvent) {
+    private static Command<AnimationEvent> decodeClipEvent(Map<String, Object> stateMap, JsonNode clipEvent) {
         try {
             final String pluginId = JsonUtils.getString(clipEvent, "pluginId");
             final String script = JsonUtils.getString(clipEvent, "script");
@@ -232,7 +232,7 @@ public abstract class FileManager {
                 stateMap.put("date", new Date(date));
             }
 
-            return Command.value(new ClipEvent((Date) stateMap.get("date"), (String) stateMap.get("pluginId"), (String) stateMap.get("script"), (Metadata) stateMap.get("metadata")));
+            return Command.value(new AnimationEvent((Date) stateMap.get("date"), (String) stateMap.get("pluginId"), (String) stateMap.get("script"), (Metadata) stateMap.get("metadata")));
         } catch (Exception e) {
             return Command.error(e);
         }
@@ -266,11 +266,11 @@ public abstract class FileManager {
         return encodeMetadata(session.getPluginId(), session.getMetadata()).map(String::getBytes);
     }
 
-    private static Command<byte[]> encodeClips(Session session, List<Clip> clips) {
+    private static Command<byte[]> encodeClips(Session session, List<AnimationClip> clips) {
         return encodeClips(clips).flatMap(data -> Command.of(() -> MAPPER.writeValueAsBytes(data)));
     }
 
-    private static Command<Object> encodeClips(List<Clip> clips) {
+    private static Command<Object> encodeClips(List<AnimationClip> clips) {
         final List<Either<Object>> results = clips.stream()
                 .map(FileManager::encodeClip)
                 .map(Command::execute)
@@ -281,7 +281,7 @@ public abstract class FileManager {
                 .orElseGet(() -> Command.value(results.stream().map(Either::get).toList()));
     }
 
-    private static Command<Object> encodeClip(Clip clip) {
+    private static Command<Object> encodeClip(AnimationClip clip) {
         final Map<String, Object> stateMap = new HashMap<>();
         final List<Either<Object>> results = clip.events().stream()
                 .map(clipEvent -> encodeClipEvent(stateMap, clipEvent))
@@ -293,7 +293,7 @@ public abstract class FileManager {
                 .orElseGet(() -> Command.value(Map.of("events", results.stream().map(Either::get).toList())));
     }
 
-    private static Command<Object> encodeClipEvent(Map<String, Object> stateMap, ClipEvent clipEvent) {
+    private static Command<Object> encodeClipEvent(Map<String, Object> stateMap, AnimationEvent clipEvent) {
         try {
             final Map<String, Object> eventMap = new HashMap<>();
 

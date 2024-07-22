@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -156,7 +156,7 @@ public class ClipListCell extends ListCell<Bitmap> {
 				g2d.setTransform(affine);
 				g2d.drawImage(image, x, y);
 			}
-			Clip clip = (Clip)bitmap.getProperty("clip");
+			AnimationClip clip = (AnimationClip)bitmap.getProperty("clip");
 			long durationInSeconds = clip.duration() / 1000;
 			long minutes = (long)Math.rint(durationInSeconds / 60.0);
 			if (minutes <= 2) {

@@ -29,9 +29,6 @@ import lombok.Builder;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
-/**
- * @author Andrea Medeghini
- */
 @Builder(setterPrefix = "with", toBuilder = true)
 public class Double4D implements Serializable, Cloneable {
 	private final double x;
@@ -59,6 +56,9 @@ public class Double4D implements Serializable, Cloneable {
 		this.w = w;
 	}
 
+	/**
+	 * @param v
+	 */
 	public Double4D(double[] v) {
 		this.x = v[0];
 		this.y = v[1];
@@ -66,6 +66,9 @@ public class Double4D implements Serializable, Cloneable {
 		this.w = v[3];
 	}
 
+	/**
+	 * @param v
+	 */
 	public Double4D(Double[] v) {
 		this.x = v[0];
 		this.y = v[1];

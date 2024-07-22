@@ -34,22 +34,22 @@ public interface CoreFactory {
 	/**
 	 * @return
 	 */
-	public String getId();
+    String getId();
 
 	/**
 	 * @return
 	 */
-	public String getGrammar();
+    String getGrammar();
 
 	/**
 	 * @return
 	 */
-	public Session createSession();
+    Session createSession();
 
 	/**
 	 * @return
 	 */
-	public Session createSession(String script, Metadata metadata);
+    Session createSession(String script, Metadata metadata);
 
 	/**
 	 * @param threadFactory
@@ -58,7 +58,7 @@ public interface CoreFactory {
 	 * @param opaque
 	 * @return
 	 */
-	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque);
+    ImageGenerator createImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque);
 
 	/**
 	 * @param threadFactory
@@ -66,16 +66,16 @@ public interface CoreFactory {
 	 * @param opaque
 	 * @return
 	 */
-	public ImageComposer createImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque);
+    ImageComposer createImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque);
 
 	/**
 	 * @return
 	 */
-	public MetadataCodec createMetadataCodec();
+    MetadataCodec createMetadataCodec();
 
 	/**
 	 * @param resourceName
 	 * @return
 	 */
-	public Either<String> loadResource(String resourceName);
+    Either<String> loadResource(String resourceName);
 }

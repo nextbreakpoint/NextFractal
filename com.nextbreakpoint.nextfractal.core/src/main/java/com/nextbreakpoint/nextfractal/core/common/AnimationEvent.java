@@ -27,8 +27,8 @@ package com.nextbreakpoint.nextfractal.core.common;
 import java.util.Date;
 import java.util.Objects;
 
-public record ClipEvent(Date date, String pluginId, String script, Metadata metadata) {
-    public ClipEvent(Date date, String pluginId, String script, Metadata metadata) {
+public record AnimationEvent(Date date, String pluginId, String script, Metadata metadata) {
+    public AnimationEvent(Date date, String pluginId, String script, Metadata metadata) {
         this.date = Objects.requireNonNull(date);
         this.pluginId = Objects.requireNonNull(pluginId);
         this.script = Objects.requireNonNull(script);

@@ -25,10 +25,11 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
+import com.nextbreakpoint.nextfractal.core.common.AnimationEvent;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 import javafx.application.Platform;
@@ -344,10 +345,10 @@ public class ExportPane extends BorderPane {
 			if (!listView.getItems().isEmpty() && delegate != null) {
 				if (!listView.getSelectionModel().getSelectedItems().isEmpty()) {
 					delegate.playbackStart(listView.getSelectionModel().getSelectedItems().stream()
-						.map(bitmap -> (Clip) bitmap.getProperty("clip")).collect(Collectors.toList()));
+						.map(bitmap -> (AnimationClip) bitmap.getProperty("clip")).collect(Collectors.toList()));
 				} else {
 					delegate.playbackStart(listView.getItems().stream()
-						.map(bitmap -> (Clip) bitmap.getProperty("clip")).collect(Collectors.toList()));
+						.map(bitmap -> (AnimationClip) bitmap.getProperty("clip")).collect(Collectors.toList()));
 				}
 			}
 		});
@@ -426,8 +427,8 @@ public class ExportPane extends BorderPane {
 		return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
 	}
 
-	private void addItem(ListView<Bitmap> listView, Clip clip, IntBuffer pixels, RendererSize size, boolean notifyAddClip) {
-		BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
+	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, RendererSize size, boolean notifyAddClip) {
+		final BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
 		bitmap.setProperty("clip", clip);
 		listView.getItems().add(bitmap);
 		if (listView.getItems().size() == 1) {
@@ -451,7 +452,7 @@ public class ExportPane extends BorderPane {
 			videoProperty.setValue(false);
 		}
 		if (delegate != null) {
-			Clip clip = (Clip) bitmap.getProperty("clip");
+			final AnimationClip clip = (AnimationClip) bitmap.getProperty("clip");
 			delegate.captureSessionRemoved(clip);
 		}
 	}
@@ -478,11 +479,11 @@ public class ExportPane extends BorderPane {
 				.get();
 	}
 
-	public void appendClip(Clip clip) {
+	public void appendClip(AnimationClip clip) {
 		addClip(clip, true);
 	}
 
-	private void addClip(Clip clip, boolean notifyAddClip) {
+	private void addClip(AnimationClip clip, boolean notifyAddClip) {
 		Command.of(tryFindFactory(clip.getFirstEvent().pluginId()))
 				.map(this::createImageComposer)
 				.execute()
@@ -490,32 +491,33 @@ public class ExportPane extends BorderPane {
 				.ifPresent(composer -> submitItem(clip, composer, notifyAddClip));
 	}
 
-	private void submitItem(Clip clip, ImageComposer composer, boolean notifyAddClip) {
+	private void submitItem(AnimationClip clip, ImageComposer composer, boolean notifyAddClip) {
 		executor.submit(() -> Command.of(() -> renderImage(clip, composer))
 				.execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, clip, pixels, composer.getSize(), notifyAddClip))));
 	}
 
-	private IntBuffer renderImage(Clip clip, ImageComposer composer) {
-		return composer.renderImage(clip.getFirstEvent().script(), clip.getFirstEvent().metadata());
+	private IntBuffer renderImage(AnimationClip clip, ImageComposer composer) {
+		final AnimationEvent firstEvent = clip.getFirstEvent();
+		return composer.renderImage(firstEvent.script(), firstEvent.metadata());
 	}
 
 	private ImageComposer createImageComposer(CoreFactory factory) {
 		return factory.createImageComposer(createThreadFactory("Export Composer"), tile, true);
 	}
 
-	public void loadClips(List<Clip> clips) {
+	public void loadClips(List<AnimationClip> clips) {
 		removeAllItems();
 		clips.forEach(clip -> addClip(clip, false));
 	}
 
 	private void removeAllItems() {
 		if (delegate != null) {
-			listView.getItems().stream().map(bitmap -> (Clip)bitmap.getProperty("clip")).forEach(clip -> delegate.captureSessionRemoved(clip));
+			listView.getItems().stream().map(bitmap -> (AnimationClip)bitmap.getProperty("clip")).forEach(clip -> delegate.captureSessionRemoved(clip));
 		}
 		listView.getItems().clear();
 	}
 
-	public void mergeClips(List<Clip> clips) {
+	public void mergeClips(List<AnimationClip> clips) {
 		clips.forEach(clip -> addClip(clip, true));
 	}
 
