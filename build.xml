@@ -2,7 +2,7 @@
 <project name="NextFractal">
 	<property environment="env" />
 	<property name="openjfx.version" value="22.0.1" />
-	<property name="nextfractal.version" value="2.3.1" />
+	<property name="nextfractal.version" value="2.3.2" />
 	<property name="nextfractal.year" value="2024" />
 	<property name="application" value="NextFractal" />
 	<property name="description" value="NextFractal is an application for creating fractals" />
@@ -519,17 +519,24 @@
 		    	<include name="**/*.txt"/>
 		    	<include name="**/*.html"/>
     			<include name="**/*.java"/>
+				<exclude name="dist/*"/>
+				<exclude name="build/*"/>
+				<exclude name="icons/*"/>
+				<exclude name="sandbox/*"/>
+				<exclude name="utils/*"/>
+				<exclude name="tmp/*"/>
 			</fileset>
 		</replaceregexp>
 		<replaceregexp match="com.nextbreakpoint.nextfractal.runtime.javafx-[0-9]\.[0-9]\.[0-9](-[a-z0-9]*)?" replace="com.nextbreakpoint.nextfractal.runtime.javafx-${nextfractal.version}" flags="g" byline="true">
 		    <fileset dir="${basedir}">
 		    	<include name="**/*.bat"/>
 		    	<include name="**/*.sh"/>
-			</fileset>
-		</replaceregexp>
-		<replaceregexp match="&lt;string&gt;[0-9]\.[0-9]\.[0-9](-[a-z0-9]*)?&lt;/string&gt;" replace="&lt;string&gt;${nextfractal.version}&lt;/string&gt;" flags="g" byline="true">
-			<fileset dir="${basedir}">
-				<include name="**/*.plist"/>
+				<exclude name="dist/*"/>
+				<exclude name="build/*"/>
+				<exclude name="icons/*"/>
+				<exclude name="sandbox/*"/>
+				<exclude name="utils/*"/>
+				<exclude name="tmp/*"/>
 			</fileset>
 		</replaceregexp>
 		<maven basedir="${basedir}" command="mvn" goal="versions:set" options="-DnewVersion=${nextfractal.version}" resultproperty="maven.build.result"/>
