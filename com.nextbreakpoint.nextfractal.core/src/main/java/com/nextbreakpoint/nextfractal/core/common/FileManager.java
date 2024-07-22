@@ -129,7 +129,7 @@ public abstract class FileManager {
     }
 
     private static Command<Bundle> createBundle(Bundle bundle, List<Clip> clips) {
-        return Command.of(() -> new Bundle(bundle.getSession(), clips));
+        return Command.of(() -> new Bundle(bundle.session(), clips));
     }
 
     private static Command<List<FileEntry>> createEntries(FileEntry manifest, FileEntry script, FileEntry metadata, FileEntry clips) {
@@ -239,19 +239,19 @@ public abstract class FileManager {
     }
 
     private static Command<FileEntry> encodeManifest(Bundle bundle) {
-        return encodeManifest(bundle.getSession()).map(entry -> new FileEntry("manifest", entry));
+        return encodeManifest(bundle.session()).map(entry -> new FileEntry("manifest", entry));
     }
 
     private static Command<FileEntry> encodeScript(Bundle bundle) {
-        return encodeScript(bundle.getSession()).map(entry -> new FileEntry("script", entry));
+        return encodeScript(bundle.session()).map(entry -> new FileEntry("script", entry));
     }
 
     private static Command<FileEntry> encodeMetadata(Bundle bundle) {
-        return encodeMetadata(bundle.getSession()).map(entry -> new FileEntry("metadata", entry));
+        return encodeMetadata(bundle.session()).map(entry -> new FileEntry("metadata", entry));
     }
 
     private static Command<FileEntry> encodeClips(Bundle bundle) {
-        return encodeClips(bundle.getSession(), bundle.getClips()).map(entry -> new FileEntry("clips", entry));
+        return encodeClips(bundle.session(), bundle.clips()).map(entry -> new FileEntry("clips", entry));
     }
 
     private static Command<byte[]> encodeManifest(Session session) {

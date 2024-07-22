@@ -51,7 +51,7 @@ public class TileGenerator {
                 .withCol(col)
                 .withSize(size)
                 .withTaskId(UUID.randomUUID())
-                .withSession(bundle.getSession())
+                .withSession(bundle.session())
                 .build();
     }
 

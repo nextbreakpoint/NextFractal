@@ -54,8 +54,8 @@ public class ApplicationUtils {
 
     public static Either<BrowseBitmap> createBitmap(File file, RendererSize size) {
         return Command.of(FileManager.loadBundle(file))
-                .flatMap(bundle -> Command.of(tryFindFactory(bundle.getSession().getPluginId()))
-                .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.getSession(), size))))
+                .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().getPluginId()))
+                .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))
                 .execute();
     }
 

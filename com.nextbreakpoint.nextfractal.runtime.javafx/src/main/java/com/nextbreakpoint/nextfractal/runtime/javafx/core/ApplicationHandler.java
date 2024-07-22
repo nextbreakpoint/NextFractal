@@ -237,7 +237,7 @@ public class ApplicationHandler {
 
     public void handleBundleLoaded(SessionBundleLoaded sessionBundleLoaded) {
         final Bundle bundle = sessionBundleLoaded.bundle();
-        if (edited && !clips.isEmpty() && !bundle.getClips().isEmpty()) {
+        if (edited && !clips.isEmpty() && !bundle.clips().isEmpty()) {
             final Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setContentText("There are new or modified clips. Do you want to discard them?");
             dialog.setTitle("Action required");
@@ -245,18 +245,18 @@ public class ApplicationHandler {
             dialog.getDialogPane().getButtonTypes().add(ButtonType.YES);
             final Optional<ButtonType> response = dialog.showAndWait();
             if (response.isPresent() && response.get().equals(ButtonType.NO)) {
-                eventBus.postEvent(CaptureClipsMerged.builder().clips(bundle.getClips()).build());
+                eventBus.postEvent(CaptureClipsMerged.builder().clips(bundle.clips()).build());
             } else {
-                eventBus.postEvent(CaptureClipsLoaded.builder().clips(bundle.getClips()).build());
+                eventBus.postEvent(CaptureClipsLoaded.builder().clips(bundle.clips()).build());
             }
         } else {
             if (edited && !clips.isEmpty()) {
-                eventBus.postEvent(CaptureClipsMerged.builder().clips(bundle.getClips()).build());
+                eventBus.postEvent(CaptureClipsMerged.builder().clips(bundle.clips()).build());
             } else {
-                eventBus.postEvent(CaptureClipsLoaded.builder().clips(bundle.getClips()).build());
+                eventBus.postEvent(CaptureClipsLoaded.builder().clips(bundle.clips()).build());
             }
         }
-        eventBus.postEvent(SessionDataLoaded.builder().session(bundle.getSession()).continuous(sessionBundleLoaded.continuous()).appendToHistory(sessionBundleLoaded.appendToHistory()).build());
+        eventBus.postEvent(SessionDataLoaded.builder().session(bundle.session()).continuous(sessionBundleLoaded.continuous()).appendToHistory(sessionBundleLoaded.appendToHistory()).build());
     }
 
     public void handleClipAdded(Clip clip) {

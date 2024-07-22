@@ -24,18 +24,20 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.Arrays;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BundleUtils {
-    private BundleUtils() {}
-
     public static Bundle createBundle(String manifest, String metadata, String script) throws Exception {
-        final FileEntry manifestEntry = new FileEntry("manifest", manifest.getBytes());
-        final FileEntry metadataEntry = new FileEntry("metadata", metadata.getBytes());
-        final FileEntry scriptEntry = new FileEntry("script", script.getBytes());
-
-        final List<FileEntry> entries = Arrays.asList(manifestEntry, metadataEntry, scriptEntry);
+        final List<FileEntry> entries = List.of(
+                new FileEntry("manifest", manifest.getBytes()),
+                new FileEntry("metadata", metadata.getBytes()),
+                new FileEntry("script", script.getBytes())
+        );
 
         return FileManager.decodeBundle(entries).orThrow().get();
     }
