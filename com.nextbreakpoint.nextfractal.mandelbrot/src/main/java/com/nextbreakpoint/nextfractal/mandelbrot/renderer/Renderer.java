@@ -315,19 +315,19 @@ public class Renderer {
 	public void setView(RendererView view) {
 		this.view = view;
 		lock.lock();
-		if ((rotation == 0 && view.getRotation().getZ() != 0) || (rotation != 0 && view.getRotation().getZ() == 0)) {
-			rotation = view.getRotation().getZ();
+		if ((rotation == 0 && view.getRotation().z() != 0) || (rotation != 0 && view.getRotation().z() == 0)) {
+			rotation = view.getRotation().z();
 			ensureBufferAndSize();
 			orbitChanged = true;
 		} else {
-			rotation = view.getRotation().getZ();
+			rotation = view.getRotation().z();
 		}
 		final RendererRegion region = getInitialRegion();
 		final Number center = region.getCenter();
 		transform = new RendererTransform();
-		transform.traslate(view.getTraslation().getX() + center.r(), view.getTraslation().getY() + center.i());
+		transform.traslate(view.getTraslation().x() + center.r(), view.getTraslation().y() + center.i());
 		transform.rotate(-rotation * Math.PI / 180);
-		transform.traslate(-view.getTraslation().getX() - center.r(), -view.getTraslation().getY() - center.i());
+		transform.traslate(-view.getTraslation().x() - center.r(), -view.getTraslation().y() - center.i());
 		buffer.setAffine(createTransform(rotation));
 		setContentRegion(computeContentRegion());
 		setJulia(view.isJulia());
@@ -663,10 +663,10 @@ public class Renderer {
 	 * 
 	 */
 	protected RendererRegion computeContentRegion() {
-		final double tx = view.getTraslation().getX();
-		final double ty = view.getTraslation().getY();
-		final double tz = view.getTraslation().getZ();
-//		final double rz = view.getRotation().getZ();
+		final double tx = view.getTraslation().x();
+		final double ty = view.getTraslation().y();
+		final double tz = view.getTraslation().z();
+//		final double rz = view.getRotation().z();
 		
 //		double a = fastRotate ? 0 : convertDegToRad(rz);
 		
@@ -692,8 +692,8 @@ public class Renderer {
 		final double qx = cx + dx + tx;
 		final double qy = cy + dy + ty;
 
-		final double gx = px + (qx - px) * ((baseImageSize.getWidth() - imageSize.getWidth()) / 2.0 + tileOffset.getX() + tileSize.getWidth() / 2) / (double)baseImageSize.getWidth();
-		final double gy = py + (qy - py) * ((baseImageSize.getWidth() - imageSize.getHeight()) / 2.0 + tileOffset.getY() + tileSize.getHeight() / 2) / (double)baseImageSize.getWidth();
+		final double gx = px + (qx - px) * ((baseImageSize.getWidth() - imageSize.getWidth()) / 2.0 + tileOffset.getX() + tileSize.getWidth() / 2f) / (double)baseImageSize.getWidth();
+		final double gy = py + (qy - py) * ((baseImageSize.getWidth() - imageSize.getHeight()) / 2.0 + tileOffset.getY() + tileSize.getHeight() / 2f) / (double)baseImageSize.getWidth();
 		final double fx = gx;//Math.cos(a) * (gx - cx) + Math.sin(a) * (gy - cx) + cx; 
 		final double fy = gy;//Math.cos(a) * (gy - cy) - Math.sin(a) * (gx - cx) + cy;
 		final double sx = dx * (getSize().getWidth() / (double)baseImageSize.getWidth());
@@ -725,8 +725,8 @@ public class Renderer {
 		final double qx = cx + dx;
 		final double qy = cy + dy;
 
-		final double gx = px + (qx - px) * ((baseImageSize.getWidth() - imageSize.getWidth()) / 2.0 + tileSize.getWidth() / 2) / (double)baseImageSize.getWidth();
-		final double gy = py + (qy - py) * ((baseImageSize.getWidth() - imageSize.getHeight()) / 2.0 + tileSize.getHeight() / 2) / (double)baseImageSize.getWidth();
+		final double gx = px + (qx - px) * ((baseImageSize.getWidth() - imageSize.getWidth()) / 2.0 + tileSize.getWidth() / 2f) / (double)baseImageSize.getWidth();
+		final double gy = py + (qy - py) * ((baseImageSize.getWidth() - imageSize.getHeight()) / 2.0 + tileSize.getHeight() / 2f) / (double)baseImageSize.getWidth();
 		final double fx = gx;//Math.cos(a) * (gx - cx) + Math.sin(a) * (gy - cx) + cx;
 		final double fy = gy;//Math.cos(a) * (gy - cy) - Math.sin(a) * (gx - cx) + cy;
 		final double sx = dx * (getSize().getWidth() / (double)baseImageSize.getWidth());

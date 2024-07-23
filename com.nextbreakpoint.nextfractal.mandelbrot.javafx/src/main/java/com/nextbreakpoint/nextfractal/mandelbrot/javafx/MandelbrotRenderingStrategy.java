@@ -149,7 +149,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 view.setScale(scale);
                 view.setState(new Integer4D(0, 0, continuous ? 1 : 0, timeAnimation ? 1 : 0));
                 view.setJulia(julia);
-                view.setPoint(new Number(point.getX(), point.getY()));
+                view.setPoint(new Number(point.x(), point.y()));
                 coordinator.setView(view);
 //				if (timeAnimation) {
                 coordinator.setTime(time);
@@ -166,7 +166,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             view.setScale(new Double4D(new double[]{1, 1, 1, 1}));
             view.setState(new Integer4D(0, 0, continuous ? 1 : 0, timeAnimation ? 1 : 0));
             view.setJulia(true);
-            view.setPoint(new Number(point.getX(), point.getY()));
+            view.setPoint(new Number(point.x(), point.y()));
             juliaCoordinator.setView(view);
 //			if (timeAnimation) {
             juliaCoordinator.setTime(time);
@@ -245,7 +245,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                     view.setScale(scale);
                     view.setState(new Integer4D(0, 0, 0, 0));
                     view.setJulia(julia);
-                    view.setPoint(new Number(point.getX(), point.getY()));
+                    view.setPoint(new Number(point.x(), point.y()));
                     coordinator.setView(view);
                     coordinator.setTime(time);
                 }
@@ -272,7 +272,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 view.setScale(scale);
                 view.setState(new Integer4D(0, 0, 0, 0));
                 view.setJulia(true);
-                view.setPoint(new Number(point.getX(), point.getY()));
+                view.setPoint(new Number(point.x(), point.y()));
                 juliaCoordinator.setView(view);
                 juliaCoordinator.setTime(time);
             }
@@ -407,7 +407,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                     Scope scope = new Scope();
                     orbit.setScope(scope);
                     orbit.init();
-                    orbit.setW(new Number(point.getX(), point.getY()));
+                    orbit.setW(new Number(point.x(), point.y()));
                     orbit.setX(orbit.getInitialPoint());
                     orbit.render(states);
                 }

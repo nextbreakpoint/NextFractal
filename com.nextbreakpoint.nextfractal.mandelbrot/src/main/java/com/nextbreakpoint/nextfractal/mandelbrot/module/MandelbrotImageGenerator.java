@@ -88,7 +88,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			view.setScale(scale);
 			view.setState(new Integer4D(0, 0, 0, 0));
 			view.setJulia(julia);
-			view.setPoint(new Number(constant.getX(), constant.getY()));
+			view.setPoint(new Number(constant.x(), constant.y()));
 			renderer.setView(view);
 			renderer.setTime(time);
 			renderer.runTask();

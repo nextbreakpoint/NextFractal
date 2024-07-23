@@ -94,7 +94,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		view.setRotation(data.getRotation());
 		view.setScale(data.getScale());
 		view.setState(new Integer4D(0, 0, 0, 0));
-		view.setPoint(new Number(data.getPoint().getX(), data.getPoint().getY()));
+		view.setPoint(new Number(data.getPoint().x(), data.getPoint().y()));
 		view.setJulia(data.isJulia());
 		coordinator.setView(view);
 		coordinator.run();

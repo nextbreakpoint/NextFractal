@@ -96,11 +96,11 @@ public class MandelbrotImageComposer implements ImageComposer {
             Java2DRendererFactory renderFactory = new Java2DRendererFactory();
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             if (metadata.getOptions().isShowPreview() && !metadata.isJulia()) {
-                int previewWidth = (int) Math.rint(tile.getImageSize().getWidth() * metadata.getOptions().getPreviewSize().getX());
-                int previewHeight = (int) Math.rint(tile.getImageSize().getHeight() * metadata.getOptions().getPreviewSize().getY());
+                int previewWidth = (int) Math.rint(tile.getImageSize().getWidth() * metadata.getOptions().getPreviewSize().x());
+                int previewHeight = (int) Math.rint(tile.getImageSize().getHeight() * metadata.getOptions().getPreviewSize().y());
                 RendererSize tileSize = new RendererSize(previewWidth, previewHeight);
-                int x = (int) Math.rint(metadata.getOptions().getPreviewOrigin().getX() * tile.getImageSize().getWidth());
-                int y = (int) Math.rint(metadata.getOptions().getPreviewOrigin().getY() * tile.getImageSize().getHeight());
+                int x = (int) Math.rint(metadata.getOptions().getPreviewOrigin().x() * tile.getImageSize().getWidth());
+                int y = (int) Math.rint(metadata.getOptions().getPreviewOrigin().y() * tile.getImageSize().getHeight());
                 RendererPoint tileOffset = new RendererPoint(x, tile.getImageSize().getHeight() - previewHeight + y);
                 renderer.setPreviewTile(new RendererTile(tile.getImageSize(), tileSize, tileOffset, new RendererSize(0, 0)));
             }
@@ -120,7 +120,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             view.setScale(scale);
             view.setState(new Integer4D(0, 0, 0, 0));
             view.setJulia(julia);
-            view.setPoint(new Number(constant.getX(), constant.getY()));
+            view.setPoint(new Number(constant.x(), constant.y()));
             renderer.setView(view);
             renderer.setTime(time);
             renderer.runTask();
@@ -170,7 +170,7 @@ public class MandelbrotImageComposer implements ImageComposer {
                 Scope scope = new Scope();
                 orbit.setScope(scope);
                 orbit.init();
-                orbit.setW(new Number(point.getX(), point.getY()));
+                orbit.setW(new Number(point.x(), point.y()));
                 orbit.setX(orbit.getInitialPoint());
                 orbit.render(states);
             }

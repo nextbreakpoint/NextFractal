@@ -56,14 +56,14 @@ public class MandelbrotParamsStrategy implements ParamsStrategy {
                         .withName("X axis value")
                         .withKey("translation-x")
                         .withLogicalType("double")
-                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getTranslation().getX()))
+                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getTranslation().x()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withTranslation(getTranslationBuilder(session).withX(Double.parseDouble(value)).build()).build()).build())
                         .build(),
                 Attribute.builder()
                         .withName("Y axis value")
                         .withKey("translation-y")
                         .withLogicalType("double")
-                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getTranslation().getY()))
+                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getTranslation().y()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withTranslation(getTranslationBuilder(session).withY(Double.parseDouble(value)).build()).build()).build())
                         .build()
         );
@@ -74,7 +74,7 @@ public class MandelbrotParamsStrategy implements ParamsStrategy {
                 Attribute.builder().withName("Z axis value")
                         .withKey("translation-z")
                         .withLogicalType("double")
-                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getTranslation().getZ()))
+                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getTranslation().z()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withTranslation(getTranslationBuilder(session).withZ(Double.parseDouble(value)).build()).build()).build())
                         .build()
         );
@@ -86,7 +86,7 @@ public class MandelbrotParamsStrategy implements ParamsStrategy {
                         .withName("Z axis rotation in degrees")
                         .withKey("rotation-z")
                         .withLogicalType("double")
-                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getRotation().getZ()))
+                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getRotation().z()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withRotation(getRotationBuilder(session).withZ(Double.parseDouble(value)).build()).build()).build())
                         .build()
         );
@@ -98,14 +98,14 @@ public class MandelbrotParamsStrategy implements ParamsStrategy {
                         .withName("Real part of constant point w")
                         .withKey("constant-r")
                         .withLogicalType("double")
-                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getPoint().getX()))
+                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getPoint().x()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withPoint(getPointBuilder(session).withX(Double.parseDouble(value)).build()).build()).build())
                         .build(),
                 Attribute.builder()
                         .withName("Imaginary part of constant point w")
                         .withKey("constant-i")
                         .withLogicalType("double")
-                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getPoint().getY()))
+                        .withMapper(session -> String.valueOf(((MandelbrotMetadata) session.getMetadata()).getPoint().y()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withPoint(getPointBuilder(session).withY(Double.parseDouble(value)).build()).build()).build())
                         .build()
         );
