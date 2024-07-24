@@ -154,15 +154,15 @@ public final class ExportHandle {
 	}
 
 	public String getCurrentPluginId() {
-		return session.getFrames().get(frameNumber).getPluginId();
+		return session.getFrames().get(frameNumber).pluginId();
 	}
 
 	public String getCurrentScript() {
-		return session.getFrames().get(frameNumber).getScript();
+		return session.getFrames().get(frameNumber).script();
 	}
 
 	public Metadata getCurrentMetadata() {
-		return session.getFrames().get(frameNumber).getMetadata();
+		return session.getFrames().get(frameNumber).metadata();
 	}
 
 	public boolean nextFrame() {

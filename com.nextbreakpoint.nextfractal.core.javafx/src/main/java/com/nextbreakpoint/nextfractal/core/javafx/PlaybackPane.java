@@ -28,7 +28,7 @@ import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Animation;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.common.Frame;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 
@@ -44,11 +44,11 @@ import static com.nextbreakpoint.nextfractal.core.common.Constants.FRAMES_PER_SE
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
 public class PlaybackPane extends Pane {
-    private final List<Frame> frames = new LinkedList<>();
+    private final List<AnimationFrame> frames = new LinkedList<>();
     private final ScheduledExecutorService executor;
     private ScheduledFuture<?> future;
     private int frameIndex = -1;
-    private Frame lastFrame;
+    private AnimationFrame lastFrame;
     private PlaybackDelegate delegate;
 
     public PlaybackPane() {
@@ -75,23 +75,23 @@ public class PlaybackPane extends Pane {
         try {
             frameIndex += 1;
             if (frameIndex < frames.size()) {
-                Frame frame = frames.get(frameIndex);
+                AnimationFrame frame = frames.get(frameIndex);
                 if (delegate != null) {
-                    if (lastFrame == null || !lastFrame.getPluginId().equals(frame.getPluginId()) || !lastFrame.getScript().equals(frame.getScript())) {
-                        Command.of(tryFindFactory(frame.getPluginId()))
-                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                    if (lastFrame == null || !lastFrame.pluginId().equals(frame.pluginId()) || !lastFrame.script().equals(frame.script())) {
+                        Command.of(tryFindFactory(frame.pluginId()))
+                                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
-                    } else if (!lastFrame.getMetadata().equals(frame.getMetadata())) {
-                        Command.of(tryFindFactory(frame.getPluginId()))
-                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, frame.keyFrame(), !frame.keyFrame() && frame.timeAnimation())));
+                    } else if (!lastFrame.metadata().equals(frame.metadata())) {
+                        Command.of(tryFindFactory(frame.pluginId()))
+                                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
-                    } else if (!lastFrame.getMetadata().getTime().equals(frame.getMetadata().getTime())) {
-                        Command.of(tryFindFactory(frame.getPluginId()))
-                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.keyFrame(), !frame.keyFrame() && frame.timeAnimation())));
+                    } else if (!lastFrame.metadata().getTime().equals(frame.metadata().getTime())) {
+                        Command.of(tryFindFactory(frame.pluginId()))
+                                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
                                 .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, true)));

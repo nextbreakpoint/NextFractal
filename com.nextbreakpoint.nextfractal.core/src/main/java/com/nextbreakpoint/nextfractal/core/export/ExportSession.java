@@ -27,7 +27,7 @@ package com.nextbreakpoint.nextfractal.core.export;
 import com.nextbreakpoint.nextfractal.core.common.Animation;
 import com.nextbreakpoint.nextfractal.core.common.Constants;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
-import com.nextbreakpoint.nextfractal.core.common.Frame;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
@@ -41,7 +41,7 @@ public final class ExportSession {
 	private static final int BORDER_SIZE = 0;
 
 	private final List<ExportJob> jobs = new ArrayList<>();
-	private final List<Frame> frames = new ArrayList<>();
+	private final List<AnimationFrame> frames = new ArrayList<>();
 	private final String sessionId;
 	private final Encoder encoder;
 	private final RendererSize size;
@@ -66,7 +66,7 @@ public final class ExportSession {
 			final Animation animation = new Animation(clips, frameRate);
 			this.frames.addAll(animation.generateFrames());
 		} else {
-			frames.add(new Frame(session.getPluginId(), session.getMetadata(), session.getScript(), true, true));
+			frames.add(new AnimationFrame(session.getPluginId(), session.getScript(), session.getMetadata(), true, true));
 		}
 		jobs.addAll(createJobs());
 	}
@@ -103,7 +103,7 @@ public final class ExportSession {
 		return Collections.unmodifiableList(jobs);
 	}
 
-	public List<Frame> getFrames() {
+	public List<AnimationFrame> getFrames() {
 		return Collections.unmodifiableList(frames);
 	}
 

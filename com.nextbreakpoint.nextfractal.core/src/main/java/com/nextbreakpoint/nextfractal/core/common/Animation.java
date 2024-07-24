@@ -43,8 +43,8 @@ public class Animation {
         this.frameCount = computeFrameCount(0, duration, frameRate);
     }
 
-    public List<Frame> generateFrames() {
-        final List<Frame> frames = new LinkedList<>();
+    public List<AnimationFrame> generateFrames() {
+        final List<AnimationFrame> frames = new LinkedList<>();
         if (!clips.isEmpty() && clips.getFirst().events().size() > 1) {
             int currentClip = 0;
             int currentEvent = 0;
@@ -53,7 +53,7 @@ public class Animation {
             float prevTime = 0;
             AnimationEvent event = clips.getFirst().events().getFirst();
             long baseTime = event.date().getTime();
-            Frame lastFrame = null;
+            AnimationFrame lastFrame = null;
             logger.fine("0) clip " + currentClip + ", event " + currentEvent);
             while (frameIndex < frameCount && currentClip < clips.size() && currentEvent < clips.get(currentClip).events().size()) {
                 currentEvent += 1;
@@ -73,10 +73,10 @@ public class Animation {
                     time = prevTime + (nextEvent.date().getTime() - baseTime) / 1000f;
                     while (frameTime - time < 0.01f) {
                         logger.fine("1) frame " + frameIndex + ", time " + frameTime);
-                        Frame frame = new Frame(event.pluginId(), event.metadata(), event.script(), true, false);
-                        if (lastFrame != null && lastFrame.equals(frame)) {
+                        AnimationFrame frame = new AnimationFrame(event.pluginId(), event.script(), event.metadata(), true, false);
+                        if (lastFrame != null && lastFrame.isSame(frame)) {
                             logger.fine("1) not key frame");
-                            frame = new Frame(event.pluginId(), event.metadata(), event.script(), false, true);
+                            frame = new AnimationFrame(event.pluginId(), event.script(), event.metadata(), false, true);
                         }
                         lastFrame = frame;
                         frames.add(frame);
@@ -87,10 +87,10 @@ public class Animation {
                 } else {
                     float frameTime = frameIndex / frameRate;
                     logger.fine("2) frame " + frameIndex + ", time " + frameTime);
-                    Frame frame = new Frame(event.pluginId(), event.metadata(), event.script(), true, false);
-                    if (lastFrame != null && lastFrame.equals(frame)) {
+                    AnimationFrame frame = new AnimationFrame(event.pluginId(), event.script(), event.metadata(), true, false);
+                    if (lastFrame != null && lastFrame.isSame(frame)) {
                         logger.fine("2) not key frame");
-                        frame = new Frame(event.pluginId(), event.metadata(), event.script(), false, true);
+                        frame = new AnimationFrame(event.pluginId(), event.script(), event.metadata(), false, true);
                     }
                     lastFrame = frame;
                     frames.add(frame);

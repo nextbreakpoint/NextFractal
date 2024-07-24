@@ -197,11 +197,11 @@ public class SimpleExportService extends AbstractExportService {
 	}
 
 	private boolean isKeyFrame(ExportHandle exportHandle) {
-		return exportHandle.getSession().getFrames().get(exportHandle.getFrameNumber()).isKeyFrame();
+		return exportHandle.getSession().getFrames().get(exportHandle.getFrameNumber()).keyFrame();
 	}
 
 	private boolean isTimeAnimation(ExportHandle exportHandle) {
-		return exportHandle.getSession().getFrames().get(exportHandle.getFrameNumber()).isTimeAnimation();
+		return exportHandle.getSession().getFrames().get(exportHandle.getFrameNumber()).timeAnimation();
 	}
 
 	private void resetJobs(ExportHandle exportHandle) {

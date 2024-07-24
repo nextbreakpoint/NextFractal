@@ -227,7 +227,7 @@ public class JobsPane extends BorderPane {
     }
 
     private IntBuffer renderImage(ExportSession session, ImageComposer composer) {
-        return composer.renderImage(session.getFrames().get(0).getScript(), session.getFrames().get(0).getMetadata());
+        return composer.renderImage(session.getFrames().getFirst().script(), session.getFrames().getFirst().metadata());
     }
 
     private void addItem(ListView<Bitmap> listView, ExportSession session, IntBuffer pixels, RendererSize size) {
@@ -261,7 +261,7 @@ public class JobsPane extends BorderPane {
     }
 
     public void appendSession(ExportSession session) {
-        Command.of(tryFindFactory(session.getFrames().getFirst().getPluginId()))
+        Command.of(tryFindFactory(session.getFrames().getFirst().pluginId()))
                 .map(this::createImageComposer)
                 .execute()
                 .optional()
