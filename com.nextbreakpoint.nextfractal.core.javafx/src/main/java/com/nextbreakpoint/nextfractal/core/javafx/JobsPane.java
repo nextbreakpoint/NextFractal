@@ -206,7 +206,7 @@ public class JobsPane extends BorderPane {
             } else {
                 sizeLabel.setText(session.getSize().getWidth() + "\u00D7" + session.getSize().getHeight() + " pixels");
                 formatLabel.setText(session.getEncoder().getName() + " Video");
-                long durationInSeconds = (long)Math.rint(session.getFrameCount() / session.getFrameRate());
+                long durationInSeconds = (long)Math.rint(session.getFrameCount() / (float) session.getFrameRate());
                 long minutes = (long)Math.rint(durationInSeconds / 60.0);
                 if (minutes <= 2) {
                     durationLabel.setText("Duration " + durationInSeconds + " seconds");
@@ -235,7 +235,7 @@ public class JobsPane extends BorderPane {
         JobEntry jobEntry = new JobEntry(session, ExportState.READY, 0f, bitmap);
         exportEntries.put(session.getSessionId(), jobEntry);
         bitmap.setProperty("exportSession", session);
-        listView.getItems().add(0, bitmap);
+        listView.getItems().addFirst(bitmap);
     }
 
     public void setDelegate(JobsDelegate delegate) {

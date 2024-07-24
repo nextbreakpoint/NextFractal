@@ -27,7 +27,6 @@ package com.nextbreakpoint.nextfractal.core.common;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.Arrays;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -43,14 +43,15 @@ import com.nextbreakpoint.nextfractal.mandelbrot.renderer.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererView;
 
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.concurrent.ThreadFactory;
 
 public class MandelbrotImageGenerator implements ImageGenerator {
 	private boolean aborted;
-	private boolean opaque;
-	private RendererTile tile;
-	private ThreadFactory threadFactory;
-	private RendererFactory renderFactory;
+	private final boolean opaque;
+	private final RendererTile tile;
+	private final ThreadFactory threadFactory;
+	private final RendererFactory renderFactory;
 
 	public MandelbrotImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
 		this.tile = tile;
@@ -64,6 +65,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 		MandelbrotMetadata metadata = (MandelbrotMetadata) data;
 		RendererSize suggestedSize = tile.getTileSize();
 		int[] pixels = new int[suggestedSize.getWidth() * suggestedSize.getHeight()];
+		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
 			DSLParser parser = new DSLParser(DSLParser.class.getPackage().getName() + ".generated", "Compile" + System.nanoTime());

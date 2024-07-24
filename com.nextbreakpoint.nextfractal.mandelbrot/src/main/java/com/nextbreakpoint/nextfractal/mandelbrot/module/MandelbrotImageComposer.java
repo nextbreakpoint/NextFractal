@@ -63,9 +63,9 @@ public class MandelbrotImageComposer implements ImageComposer {
     private static final Logger logger = Logger.getLogger(MandelbrotImageComposer.class.getName());
 
     private boolean aborted;
-    private boolean opaque;
-    private RendererTile tile;
-    private ThreadFactory threadFactory;
+    private final boolean opaque;
+    private final RendererTile tile;
+    private final ThreadFactory threadFactory;
 
     public MandelbrotImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque) {
         this.tile = tile;
@@ -199,8 +199,8 @@ public class MandelbrotImageComposer implements ImageComposer {
         double a = -r[2] * Math.PI / 180;
         double dw = imageSize.getWidth();
         double dh = imageSize.getWidth() * size.i() / size.r();
-        double cx = imageSize.getWidth() / 2;
-        double cy = imageSize.getHeight() / 2;
+        double cx = imageSize.getWidth() / 2d;
+        double cy = imageSize.getHeight() / 2d;
         gc.setStroke(factory.createColor(1, 1, 0, 1));
         double[] point = metadata.getPoint().toArray();
         double zx = point[0];
@@ -233,8 +233,8 @@ public class MandelbrotImageComposer implements ImageComposer {
             double a = -r[2] * Math.PI / 180;
             double dw = imageSize.getWidth();
             double dh = imageSize.getWidth() * size.i() / size.r();
-            double cx = imageSize.getWidth() / 2;
-            double cy = imageSize.getHeight() / 2;
+            double cx = imageSize.getWidth() / 2d;
+            double cy = imageSize.getHeight() / 2d;
             gc.setStroke(factory.createColor(1, 0, 0, 1));
             Number[] state = states.get(0);
             double zx = state[0].r();
@@ -264,7 +264,7 @@ public class MandelbrotImageComposer implements ImageComposer {
     }
 
     private void drawTraps(Java2DRendererFactory factory, Java2DRendererGraphicsContext gc, RendererSize imageSize, RendererRegion region, MandelbrotMetadata metadata, java.util.List<Trap> traps) {
-        if (traps.size() > 0) {
+        if (!traps.isEmpty()) {
             Number size = region.getSize();
             Number center = region.getCenter();
             double[] t = metadata.getTranslation().toArray();
@@ -275,14 +275,14 @@ public class MandelbrotImageComposer implements ImageComposer {
             double a = -r[2] * Math.PI / 180;
             double dw = imageSize.getWidth();
             double dh = imageSize.getWidth() * size.i() / size.r();
-            double cx = imageSize.getWidth() / 2;
-            double cy = imageSize.getHeight() / 2;
+            double cx = imageSize.getWidth() / 2d;
+            double cy = imageSize.getHeight() / 2d;
             gc.setStroke(factory.createColor(1, 1, 0, 1));
             for (Trap trap : traps) {
                 java.util.List<Number> points = trap.toPoints();
-                if (points.size() > 0) {
-                    double zx = points.get(0).r();
-                    double zy = points.get(0).i();
+                if (!points.isEmpty()) {
+                    double zx = points.getFirst().r();
+                    double zy = points.getFirst().i();
                     double px = (zx - tx - center.r()) / (tz * size.r());
                     double py = (zy - ty - center.i()) / (tz * size.r());
                     double qx = Math.cos(a) * px + Math.sin(a) * py;

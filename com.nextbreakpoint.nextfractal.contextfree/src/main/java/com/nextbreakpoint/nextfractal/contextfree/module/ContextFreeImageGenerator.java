@@ -36,14 +36,15 @@ import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.concurrent.ThreadFactory;
 
 public class ContextFreeImageGenerator implements ImageGenerator {
 	private boolean aborted;
-	private boolean opaque;
-	private RendererTile tile;
-	private ThreadFactory threadFactory;
-	private RendererFactory renderFactory;
+	private final boolean opaque;
+	private final RendererTile tile;
+	private final ThreadFactory threadFactory;
+	private final RendererFactory renderFactory;
 
 	public ContextFreeImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
 		this.tile = tile;
@@ -57,7 +58,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 		ContextFreeMetadata metadata = (ContextFreeMetadata)data;
 		RendererSize suggestedSize = tile.getTileSize();
 		int[] pixels = new int[suggestedSize.getWidth() * suggestedSize.getHeight()];
-		for (int i = 0; i < pixels.length; i++) pixels[i] = 0xFF000000;
+        Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
 			DSLParser parser = new DSLParser();

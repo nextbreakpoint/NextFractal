@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * Utility class for colors manipulation.

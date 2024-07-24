@@ -47,9 +47,9 @@ public class ContextFreeImageComposer implements ImageComposer {
     private static final Logger logger = Logger.getLogger(ContextFreeImageComposer.class.getName());
 
     private boolean aborted;
-    private boolean opaque;
-    private RendererTile tile;
-    private ThreadFactory threadFactory;
+    private final boolean opaque;
+    private final RendererTile tile;
+    private final ThreadFactory threadFactory;
 
     public ContextFreeImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque) {
         this.tile = tile;
