@@ -26,21 +26,16 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.Objects;
 
-public class FileEntry {
-    private final String name;
-    private final byte[] data;
-
+public record FileEntry(String name, byte[] data) {
     public FileEntry(String name, byte[] data) {
         this.name = Objects.requireNonNull(name);
         this.data = Objects.requireNonNull(data);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    //TODO shall we return an immutable object?
-    public byte[] getData() {
-        return data;
+    @Override
+    public byte[] data() {
+        final byte[] copy = new byte[data.length];
+        System.arraycopy(data, 0, copy, 0, copy.length);
+        return copy;
     }
 }

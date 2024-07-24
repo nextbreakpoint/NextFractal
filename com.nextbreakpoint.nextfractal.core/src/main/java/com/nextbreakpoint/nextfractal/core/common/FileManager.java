@@ -24,11 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -95,8 +94,8 @@ public abstract class FileManager {
     private static Command<Bundle> tryDecodeBundle(List<FileEntry> entries) {
         return decodeManifest(entries)
                 .flatMap(manifest -> decodeScript(entries)
-                        .flatMap(script -> decodeMetadata(entries, getPluginId(manifest))
-                                .flatMap(metadata -> createBundle(getPluginId(manifest), script, metadata)
+                        .flatMap(script -> decodeMetadata(entries, manifest.pluginId())
+                                .flatMap(metadata -> createBundle(manifest.pluginId(), script, metadata)
                                         .flatMap(bundle -> decodeClips(entries)
                                                 .flatMap(clips -> createBundle(bundle, clips))
                                         )
@@ -136,40 +135,40 @@ public abstract class FileManager {
         return Command.value(List.of(manifest, script, metadata, clips));
     }
 
-    private static Command<Map<String, String>> decodeManifest(List<FileEntry> entries) {
+    private static Command<FileManifest> decodeManifest(List<FileEntry> entries) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("manifest"))
+                .filter(entry -> entry.name().equals("manifest"))
                 .findFirst()
-                .map(entry -> decodeManifest(entry.getData()))
+                .map(entry -> decodeManifest(entry.data()))
                 .orElse(Command.error(new Exception("Manifest entry is required")));
     }
 
     private static Command<String> decodeScript(List<FileEntry> entries) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("script"))
+                .filter(entry -> entry.name().equals("script"))
                 .findFirst()
-                .map(entry -> decodeScript(entry.getData()))
+                .map(entry -> decodeScript(entry.data()))
                 .orElse(Command.error(new Exception("Script entry is required")));
     }
 
     private static Command<Metadata> decodeMetadata(List<FileEntry> entries, String pluginId) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("metadata"))
+                .filter(entry -> entry.name().equals("metadata"))
                 .findFirst()
-                .map(entry -> decodeMetadata(pluginId, entry.getData()))
+                .map(entry -> decodeMetadata(pluginId, entry.data()))
                 .orElse(Command.error(new Exception("Metadata entry is required")));
     }
 
     private static Command<List<AnimationClip>> decodeClips(List<FileEntry> entries) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("clips"))
+                .filter(entry -> entry.name().equals("clips"))
                 .findFirst()
-                .map(entry1 -> decodeClips(entry1.getData()))
+                .map(entry -> decodeClips(entry.data()))
                 .orElse(Command.value(List.of()));
     }
 
-    private static Command<Map<String, String>> decodeManifest(byte[] data) {
-        return Command.of(() -> MAPPER.readValue(data, new TypeReference<>() {}));
+    private static Command<FileManifest> decodeManifest(byte[] data) {
+        return Command.of(() -> MAPPER.readValue(data, FileManifest.class));
     }
 
     private static Command<String> decodeScript(byte[] data) {
@@ -362,15 +361,11 @@ public abstract class FileManager {
     }
 
     private static Void writeEntry(ZipOutputStream os, FileEntry entry) throws IOException {
-        final ZipEntry zipEntry = new ZipEntry(entry.getName());
+        final ZipEntry zipEntry = new ZipEntry(entry.name());
         os.putNextEntry(zipEntry);
-        os.write(entry.getData());
+        os.write(entry.data());
         os.closeEntry();
         return null;
-    }
-
-    private static String getPluginId(Map<String, String> manifest) {
-        return manifest.getOrDefault("pluginId", "");
     }
 
     private static <T> Command<T> createFailure(String message, Either<?> error) {
