@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
@@ -600,7 +600,7 @@ public class BrowsePane extends BorderPane {
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }
         } catch (Exception e) {
-            item.setErrors(Arrays.asList(new SourceError(SourceError.ErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
+            item.setErrors(List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
             logger.log(Level.WARNING, "Can't create bitmap: " + e.getMessage());
         }
     }
@@ -621,7 +621,7 @@ public class BrowsePane extends BorderPane {
                 Platform.runLater(() -> item.setRenderer(renderer));
             }
         } catch (Exception e) {
-            item.setErrors(List.of(new SourceError(SourceError.ErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
+            item.setErrors(List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
             logger.log(Level.WARNING, "Can't initialize renderer", e);
         }
     }

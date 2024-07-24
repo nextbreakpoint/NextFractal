@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
 
 import java.util.List;
@@ -34,12 +34,12 @@ public class DSLParserResult {
 	private Type type;
 	private String orbitSource;
 	private String colorSource;
-	private List<SourceError> errors;
+	private List<ParserError> errors;
 	private String source;
 	private String packageName;
 	private String className;
 
-	public DSLParserResult(ASTFractal ast, Type type, String source, String orbitSource, String colorSource, List<SourceError> errors, String packageName, String className) {
+	public DSLParserResult(ASTFractal ast, Type type, String source, String orbitSource, String colorSource, List<ParserError> errors, String packageName, String className) {
 		this.ast = ast;
 		this.type = type;
 		this.source = source;
@@ -62,7 +62,7 @@ public class DSLParserResult {
 		return colorSource;
 	}
 
-	public List<SourceError> getErrors() {
+	public List<ParserError> getErrors() {
 		return errors;
 	}
 

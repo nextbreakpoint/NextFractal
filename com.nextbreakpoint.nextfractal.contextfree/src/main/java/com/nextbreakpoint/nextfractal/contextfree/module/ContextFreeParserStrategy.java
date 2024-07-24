@@ -34,9 +34,9 @@ public class ContextFreeParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser().parse(session.getScript()))
+        return Command.of(() -> new DSLParser().parse(session.script()))
                 .map(ContextFreeParserStrategy::processResult)
-                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.getScript()), result))
+                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.script()), result))
                 .execute()
                 .orThrow(RuntimeException::new)
                 .get();
@@ -54,12 +54,12 @@ public class ContextFreeParserStrategy implements ParserStrategy {
                     .group("BRACE") != null ? "contextfree-brace" : matcher
                     .group("OPERATOR") != null ? "contextfree-operator" : matcher
                     .group("PATHOP") != null ? "contextfree-pathop" : null;
-            spansBuilder.add(List.of("code"), matcher.start() - lastKeywordEnd);
-            spansBuilder.add(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
+            spansBuilder.addSpan(List.of("code"), matcher.start() - lastKeywordEnd);
+            spansBuilder.addSpan(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
             lastKeywordEnd = matcher.end();
         }
-        spansBuilder.add(List.of("code"), text.length() - lastKeywordEnd);
-        return spansBuilder.create();
+        spansBuilder.addSpan(List.of("code"), text.length() - lastKeywordEnd);
+        return spansBuilder.build();
     }
 
     private static Pattern createHighlightingPattern() {

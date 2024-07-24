@@ -8,8 +8,8 @@ import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererCoordinator;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
-import com.nextbreakpoint.nextfractal.core.common.TileUtils;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
@@ -51,7 +51,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         renderFactory = new JavaFXRendererFactory();
 
         Map<String, Integer> hints = new HashMap<>();
-        coordinator = createRendererCoordinator(hints, TileUtils.createRendererTile(width, height));
+        coordinator = createRendererCoordinator(hints, RendererUtils.createRendererTile(width, height));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public List<SourceError> updateCoordinators(Object result) {
+    public List<ParserError> updateCoordinators(Object result) {
         try {
             DSLParserResult parserResult = (DSLParserResult) result;
             hasError = !parserResult.getErrors().isEmpty();
@@ -110,7 +110,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Can't render image: " + e.getMessage());
             }
-            return List.of(new SourceError(SourceError.ErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            return List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
         }
         return Collections.emptyList();
     }

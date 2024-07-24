@@ -39,7 +39,7 @@ import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.TileUtils;
+import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
@@ -73,13 +73,13 @@ public class ContextFreeUIFactory implements UIFactory {
 	@Override
 	public GridItemRenderer createRenderer(Bitmap bitmap) {
 		Map<String, Integer> hints = new HashMap<String, Integer>();
-		RendererTile tile = TileUtils.createRendererTile(bitmap.getWidth(), bitmap.getHeight());
+		RendererTile tile = RendererUtils.createRendererTile(bitmap.getWidth(), bitmap.getHeight());
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
 		RendererCoordinator coordinator = new RendererCoordinator(threadFactory, new JavaFXRendererFactory(), tile, hints);
 		CFDG cfdg = (CFDG)bitmap.getProperty("cfdg");
 		Session session = (Session)bitmap.getProperty("session");
 		coordinator.setInterpreter(new CFDGInterpreter(cfdg));
-		coordinator.setSeed(((ContextFreeMetadata)session.getMetadata()).getSeed());
+		coordinator.setSeed(((ContextFreeMetadata)session.metadata()).getSeed());
 		coordinator.init();
 		coordinator.run();
 		return new GridItemRendererAdapter(coordinator);
@@ -88,7 +88,7 @@ public class ContextFreeUIFactory implements UIFactory {
 	@Override
 	public BrowseBitmap createBitmap(Session session, RendererSize size) throws Exception {
 		DSLParser compiler = new DSLParser();
-		DSLParserResult report = compiler.parse(session.getScript());
+		DSLParserResult report = compiler.parse(session.script());
 		if (!report.getErrors().isEmpty()) {
 			throw new RuntimeException("Failed to compile source");
 		}

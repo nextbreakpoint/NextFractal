@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
@@ -50,9 +50,9 @@ import java.util.Map;
 public class InterpreterColorFactory implements ClassFactory<Color> {
 	private ASTFractal astFractal;
 	private String source;
-	private List<SourceError> errors;
+	private List<ParserError> errors;
 
-	public InterpreterColorFactory(ASTFractal astFractal, String source, List<SourceError> errors) {
+	public InterpreterColorFactory(ASTFractal astFractal, String source, List<ParserError> errors) {
 		this.astFractal = astFractal;
 		this.source = source;
 		this.errors = errors;
@@ -110,23 +110,23 @@ public class InterpreterColorFactory implements ClassFactory<Color> {
 			color.setRules(rules);
 			return new InterpreterColor(color, context);
 		} catch (ASTException e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
-			errors.add(new SourceError(type, line, charPositionInLine, index, length, message));
+			errors.add(new ParserError(type, line, charPositionInLine, index, length, message));
 			throw new ParserException("Can't build color", errors);
 		} catch (Exception e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			String message = e.getMessage();
-			errors.add(new SourceError(type, 0, 0, 0, 0, message));
+			errors.add(new ParserError(type, 0, 0, 0, 0, message));
 			throw new ParserException("Can't build color", errors);
 		}
 	}
 
-	public List<SourceError> getErrors() {
+	public List<ParserError> getErrors() {
 		return errors;
 	}
 }

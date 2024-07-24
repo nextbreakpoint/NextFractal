@@ -24,24 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.core.encode;
 
-/**
- * @author Andrea Medeghini
- */
 public class EncoderException extends Exception {
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * @param message
 	 */
 	public EncoderException(final String message) {
 		super(message);
-	}
-
-	/**
-	 * @param cause
-	 */
-	public EncoderException(final Throwable cause) {
-		super(cause);
 	}
 
 	/**

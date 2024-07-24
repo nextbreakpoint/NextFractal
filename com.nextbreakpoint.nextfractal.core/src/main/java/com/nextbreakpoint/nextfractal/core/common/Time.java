@@ -26,17 +26,8 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import lombok.Builder;
 
-import java.io.Serializable;
-import java.util.StringTokenizer;
-
-/**
- * @author Andrea Medeghini
- */
 @Builder(setterPrefix = "with", toBuilder = true)
-public class Time implements Serializable, Cloneable {
-	private final double value;
-	private final double scale;
-
+public record Time(double value, double scale) {
 	/**
 	 *
 	 */
@@ -45,105 +36,25 @@ public class Time implements Serializable, Cloneable {
 	}
 
 	/**
-	 * @param value
-	 * @param scale
+	 *
+	 * @param array
 	 */
-	public Time(final double value, final double scale) {
-		this.value = value;
-		this.scale = scale;
-	}
-
-	public Time(double[] v) {
-		this.value = v[0];
-		this.scale = v[1];
-	}
-
-	public Time(Double[] v) {
-		this.value = v[0];
-		this.scale = v[1];
+	public Time(double[] array) {
+		this(array[0], array[1]);
 	}
 
 	/**
-	 * @return the value
+	 *
+	 * @param array
 	 */
-	public double getValue() {
-		return value;
+	public Time(Double[] array) {
+		this(array[0], array[1]);
 	}
 
-	/**
-	 * @return the scale
-	 */
-	public double getScale() {
-		return scale;
-	}
-
-	/**
-	 * @see Object#toString()
-	 */
-	@Override
-	public String toString() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append(value);
-		builder.append(", ");
-		builder.append(scale);
-		return builder.toString();
-	}
-
-	/**
-	 * @param text
-	 * @return
-	 */
-	public static Time valueOf(final String text) {
-		final StringTokenizer tkn = new StringTokenizer(text, ",");
-		final String value = tkn.nextToken().trim();
-		final String scale = tkn.nextToken().trim();
-		return new Time(Double.valueOf(value), Double.valueOf(scale));
-	}
-
-	/**
-	 * @see Object#equals(Object)
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		final Time other = (Time) obj;
-		if (Double.doubleToLongBits(value) != Double.doubleToLongBits(other.value)) {
-			return false;
-		}
-		if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @see Object#clone()
-	 */
-	@Override
-	public Time clone() {
-		return new Time(value, scale);
-	}
-	
 	/**
 	 * @return
 	 */
 	public double[] toArray() {
 		return new double[] {value, scale};
-	}
-
-	@Override
-	public int hashCode() {
-		int result;
-		long temp;
-		temp = Double.doubleToLongBits(value);
-		result = (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(scale);
-		result = 31 * result + (int) (temp ^ (temp >>> 32));
-		return result;
 	}
 }

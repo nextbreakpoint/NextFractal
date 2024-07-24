@@ -188,7 +188,7 @@ public class MandelbrotToolbar extends Toolbar {
     }
 
     public void bindSession(Session session) {
-        final MandelbrotMetadata metadata = (MandelbrotMetadata) session.getMetadata();
+        final MandelbrotMetadata metadata = (MandelbrotMetadata) session.metadata();
 
         showPreviewProperty.setValue(metadata.getOptions().isShowPreview());
         showOrbitProperty.setValue(metadata.getOptions().isShowOrbit());

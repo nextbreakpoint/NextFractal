@@ -25,13 +25,13 @@
 package com.nextbreakpoint.nextfractal.core.common;
 
 public abstract class Session {
-	public abstract String getPluginId();
+	public abstract String pluginId();
 
-	public abstract String getGrammar();
+	public abstract String grammar();
 
-	public abstract String getScript();
+	public abstract String script();
 
-	public abstract Metadata getMetadata();
+	public abstract Metadata metadata();
 
 	public abstract Session withSource(String source);
 

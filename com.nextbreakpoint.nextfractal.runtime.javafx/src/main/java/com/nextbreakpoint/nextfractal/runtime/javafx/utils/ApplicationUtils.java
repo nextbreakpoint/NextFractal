@@ -54,13 +54,13 @@ public class ApplicationUtils {
 
     public static Either<BrowseBitmap> createBitmap(File file, RendererSize size) {
         return Command.of(FileManager.loadBundle(file))
-                .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().getPluginId()))
+                .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().pluginId()))
                 .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))
                 .execute();
     }
 
     public static Either<GridItemRenderer> createRenderer(Bitmap bitmap) {
-        return Command.of(tryFindFactory(((Session) bitmap.getProperty("session")).getPluginId()))
+        return Command.of(tryFindFactory(((Session) bitmap.getProperty("session")).pluginId()))
                 .flatMap(factory -> Command.of(() -> factory.createRenderer(bitmap)))
                 .execute();
     }

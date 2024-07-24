@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.renderer;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
 import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
@@ -265,7 +265,7 @@ public class RendererCoordinator implements RendererDelegate {
 	/**
 	 * @return
 	 */
-	public List<SourceError> getErrors() {
+	public List<ParserError> getErrors() {
 		return renderer.getErrors();
 	}
 

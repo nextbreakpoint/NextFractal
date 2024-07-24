@@ -29,14 +29,14 @@ public class ContextFreeParamsStrategy implements ParamsStrategy {
                         .withName("Random seed")
                         .withKey("contextfree-seed")
                         .withLogicalType("string")
-                        .withMapper(session -> String.valueOf(((ContextFreeMetadata) session.getMetadata()).getSeed()))
+                        .withMapper(session -> String.valueOf(((ContextFreeMetadata) session.metadata()).getSeed()))
                         .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withSeed(value).build()).build())
                         .build()
         );
     }
 
     private static ContextFreeMetadata.ContextFreeMetadataBuilder getMetadataBuilder(Session session) {
-        return ((ContextFreeMetadata) session.getMetadata()).toBuilder();
+        return ((ContextFreeMetadata) session.metadata()).toBuilder();
     }
 
     private static ContextFreeSession.ContextFreeSessionBuilder getSessionBuilder(Session session) {

@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsLoaded;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsMerged;
@@ -146,10 +146,10 @@ public class ApplicationHandler {
         eventBus.subscribe(TimeAnimationActionFired.class.getSimpleName(), event -> handleTimeAnimationAction(((TimeAnimationActionFired)event).action()));
     }
 
-	private String formatErrors(List<SourceError> errors) {
+	private String formatErrors(List<ParserError> errors) {
         final StringBuilder builder = new StringBuilder();
         if (errors != null) {
-            for (SourceError error : errors) {
+            for (ParserError error : errors) {
                 builder.append("Line ");
                 builder.append(error.getLine());
                 builder.append(": ");
@@ -288,7 +288,7 @@ public class ApplicationHandler {
 
     public void handleSessionChanged(Session session) {
         if (capture) {
-            clip = clip.appendEvent(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.appendEvent(new Date(), session.pluginId(), session.script(), session.metadata());
         }
     }
 
@@ -413,7 +413,7 @@ public class ApplicationHandler {
         capture = true;
         clip = new AnimationClip();
         if (session != null) {
-            clip = clip.appendEvent(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.appendEvent(new Date(), session.pluginId(), session.script(), session.metadata());
         }
         eventBus.postEvent(CaptureSessionStarted.builder().clip(clip).build());
     }
@@ -421,7 +421,7 @@ public class ApplicationHandler {
     private void stopCapture() {
         capture = false;
         if (session != null) {
-            clip = clip.appendEvent(new Date(), session.getPluginId(), session.getScript(), session.getMetadata());
+            clip = clip.appendEvent(new Date(), session.pluginId(), session.script(), session.metadata());
         }
         eventBus.postEvent(CaptureSessionStopped.builder().clip(clip).build());
     }

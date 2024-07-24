@@ -29,8 +29,8 @@ import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
-import com.nextbreakpoint.nextfractal.core.common.TileUtils;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
@@ -99,7 +99,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         coordinators = createCoordinators(rows, columns, hints);
 
         final Map<String, Integer> juliaHints = Map.of(RendererCoordinator.KEY_TYPE, RendererCoordinator.VALUE_REALTIME);
-        juliaCoordinator = createJuliaRendererCoordinator(juliaHints, TileUtils.createRendererTile(200, 200));
+        juliaCoordinator = createJuliaRendererCoordinator(juliaHints, RendererUtils.createRendererTile(200, 200));
     }
 
     public Number getInitialCenter() {
@@ -132,12 +132,12 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
 
     @Override
     public void updateCoordinators(Session session, boolean continuous, boolean timeAnimation) {
-        MandelbrotMetadata metadata = (MandelbrotMetadata) session.getMetadata();
+        MandelbrotMetadata metadata = (MandelbrotMetadata) session.metadata();
         Double4D translation = metadata.getTranslation();
         Double4D rotation = metadata.getRotation();
         Double4D scale = metadata.getScale();
         Double2D point = metadata.getPoint();
-        Time time = metadata.getTime();
+        Time time = metadata.time();
         boolean julia = metadata.isJulia();
         abortCoordinators();
         joinCoordinators();
@@ -186,7 +186,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public List<SourceError> updateCoordinators(Object result) {
+    public List<ParserError> updateCoordinators(Object result) {
         try {
             DSLParserResult parserResult = (DSLParserResult) result;
             hasError = !parserResult.getErrors().isEmpty();
@@ -212,7 +212,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             Double4D rotation = oldMetadata.getRotation();
             Double4D scale = oldMetadata.getScale();
             Double2D point = oldMetadata.getPoint();
-            Time time = oldMetadata.getTime();
+            Time time = oldMetadata.time();
             boolean julia = oldMetadata.isJulia();
             abortCoordinators();
             if (juliaCoordinator != null) {
@@ -293,7 +293,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Can't render image: " + e.getMessage());
             }
-            return List.of(new SourceError(SourceError.ErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            return List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
         }
         return Collections.emptyList();
     }
@@ -326,7 +326,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         final RendererCoordinator[] coordinators = new RendererCoordinator[rows * columns];
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
-                final RendererTile tile = TileUtils.createRendererTile(width, height, rows, columns, row, column);
+                final RendererTile tile = RendererUtils.createRendererTile(width, height, rows, columns, row, column);
                 final RendererCoordinator rendererCoordinator = createRendererCoordinator(hints, tile);
                 coordinators[row * columns + column] = rendererCoordinator;
             }

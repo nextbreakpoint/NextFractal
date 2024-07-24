@@ -24,5 +24,4 @@
  */
 package com.nextbreakpoint.nextfractal.core.encode;
 
-public interface EncoderHandle {
-}
+public interface EncoderHandle {}

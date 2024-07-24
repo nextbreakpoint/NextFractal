@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.renderer;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
 import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
@@ -194,7 +194,7 @@ public class RendererCoordinator implements RendererDelegate {
 	/**
 	 * @return
 	 */
-	public List<SourceError> getErrors() {
+	public List<ParserError> getErrors() {
 		return renderer.getErrors();
 	}
 

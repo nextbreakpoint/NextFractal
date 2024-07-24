@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.viewer;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStarted;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStopped;
 import com.nextbreakpoint.nextfractal.core.event.EditorLoadFileRequested;
@@ -38,7 +38,6 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStarted;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataChanged;
-import com.nextbreakpoint.nextfractal.core.event.SessionReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
@@ -246,7 +245,7 @@ public class Viewer extends BorderPane {
 	}
 
 	private void handleReportChanged(Session session, Boolean continuous, ParserResult report) {
-		if (factory == null || !this.session.getPluginId().equals(session.getPluginId())) {
+		if (factory == null || !this.session.pluginId().equals(session.pluginId())) {
 			// session is being used in the constructors of the strategy classes
 			this.session = session;
 
@@ -264,14 +263,14 @@ public class Viewer extends BorderPane {
 		}
 
 		if (renderingStrategy != null) {
-			final List<SourceError> errorList = renderingStrategy.updateCoordinators(report.result());
+			final List<ParserError> errorList = renderingStrategy.updateCoordinators(report.result());
 
 			errorProperty.setValue(!errorList.isEmpty());
 		}
 	}
 
 	private void handleSessionChanged(Session session, Boolean continuous) {
-		if (factory == null || !this.session.getPluginId().equals(session.getPluginId())) {
+		if (factory == null || !this.session.pluginId().equals(session.pluginId())) {
 			// session is being used in the constructors of the strategy classes
 			this.session = session;
 
@@ -315,7 +314,7 @@ public class Viewer extends BorderPane {
 
 		delegate = null;
 
-		factory = tryFindFactory(session.getPluginId()).optional().orElse(null);
+		factory = tryFindFactory(session.pluginId()).optional().orElse(null);
 
 		if (factory == null) {
 			return;

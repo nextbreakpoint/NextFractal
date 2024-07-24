@@ -26,6 +26,9 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -36,12 +39,11 @@ import java.nio.IntBuffer;
 import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TileGenerator {
-    private static final ThreadFactory threadFactory = new DefaultThreadFactory(TileGenerator.class.getName(), true, Thread.MIN_PRIORITY);
+    private static final ThreadFactory THREAD_FACTORY = ThreadUtils.createThreadFactory(TileGenerator.class.getName());
 
-    private TileGenerator() {}
-
-    public static TileRequest createTileRequest(int size, int rows, int cols, int row, int col, Bundle bundle) throws Exception {
+    public static TileRequest createTileRequest(int size, int rows, int cols, int row, int col, Bundle bundle) {
         validateParameters(size, cols, rows, row, col);
 
         return TileRequest.builder()
@@ -53,6 +55,29 @@ public class TileGenerator {
                 .withTaskId(UUID.randomUUID())
                 .withSession(bundle.session())
                 .build();
+    }
+
+    public static byte[] generatePNGImage(TileRequest request) throws Exception {
+        final TileParameters parameters = createTileParameters(request);
+
+        final RendererTile renderTile = parameters.createRenderTile();
+
+        final Session session = request.session();
+
+        final ImageComposer composer = Command.of(Plugins.tryFindFactory(session.pluginId()))
+                .map(factory -> factory.createImageComposer(THREAD_FACTORY, renderTile, true))
+                .execute()
+                .orThrow()
+                .optional()
+                .orElseThrow();
+
+        final IntBuffer pixels = composer.renderImage(session.script(), session.metadata());
+
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            writePNGImage(os, pixels, renderTile.getTileSize());
+
+            return os.toByteArray();
+        }
     }
 
     private static void validateParameters(int size, int rows, int cols, int row, int col) {
@@ -67,14 +92,14 @@ public class TileGenerator {
         }
     }
 
-    private static TileContext createTileContext(TileRequest request) {
-        final int tileSize = request.getSize();
-        final int rows = request.getRows();
-        final int cols = request.getCols();
-        final int row = request.getRow();
-        final int col = request.getCol();
-        final TileContext context = TileContext.builder()
-                .withQuality(1)
+    private static TileParameters createTileParameters(TileRequest request) {
+        final int tileSize = request.size();
+        final int rows = request.rows();
+        final int cols = request.cols();
+        final int row = request.row();
+        final int col = request.col();
+
+        return TileParameters.builder()
                 .withImageWidth(tileSize * cols)
                 .withImageHeight(tileSize * rows)
                 .withTileWidth(tileSize)
@@ -83,41 +108,16 @@ public class TileGenerator {
                 .withTileOffsetY(tileSize * row)
                 .withBorderWidth(0)
                 .withBorderHeight(0)
-                .withRow(row)
-                .withCol(col)
-                .withRows(rows)
-                .withCols(cols)
-                .withSession(request.getSession())
-                .withTaskId(request.getTaskId())
                 .build();
-        return context;
     }
 
-    private static void writePNGImage(ByteArrayOutputStream baos, IntBuffer pixels, RendererSize tileSize) throws IOException {
+    private static void writePNGImage(ByteArrayOutputStream os, IntBuffer pixels, RendererSize tileSize) throws IOException {
         final BufferedImage image =  new BufferedImage(tileSize.getWidth(), tileSize.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
         final int[] buffer = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 
         System.arraycopy(pixels.array(), 0, buffer, 0, tileSize.getWidth() * tileSize.getHeight());
 
-        ImageIO.write(image, "PNG", baos);
-    }
-
-    public static byte[] generateImage(TileRequest request) throws Exception {
-        final TileContext context = createTileContext(request);
-
-        final ImageComposer composer = Command.of(Plugins.tryFindFactory(context.getSession().getPluginId()))
-                .map(factory -> factory.createImageComposer(threadFactory, context.getTile(), true))
-                .execute()
-                .orThrow()
-                .orElse(null);
-
-        final IntBuffer pixels = composer.renderImage(context.getSession().getScript(), context.getSession().getMetadata());
-
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        writePNGImage(baos, pixels, context.getTile().getTileSize());
-
-        return baos.toByteArray();
+        ImageIO.write(image, "PNG", os);
     }
 }

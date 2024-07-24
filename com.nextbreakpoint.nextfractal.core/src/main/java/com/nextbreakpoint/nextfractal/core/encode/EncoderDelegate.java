@@ -31,10 +31,10 @@ public interface EncoderDelegate {
 	/**
 	 * @return
 	 */
-	public boolean isInterrupted();
+	boolean isInterrupted();
 
 	/**
 	 * @param progress
 	 */
-	public void didProgressChanged(float progress);
+	void didProgressChanged(float progress);
 }

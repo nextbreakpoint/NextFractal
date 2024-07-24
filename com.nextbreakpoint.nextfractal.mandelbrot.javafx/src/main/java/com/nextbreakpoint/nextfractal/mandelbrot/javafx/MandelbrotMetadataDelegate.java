@@ -29,7 +29,7 @@ class MandelbrotMetadataDelegate implements MetadataDelegate {
 
     @Override
     public Metadata getMetadata() {
-        return supplier.get().getMetadata();
+        return supplier.get().metadata();
     }
 
     @Override
@@ -44,7 +44,7 @@ class MandelbrotMetadataDelegate implements MetadataDelegate {
 
     @Override
     public void updateRenderingContext(RenderingContext renderingContext) {
-        final MandelbrotOptions options = ((MandelbrotMetadata) supplier.get().getMetadata()).getOptions();
+        final MandelbrotOptions options = ((MandelbrotMetadata) supplier.get().metadata()).getOptions();
 
         renderingContext.getCanvas("julia").setVisible(options.isShowPreview());
         renderingContext.getCanvas("orbit").setVisible(options.isShowOrbit());

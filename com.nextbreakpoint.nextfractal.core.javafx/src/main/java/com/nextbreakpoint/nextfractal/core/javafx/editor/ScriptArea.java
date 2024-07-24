@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx.editor;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
 import com.nextbreakpoint.nextfractal.core.event.EditorReportChanged;
@@ -73,7 +73,7 @@ public class ScriptArea extends CodeArea {
     private void handleEditorReportChanged(EditorReportChanged event) {
         if (!event.continuous()) {
             internalSource.setValue(true);
-            replaceText(0, getLength(), event.session().getScript());
+            replaceText(0, getLength(), event.session().script());
             getUndoManager().forgetHistory();
             internalSource.setValue(false);
         }
@@ -82,21 +82,21 @@ public class ScriptArea extends CodeArea {
 
     private void updateTextStyles(ParserResult result) {
         setStyleSpans(0, convertStyleSpans(result.highlighting()));
-        final List<SourceError> errors = result.errors();
+        final List<ParserError> errors = result.errors();
         if (!errors.isEmpty()) {
-            errors.sort(Comparator.comparing(SourceError::getIndex));
-            for (SourceError error : errors) {
+            errors.sort(Comparator.comparing(ParserError::getIndex));
+            for (ParserError error : errors) {
                 if (log.isLoggable(Level.FINE)) {
                     log.fine(error.toString());
                 }
-                if (error.getType() != SourceError.ErrorType.RUNTIME) {
+                if (error.getType() != ParserError.ErrorType.RUNTIME) {
                     final int lineBegin = (int) error.getIndex();
                     final int lineEnd = lineBegin + 1;
                     try {
                         if (lineBegin < getLength() && lineEnd <= getLength()) {
                             final GenericStyleSpansBuilder<Collection<String>> builder = new GenericStyleSpansBuilder<>();
-                            builder.add(List.of("error"), lineEnd - lineBegin);
-                            final GenericStyleSpans<Collection<String>> spans = builder.create();
+                            builder.addSpan(List.of("error"), lineEnd - lineBegin);
+                            final GenericStyleSpans<Collection<String>> spans = builder.build();
                             setStyleSpans(lineBegin, convertStyleSpans(spans));
                         } else {
                             if (log.isLoggable(Level.WARNING)) {

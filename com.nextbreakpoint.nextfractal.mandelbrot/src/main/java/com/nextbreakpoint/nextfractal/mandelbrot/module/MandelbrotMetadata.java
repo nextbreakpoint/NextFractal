@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -65,11 +66,11 @@ public class MandelbrotMetadata implements Metadata {
 	}
 
 	public MandelbrotMetadata(MandelbrotMetadata other) {
-		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.getTime(), other.isJulia(), other.getOptions());
+		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.time(), other.isJulia(), other.getOptions());
 	}
 
 	public MandelbrotMetadata(MandelbrotMetadata other, MandelbrotOptions options) {
-		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.getTime(), other.isJulia(), options);
+		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.time(), other.isJulia(), options);
 	}
 
 	public Double4D getTranslation() {
@@ -84,7 +85,9 @@ public class MandelbrotMetadata implements Metadata {
 		return scale;
 	}
 
-	public Time getTime() {
+	@JsonProperty("time")
+	@Override
+	public Time time() {
 		return time;
 	}
 

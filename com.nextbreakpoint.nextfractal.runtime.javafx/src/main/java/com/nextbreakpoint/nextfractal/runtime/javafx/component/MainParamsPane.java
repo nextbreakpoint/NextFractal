@@ -109,7 +109,7 @@ public class MainParamsPane extends Pane {
 
 		grammarCombobox.setOnAction(e -> {
 			final SingleSelectionModel<String> selectionModel = grammarCombobox.getSelectionModel();
-			if (session != null && !selectionModel.getSelectedItem().equals(session.getGrammar())) {
+			if (session != null && !selectionModel.getSelectedItem().equals(session.grammar())) {
 				eventBus.postEvent(EditorGrammarSelected.builder().grammar(selectionModel.getSelectedItem()).build());
 			}
 		});
@@ -123,7 +123,7 @@ public class MainParamsPane extends Pane {
 
 	private void handleSessionDataLoaded(ComboBox<String> grammarCombobox, SessionDataLoaded event) {
 		session = event.session();
-		grammarCombobox.getSelectionModel().select(event.session().getGrammar());
+		grammarCombobox.getSelectionModel().select(event.session().grammar());
 	}
 
 	public void setParamsDisable(boolean disabled) {

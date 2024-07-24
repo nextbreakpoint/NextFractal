@@ -25,7 +25,6 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx.tool;
 
 import com.nextbreakpoint.nextfractal.core.javafx.Tool;
-import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
 import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
@@ -85,12 +84,12 @@ public class ToolPick implements Tool {
 	@Override
 	public void update(long timeInMillis, boolean timeAnimation) {
 		MandelbrotMetadata oldMetadata = context.getMetadata();
-		Time time = oldMetadata.getTime();
+		Time time = oldMetadata.time();
 		if (timeAnimation || lastTimeInMillis == null) {
 			if (lastTimeInMillis == null) {
 				lastTimeInMillis = timeInMillis;
 			}
-			time = new Time(time.getValue() + (timeInMillis - lastTimeInMillis) / 1000.0, time.getScale());
+			time = new Time(time.value() + (timeInMillis - lastTimeInMillis) / 1000.0, time.scale());
 			lastTimeInMillis = timeInMillis;
 		} else {
 			lastTimeInMillis = null;

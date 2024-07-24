@@ -65,7 +65,7 @@ import com.nextbreakpoint.nextfractal.core.javafx.StringObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.editor.ScriptEditor;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.common.TileUtils;
+import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -507,6 +507,6 @@ public class MainSidePane extends BorderPane {
 //    }
 
     private static RendererTile createRendererTile() {
-        return TileUtils.createRendererTile(Screen.getPrimary().getVisualBounds().getWidth());
+        return RendererUtils.createRendererTile(Screen.getPrimary().getVisualBounds().getWidth());
     }
 }

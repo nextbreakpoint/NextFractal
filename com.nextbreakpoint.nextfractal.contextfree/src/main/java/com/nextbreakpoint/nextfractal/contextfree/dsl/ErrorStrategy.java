@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.antlr.v4.runtime.InputMismatchException;
@@ -39,21 +39,21 @@ import java.util.logging.Logger;
 
 public class ErrorStrategy extends DefaultErrorStrategy {
 	private static final Logger logger = Logger.getLogger(ErrorStrategy.class.getName());
-	private List<SourceError> errors;
+	private List<ParserError> errors;
 	
-	public ErrorStrategy(List<SourceError> errors) {
+	public ErrorStrategy(List<ParserError> errors) {
 		this.errors = errors;
 	}
 
 	@Override
 	public void reportError(Parser recognizer, RecognitionException e) {
 		String message = generateErrorMessage("Parse failed", recognizer);
-		SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 		logger.log(Level.FINE, error.toString(), e);
 		errors.add(error);
 	}
@@ -61,12 +61,12 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportInputMismatch(Parser recognizer, InputMismatchException e) {
 		String message = generateErrorMessage("Input mismatch", recognizer);
-		SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 		logger.log(Level.FINE, error.toString(), e);
 		errors.add(error);
 	}
@@ -74,12 +74,12 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
 		String message = generateErrorMessage("Failed predicate", recognizer);
-		SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 		logger.log(Level.FINE, error.toString(), e);
 		errors.add(error);
 	}
@@ -87,12 +87,12 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportUnwantedToken(Parser recognizer) {
 		String message = generateErrorMessage("Unwanted token", recognizer);
-		SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 		long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 		logger.log(Level.FINE, error.toString());
 		errors.add(error);
 	}
@@ -100,12 +100,12 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportMissingToken(Parser recognizer) {
 		String message = generateErrorMessage("Missing token", recognizer);
-		SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 		long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 		logger.log(Level.FINE, error.toString());
 		errors.add(error);
 	}
@@ -119,7 +119,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 			if (tokens.contains(entry.getValue())) {
 				if (first) {
 					first = false;
-					if (message.length() > 0 && !message.endsWith(".")) {
+					if (!message.isEmpty() && !message.endsWith(".")) {
 						builder.append(". ");
 					}
 					builder.append("Expected tokens: ");

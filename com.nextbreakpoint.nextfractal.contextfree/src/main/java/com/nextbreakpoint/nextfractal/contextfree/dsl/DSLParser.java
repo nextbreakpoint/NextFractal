@@ -27,7 +27,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl;
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.*;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.exceptions.CFDGException;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -47,12 +47,12 @@ public class DSLParser {
 	}
 	
 	public DSLParserResult parse(String source) throws ParserException {
-		List<SourceError> errors = new ArrayList<>();
+		List<ParserError> errors = new ArrayList<>();
 		CFDG cfdg = parse(source, errors);
 		return new DSLParserResult(cfdg, DSLParserResult.Type.INTERPRETER, source, errors);
 	}
 
-	private CFDG parse(String source, List<SourceError> errors) throws ParserException {
+	private CFDG parse(String source, List<ParserError> errors) throws ParserException {
 		try {
 			CharStream is = CharStreams.fromReader(new StringReader(source));
 			CFDGLexer lexer = new CFDGLexer(is);
@@ -68,20 +68,20 @@ public class DSLParser {
 				return parser.getDriver().getCFDG();
 			}
 		} catch (CFDGException e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+			ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 			logger.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
 		} catch (Exception e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, 0L, 0L, 0L, 0L, message);
+			ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
 			logger.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 		}

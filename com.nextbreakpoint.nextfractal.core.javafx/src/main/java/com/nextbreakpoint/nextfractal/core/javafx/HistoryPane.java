@@ -91,7 +91,7 @@ public class HistoryPane extends BorderPane {
     }
 
     private void submitItem(Session session, ImageComposer composer) {
-        executor.submit(() -> Command.of(() -> composer.renderImage(session.getScript(), session.getMetadata()))
+        executor.submit(() -> Command.of(() -> composer.renderImage(session.script(), session.metadata()))
                 .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
     }
 
@@ -102,7 +102,7 @@ public class HistoryPane extends BorderPane {
     }
 
     public void appendSession(Session session) {
-        Command.of(tryFindFactory(session.getPluginId()))
+        Command.of(tryFindFactory(session.pluginId()))
                 .map(this::createImageComposer)
                 .execute()
                 .optional()

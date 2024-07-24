@@ -60,9 +60,9 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.getScript()))
+        return Command.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.script()))
                 .map(MandelbrotParserStrategy::processResult)
-                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.getScript()), result))
+                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.script()), result))
                 .execute()
                 .orThrow(RuntimeException::new)
                 .get();
@@ -88,12 +88,12 @@ public class MandelbrotParserStrategy implements ParserStrategy {
                 .group("BRACE") != null ? "mandelbrot-brace" : matcher
                 .group("OPERATOR") != null ? "mandelbrot-operator" : matcher
                 .group("PATHOP") != null ? "mandelbrot-pathop" : null;
-            spansBuilder.add(List.of("code"), matcher.start() - lastKeywordEnd);
-            spansBuilder.add(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
+            spansBuilder.addSpan(List.of("code"), matcher.start() - lastKeywordEnd);
+            spansBuilder.addSpan(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
             lastKeywordEnd = matcher.end();
         }
-        spansBuilder.add(List.of("code"), text.length() - lastKeywordEnd);
-        return spansBuilder.create();
+        spansBuilder.addSpan(List.of("code"), text.length() - lastKeywordEnd);
+        return spansBuilder.build();
     }
 
     private static Pattern createHighlightingPattern() {

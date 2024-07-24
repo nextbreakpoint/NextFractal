@@ -89,7 +89,7 @@ public class PlaybackPane extends Pane {
                                 .execute()
                                 .optional()
                                 .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.keyFrame(), !frame.keyFrame() && frame.timeAnimation())));
-                    } else if (!lastFrame.metadata().getTime().equals(frame.metadata().getTime())) {
+                    } else if (!lastFrame.metadata().time().equals(frame.metadata().time())) {
                         Command.of(tryFindFactory(frame.pluginId()))
                                 .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()

@@ -154,7 +154,7 @@ public abstract class AbstractImageEncoder implements Encoder {
 					}
 				}
 				catch (final Exception e) {
-					throw new EncoderException(e);
+					throw new EncoderException("Failed to encode image", e);
 				}
 				finally {
 					if (!pBitmap.equals(NULL)) {

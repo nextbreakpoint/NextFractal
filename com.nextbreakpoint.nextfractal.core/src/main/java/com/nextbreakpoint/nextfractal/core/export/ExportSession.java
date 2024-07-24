@@ -66,7 +66,7 @@ public final class ExportSession {
 			final Animation animation = new Animation(clips, frameRate);
 			this.frames.addAll(animation.generateFrames());
 		} else {
-			frames.add(new AnimationFrame(session.getPluginId(), session.getScript(), session.getMetadata(), true, true));
+			frames.add(new AnimationFrame(session.pluginId(), session.script(), session.metadata(), true, true));
 		}
 		jobs.addAll(createJobs());
 	}

@@ -300,7 +300,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 			} catch (Exception e) {
 				dispose();
 				log.log(Level.WARNING, "Failed to encode video", e);
-				throw new EncoderException(e);
+				throw new EncoderException("Failed to encode video", e);
 			}
 		}
 
@@ -335,7 +335,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 			} catch (Exception e) {
 				dispose();
 				log.log(Level.WARNING, "Failed to encode video", e);
-				throw new EncoderException(e);
+				throw new EncoderException("Failed to encode video", e);
 			}
 		}
 
@@ -355,7 +355,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				}
 			} catch (Exception e) {
 				log.log(Level.WARNING, "Failed to encode video", e);
-				throw new EncoderException(e);
+				throw new EncoderException("Failed to encode video", e);
 			} finally {
 				dispose();
 			}
@@ -402,7 +402,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				}
 			} catch (Exception e) {
 				log.log(Level.WARNING, "Failed to encode video", e);
-				throw new EncoderException(e);
+				throw new EncoderException("Failed to encode video", e);
 			} finally {
 				if (arena != null) {
 					arena.close();

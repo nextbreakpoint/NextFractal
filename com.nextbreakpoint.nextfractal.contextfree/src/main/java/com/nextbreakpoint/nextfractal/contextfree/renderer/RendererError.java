@@ -24,10 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.renderer;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 
-public class RendererError extends SourceError {
+public class RendererError extends ParserError {
 	public RendererError(long line, long charPositionInLine, long index, long length, String message) {
-		super(SourceError.ErrorType.RUNTIME, line, charPositionInLine, index, length, message);
+		super(ParserError.ErrorType.RUNTIME, line, charPositionInLine, index, length, message);
 	}
 }

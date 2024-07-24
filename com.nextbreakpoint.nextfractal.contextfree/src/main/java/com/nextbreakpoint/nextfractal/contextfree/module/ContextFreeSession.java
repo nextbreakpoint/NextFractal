@@ -25,13 +25,14 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.nextfractal.core.common.IOUtils;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SessionUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,22 +58,22 @@ public class ContextFreeSession extends Session {
 	}
 
 	@Override
-    public String getPluginId() {
+    public String pluginId() {
         return ContextFreeFactory.PLUGIN_ID;
     }
 
 	@Override
-	public String getGrammar() {
+	public String grammar() {
 		return ContextFreeFactory.GRAMMAR;
 	}
 
 	@Override
-	public String getScript() {
+	public String script() {
 		return script;
 	}
 
 	@Override
-	public Metadata getMetadata() {
+	public Metadata metadata() {
 		return metadata;
 	}
 
@@ -87,7 +88,7 @@ public class ContextFreeSession extends Session {
 	}
 
 	private static String getInitialSource() {
-		return Command.of(() -> SessionUtils.readAll(Objects.requireNonNull(ContextFreeSession.class.getResourceAsStream("/contextfree.txt"))))
+		return Command.of(() -> IOUtils.readString(Objects.requireNonNull(getResourceAsStream())))
 				.execute()
 				.observe()
 				.onFailure(e -> logger.log(Level.WARNING, "Can't load resource /contextfree.txt"))
@@ -95,8 +96,12 @@ public class ContextFreeSession extends Session {
 				.orElse("");
 	}
 
+	private static InputStream getResourceAsStream() {
+		return ContextFreeSession.class.getResourceAsStream("/contextfree.txt");
+	}
+
 	@Override
 	public String toString() {
-		return "{pluginId=" + getPluginId() + ", metadata=" + metadata + ", script='" + script + "'}";
+		return "{pluginId=" + pluginId() + ", metadata=" + metadata + ", script='" + script + "'}";
 	}
 }

@@ -40,7 +40,7 @@ public interface EncoderContext {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] getPixelsAsByteArray(int n, int x, int y, int w, int h, int s) throws IOException;
+	byte[] getPixelsAsByteArray(int n, int x, int y, int w, int h, int s) throws IOException;
 
 	/**
 	 * @param n
@@ -53,20 +53,20 @@ public interface EncoderContext {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] getPixelsAsByteArray(final int n, final int x, final int y, final int w, final int h, final int s, final boolean flip) throws IOException;
+	byte[] getPixelsAsByteArray(final int n, final int x, final int y, final int w, final int h, final int s, final boolean flip) throws IOException;
 
 	/**
 	 * @return
 	 */
-	public int getImageHeight();
+	int getImageHeight();
 
 	/**
 	 * @return
 	 */
-	public int getImageWidth();
+	int getImageWidth();
 
 	/**
 	 * @return
 	 */
-	public int getFrameRate();
+	int getFrameRate();
 }

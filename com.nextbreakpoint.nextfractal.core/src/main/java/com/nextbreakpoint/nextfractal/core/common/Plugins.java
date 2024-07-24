@@ -26,6 +26,8 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,9 +36,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Plugins {
-    private Plugins() {}
-
     private static ServiceLoader<CoreFactory> factoryLoader() {
         return ServiceLoader.load(CoreFactory.class);
     }

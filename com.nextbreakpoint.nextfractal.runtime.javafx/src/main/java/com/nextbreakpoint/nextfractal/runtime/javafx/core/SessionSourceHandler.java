@@ -86,12 +86,12 @@ public class SessionSourceHandler {
     }
 
     private Session createModifiedSession(String text) {
-        return parserStrategy.createSession(session.getMetadata(), text);
+        return parserStrategy.createSession(session.metadata(), text);
     }
 
     private void notifyEvent(EditorReportChanged event) {
         // we need to ignore the event if session has changed between creation and notification
-        if (Objects.equals(event.session().getMetadata(), session.getMetadata())) {
+        if (Objects.equals(event.session().metadata(), session.metadata())) {
             eventBus.postEvent(event);
         }
     }
@@ -99,7 +99,7 @@ public class SessionSourceHandler {
     private void onSessionChanged(Session session, boolean continuous, boolean appendToHistory) {
         updateSession(session);
 
-        computeEvent(session.getScript(), continuous, appendToHistory)
+        computeEvent(session.script(), continuous, appendToHistory)
                 .whenComplete((newEvent, throwable) -> {
                     if (throwable == null) {
                         Platform.runLater(() -> notifyEvent(newEvent));
@@ -110,7 +110,7 @@ public class SessionSourceHandler {
     }
 
     private void updateSession(Session session) {
-        if (parserStrategy == null || !this.session.getPluginId().equals(session.getPluginId())) {
+        if (parserStrategy == null || !this.session.pluginId().equals(session.pluginId())) {
             parserStrategy = createParserStrategy(session).orElse(null);
         }
 
@@ -118,7 +118,7 @@ public class SessionSourceHandler {
     }
 
     private static Either<ParserStrategy> createParserStrategy(Session session) {
-        return Command.of(tryFindFactory(session.getPluginId()))
+        return Command.of(tryFindFactory(session.pluginId()))
                 .map(plugin -> Objects.requireNonNull(plugin.createParserStrategy()))
                 .execute();
     }

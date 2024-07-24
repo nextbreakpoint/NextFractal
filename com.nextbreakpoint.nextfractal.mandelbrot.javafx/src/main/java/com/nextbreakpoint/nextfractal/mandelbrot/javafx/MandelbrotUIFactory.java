@@ -32,7 +32,7 @@ import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.TileUtils;
+import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
@@ -81,14 +81,14 @@ public class MandelbrotUIFactory implements UIFactory {
 		Map<String, Integer> hints = new HashMap<>();
 		hints.put(RendererCoordinator.KEY_TYPE, RendererCoordinator.VALUE_REALTIME);
 		hints.put(RendererCoordinator.KEY_MULTITHREAD, RendererCoordinator.VALUE_SINGLE_THREAD);
-		RendererTile tile = TileUtils.createRendererTile(bitmap.getWidth(), bitmap.getHeight());
+		RendererTile tile = RendererUtils.createRendererTile(bitmap.getWidth(), bitmap.getHeight());
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Mandelbrot Browser", true, Thread.MIN_PRIORITY);
 		RendererCoordinator coordinator = new RendererCoordinator(threadFactory, new JavaFXRendererFactory(), tile, hints);
 		Orbit orbit = (Orbit)bitmap.getProperty("orbit");
 		Color color = (Color)bitmap.getProperty("color");
 		coordinator.setOrbitAndColor(orbit, color);
 		coordinator.init();
-		MandelbrotMetadata data = (MandelbrotMetadata) session.getMetadata();
+		MandelbrotMetadata data = (MandelbrotMetadata) session.metadata();
 		RendererView view = new RendererView();
 		view.setTraslation(data.getTranslation());
 		view.setRotation(data.getRotation());
@@ -103,7 +103,7 @@ public class MandelbrotUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, RendererSize size) throws Exception {
-		String source = session.getScript();
+		String source = session.script();
 		DSLParser parser = new DSLParser(DSLCompiler.class.getPackage().getName() + ".generated", "Compile" + System.nanoTime());
 		DSLParserResult result = parser.parse(source);
 		DSLCompiler compiler = new DSLCompiler();

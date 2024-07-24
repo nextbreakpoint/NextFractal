@@ -109,7 +109,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             Double4D rotation = metadata.getRotation();
             Double4D scale = metadata.getScale();
             Double2D constant = metadata.getPoint();
-            Time time = metadata.getTime();
+            Time time = metadata.time();
             boolean julia = metadata.isJulia();
             renderer.setOrbit(orbit);
             renderer.setColor(color);

@@ -32,27 +32,23 @@ import java.util.stream.StreamSupport;
 public class JsonUtils {
     private JsonUtils() {}
 
-    public static String getString(JsonNode clipEvent, String field) {
-        final JsonNode node = clipEvent.get(field);
-        if (node != null) {
-            return node.asText();
+    public static String getString(JsonNode node, String field) {
+        final JsonNode fieldNode = node.get(field);
+        if (fieldNode != null) {
+            return fieldNode.asText();
         }
         return null;
     }
 
-    public static Long getLong(JsonNode clipEvent, String field) {
-        final JsonNode node = clipEvent.get(field);
-        if (node != null) {
-            return node.asLong();
+    public static Long getLong(JsonNode node, String field) {
+        final JsonNode fieldNode = node.get(field);
+        if (fieldNode != null) {
+            return fieldNode.asLong();
         }
         return null;
     }
 
-    public static Stream<JsonNode> getClips(JsonNode clips) {
-        return clips.isArray() ? StreamSupport.stream(clips.spliterator(), false) : Stream.of();
-    }
-
-    public static Stream<JsonNode> getEvents(JsonNode events) {
-        return (events != null && events.isArray()) ? StreamSupport.stream(events.spliterator(), false) : Stream.of();
+    public static Stream<JsonNode> asStream(JsonNode node) {
+        return node.isArray() ? StreamSupport.stream(node.spliterator(), false) : Stream.of();
     }
 }

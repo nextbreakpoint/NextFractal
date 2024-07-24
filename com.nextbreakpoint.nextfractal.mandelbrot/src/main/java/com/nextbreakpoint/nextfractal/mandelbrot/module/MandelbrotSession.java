@@ -27,14 +27,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.module;
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
+import com.nextbreakpoint.nextfractal.core.common.IOUtils;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SessionUtils;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,22 +61,22 @@ public class MandelbrotSession extends Session {
 	}
 
 	@Override
-    public String getPluginId() {
+    public String pluginId() {
         return MandelbrotFactory.PLUGIN_ID;
     }
 
 	@Override
-	public String getGrammar() {
+	public String grammar() {
 		return MandelbrotFactory.GRAMMAR;
 	}
 
 	@Override
-	public String getScript() {
+	public String script() {
 		return script;
 	}
 
 	@Override
-	public Metadata getMetadata() {
+	public Metadata metadata() {
 		return metadata;
 	}
 
@@ -90,7 +91,7 @@ public class MandelbrotSession extends Session {
 	}
 
 	private static String getInitialScript() {
-		return Command.of(() -> SessionUtils.readAll(Objects.requireNonNull(MandelbrotSession.class.getResourceAsStream("/mandelbrot.txt"))))
+		return Command.of(() -> IOUtils.readString(Objects.requireNonNull(getResourceAsStream())))
 				.execute()
 				.observe()
 				.onFailure(e -> logger.log(Level.WARNING, "Can't load resource /mandelbrot.txt", e))
@@ -98,8 +99,12 @@ public class MandelbrotSession extends Session {
 				.orElse(null);
 	}
 
+	private static InputStream getResourceAsStream() {
+		return MandelbrotSession.class.getResourceAsStream("/mandelbrot.txt");
+	}
+
 	@Override
 	public String toString() {
-		return "{pluginId=" + getPluginId() + ", metadata=" + metadata + ", script='" + script + "'}";
+		return "{pluginId=" + pluginId() + ", metadata=" + metadata + ", script='" + script + "'}";
 	}
 }

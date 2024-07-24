@@ -40,13 +40,11 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.enums.ShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.exceptions.CFDGException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.exceptions.StopException;
 import com.nextbreakpoint.nextfractal.contextfree.renderer.RenderListener;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
 import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;

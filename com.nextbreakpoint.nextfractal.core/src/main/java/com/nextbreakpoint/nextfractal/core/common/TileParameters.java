@@ -24,20 +24,28 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
+import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import lombok.Builder;
 
-public class SessionUtils {
-	private SessionUtils() {}
+@Builder(setterPrefix = "with", toBuilder = true)
+public record TileParameters(
+	int imageWidth,
+	int imageHeight,
+	int tileWidth,
+	int tileHeight,
+	int tileOffsetX,
+	int tileOffsetY,
+	int borderWidth,
+	int borderHeight
+) {
+	public RendererTile createRenderTile() {
+		final RendererSize imageSize = new RendererSize(imageWidth, imageHeight);
+		final RendererSize tileSize = new RendererSize(tileWidth, tileHeight);
+		final RendererSize tileBorder = new RendererSize(borderWidth, borderHeight);
+		final RendererPoint tileOffset = new RendererPoint(tileOffsetX, tileOffsetY);
 
-	public static String readAll(InputStream is) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		byte[] buffer = new byte[4096];
-		int length = 0;
-		while ((length = is.read(buffer)) > 0) {
-			baos.write(buffer, 0, length);
-		}
-		return baos.toString();
+        return new RendererTile(imageSize, tileSize, tileOffset, tileBorder);
 	}
 }

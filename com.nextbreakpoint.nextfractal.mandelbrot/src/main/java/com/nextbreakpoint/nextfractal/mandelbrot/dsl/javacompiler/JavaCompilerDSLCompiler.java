@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.javacompiler;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.IOUtils;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
@@ -53,33 +54,33 @@ public class JavaCompilerDSLCompiler {
 	private static final Logger logger = Logger.getLogger(JavaCompilerDSLCompiler.class.getName());
 
 	public ClassFactory<Orbit> compileOrbit(DSLParserResult report) throws CompilerException {
-		List<SourceError> errors = new ArrayList<>();
+		List<ParserError> errors = new ArrayList<>();
 		try {
 			Class<Orbit> clazz = compileToClass(report.getOrbitSource(), report.getPackageName(), report.getClassName() + "Orbit", Orbit.class, errors);
 			return new JavaClassFactory<>(clazz);
 		} catch (Throwable e) {
-			SourceError.ErrorType type = SourceError.ErrorType.JAVA_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
 			String message = e.getMessage();
-			errors.add(new SourceError(type, 0, 0, 0, 0, message));
+			errors.add(new ParserError(type, 0, 0, 0, 0, message));
 			throw new CompilerException("Can't compile orbit", report.getOrbitSource(), errors);
 		}
 	}
 
 	public ClassFactory<Color> compileColor(DSLParserResult report) throws CompilerException {
-		List<SourceError> errors = new ArrayList<>();
+		List<ParserError> errors = new ArrayList<>();
 		try {
 			Class<Color> clazz = compileToClass(report.getColorSource(), report.getPackageName(), report.getClassName() + "Color", Color.class, errors);
 			return new JavaClassFactory<>(clazz);
 		} catch (Throwable e) {
-			SourceError.ErrorType type = SourceError.ErrorType.JAVA_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
 			String message = e.getMessage();
-			errors.add(new SourceError(type, 0, 0, 0, 0, message));
+			errors.add(new ParserError(type, 0, 0, 0, 0, message));
 			throw new CompilerException("Can't compile color", report.getColorSource(), errors);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T> Class<T> compileToClass(String source, String packageName, String className, Class<T> clazz, List<SourceError> errors) throws CompilerException {
+	private <T> Class<T> compileToClass(String source, String packageName, String className, Class<T> clazz, List<ParserError> errors) throws CompilerException {
 		logger.log(Level.FINE, "Compile Java source:\n" + source);
 		List<SimpleJavaFileObject> compilationUnits = new ArrayList<>();
 		compilationUnits.add(new JavaSourceFileObject(className, source));
@@ -102,32 +103,32 @@ public class JavaCompilerDSLCompiler {
 				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
 					if (diagnostic.getCode().equals("compiler.err.cant.access")) {
 						// TODO Not sure why it doesn't happen with Java 8, but only with Java 9.
-						SourceError.ErrorType type = SourceError.ErrorType.JAVA_COMPILER;
+						ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
 						long line = diagnostic.getLineNumber();
 						long charPositionInLine = diagnostic.getColumnNumber();
 						long index = diagnostic.getStartPosition();
 						long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
 						String message = diagnostic.getMessage(null);
-						SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+						ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 						logger.log(Level.WARNING, error.toString());
 						errors.add(error);
 					} else {
-						SourceError.ErrorType type = SourceError.ErrorType.JAVA_COMPILER;
+						ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
 						long line = diagnostic.getLineNumber();
 						long charPositionInLine = diagnostic.getColumnNumber();
 						long index = diagnostic.getStartPosition();
 						long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
 						String message = diagnostic.getMessage(null);
-						SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+						ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 						logger.log(Level.FINE, error.toString());
 						errors.add(error);
 					}
 				}
 			}
 		} catch (Exception e) {
-			SourceError.ErrorType type = SourceError.ErrorType.JAVA_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, 0, 0, 0, 0, message);
+			ParserError error = new ParserError(type, 0, 0, 0, 0, message);
 			logger.log(Level.SEVERE, "Can't compile class", e);
 			errors.add(error);
 			throw new CompilerException("Can't compile class", source, errors);
@@ -158,24 +159,11 @@ public class JavaCompilerDSLCompiler {
 	}
 
 	private byte[] loadBytes(JavaFileObject file) throws IOException {
-		InputStream is = null;
-		try {
-			is = file.openInputStream();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[4096];
-			int length = 0;
-			while ((length = is.read(buffer)) > 0) {
-				baos.write(buffer, 0, length);
+        try (InputStream is = file.openInputStream()) {
+			try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+				IOUtils.copyBytes(is, os);
+				return os.toByteArray();
 			}
-			byte[] out = baos.toByteArray();
-			return out;
-		} finally {
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-				}
-			}
-		}
+        }
 	}
 }	

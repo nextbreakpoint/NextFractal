@@ -28,6 +28,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -48,7 +50,8 @@ import java.util.zip.ZipOutputStream;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
-public abstract class FileManager {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class FileManager {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static Either<Bundle> loadBundle(File file) {
@@ -184,7 +187,7 @@ public abstract class FileManager {
     }
 
     private static Command<List<AnimationClip>> decodeClips(JsonNode clips) {
-        final List<Either<AnimationClip>> results = JsonUtils.getClips(clips)
+        final List<Either<AnimationClip>> results = JsonUtils.asStream(clips)
                 .map(FileManager::decodeClip)
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
@@ -196,11 +199,12 @@ public abstract class FileManager {
 
     private static Command<AnimationClip> decodeClip(JsonNode clip) {
         final Map<String, Object> stateMap = new HashMap<>();
-        final List<Either<AnimationEvent>> results = JsonUtils.getEvents(clip.get("events"))
+        final JsonNode events = clip.get("events");
+        final List<Either<AnimationEvent>> results = events != null ? JsonUtils.asStream(events)
                 .map(clipEvent -> decodeClipEvent(stateMap, clipEvent))
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
-                .toList();
+                .toList() : List.of();
         final Optional<Either<AnimationEvent>> error = results.stream().filter(Either::isFailure).findFirst();
         return error.<Command<AnimationClip>>map(result -> createFailure("Can't decode clip", result))
                 .orElseGet(() -> Command.value(new AnimationClip(results.stream().map(Either::get).toList())));
@@ -254,15 +258,15 @@ public abstract class FileManager {
     }
 
     private static Command<byte[]> encodeManifest(Session session) {
-        return Command.of(() -> MAPPER.writeValueAsBytes(new FileManifest(session.getPluginId())));
+        return Command.of(() -> MAPPER.writeValueAsBytes(new FileManifest(session.pluginId())));
     }
 
     private static Command<byte[]> encodeScript(Session session) {
-        return Command.of(() -> session.getScript().getBytes());
+        return Command.of(() -> session.script().getBytes());
     }
 
     private static Command<byte[]> encodeMetadata(Session session) {
-        return encodeMetadata(session.getPluginId(), session.getMetadata()).map(String::getBytes);
+        return encodeMetadata(session.pluginId(), session.metadata()).map(String::getBytes);
     }
 
     private static Command<byte[]> encodeClips(Session session, List<AnimationClip> clips) {

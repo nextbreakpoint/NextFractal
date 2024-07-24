@@ -25,5 +25,5 @@
 package com.nextbreakpoint.nextfractal.core.common;
 
 public interface Metadata {
-	public Time getTime();
+	Time time();
 }

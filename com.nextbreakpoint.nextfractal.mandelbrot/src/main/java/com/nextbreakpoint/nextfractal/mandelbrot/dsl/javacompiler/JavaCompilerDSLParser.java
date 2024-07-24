@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.javacompiler;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.*;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ErrorStrategy;
@@ -73,7 +73,7 @@ public class JavaCompilerDSLParser {
 	}
 	
 	public DSLParserResult parse(String source) throws ParserException {
-		List<SourceError> errors = new ArrayList<>();
+		List<ParserError> errors = new ArrayList<>();
 		ASTFractal ast = parse(source, errors);
 		ExpressionContext orbitContext = new ExpressionContext();
 		String orbitSource = buildOrbit(orbitContext, ast, errors);
@@ -86,7 +86,7 @@ public class JavaCompilerDSLParser {
 		return new DSLParserResult(ast, Type.JAVA, source, orbitSource, colorSource, errors, packageName, className);
 	}
 	
-	private ASTFractal parse(String source, List<SourceError> errors) throws ParserException {
+	private ASTFractal parse(String source, List<ParserError> errors) throws ParserException {
 		try {
 			CharStream is = CharStreams.fromReader(new StringReader(source));
 			MandelbrotLexer lexer = new MandelbrotLexer(is);
@@ -100,20 +100,20 @@ public class JavaCompilerDSLParser {
             	return fractal;
             }
 		} catch (ASTException e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+			ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 			logger.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
 		} catch (Exception e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, 0L, 0L, 0L, 0L, message);
+			ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
 			logger.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
@@ -121,40 +121,40 @@ public class JavaCompilerDSLParser {
 		return null;
 	}
 
-	private String buildOrbit(ExpressionContext context, ASTFractal fractal, List<SourceError> errors) throws ParserException {
+	private String buildOrbit(ExpressionContext context, ASTFractal fractal, List<ParserError> errors) throws ParserException {
 		try {
 			StringBuilder builder = new StringBuilder();
 			Map<String, CompilerVariable> variables = new HashMap<>();
 			compileOrbit(context, builder, variables, fractal);
 			return builder.toString();
 		} catch (ASTException e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+			ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 			logger.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
 		}
 	}
 	
-	private String buildColor(ExpressionContext context, ASTFractal fractal, List<SourceError> errors) throws ParserException {
+	private String buildColor(ExpressionContext context, ASTFractal fractal, List<ParserError> errors) throws ParserException {
 		try {
 			StringBuilder builder = new StringBuilder();
 			Map<String, CompilerVariable> variables = new HashMap<>();
 			compileColor(context, builder, variables, fractal);
 			return builder.toString();
 		} catch (ASTException e) {
-			SourceError.ErrorType type = SourceError.ErrorType.SCRIPT_COMPILER;
+			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
-			SourceError error = new SourceError(type, line, charPositionInLine, index, length, message);
+			ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
 			logger.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
@@ -323,7 +323,7 @@ public class JavaCompilerDSLParser {
 		builder.append(context.getNumberCount());
 		builder.append("];\n");
 		builder.append("}\n");
-		builder.append("public double time() {\nreturn getTime().getValue() * getTime().getScale();\n}\n");
+		builder.append("public double time() {\nreturn getTime().value() * getTime().scale();\n}\n");
 		builder.append("public boolean useTime() {\nreturn ");
 		builder.append(context.orbitUseTime());
 		builder.append(";\n}\n");
@@ -438,7 +438,7 @@ public class JavaCompilerDSLParser {
 		builder.append(context.getNumberCount());
 		builder.append("];\n");
 		builder.append("}\n");
-		builder.append("public double time() {\nreturn getTime().getValue() * getTime().getScale();\n}\n");
+		builder.append("public double time() {\nreturn getTime().value() * getTime().scale();\n}\n");
 		builder.append("public boolean useTime() {\nreturn ");
 		builder.append(context.colorUseTime());
 		builder.append(";\n}\n");

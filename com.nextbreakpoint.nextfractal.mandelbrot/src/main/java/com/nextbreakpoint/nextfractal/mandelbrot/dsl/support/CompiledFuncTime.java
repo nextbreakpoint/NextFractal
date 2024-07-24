@@ -40,12 +40,12 @@ public class CompiledFuncTime extends CompiledExpression {
 
 	@Override
 	public double evaluateReal(InterpreterContext context, Map<String, CompilerVariable> scope) {
-		return context.getTime().getValue() * context.getTime().getScale();
+		return context.getTime().value() * context.getTime().scale();
 	}
 
 	@Override
 	public Number evaluate(InterpreterContext context, Map<String, CompilerVariable> scope) {
-		return context.getNumber(index).set(context.getTime().getValue() * context.getTime().getScale());
+		return context.getNumber(index).set(context.getTime().value() * context.getTime().scale());
 	}
 
 	@Override

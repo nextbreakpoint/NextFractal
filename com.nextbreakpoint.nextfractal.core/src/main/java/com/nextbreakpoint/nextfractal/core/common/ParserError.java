@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-public class SourceError {
+public class ParserError {
 	private ErrorType type;
 	private long line;
 	private long charPositionInLine;
@@ -32,7 +32,7 @@ public class SourceError {
 	private long length;
 	private String message;
 
-	public SourceError(ErrorType type, long line, long charPositionInLine, long index, long length, String message) {
+	public ParserError(ErrorType type, long line, long charPositionInLine, long index, long length, String message) {
 		this.type = type;
 		this.line = line;
 		this.charPositionInLine = charPositionInLine;

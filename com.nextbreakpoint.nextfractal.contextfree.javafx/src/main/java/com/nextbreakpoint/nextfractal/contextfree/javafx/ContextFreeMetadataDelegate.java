@@ -28,7 +28,7 @@ public class ContextFreeMetadataDelegate implements MetadataDelegate {
 
     @Override
     public Metadata getMetadata() {
-        return supplier.get().getMetadata();
+        return supplier.get().metadata();
     }
 
     @Override

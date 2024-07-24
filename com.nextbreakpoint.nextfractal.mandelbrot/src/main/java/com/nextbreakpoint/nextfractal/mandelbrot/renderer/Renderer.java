@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.renderer;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.render.*;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
@@ -69,7 +69,7 @@ public class Renderer {
 	protected volatile boolean juliaChanged;
 	protected volatile boolean pointChanged;
 	protected volatile boolean timeChanged;
-	protected volatile List<SourceError> errors = new ArrayList<>();
+	protected volatile List<ParserError> errors = new ArrayList<>();
 	protected volatile float progress;
 	protected volatile double rotation;
 	protected volatile Time time;
@@ -816,8 +816,8 @@ public class Renderer {
 		return contentRendererFractal.getOrbit().getTraps();
 	}
 
-	public List<SourceError> getErrors() {
-		List<SourceError> result = new ArrayList<>(errors);
+	public List<ParserError> getErrors() {
+		List<ParserError> result = new ArrayList<>(errors);
 		errors.clear();
 		return result;
 	}

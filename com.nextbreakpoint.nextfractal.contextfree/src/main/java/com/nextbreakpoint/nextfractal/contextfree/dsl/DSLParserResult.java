@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ public class DSLParserResult {
 	private CFDG cfdg;
 	private Type type;
 	private String source;
-	private List<SourceError> errors;
+	private List<ParserError> errors;
 
-	public DSLParserResult(CFDG cfdg, Type type, String source, List<SourceError> errors) {
+	public DSLParserResult(CFDG cfdg, Type type, String source, List<ParserError> errors) {
 		this.cfdg = cfdg;
 		this.type = type;
 		this.source = source;
@@ -50,7 +50,7 @@ public class DSLParserResult {
 		return source;
 	}
 
-	public List<SourceError> getErrors() {
+	public List<ParserError> getErrors() {
 		return errors;
 	}
 

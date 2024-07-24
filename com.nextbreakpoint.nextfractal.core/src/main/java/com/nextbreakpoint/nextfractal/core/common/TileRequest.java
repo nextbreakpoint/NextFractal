@@ -24,105 +24,18 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
+import lombok.Builder;
+
 import java.util.UUID;
 
-public class TileRequest {
-	private Session session;
-	private int size;
-	private int cols;
-	private int rows;
-	private int col;
-	private int row;
-	private UUID taskId;
+@Builder(setterPrefix = "with", toBuilder = true)
+public record TileRequest(
+	Session session,
+	int size,
+	int cols,
+	int rows,
+	int col,
+	int row,
+	UUID taskId
+) {}
 
-	private TileRequest() {}
-
-	public int getSize() {
-		return size;
-	}
-
-	public int getCols() {
-		return cols;
-	}
-
-	public int getRows() {
-		return rows;
-	}
-
-	public int getCol() {
-		return col;
-	}
-
-	public int getRow() {
-		return row;
-	}
-
-	public Session getSession() {
-		return session;
-	}
-
-	public UUID getTaskId() {
-		return taskId;
-	}
-
-	public static Builder builder() {
-		return new Builder();
-	}
-
-	public static class Builder {
-		private UUID taskId;
-		private Session session;
-		private int size;
-		private int cols;
-		private int rows;
-		private int col;
-		private int row;
-
-		public Builder withSession(Session session) {
-			this.session = session;
-			return this;
-		}
-
-		public Builder withTaskId(UUID taskId) {
-			this.taskId = taskId;
-			return this;
-		}
-
-		public Builder withSize(int size) {
-			this.size = size;
-			return this;
-		}
-
-		public Builder withCols(int cols) {
-			this.cols = cols;
-			return this;
-		}
-
-		public Builder withRows(int rows) {
-			this.rows = rows;
-			return this;
-		}
-
-		public Builder withCol(int col) {
-			this.col = col;
-			return this;
-		}
-
-		public Builder withRow(int row) {
-			this.row = row;
-			return this;
-		}
-
-		public TileRequest build() {
-			TileRequest tileRequest = new TileRequest();
-			tileRequest.taskId = taskId;
-			tileRequest.session = session;
-			tileRequest.size = size;
-			tileRequest.cols = cols;
-			tileRequest.rows = rows;
-			tileRequest.col = col;
-			tileRequest.row = row;
-			return tileRequest;
-		}
-	}
-}

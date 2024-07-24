@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import lombok.Builder;
@@ -68,8 +69,9 @@ public class ContextFreeMetadata implements Metadata {
 //		return seed.hashCode();
 //	}
 
+	@JsonProperty("time")
 	@Override
-	public Time getTime() {
+	public Time time() {
 		return time;
 	}
 }
