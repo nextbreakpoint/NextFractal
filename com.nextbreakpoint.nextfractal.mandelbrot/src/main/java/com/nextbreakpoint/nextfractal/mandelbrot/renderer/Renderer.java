@@ -332,8 +332,8 @@ public class Renderer {
 		setContentRegion(computeContentRegion());
 		setJulia(view.isJulia());
 		setPoint(view.getPoint());
-		setContinuous(view.getState().getZ() == 1);
-		setTimeAnimation(view.getState().getW() == 1);
+		setContinuous(view.getState().z() == 1);
+		setTimeAnimation(view.getState().w() == 1);
 		lock.unlock();
 	}
 
