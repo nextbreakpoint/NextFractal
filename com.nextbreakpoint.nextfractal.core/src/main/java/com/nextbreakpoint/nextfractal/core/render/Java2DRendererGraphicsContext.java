@@ -32,8 +32,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.Stack;
 
 public class Java2DRendererGraphicsContext implements RendererGraphicsContext {
-	private Graphics2D g2d;
-	private Stack<State> stack = new Stack<>();
+	private final Graphics2D g2d;
+	private final Stack<State> stack = new Stack<>();
 	private GeneralPath shape;
 	private RendererColor strokeColor;
 	private RendererColor fillColor;
@@ -171,7 +171,7 @@ public class Java2DRendererGraphicsContext implements RendererGraphicsContext {
 		g2d.setClip(null);
 	}
 	
-	private class State {
+	private static class State {
 		AffineTransform transform;
 		Shape clip;
 	}
@@ -204,28 +204,20 @@ public class Java2DRendererGraphicsContext implements RendererGraphicsContext {
 	}
 
 	private int mapToJoin(int join) {
-		switch (join) {
-			case JOIN_MITER:
-				return BasicStroke.JOIN_MITER;
-			case JOIN_ROUND:
-				return BasicStroke.JOIN_ROUND;
-			case JOIN_BEVEL:
-				return BasicStroke.JOIN_BEVEL;
-			default:
-				throw new RuntimeException("Invalid line join " + join);
-		}
+        return switch (join) {
+            case JOIN_MITER -> BasicStroke.JOIN_MITER;
+            case JOIN_ROUND -> BasicStroke.JOIN_ROUND;
+            case JOIN_BEVEL -> BasicStroke.JOIN_BEVEL;
+            default -> throw new RuntimeException("Invalid line join " + join);
+        };
 	}
 
 	private int mapToCap(int cap) {
-		switch (cap) {
-			case CAP_BUTT:
-				return BasicStroke.CAP_BUTT;
-			case CAP_ROUND:
-				return BasicStroke.CAP_ROUND;
-			case CAP_SQUARE:
-				return BasicStroke.CAP_SQUARE;
-			default:
-				throw new RuntimeException("Invalid line cap " + cap);
-		}
+        return switch (cap) {
+            case CAP_BUTT -> BasicStroke.CAP_BUTT;
+            case CAP_ROUND -> BasicStroke.CAP_ROUND;
+            case CAP_SQUARE -> BasicStroke.CAP_SQUARE;
+            default -> throw new RuntimeException("Invalid line cap " + cap);
+        };
 	}
 }

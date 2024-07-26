@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
-import com.nextbreakpoint.nextfractal.core.export.ExportState;
+import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 import javafx.application.Platform;
@@ -76,7 +76,7 @@ public class JobsPane extends BorderPane {
         this.tile = tile;
 
         listView = new ListView<>();
-        listView.setFixedCellSize(tile.getTileSize().getHeight() + PADDING);
+        listView.setFixedCellSize(tile.tileSize().height() + PADDING);
         listView.setCellFactory(view -> new JobsListCell(tile));
 
         HBox exportControls = new HBox(0);
@@ -135,7 +135,7 @@ public class JobsPane extends BorderPane {
     private boolean isExportSessionSuspended(Bitmap bitmap) {
         ExportSession exportSession = (ExportSession) bitmap.getProperty("exportSession");
         JobEntry exportEntry = exportEntries.get(exportSession.getSessionId());
-        return exportEntry != null && exportEntry.getState() == ExportState.SUSPENDED;
+        return exportEntry != null && exportEntry.getState() == ExportSessionState.SUSPENDED;
     }
 
     private DefaultThreadFactory createThreadFactory(String name) {
@@ -201,10 +201,10 @@ public class JobsPane extends BorderPane {
         if (bitmap != null) {
             ExportSession session = (ExportSession) bitmap.getProperty("exportSession");
             if (session.getFrameCount() <= 1) {
-                sizeLabel.setText(session.getSize().getWidth() + "\u00D7" + session.getSize().getHeight() + " pixels");
+                sizeLabel.setText(session.getFrameSize().width() + "\u00D7" + session.getFrameSize().height() + " pixels");
                 formatLabel.setText(session.getEncoder().getName() + " Image");
             } else {
-                sizeLabel.setText(session.getSize().getWidth() + "\u00D7" + session.getSize().getHeight() + " pixels");
+                sizeLabel.setText(session.getFrameSize().width() + "\u00D7" + session.getFrameSize().height() + " pixels");
                 formatLabel.setText(session.getEncoder().getName() + " Video");
                 long durationInSeconds = (long)Math.rint(session.getFrameCount() / (float) session.getFrameRate());
                 long minutes = (long)Math.rint(durationInSeconds / 60.0);
@@ -231,8 +231,8 @@ public class JobsPane extends BorderPane {
     }
 
     private void addItem(ListView<Bitmap> listView, ExportSession session, IntBuffer pixels, RendererSize size) {
-        BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
-        JobEntry jobEntry = new JobEntry(session, ExportState.READY, 0f, bitmap);
+        BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
+        JobEntry jobEntry = new JobEntry(session, ExportSessionState.READY, 0f, bitmap);
         exportEntries.put(session.getSessionId(), jobEntry);
         bitmap.setProperty("exportSession", session);
         listView.getItems().addFirst(bitmap);
@@ -272,7 +272,7 @@ public class JobsPane extends BorderPane {
         return factory.createImageComposer(createThreadFactory("Jobs Composer"), tile, true);
     }
 
-    public void updateSession(ExportSession exportSession, ExportState state, Float progress) {
+    public void updateSession(ExportSession exportSession, ExportSessionState state, Float progress) {
         JobEntry exportEntry = exportEntries.get(exportSession.getSessionId());
         if (exportEntry != null) {
             JobEntry jobEntry = new JobEntry(exportSession, state, progress, exportEntry.getBitmap());
@@ -297,11 +297,11 @@ public class JobsPane extends BorderPane {
 
     private class JobEntry {
         private ExportSession exportSession;
-        private ExportState state;
+        private ExportSessionState state;
         private Float progress;
         private Bitmap bitmap;
 
-        public JobEntry(ExportSession exportSession, ExportState state, Float progress, Bitmap bitmap) {
+        public JobEntry(ExportSession exportSession, ExportSessionState state, Float progress, Bitmap bitmap) {
             this.exportSession = exportSession;
             this.state = state;
             this.progress = progress;
@@ -312,7 +312,7 @@ public class JobsPane extends BorderPane {
             return exportSession;
         }
 
-        public ExportState getState() {
+        public ExportSessionState getState() {
             return state;
         }
 

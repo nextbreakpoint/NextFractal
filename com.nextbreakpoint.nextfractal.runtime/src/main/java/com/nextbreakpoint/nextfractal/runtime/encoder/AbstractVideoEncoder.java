@@ -86,9 +86,6 @@ import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_2.av_image_get_buffer_siz
 import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_2.av_q2intfloat;
 import static java.lang.foreign.MemorySegment.NULL;
 
-/**
- * @author Andrea Medeghini
- */
 @Log
 public abstract class AbstractVideoEncoder implements Encoder {
 	private EncoderDelegate delegate;
@@ -118,8 +115,8 @@ public abstract class AbstractVideoEncoder implements Encoder {
 	}
 
 	@Override
-	public void encode(EncoderHandle handle, int index, int count) throws EncoderException {
-		((VideoEncoderHandle) handle).encode(index, count);
+	public void encode(EncoderHandle handle, int frameIndex, int repeatFrameCount, int totalFrameCount) throws EncoderException {
+		((VideoEncoderHandle) handle).encode(frameIndex, repeatFrameCount, totalFrameCount);
 	}
 
 	/**
@@ -160,9 +157,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				if (delegate != null) {
 					delegate.didProgressChanged(0f);
 				}
-				if (AbstractVideoEncoder.log.isLoggable(Level.FINE)) {
-					AbstractVideoEncoder.log.fine("Encoding video...");
-				}
+				log.info("Session %s: Encoding video...".formatted(context.getSessionId()));
 				time = System.currentTimeMillis();
 				final int bytesPerPixel = 3;
 				final int fps = context.getFrameRate();
@@ -184,7 +179,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				if (pOutputFormat.equals(NULL)) {
 					throw new EncoderException("Can't find format " + getFormatName());
 				}
-				AbstractVideoEncoder.log.info("Format is " + AVOutputFormat.long_name(pOutputFormat).getString(0));
+				log.info("Session %s: Format %s".formatted(context.getSessionId(), AVOutputFormat.long_name(pOutputFormat).getString(0)));
 				AVFormatContext.oformat(pFormatContext, pOutputFormat);
 				final var pTimeBase = arena.allocate(AVRational.layout());
 				if (pTimeBase.equals(NULL)) {
@@ -198,7 +193,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				}
 				AVRational.num(pFrameRate, fps);
 				AVRational.den(pFrameRate, 1);
-				AbstractVideoEncoder.log.info("FPS is " + fps);
+				log.info("Session %s: FPS %d".formatted(context.getSessionId(), fps));
                 pCodec = avcodec_find_encoder(getCodecID());
 				if (pCodec.equals(NULL)) {
 					throw new EncoderException("Can't find encoder " + getCodecID());
@@ -241,11 +236,11 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				final var pProperties = av_stream_new_side_data(pStream, AV_PKT_DATA_CPB_PROPERTIES(), AVCPBProperties.sizeof());
 				AVCPBProperties.buffer_size(pProperties, frameWidth * frameHeight * bytesPerPixel * 2L);
 //				final var pProperties = av_stream_get_side_data(pStream, AV_PKT_DATA_CPB_PROPERTIES(), NULL);
-				AbstractVideoEncoder.log.info("Buffer size " + AVCPBProperties.buffer_size(pProperties));
+				log.info("Session %s: Buffer size %d".formatted(context.getSessionId(), AVCPBProperties.buffer_size(pProperties)));
 				if (avcodec_open2(pCodecContext, pCodec, NULL) != 0) {
 					throw new EncoderException("Can't open encoder");
 				}
-				AbstractVideoEncoder.log.info("Codec name " + AVCodec.name(pCodec).getString(0));
+				log.info("Session %s: Codec %s".formatted(context.getSessionId(), AVCodec.name(pCodec).getString(0)));
 				final var ppOutputAVIOCtx = arena.allocate(C_POINTER);
 				if (avio_open2(ppOutputAVIOCtx, pFileName, AVIO_FLAG_WRITE(), NULL, NULL) < 0) {
 					throw new EncoderException("Can't open IO context");
@@ -295,16 +290,16 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				avformat_write_header(pFormatContext, NULL);
 			} catch (EncoderException e) {
 				dispose();
-				log.log(Level.WARNING, "Failed to encode video", e);
+				log.log(Level.WARNING, "Session %s: Failed to encode video".formatted(context.getSessionId()), e);
 				throw e;
 			} catch (Exception e) {
 				dispose();
-				log.log(Level.WARNING, "Failed to encode video", e);
+				log.log(Level.WARNING, "Session %s: Failed to encode video".formatted(context.getSessionId()), e);
 				throw new EncoderException("Failed to encode video", e);
 			}
 		}
 
-		public void encode(int frameIndex, int frameCount) throws EncoderException {
+		public void encode(int frameIndex, int repeatFrameCount, int totalFrameCount) throws EncoderException {
 			try {
 				if (!pPacket.equals(NULL)) {
 					final var pOutputData = AVFrame.data(pRGBFrame);
@@ -312,16 +307,16 @@ public abstract class AbstractVideoEncoder implements Encoder {
 					final byte[] data = context.getPixelsAsByteArray(0, 0, 0, context.getImageWidth(), context.getImageHeight(), 3, true);
 					MemorySegment.copy(MemorySegment.ofArray(data), 0, pOutputData.get(C_POINTER, 0), 0, rgbByteSize);
 					sws_scale(pSwsContext, AVFrame.data(pRGBFrame), AVFrame.linesize(pRGBFrame), 0, context.getImageHeight(), AVFrame.data(pYUVFrame), AVFrame.linesize(pYUVFrame));
-					for (int count = 0; count < frameCount; count++) {
-						int lastFrame = frameIndex + count;
+					for (int count = 0; count < repeatFrameCount; count++) {
+						log.info("Session %s: Completed %.0f%%".formatted(context.getSessionId(), ((frameIndex + count + 1f) / totalFrameCount) * 100f));
 						if (delegate != null) {
-							delegate.didProgressChanged(lastFrame / (frameCount - 1f));
+							delegate.didProgressChanged(((frameIndex + count + 1f) / totalFrameCount) * 100f);
 						}
 						if (avcodec_send_frame(pCodecContext, pYUVFrame) == 0) {
 							while (avcodec_receive_packet(pCodecContext, pPacket) == 0) {
 								av_packet_rescale_ts(pPacket, AVCodecContext.time_base(pCodecContext), AVStream.time_base(pStream));
 								av_write_frame(pFormatContext, pPacket);
-								log.fine("1) pts " + AVPacket.pts(pPacket) + ", dts " + AVPacket.dts(pPacket));
+								log.fine("Session %s: 1) pts %d, dts %d".formatted(context.getSessionId(), AVPacket.pts(pPacket), AVPacket.dts(pPacket)));
 								Thread.yield();
 							}
 							av_write_frame(pFormatContext, NULL);
@@ -334,7 +329,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				}
 			} catch (Exception e) {
 				dispose();
-				log.log(Level.WARNING, "Failed to encode video", e);
+				log.log(Level.WARNING, "Session %s: Failed to encode video".formatted(context.getSessionId()), e);
 				throw new EncoderException("Failed to encode video", e);
 			}
 		}
@@ -346,7 +341,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 						while (avcodec_receive_packet(pCodecContext, pPacket) == 0) {
 							av_packet_rescale_ts(pPacket, AVCodecContext.time_base(pCodecContext), AVStream.time_base(pStream));
 							av_write_frame(pFormatContext, pPacket);
-							log.fine("2) pts " + AVPacket.pts(pPacket) + ", dts " + AVPacket.dts(pPacket));
+							log.fine("Session %s: 2) pts %d, dts %d".formatted(context.getSessionId(), AVPacket.pts(pPacket), AVPacket.dts(pPacket)));
 							Thread.yield();
 						}
 						av_write_frame(pFormatContext, NULL);
@@ -354,19 +349,18 @@ public abstract class AbstractVideoEncoder implements Encoder {
 					av_write_trailer(pFormatContext);
 				}
 			} catch (Exception e) {
-				log.log(Level.WARNING, "Failed to encode video", e);
+				log.log(Level.WARNING, "Session %s: Failed to encode video".formatted(context.getSessionId()), e);
 				throw new EncoderException("Failed to encode video", e);
 			} finally {
 				dispose();
 			}
 			if (delegate == null || !delegate.isInterrupted()) {
 				time = System.currentTimeMillis() - time;
-				if (AbstractVideoEncoder.log.isLoggable(Level.INFO)) {
-					AbstractVideoEncoder.log.info("Video exported: elapsed time " + String.format("%3.2f", time / 1000.0d) + "s");
-				}
+				log.info("Session %s: Completed %.0f%%".formatted(context.getSessionId(), 100f));
 				if (delegate != null) {
-					delegate.didProgressChanged(1f);
+					delegate.didProgressChanged(100f);
 				}
+				log.info("Session %s: Video exported (total time %3.2fs)".formatted(context.getSessionId(), time / 1000.0d));
 			}
 		}
 
@@ -401,7 +395,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 					pFormatContext = NULL;
 				}
 			} catch (Exception e) {
-				log.log(Level.WARNING, "Failed to encode video", e);
+				log.log(Level.WARNING, "Session %s: Failed to encode video".formatted(context.getSessionId()), e);
 				throw new EncoderException("Failed to encode video", e);
 			} finally {
 				if (arena != null) {

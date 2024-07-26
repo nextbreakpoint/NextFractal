@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.runtime.export;
 
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobState;
@@ -57,26 +58,28 @@ public class SimpleExportRenderer implements ExportRenderer {
 	}
 
 	@Override
-	public Future<ExportJobHandle> dispatch(ExportJobHandle job) {
-		return service.submit(new ProcessExportJob(job));
+	public Future<ExportJobHandle> dispatch(ExportJobHandle job, AnimationFrame frame) {
+		return service.submit(new ProcessExportJob(job, frame));
 	}
 
 	private ExecutorService createExecutorService(ThreadFactory threadFactory) {
 		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	private ImageComposer createImageComposer(ExportJobHandle job) {
-		return Command.of(tryFindFactory(job.getProfile().getPluginId()))
-				.map(plugin -> plugin.createImageComposer(threadFactory, job.getJob().getTile(), false))
+	private ImageComposer createImageComposer(ExportProfile profile, AnimationFrame frame) {
+		return Command.of(tryFindFactory(frame.pluginId()))
+				.map(plugin -> plugin.createImageComposer(threadFactory, profile.createRenderTile(), false))
 				.execute()
 				.orElse(null);
 	}
 
 	private class ProcessExportJob implements Callable<ExportJobHandle> {
 		private final ExportJobHandle job;
-		
-		public ProcessExportJob(ExportJobHandle job) {
+		private final AnimationFrame frame;
+
+		public ProcessExportJob(ExportJobHandle job, AnimationFrame frame) {
 			this.job = Objects.requireNonNull(job);
+			this.frame = Objects.requireNonNull(frame);
 			job.setState(ExportJobState.READY);
 		}
 
@@ -92,15 +95,13 @@ public class SimpleExportRenderer implements ExportRenderer {
 
 		private void processError(Throwable e) {
 			log.log(Level.WARNING, "Failed to render tile", e);
-			job.setError(e);
-			job.setState(ExportJobState.FAILED);
+			job.setState(ExportJobState.FAILED, e);
 		}
 
 		private ExportJobHandle processJob(ExportJobHandle job) throws IOException {
 			log.fine(job.toString());
-			ExportProfile profile = job.getProfile();
-			ImageComposer composer = createImageComposer(job);
-			IntBuffer pixels = composer.renderImage(profile.getScript(), profile.getMetadata());
+			ImageComposer composer = createImageComposer(job.getJob().getProfile(), frame);
+			IntBuffer pixels = composer.renderImage(frame.script(), frame.metadata());
 			if (composer.isInterrupted()) {
                 job.setState(ExportJobState.INTERRUPTED);
             } else {

@@ -25,15 +25,15 @@
 package com.nextbreakpoint.nextfractal.core.render;
 
 public interface RendererBuffer {
-	public int getWidth();
+	int getWidth();
 	
-	public int getHeight();
+	int getHeight();
 	
-	public void dispose();
+	void dispose();
 
-	public void clear();
+	void clear();
 
-	public void update(int[] pixels);
+	void update(int[] pixels);
 
-	public RendererImage getImage();
+	RendererImage getImage();
 }

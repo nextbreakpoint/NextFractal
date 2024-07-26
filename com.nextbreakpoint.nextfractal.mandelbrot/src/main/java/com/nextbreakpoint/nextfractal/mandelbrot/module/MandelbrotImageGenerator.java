@@ -63,8 +63,8 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 	@Override
 	public IntBuffer renderImage(String script, Metadata data) {
 		MandelbrotMetadata metadata = (MandelbrotMetadata) data;
-		RendererSize suggestedSize = tile.getTileSize();
-		int[] pixels = new int[suggestedSize.getWidth() * suggestedSize.getHeight()];
+		RendererSize suggestedSize = tile.tileSize();
+		int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
 		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
@@ -105,7 +105,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 
 	@Override
 	public RendererSize getSize() {
-		return tile.getTileSize();
+		return tile.tileSize();
 	}
 	
 	@Override

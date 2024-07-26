@@ -31,6 +31,7 @@ import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
+import lombok.extern.java.Log;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -39,10 +40,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import static com.nextbreakpoint.nextfractal.core.common.Constants.FRAMES_PER_SECOND;
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
+@Log
 public class PlaybackPane extends Pane {
     private final List<AnimationFrame> frames = new LinkedList<>();
     private final ScheduledExecutorService executor;
@@ -82,19 +85,19 @@ public class PlaybackPane extends Pane {
                                 .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, frame.keyFrame(), !frame.keyFrame() && frame.timeAnimation())));
+                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, false, false)));
                     } else if (!lastFrame.metadata().equals(frame.metadata())) {
                         Command.of(tryFindFactory(frame.pluginId()))
                                 .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.keyFrame(), !frame.keyFrame() && frame.timeAnimation())));
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, false)));
                     } else if (!lastFrame.metadata().time().equals(frame.metadata().time())) {
                         Command.of(tryFindFactory(frame.pluginId()))
                                 .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, true)));
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, false)));
                     }
                 }
                 lastFrame = frame;
@@ -103,7 +106,7 @@ public class PlaybackPane extends Pane {
                 lastFrame = null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "Can't playback frame", e);
         }
     }
 

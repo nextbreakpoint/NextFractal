@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.render;
 
 public interface RendererColor {
-	public void setStroke(RendererGraphicsContext context);
+	void setStroke(RendererGraphicsContext context);
 	
-	public void setFill(RendererGraphicsContext context);
+	void setFill(RendererGraphicsContext context);
 }

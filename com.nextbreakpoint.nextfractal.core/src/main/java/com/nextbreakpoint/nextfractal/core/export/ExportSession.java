@@ -31,71 +31,52 @@ import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import lombok.Getter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public final class ExportSession {
 	private static final int BORDER_SIZE = 0;
 
+	@Getter
+    private final String sessionId;
+	@Getter
+	//TODO the encoder has mutable state. perhaps we should use an encoder factory instead
+    private final Encoder encoder;
+	@Getter
+    private final RendererSize frameSize;
+	@Getter
+    private final File tmpFile;
+	@Getter
+    private final File file;
+	@Getter
+	private final int tileSize;
+	@Getter
+	private final int frameRate;
+	@Getter
+	private final float quality;
+
 	private final List<ExportJob> jobs = new ArrayList<>();
 	private final List<AnimationFrame> frames = new ArrayList<>();
-	private final String sessionId;
-	private final Encoder encoder;
-	private final RendererSize size;
-	private final File tmpFile;
-	private final File file;
-	private final int tileSize;
-	private final float quality;
-	private final int frameRate;
-	private final Session session;
 
-	public ExportSession(String sessionId, Session session, List<AnimationClip> clips, File file, File tmpFile, RendererSize size, int tileSize, Encoder encoder) {
-		this.sessionId = sessionId;
-		this.session = session;
-		this.tmpFile = tmpFile;
-		this.file = file;
-		this.size = size;
-		this.encoder = encoder;
+	public ExportSession(String sessionId, Session session, List<AnimationClip> clips, File file, File tmpFile, RendererSize frameSize, int tileSize, Encoder encoder) {
+		this.sessionId = Objects.requireNonNull(sessionId);
+		this.tmpFile = Objects.requireNonNull(tmpFile);
+		this.file = Objects.requireNonNull(file);
+		this.frameSize = Objects.requireNonNull(frameSize);
+		this.encoder = Objects.requireNonNull(encoder);
 		this.tileSize = tileSize;
 		this.quality = 1;
 		this.frameRate = Constants.FRAMES_PER_SECOND;
-		if (!clips.isEmpty() && clips.getFirst().events().size() > 1) {
-			final Animation animation = new Animation(clips, frameRate);
-			this.frames.addAll(animation.generateFrames());
-		} else {
-			frames.add(new AnimationFrame(session.pluginId(), session.script(), session.metadata(), true, true));
-		}
+		createFrames(session, clips);
 		jobs.addAll(createJobs());
 	}
 
-	public String getSessionId() {
-		return sessionId;
-	}
-
-	public RendererSize getSize() {
-		return size;
-	}
-
-	public Encoder getEncoder() {
-		return encoder;
-	}
-
-	public File getFile() {
-		return file;
-	}
-
-	public File getTmpFile() {
-		return tmpFile;
-	}
-
-	public int getFrameRate() {
-		return frameRate;
-	}
-
-	public int getFrameCount() {
+    public int getFrameCount() {
 		return frames.size();
 	}
 
@@ -107,14 +88,24 @@ public final class ExportSession {
 		return Collections.unmodifiableList(frames);
 	}
 
-	public void dispose() {
-		jobs.clear();
+	@Override
+	public String toString() {
+		return "[sessionId = " + sessionId + "]";
+	}
+
+	private void createFrames(Session session, List<AnimationClip> clips) {
+		if (!clips.isEmpty() && clips.getFirst().events().size() > 1) {
+			final Animation animation = new Animation(clips, frameRate);
+			this.frames.addAll(animation.generateFrames());
+		} else {
+			frames.add(new AnimationFrame(session.pluginId(), session.script(), session.metadata(), true, true));
+		}
 	}
 
 	private List<ExportJob> createJobs() {
-		final List<ExportJob> jobs = new ArrayList<ExportJob>();
-		final int frameWidth = size.getWidth();
-		final int frameHeight = size.getHeight();
+		final List<ExportJob> jobs = new ArrayList<>();
+		final int frameWidth = frameSize.width();
+		final int frameHeight = frameSize.height();
 		final int nx = frameWidth / tileSize;
 		final int ny = frameHeight / tileSize;
 		final int rx = frameWidth - tileSize * nx;
@@ -151,18 +142,16 @@ public final class ExportSession {
 	}
 
 	private ExportProfile createProfile(final int frameWidth, final int frameHeight, int tileOffsetX, int tileOffsetY) {
-		ExportProfileBuilder builder = new ExportProfileBuilder();
-		builder.withQuality(quality);
-		builder.withFrameRate(frameRate);
-		builder.withFrameWidth(frameWidth);
-		builder.withFrameHeight(frameHeight);
-		builder.withTileWidth(tileSize);
-		builder.withTileHeight(tileSize);
-		builder.withTileOffsetX(tileOffsetX);
-		builder.withTileOffsetY(tileOffsetY);
-		builder.withBorderWidth(BORDER_SIZE);
-		builder.withBorderHeight(BORDER_SIZE);
-		return builder.build();
+		return ExportProfile.builder()
+				.withFrameWidth(frameWidth)
+				.withFrameHeight(frameHeight)
+				.withTileWidth(tileSize)
+				.withTileHeight(tileSize)
+				.withTileOffsetX(tileOffsetX)
+				.withTileOffsetY(tileOffsetY)
+				.withBorderWidth(BORDER_SIZE)
+				.withBorderHeight(BORDER_SIZE)
+				.build();
 	}
 
 	private ExportJob createJob(ExportProfile profile) {

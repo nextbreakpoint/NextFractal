@@ -92,7 +92,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		if (!report.getErrors().isEmpty()) {
 			throw new RuntimeException("Failed to compile source");
 		}
-		BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), null);
+		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("cfdg", report.getCFDG());
 		bitmap.setProperty("session", session);
 		return bitmap;

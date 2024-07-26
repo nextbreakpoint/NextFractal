@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.common.Session;
 public interface PlaybackDelegate {
     void playbackStopped();
 
-    void loadSessionData(Session session, boolean continuous, boolean imeAnimation);
+    void loadSessionData(Session session, boolean continuous, boolean appendToHistory);
 
-    void updateSessionData(Session session, boolean continuous, boolean timeAnimation);
+    void updateSessionData(Session session, boolean continuous, boolean appendToHistory);
 }

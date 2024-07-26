@@ -59,7 +59,7 @@ public class HistoryPane extends BorderPane {
         this.tile = tile;
 
         listView = new ListView<>();
-        listView.setFixedCellSize(tile.getTileSize().getHeight() + PADDING);
+        listView.setFixedCellSize(tile.tileSize().height() + PADDING);
         listView.setCellFactory(view -> new HistoryListCell(tile));
         listView.setTooltip(new Tooltip("Previous images"));
 
@@ -96,7 +96,7 @@ public class HistoryPane extends BorderPane {
     }
 
     private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, RendererSize size) {
-        BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
+        BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
         bitmap.setProperty("session", session);
         listView.getItems().addFirst(bitmap);
     }

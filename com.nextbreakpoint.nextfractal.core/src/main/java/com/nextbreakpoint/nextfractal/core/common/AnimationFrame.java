@@ -26,13 +26,13 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.Objects;
 
-public record AnimationFrame(String pluginId, String script, Metadata metadata, boolean keyFrame, boolean timeAnimation) {
-    public AnimationFrame(String pluginId, String script, Metadata metadata, boolean keyFrame, boolean timeAnimation) {
+public record AnimationFrame(String pluginId, String script, Metadata metadata, boolean keyFrame, boolean repeated) {
+    public AnimationFrame(String pluginId, String script, Metadata metadata, boolean keyFrame, boolean repeated) {
         this.pluginId = Objects.requireNonNull(pluginId);
         this.script = Objects.requireNonNull(script);
         this.metadata = Objects.requireNonNull(metadata);
         this.keyFrame = keyFrame;
-        this.timeAnimation = timeAnimation;
+        this.repeated = repeated;
     }
 
     public boolean isSame(AnimationFrame other) {

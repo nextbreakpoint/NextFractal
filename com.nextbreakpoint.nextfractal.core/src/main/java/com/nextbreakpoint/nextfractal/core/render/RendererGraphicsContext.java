@@ -25,68 +25,68 @@
 package com.nextbreakpoint.nextfractal.core.render;
 
 public interface RendererGraphicsContext {
-	public static final int JOIN_MITER = 1;
-	public static final int JOIN_ROUND = 2;
-	public static final int JOIN_BEVEL = 3;
-	public static final int CAP_BUTT = 1;
-	public static final int CAP_ROUND = 2;
-	public static final int CAP_SQUARE = 3;
-	public static final int EVEN_ODD = 0;
-	public static final int NON_ZERO = 1;
+	int JOIN_MITER = 1;
+	int JOIN_ROUND = 2;
+	int JOIN_BEVEL = 3;
+	int CAP_BUTT = 1;
+	int CAP_ROUND = 2;
+	int CAP_SQUARE = 3;
+	int EVEN_ODD = 0;
+	int NON_ZERO = 1;
 
-	public void setStroke(RendererColor c);
+	void setStroke(RendererColor c);
 
-	public void setFill(RendererColor c);
+	void setFill(RendererColor c);
 	
-	public void setFont(RendererFont font);
+	void setFont(RendererFont font);
 
-	public void setWindingRule(int windingRule);
+	void setWindingRule(int windingRule);
 
-	public void rect(int x, int y, int width, int height);
+	void rect(int x, int y, int width, int height);
 	
-	public void stroke();
+	void stroke();
 	
-	public void fill();
+	void fill();
 
-	public void clip();
+	void clip();
 
-	public void beginPath();
+	void beginPath();
 
-	public void closePath();
+	void closePath();
 
-	public void moveTo(float x, float y);
+	void moveTo(float x, float y);
 	
-	public void lineTo(float x, float y);
+	void lineTo(float x, float y);
 
-	public void quadTo(float x1, float y1, float x2, float y2);
+	void quadTo(float x1, float y1, float x2, float y2);
 
-	public void cubicTo(float x1, float y1, float x2, float y2, float x3, float y3);
+	void cubicTo(float x1, float y1, float x2, float y2, float x3, float y3);
 
-//	public void arcTo(float rx, float ry, float angle, float largeArcFlag, float seepwFlag, float x, float y);
+//	void arcTo(float rx, float ry, float angle, float largeArcFlag, float seepwFlag, float x, float y);
 
-	public void strokeRect(int x, int y, int width, int height);
+	void strokeRect(int x, int y, int width, int height);
 	
-	public void fillRect(int x, int y, int width, int height);
+	void fillRect(int x, int y, int width, int height);
 	
-	public void strokeText(String text, int x, int y);
+	void strokeText(String text, int x, int y);
 
-	public void fillText(String text, int x, int y);
+	void fillText(String text, int x, int y);
 
-	public void drawImage(RendererImage image, int x, int y);
+	void drawImage(RendererImage image, int x, int y);
 
-	public void drawImage(RendererImage image, int x, int y, int w, int h);
+	void drawImage(RendererImage image, int x, int y, int w, int h);
 
-	public void clearRect(int x, int y, int width, int height);
+	void clearRect(int x, int y, int width, int height);
 
-	public void setAffine(RendererAffine t);
+	void setAffine(RendererAffine t);
 
-	public void save();
+	void save();
 
-	public void restore();
+	void restore();
 
-	public void setClip(int x, int y, int width, int height);
+	void setClip(int x, int y, int width, int height);
 
-	public void setAlpha(double alpha);
+	void setAlpha(double alpha);
 
-	public void setStrokeLine(float width, int cap, int join, float miterLimit);
+	void setStrokeLine(float width, int cap, int join, float miterLimit);
 }

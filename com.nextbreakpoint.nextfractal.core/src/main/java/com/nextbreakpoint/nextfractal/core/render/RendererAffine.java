@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.render;
 
 public interface RendererAffine {
-	public void setAffine(RendererGraphicsContext context);
+	void setAffine(RendererGraphicsContext context);
 
-	public void append(RendererAffine affine);
+	void append(RendererAffine affine);
 }

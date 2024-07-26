@@ -42,19 +42,19 @@ public class SimpleCanvas implements CFCanvas {
     public SimpleCanvas(Graphics2D g2d, RendererTile tile) {
         this.g2d = g2d;
         this.tile = tile;
-        final RendererSize tileSize = tile.getTileSize();
-        final RendererSize borderSize = tile.getBorderSize();
-        final int width = tileSize.getWidth() + borderSize.getWidth() * 2;
-        final int height = tileSize.getHeight() + borderSize.getHeight() * 2;
+        final RendererSize tileSize = tile.tileSize();
+        final RendererSize borderSize = tile.borderSize();
+        final int width = tileSize.width() + borderSize.width() * 2;
+        final int height = tileSize.height() + borderSize.height() * 2;
         size = new RendererSize(width, height);
     }
 
     public int getWidth() {
-        return size.getWidth();
+        return size.width();
     }
 
     public int getHeight() {
-        return size.getHeight();
+        return size.height();
     }
 
     public void primitive(int shapeType, double[] color, AffineTransform transform) {
@@ -152,17 +152,17 @@ public class SimpleCanvas implements CFCanvas {
     }
 
     public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
-        final RendererSize imageSize = tile.getImageSize();
-        final RendererSize borderSize = tile.getBorderSize();
-        final RendererPoint tileOffset = tile.getTileOffset();
+        final RendererSize imageSize = tile.imageSize();
+        final RendererSize borderSize = tile.borderSize();
+        final RendererPoint tileOffset = tile.tileOffset();
         normTransform = new AffineTransform();
-//        normTransform.translate(0, imageSize.getHeight());
+//        normTransform.translate(0, imageSize.height());
 //        normTransform.scale(1, -1);
-        normTransform.translate(-tileOffset.getX() + borderSize.getWidth(), -tileOffset.getY() + borderSize.getHeight());
-        normTransform.translate(-(currWidth - imageSize.getWidth()) / 2, -(currHeight - imageSize.getHeight()) / 2);
-//        normTransform.translate(0, imageSize.getHeight() / 2);
+        normTransform.translate(-tileOffset.x() + borderSize.width(), -tileOffset.y() + borderSize.height());
+        normTransform.translate(-(currWidth - imageSize.width()) / 2d, -(currHeight - imageSize.height()) / 2d);
+//        normTransform.translate(0, imageSize.height() / 2);
 //        normTransform.scale(1, -1);
-//        normTransform.translate(0, -imageSize.getHeight() / 2);
+//        normTransform.translate(0, -imageSize.height() / 2);
     }
 
     public void clear(double[] backgroundColor) {

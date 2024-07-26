@@ -69,4 +69,9 @@ public interface EncoderContext {
 	 * @return
 	 */
 	int getFrameRate();
+
+	/**
+	 * @return
+	 */
+	String getSessionId();
 }

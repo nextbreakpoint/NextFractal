@@ -174,8 +174,8 @@ public final class XaosRenderer extends Renderer {
 				contentRendererStrategy = new MandelbrotRendererStrategy(contentRendererFractal);
 			}
 			contentRendererStrategy.prepare();
-			int width = getSize().getWidth();
-			int height = getSize().getHeight();
+			int width = getSize().width();
+			int height = getSize().height();
 			contentRendererData.setSize(width, height, contentRendererFractal.getStateSize());
 			contentRendererData.setPoint(contentRendererFractal.getPoint());
 			if (copyOfRegionChanged) {
@@ -1240,7 +1240,7 @@ public final class XaosRenderer extends Renderer {
 		if (XaosConstants.DUMP) {
 			logger.fine("Do symetry...");
 		}
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		int from_offset = 0;
 		int to_offset = 0;
 		int i = 0;
@@ -1291,7 +1291,7 @@ public final class XaosRenderer extends Renderer {
 		}
 		final XaosChunk[] table = movetable.data;
 		XaosChunk tmpData = null;
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		int new_offset = 0;
 		int old_offset = 0;
 		int from = 0;
@@ -1323,7 +1323,7 @@ public final class XaosRenderer extends Renderer {
 		}
 		final XaosChunk[] table = filltable.data;
 		XaosChunk tmpData = null;
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		int from_offset = 0;
 		int to_offset = 0;
 		int from = 0;
@@ -1417,7 +1417,7 @@ public final class XaosRenderer extends Renderer {
 		if (XaosConstants.PRINT_CALCULATE) {
 			logger.fine("Calculate line " + realloc.pos);
 		}
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		final double position = realloc.position;
 		final int r = realloc.pos;
 		int offset = r * rowsize;
@@ -1550,7 +1550,7 @@ public final class XaosRenderer extends Renderer {
 		if (XaosConstants.PRINT_CALCULATE) {
 			logger.fine("Calculate column " + realloc.pos);
 		}
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		final double position = realloc.position;
 		final int r = realloc.pos;
 		int offset = r;
@@ -1687,7 +1687,7 @@ public final class XaosRenderer extends Renderer {
 		if (XaosConstants.DUMP) {
 			logger.fine("Refresh line...");
 		}
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		int offset = realloc.pos * rowsize;
 		int c = 0;
 		RendererState p = xaosRendererData.newPoint();
@@ -1716,7 +1716,7 @@ public final class XaosRenderer extends Renderer {
 		if (XaosConstants.DUMP) {
 			logger.fine("Refresh column...");
 		}
-		final int rowsize = getSize().getWidth();
+		final int rowsize = getSize().width();
 		int offset = realloc.pos;
 		int c = 0;
 		RendererState p = xaosRendererData.newPoint();
@@ -1774,29 +1774,29 @@ public final class XaosRenderer extends Renderer {
 	 */
 	@Override
 	protected RendererTile computeOptimalBufferSize(RendererTile tile, double rotation) {
-		RendererSize tileSize = tile.getTileSize();
-		RendererSize imageSize = tile.getImageSize();
-		RendererSize borderSize = tile.getBorderSize();
-		RendererPoint tileOffset = tile.getTileOffset();
+		RendererSize tileSize = tile.tileSize();
+		RendererSize imageSize = tile.imageSize();
+		RendererSize borderSize = tile.borderSize();
+		RendererPoint tileOffset = tile.tileOffset();
 		if (rotation == 0) {
 			return new RendererTile(imageSize, tileSize, tileOffset, borderSize);
 		} else {
 			RendererSize newImageSize = computeBufferSize(imageSize);
 			if (overlapping) {
-				int width = (newImageSize.getWidth() - imageSize.getWidth()) / 2;
-				int height = (newImageSize.getHeight() - imageSize.getHeight()) / 2;
+				int width = (newImageSize.width() - imageSize.width()) / 2;
+				int height = (newImageSize.height() - imageSize.height()) / 2;
 				RendererSize newBorderSize = new RendererSize(width, height);
 				return new RendererTile(imageSize, tileSize, tileOffset, newBorderSize);
 			} else {
-				int hcells = (int) Math.rint(imageSize.getWidth() / (double)tileSize.getWidth());
-				int vcells = (int) Math.rint(imageSize.getHeight() / (double)tileSize.getHeight());
-				int hpos = (int) Math.rint(tileOffset.getX() / (double)tileSize.getWidth());
-				int vpos = (int) Math.rint(tileOffset.getY() / (double)tileSize.getHeight());
-				int width = (int) Math.rint(newImageSize.getWidth() / (double)hcells);
-				int height = (int) Math.rint(newImageSize.getHeight() / (double)vcells);
+				int hcells = (int) Math.rint(imageSize.width() / (double)tileSize.width());
+				int vcells = (int) Math.rint(imageSize.height() / (double)tileSize.height());
+				int hpos = (int) Math.rint(tileOffset.x() / (double)tileSize.width());
+				int vpos = (int) Math.rint(tileOffset.y() / (double)tileSize.height());
+				int width = (int) Math.rint(newImageSize.width() / (double)hcells);
+				int height = (int) Math.rint(newImageSize.height() / (double)vcells);
 				RendererSize newTileSize = new RendererSize(width, height);
-				int offsetX = (int) Math.rint(newTileSize.getWidth() * hpos);
-				int offsetY = (int) Math.rint(newTileSize.getHeight() * vpos);
+				int offsetX = (int) Math.rint(newTileSize.width() * hpos);
+				int offsetY = (int) Math.rint(newTileSize.height() * vpos);
 				RendererPoint newTileOffset = new RendererPoint(offsetX, offsetY);
 				return new RendererTile(newImageSize, newTileSize, newTileOffset, borderSize);
 			}
@@ -1809,25 +1809,25 @@ public final class XaosRenderer extends Renderer {
 	 */
 	@Override
 	protected RendererAffine createTransform(double rotation) {
-		RendererSize baseImageSize = tile.getImageSize();
-		final RendererSize tileSize = buffer.getTile().getTileSize();
-		final RendererSize imageSize = buffer.getTile().getImageSize();
-		final RendererSize borderSize = buffer.getTile().getBorderSize();
-		final RendererPoint tileOffset = buffer.getTile().getTileOffset();
-		int offsetX = borderSize.getWidth();
-		int offsetY = borderSize.getHeight();
-		int rotCenterX = offsetX + imageSize.getWidth() / 2 - tileOffset.getX();
-		int rotCenterY = offsetY + imageSize.getHeight() / 2 + tileSize.getHeight() - imageSize.getHeight() - tileOffset.getY();
+		RendererSize baseImageSize = tile.imageSize();
+		final RendererSize tileSize = buffer.getTile().tileSize();
+		final RendererSize imageSize = buffer.getTile().imageSize();
+		final RendererSize borderSize = buffer.getTile().borderSize();
+		final RendererPoint tileOffset = buffer.getTile().tileOffset();
+		int offsetX = borderSize.width();
+		int offsetY = borderSize.height();
+		int rotCenterX = offsetX + imageSize.width() / 2 - tileOffset.x();
+		int rotCenterY = offsetY + imageSize.height() / 2 + tileSize.height() - imageSize.height() - tileOffset.y();
 		if (!overlapping) {
-			offsetX += (imageSize.getWidth() - baseImageSize.getWidth()) / 2;
-			offsetY -= (imageSize.getHeight() - baseImageSize.getHeight()) / 2;
+			offsetX += (imageSize.width() - baseImageSize.width()) / 2;
+			offsetY -= (imageSize.height() - baseImageSize.height()) / 2;
 		}
-		final int centerY = tileSize.getHeight() / 2;
+		final int centerY = tileSize.height() / 2;
 		final RendererAffine affine = renderFactory.createAffine();
 		affine.append(renderFactory.createTranslateAffine(0, +centerY));
 		affine.append(renderFactory.createScaleAffine(1, -1));
 		affine.append(renderFactory.createTranslateAffine(0, -centerY));
-		affine.append(renderFactory.createTranslateAffine(tileOffset.getX() - offsetX, tileOffset.getY() - offsetY));
+		affine.append(renderFactory.createTranslateAffine(tileOffset.x() - offsetX, tileOffset.y() - offsetY));
 		affine.append(renderFactory.createRotateAffine(rotation, rotCenterX, rotCenterY));
 		return affine;
 	}

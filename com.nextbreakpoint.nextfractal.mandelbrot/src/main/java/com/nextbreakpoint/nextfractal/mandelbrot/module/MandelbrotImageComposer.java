@@ -76,8 +76,8 @@ public class MandelbrotImageComposer implements ImageComposer {
     @Override
     public IntBuffer renderImage(String script, Metadata data) {
         MandelbrotMetadata metadata = (MandelbrotMetadata) data;
-        RendererSize suggestedSize = tile.getTileSize();
-        BufferedImage image = new BufferedImage(suggestedSize.getWidth(), suggestedSize.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        RendererSize suggestedSize = tile.tileSize();
+        BufferedImage image = new BufferedImage(suggestedSize.width(), suggestedSize.height(), BufferedImage.TYPE_INT_ARGB);
         IntBuffer buffer = IntBuffer.wrap(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         Graphics2D g2d = null;
         try {
@@ -96,13 +96,13 @@ public class MandelbrotImageComposer implements ImageComposer {
             Java2DRendererFactory renderFactory = new Java2DRendererFactory();
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             if (metadata.getOptions().isShowPreview() && !metadata.isJulia()) {
-                int previewWidth = (int) Math.rint(tile.getImageSize().getWidth() * metadata.getOptions().getPreviewSize().x());
-                int previewHeight = (int) Math.rint(tile.getImageSize().getHeight() * metadata.getOptions().getPreviewSize().y());
+                int previewWidth = (int) Math.rint(tile.imageSize().width() * metadata.getOptions().getPreviewSize().x());
+                int previewHeight = (int) Math.rint(tile.imageSize().height() * metadata.getOptions().getPreviewSize().y());
                 RendererSize tileSize = new RendererSize(previewWidth, previewHeight);
-                int x = (int) Math.rint(metadata.getOptions().getPreviewOrigin().x() * tile.getImageSize().getWidth());
-                int y = (int) Math.rint(metadata.getOptions().getPreviewOrigin().y() * tile.getImageSize().getHeight());
-                RendererPoint tileOffset = new RendererPoint(x, tile.getImageSize().getHeight() - previewHeight + y);
-                renderer.setPreviewTile(new RendererTile(tile.getImageSize(), tileSize, tileOffset, new RendererSize(0, 0)));
+                int x = (int) Math.rint(metadata.getOptions().getPreviewOrigin().x() * tile.imageSize().width());
+                int y = (int) Math.rint(metadata.getOptions().getPreviewOrigin().y() * tile.imageSize().height());
+                RendererPoint tileOffset = new RendererPoint(x, tile.imageSize().height() - previewHeight + y);
+                renderer.setPreviewTile(new RendererTile(tile.imageSize(), tileSize, tileOffset, new RendererSize(0, 0)));
             }
             renderer.setOpaque(opaque);
             Double4D translation = metadata.getTranslation();
@@ -129,16 +129,16 @@ public class MandelbrotImageComposer implements ImageComposer {
             renderer.copyImage(renderContext);
             RendererRegion region = new RendererRegion(orbit.getInitialRegion());
             renderContext.setAffine(createTransform(renderFactory, tile));
-            renderContext.setStrokeLine(tile.getImageSize().getWidth() * 0.002f, RendererGraphicsContext.CAP_BUTT, RendererGraphicsContext.JOIN_MITER, 1f);
+            renderContext.setStrokeLine(tile.imageSize().width() * 0.002f, RendererGraphicsContext.CAP_BUTT, RendererGraphicsContext.JOIN_MITER, 1f);
             if (metadata.getOptions().isShowTraps()) {
-                drawTraps(renderFactory, renderContext, tile.getImageSize(), region, metadata, orbit.getTraps());
+                drawTraps(renderFactory, renderContext, tile.imageSize(), region, metadata, orbit.getTraps());
             }
             if (metadata.getOptions().isShowOrbit()) {
                 java.util.List<Number[]> states = renderOrbit(orbit, constant);
-                drawOrbit(renderFactory, renderContext, tile.getImageSize(), region, metadata, states);
+                drawOrbit(renderFactory, renderContext, tile.imageSize(), region, metadata, states);
             }
             if (metadata.getOptions().isShowPoint()) {
-                drawPoint(renderFactory, renderContext, tile.getImageSize(), region, metadata);
+                drawPoint(renderFactory, renderContext, tile.imageSize(), region, metadata);
             }
             aborted = renderer.isInterrupted();
         } catch (Throwable e) {
@@ -152,14 +152,14 @@ public class MandelbrotImageComposer implements ImageComposer {
     }
 
     protected RendererAffine createTransform(RendererFactory factory, RendererTile tile) {
-        final RendererSize imageSize = tile.getImageSize();
-        final RendererPoint tileOffset = tile.getTileOffset();
-        final int centerY = imageSize.getHeight() / 2;
+        final RendererSize imageSize = tile.imageSize();
+        final RendererPoint tileOffset = tile.tileOffset();
+        final int centerY = imageSize.height() / 2;
         final RendererAffine affine = factory.createAffine();
         affine.append(factory.createTranslateAffine(0, +centerY));
         affine.append(factory.createScaleAffine(1, -1));
         affine.append(factory.createTranslateAffine(0, -centerY));
-        affine.append(factory.createTranslateAffine(-tileOffset.getX(), tileOffset.getY()));
+        affine.append(factory.createTranslateAffine(-tileOffset.x(), tileOffset.y()));
         return affine;
     }
 
@@ -181,7 +181,7 @@ public class MandelbrotImageComposer implements ImageComposer {
 
     @Override
     public RendererSize getSize() {
-        return tile.getTileSize();
+        return tile.tileSize();
     }
 
     public boolean isInterrupted() {
@@ -197,10 +197,10 @@ public class MandelbrotImageComposer implements ImageComposer {
         double ty = t[1];
         double tz = t[2];
         double a = -r[2] * Math.PI / 180;
-        double dw = imageSize.getWidth();
-        double dh = imageSize.getWidth() * size.i() / size.r();
-        double cx = imageSize.getWidth() / 2d;
-        double cy = imageSize.getHeight() / 2d;
+        double dw = imageSize.width();
+        double dh = imageSize.width() * size.i() / size.r();
+        double cx = imageSize.width() / 2d;
+        double cy = imageSize.height() / 2d;
         gc.setStroke(factory.createColor(1, 1, 0, 1));
         double[] point = metadata.getPoint().toArray();
         double zx = point[0];
@@ -212,7 +212,7 @@ public class MandelbrotImageComposer implements ImageComposer {
         int x = (int) Math.rint(qx * dw + cx);
         int y = (int) Math.rint(cy - qy * dh);
         gc.beginPath();
-        int d = (int) Math.rint(imageSize.getWidth() * 0.0025);
+        int d = (int) Math.rint(imageSize.width() * 0.0025);
         gc.moveTo(x - d, y - d);
         gc.lineTo(x + d, y - d);
         gc.lineTo(x + d, y + d);
@@ -231,10 +231,10 @@ public class MandelbrotImageComposer implements ImageComposer {
             double ty = t[1];
             double tz = t[2];
             double a = -r[2] * Math.PI / 180;
-            double dw = imageSize.getWidth();
-            double dh = imageSize.getWidth() * size.i() / size.r();
-            double cx = imageSize.getWidth() / 2d;
-            double cy = imageSize.getHeight() / 2d;
+            double dw = imageSize.width();
+            double dh = imageSize.width() * size.i() / size.r();
+            double cx = imageSize.width() / 2d;
+            double cy = imageSize.height() / 2d;
             gc.setStroke(factory.createColor(1, 0, 0, 1));
             Number[] state = states.get(0);
             double zx = state[0].r();
@@ -273,10 +273,10 @@ public class MandelbrotImageComposer implements ImageComposer {
             double ty = t[1];
             double tz = t[2];
             double a = -r[2] * Math.PI / 180;
-            double dw = imageSize.getWidth();
-            double dh = imageSize.getWidth() * size.i() / size.r();
-            double cx = imageSize.getWidth() / 2d;
-            double cy = imageSize.getHeight() / 2d;
+            double dw = imageSize.width();
+            double dh = imageSize.width() * size.i() / size.r();
+            double cx = imageSize.width() / 2d;
+            double cy = imageSize.height() / 2d;
             gc.setStroke(factory.createColor(1, 1, 0, 1));
             for (Trap trap : traps) {
                 java.util.List<Number> points = trap.toPoints();

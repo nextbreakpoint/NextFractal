@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.runtime.export;
 
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
-import com.nextbreakpoint.nextfractal.core.export.ExportState;
+import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 
 public interface ExportServiceDelegate {
-    void notifyUpdate(ExportSession session, ExportState state, float progress);
+    void notifyUpdate(ExportSession session, ExportSessionState state, float progress);
 }

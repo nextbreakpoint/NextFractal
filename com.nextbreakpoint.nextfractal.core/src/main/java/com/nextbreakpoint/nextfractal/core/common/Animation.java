@@ -99,7 +99,7 @@ public class Animation {
             }
         }
         logger.fine("3) frame count " + frames.size() + ", frame rate " + frameRate + " fps");
-        logger.info("Generated " + frames.size() + " frames");
+        logger.info("Total frames generated: " + frames.size());
         return frames;
     }
 

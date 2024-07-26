@@ -46,7 +46,7 @@ public class HistoryListCell extends ListCell<Bitmap> {
 
 	public HistoryListCell(RendererTile tile) {
 		this.tile = tile;
-		canvas = new Canvas(tile.getTileSize().getWidth(), tile.getTileSize().getHeight());
+		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 		label = new Label();
 		label.getStyleClass().add("text-small");
 		pane = new BorderPane();
@@ -71,8 +71,8 @@ public class HistoryListCell extends ListCell<Bitmap> {
 				image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
 				GraphicsContext g2d = canvas.getGraphicsContext2D();
 				Affine affine = new Affine();
-				int x = (tile.getTileSize().getWidth() - bitmap.getWidth()) / 2;
-				int y = (tile.getTileSize().getHeight() - bitmap.getHeight()) / 2;
+				int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+				int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
 				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 				affine.append(Affine.scale(1, -1));
 				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));

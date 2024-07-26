@@ -109,7 +109,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		DSLCompiler compiler = new DSLCompiler();
 		Orbit orbit = compiler.compileOrbit(result).create();
 		Color color = compiler.compileColor(result).create();
-		BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), null);
+		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("orbit", orbit);
 		bitmap.setProperty("color", color);
 		bitmap.setProperty("session", session);

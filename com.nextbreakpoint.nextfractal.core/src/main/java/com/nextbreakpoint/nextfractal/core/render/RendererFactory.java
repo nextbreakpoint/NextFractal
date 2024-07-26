@@ -25,19 +25,19 @@
 package com.nextbreakpoint.nextfractal.core.render;
 
 public interface RendererFactory {
-	public RendererBuffer createBuffer(int width, int height);
+	RendererBuffer createBuffer(int width, int height);
 	
-	public RendererGraphicsContext createGraphicsContext(Object context);
+	RendererGraphicsContext createGraphicsContext(Object context);
 
-	public RendererAffine createTranslateAffine(double x, double y);
+	RendererAffine createTranslateAffine(double x, double y);
 
-	public RendererAffine createRotateAffine(double a, double centerX, double centerY);
+	RendererAffine createRotateAffine(double a, double centerX, double centerY);
 
-	public RendererAffine createScaleAffine(double x, double y);
+	RendererAffine createScaleAffine(double x, double y);
 
-	public RendererColor createColor(double red, double green, double blue, double opacity);
+	RendererColor createColor(double red, double green, double blue, double opacity);
 
-	public RendererAffine createAffine();
+	RendererAffine createAffine();
 
-	public RendererAffine createAffine(double[] matrix);
+	RendererAffine createAffine(double[] matrix);
 }

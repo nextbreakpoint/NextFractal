@@ -53,7 +53,7 @@ import com.nextbreakpoint.nextfractal.core.event.SessionStatusChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
-import com.nextbreakpoint.nextfractal.core.export.ExportState;
+import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportPane;
 import com.nextbreakpoint.nextfractal.core.javafx.HistoryPane;
@@ -420,9 +420,9 @@ public class MainSidePane extends BorderPane {
         rootPane.setDisable(false);
     }
 
-    private void handleExportSessionStateChanged(JobsPane jobsPane, ExportSession exportSession, ExportState state, Float progress) {
+    private void handleExportSessionStateChanged(JobsPane jobsPane, ExportSession exportSession, ExportSessionState state, Float progress) {
         log.info("Session " + exportSession.getSessionId() + " state " + state.name());
-        if (state == ExportState.FINISHED) {
+        if (state == ExportSessionState.FINISHED) {
             jobsPane.removeSession(exportSession);
         } else {
             jobsPane.updateSession(exportSession, state, progress);

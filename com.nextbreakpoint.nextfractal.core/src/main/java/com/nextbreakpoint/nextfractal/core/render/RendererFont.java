@@ -25,5 +25,5 @@
 package com.nextbreakpoint.nextfractal.core.render;
 
 public interface RendererFont {
-	public void setFont(RendererGraphicsContext context);
+	void setFont(RendererGraphicsContext context);
 }

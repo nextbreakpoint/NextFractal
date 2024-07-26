@@ -57,7 +57,7 @@ public class ClipListCell extends ListCell<Bitmap> {
 	public ClipListCell(RendererTile tile, ClipListCellDelegate delegate) {
 		this.tile = tile;
 		this.delegate = delegate;
-		canvas = new Canvas(tile.getTileSize().getWidth(), tile.getTileSize().getHeight());
+		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 		label = new Label();
 		label.getStyleClass().add("text-small");
 		pane = new BorderPane();
@@ -148,8 +148,8 @@ public class ClipListCell extends ListCell<Bitmap> {
 				WritableImage image = getWritableImage(bitmap);
 				GraphicsContext g2d = canvas.getGraphicsContext2D();
 				Affine affine = new Affine();
-				int x = (tile.getTileSize().getWidth() - bitmap.getWidth()) / 2;
-				int y = (tile.getTileSize().getHeight() - bitmap.getHeight()) / 2;
+				int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+				int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
 				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 				affine.append(Affine.scale(1, -1));
 				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));

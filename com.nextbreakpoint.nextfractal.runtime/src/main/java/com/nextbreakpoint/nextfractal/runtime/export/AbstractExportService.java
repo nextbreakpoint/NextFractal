@@ -24,10 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.export;
 
-import com.nextbreakpoint.nextfractal.core.export.ExportHandle;
+import com.nextbreakpoint.nextfractal.core.export.ExportSessionHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportService;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
-import com.nextbreakpoint.nextfractal.core.export.ExportState;
+import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 import lombok.extern.java.Log;
 
 import java.util.Collection;
@@ -45,8 +45,8 @@ import java.util.logging.Level;
 
 @Log
 public abstract class AbstractExportService implements ExportService {
-	private final HashMap<String, ExportHandle> sessions = new LinkedHashMap<>();
-	private final List<ExportHandle> finishedSessions = new LinkedList<>();
+	private final HashMap<String, ExportSessionHandle> exportHandles = new LinkedHashMap<>();
+	private final List<ExportSessionHandle> completedExportHandles = new LinkedList<>();
 	private final ReentrantLock lock = new ReentrantLock();
 	private final ScheduledExecutorService executor;
 	
@@ -68,16 +68,16 @@ public abstract class AbstractExportService implements ExportService {
 	public final void startSession(ExportSession session) {
 		try {
 			lock.lock();
-			ExportHandle exportHandle = sessions.get(session.getSessionId());
+			ExportSessionHandle exportHandle = exportHandles.get(session.getSessionId());
 			if (exportHandle == null) {
-				exportHandle = new ExportHandle(session);
+				exportHandle = new ExportSessionHandle(session);
 			}
-			if (exportHandle.getState() != ExportState.SUSPENDED) {
+			if (exportHandle.getState() != ExportSessionState.SUSPENDED) {
 				throw new IllegalStateException("Session is not suspended");
 			}
-			exportHandle.setState(ExportState.READY);
+			exportHandle.setState(ExportSessionState.READY);
 			exportHandle.setCancelled(false);
-			sessions.put(session.getSessionId(), exportHandle);
+			exportHandles.put(session.getSessionId(), exportHandle);
 		} finally {
 			lock.unlock();
 		}
@@ -86,7 +86,7 @@ public abstract class AbstractExportService implements ExportService {
 	public final void stopSession(ExportSession session) {
 		try {
 			lock.lock();
-			ExportHandle exportHandle = sessions.get(session.getSessionId());
+			ExportSessionHandle exportHandle = exportHandles.get(session.getSessionId());
 			if (exportHandle != null) {
 				exportHandle.setCancelled(true);
 				cancelTasks(exportHandle);
@@ -99,7 +99,7 @@ public abstract class AbstractExportService implements ExportService {
 	public final void suspendSession(ExportSession session) {
 		try {
 			lock.lock();
-			ExportHandle exportHandle = sessions.get(session.getSessionId());
+			ExportSessionHandle exportHandle = exportHandles.get(session.getSessionId());
 			if (exportHandle != null) {
 				exportHandle.setCancelled(false);
 				cancelTasks(exportHandle);
@@ -112,12 +112,12 @@ public abstract class AbstractExportService implements ExportService {
 	public final void resumeSession(ExportSession session) {
 		try {
 			lock.lock();
-			ExportHandle exportHandle = sessions.get(session.getSessionId());
+			ExportSessionHandle exportHandle = exportHandles.get(session.getSessionId());
 			if (exportHandle != null) {
-				if (exportHandle.getState() != ExportState.SUSPENDED) {
+				if (exportHandle.getState() != ExportSessionState.SUSPENDED) {
 					throw new IllegalStateException("Session is not suspended");
 				}
-				exportHandle.setState(ExportState.DISPATCHED);
+				exportHandle.setState(ExportSessionState.DISPATCHED);
 				exportHandle.setCancelled(false);
 				resumeTasks(exportHandle);
 			}
@@ -128,17 +128,17 @@ public abstract class AbstractExportService implements ExportService {
 
 	private void lockAndUpdateSessions() {
 		try {
-			LinkedList<ExportHandle> copyOfSessions = new LinkedList<>();
+			LinkedList<ExportSessionHandle> exportHandles = new LinkedList<>();
 			try {
 				lock.lock();
-				copyOfSessions.addAll(sessions.values());
+				exportHandles.addAll(this.exportHandles.values());
 			} finally {
 				lock.unlock();
 			}
-			Collection<ExportHandle> finished = updateInBackground(copyOfSessions);
+			Collection<ExportSessionHandle> completedExportHandles = updateInBackground(exportHandles);
 			try {
 				lock.lock();
-				finishedSessions.addAll(finished);
+				this.completedExportHandles.addAll(completedExportHandles);
 			} finally {
 				lock.unlock();
 			}
@@ -149,30 +149,30 @@ public abstract class AbstractExportService implements ExportService {
 
 	private void notifyUpdateSessions() {
 		try {
-			LinkedList<ExportHandle> copyOfSessions = new LinkedList<>();
+			LinkedList<ExportSessionHandle> exportHandles = new LinkedList<>();
 			try {
 				lock.lock();
-				copyOfSessions.addAll(sessions.values());
-				finishedSessions.forEach(session -> sessions.remove(session.getSessionId()));
-				finishedSessions.clear();
+				exportHandles.addAll(this.exportHandles.values());
+				completedExportHandles.forEach(exportHandle -> this.exportHandles.remove(exportHandle.getSessionId()));
+				completedExportHandles.clear();
 			} finally {
 				lock.unlock();
 			}
-			notifyUpdate(copyOfSessions);
+			notifyUpdate(exportHandles);
 		} catch (Exception e) {
 			log.log(Level.WARNING, "Can't notify updates", e);
 		}
 	}
 
-	protected abstract Collection<ExportHandle> updateInBackground(Collection<ExportHandle> holders);
+	protected abstract Collection<ExportSessionHandle> updateInBackground(Collection<ExportSessionHandle> holders);
 
-	protected abstract void notifyUpdate(Collection<ExportHandle> holders);
+	protected abstract void notifyUpdate(Collection<ExportSessionHandle> holders);
 
-	protected abstract void resumeTasks(ExportHandle exportHandle);
+	protected abstract void resumeTasks(ExportSessionHandle exportHandle);
 
-	protected abstract void cancelTasks(ExportHandle exportHandle);
+	protected abstract void cancelTasks(ExportSessionHandle exportHandle);
 
 	public int getSessionCount() {
-		return sessions.size();
+		return exportHandles.size();
 	}
 }

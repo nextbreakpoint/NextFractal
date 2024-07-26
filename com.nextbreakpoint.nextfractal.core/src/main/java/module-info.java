@@ -39,6 +39,4 @@ module com.nextbreakpoint.nextfractal.core {
     exports com.nextbreakpoint.nextfractal.core.event;
     uses com.nextbreakpoint.nextfractal.core.common.CoreFactory;
     uses com.nextbreakpoint.nextfractal.core.encode.Encoder;
-    opens com.nextbreakpoint.nextfractal.core.common to com.fasterxml.jackson.databind;
-    opens com.nextbreakpoint.nextfractal.core.editor to com.fasterxml.jackson.databind;
 }

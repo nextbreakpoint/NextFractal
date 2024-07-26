@@ -595,7 +595,7 @@ public class BrowsePane extends BorderPane {
     private void loadItem(GridItem item, File file) {
         try {
             if (!item.isAborted() && delegate != null) {
-                final BrowseBitmap bitmap = delegate.createBitmap(file, tile.getTileSize());
+                final BrowseBitmap bitmap = delegate.createBitmap(file, tile.tileSize());
 
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }

@@ -61,11 +61,12 @@ public interface Encoder {
 
 	/**
 	 * @param handle
-	 * @param index
-	 * @param count
+	 * @param frameIndex
+	 * @param repeatFrameCount
+	 * @param totalFrameCount
 	 * @throws EncoderException
 	 */
-	void encode(EncoderHandle handle, int index, int count) throws EncoderException;
+	void encode(EncoderHandle handle, int frameIndex, int repeatFrameCount, int totalFrameCount) throws EncoderException;
 
 	/**
 	 * @return

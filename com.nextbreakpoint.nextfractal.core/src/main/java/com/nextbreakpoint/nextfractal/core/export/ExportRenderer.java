@@ -24,8 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+
 import java.util.concurrent.Future;
 
 public interface ExportRenderer {
-	Future<ExportJobHandle> dispatch(ExportJobHandle job);
+	Future<ExportJobHandle> dispatch(ExportJobHandle job, AnimationFrame frame);
 }

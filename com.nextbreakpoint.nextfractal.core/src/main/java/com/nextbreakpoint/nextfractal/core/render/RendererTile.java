@@ -24,69 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.core.render;
 
-/**
- * @author Andrea Medeghini
- */
-public class RendererTile {
-	private final RendererSize imageSize;
-	private final RendererSize tileSize;
-	private final RendererPoint tileOffset;
-	private final RendererSize borderSize;
-
-	/**
-	 * @param imageSize
-	 * @param tileSize
-	 * @param tileOffset
-	 * @param borderSize
-	 */
-	public RendererTile(final RendererSize imageSize, final RendererSize tileSize, final RendererPoint tileOffset, final RendererSize borderSize) {
-		this.imageSize = imageSize;
-		this.tileSize = tileSize;
-		this.tileOffset = tileOffset;
-		this.borderSize = borderSize;
-	}
-
-	/**
-	 * @return the imageSize
-	 */
-	public RendererSize getImageSize() {
-		return imageSize;
-	}
-
-	/**
-	 * @return the borderSize
-	 */
-	public RendererSize getBorderSize() {
-		return borderSize;
-	}
-
-	/**
-	 * @return the tileOffset
-	 */
-	public RendererPoint getTileOffset() {
-		return tileOffset;
-	}
-
-	/**
-	 * @return the tileSize
-	 */
-	public RendererSize getTileSize() {
-		return tileSize;
-	}
-
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append(imageSize.toString());
-		builder.append(", ");
-		builder.append(tileSize.toString());
-		builder.append(", ");
-		builder.append(tileOffset.toString());
-		builder.append(", ");
-		builder.append(borderSize.toString());
-		return builder.toString();
-	}
-}
+public record RendererTile(
+	RendererSize imageSize,
+	RendererSize tileSize,
+	RendererPoint tileOffset,
+	RendererSize borderSize
+){}

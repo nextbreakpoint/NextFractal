@@ -48,7 +48,7 @@ public class BrowseListCell extends ListCell<Bitmap[]> {
 		pane = new HBox(0);
 		canvas = new Canvas[numOfColumns];
 		for (int i = 0 ; i < numOfColumns; i++) {
-			canvas[i] = new Canvas(tile.getTileSize().getWidth(), tile.getTileSize().getHeight());
+			canvas[i] = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 			pane.getChildren().add(canvas[i]);
 		}
 	}
@@ -70,11 +70,11 @@ public class BrowseListCell extends ListCell<Bitmap[]> {
 	}
 
 	private void renderFractal(GraphicsContext g2d, Bitmap bitmap) {
-		WritableImage image = new WritableImage(size.getWidth(), size.getHeight());
+		WritableImage image = new WritableImage(size.width(), size.height());
 		image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
 		Affine affine = new Affine();
-		int x = (tile.getTileSize().getWidth() - size.getWidth()) / 2;
-		int y = (tile.getTileSize().getHeight() - size.getHeight()) / 2;
+		int x = (tile.tileSize().width() - size.width()) / 2;
+		int y = (tile.tileSize().height() - size.height()) / 2;
 		affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 		affine.append(Affine.scale(1, -1));
 		affine.append(Affine.translate(0, -image.getHeight() / 2 - y));

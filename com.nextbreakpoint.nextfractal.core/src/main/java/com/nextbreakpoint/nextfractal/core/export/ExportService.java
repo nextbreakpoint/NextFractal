@@ -25,15 +25,15 @@
 package com.nextbreakpoint.nextfractal.core.export;
 
 public interface ExportService {
-	public void shutdown();
+	void shutdown();
 
-	public void startSession(ExportSession session);
+	void startSession(ExportSession session);
 
-	public void stopSession(ExportSession session);
+	void stopSession(ExportSession session);
 
-	public void suspendSession(ExportSession session);
+	void suspendSession(ExportSession session);
 
-	public void resumeSession(ExportSession session);
+	void resumeSession(ExportSession session);
 
     int getSessionCount();
 }

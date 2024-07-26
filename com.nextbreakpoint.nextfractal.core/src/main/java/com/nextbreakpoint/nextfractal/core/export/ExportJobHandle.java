@@ -24,54 +24,48 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
+import lombok.Getter;
+
+import java.util.Objects;
+
 public class ExportJobHandle {
+    @Getter
     private final ExportJob job;
-    private volatile ExportProfile profile;
+
     private volatile ExportJobState state;
     private volatile Throwable error;
 
     public ExportJobHandle(ExportJob job) {
-        this.job = job;
+        this.job = Objects.requireNonNull(job);
         this.state = ExportJobState.READY;
     }
 
-    public ExportProfile getProfile() {
-        return profile;
-    }
-
-    public ExportJobState getState() {
-        return state;
-    }
-
-    public Throwable getError() {
+    public synchronized Throwable getError() {
         return error;
     }
 
-    public ExportJob getJob() {
-        return job;
+    public synchronized ExportJobState getState() {
+        return state;
     }
 
-    public void setProfile(ExportProfile profile) {
-        this.profile = profile;
-    }
-
-    public void setError(Throwable error) {
+    public synchronized void setState(ExportJobState state, Throwable error) {
+        this.state = state;
         this.error = error;
     }
 
     public void setState(ExportJobState state) {
-        this.state = state;
+        setState(state, null);
     }
 
-    public boolean isInterrupted() {
+    public synchronized boolean isInterrupted() {
         return state == ExportJobState.INTERRUPTED;
     }
 
-    public boolean isCompleted() {
+    public synchronized boolean isCompleted() {
         return state == ExportJobState.COMPLETED;
     }
 
-    public boolean isReady() {
+    public synchronized boolean isReady() {
         return state == ExportJobState.READY;
     }
 }

@@ -36,6 +36,6 @@ public class CFDGInterpreter {
     public CFDGRenderer create(RendererSize imageSize, String seed, CFDGLogger logger) {
         cfdg.getDriver().setLogger(logger);
         cfdg.rulesLoaded();
-        return cfdg.renderer(imageSize.getWidth(), imageSize.getHeight(), 1, seed.hashCode(), 0.1);
+        return cfdg.renderer(imageSize.width(), imageSize.height(), 1, seed.hashCode(), 0.1);
     }
 }

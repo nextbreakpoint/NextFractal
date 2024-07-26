@@ -60,8 +60,8 @@ public class ContextFreeImageComposer implements ImageComposer {
     @Override
     public IntBuffer renderImage(String script, Metadata data) {
         ContextFreeMetadata metadata = (ContextFreeMetadata) data;
-        RendererSize suggestedSize = tile.getTileSize();
-        BufferedImage image = new BufferedImage(suggestedSize.getWidth(), suggestedSize.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        RendererSize suggestedSize = tile.tileSize();
+        BufferedImage image = new BufferedImage(suggestedSize.width(), suggestedSize.height(), BufferedImage.TYPE_INT_ARGB);
         IntBuffer buffer = IntBuffer.wrap(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         Graphics2D g2d = null;
         try {
@@ -98,7 +98,7 @@ public class ContextFreeImageComposer implements ImageComposer {
 
     @Override
     public RendererSize getSize() {
-        return tile.getTileSize();
+        return tile.tileSize();
     }
 
     @Override

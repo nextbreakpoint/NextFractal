@@ -32,8 +32,8 @@ public class Java2DRendererBuffer implements RendererBuffer {
 	private final BufferedImage image;
 	private final Graphics2D g2d;
 	
-	public Java2DRendererBuffer(int witdh, int height) {
-		image = new BufferedImage(witdh, height, BufferedImage.TYPE_INT_ARGB);
+	public Java2DRendererBuffer(int width, int height) {
+		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		g2d = image.createGraphics();
 	}
 

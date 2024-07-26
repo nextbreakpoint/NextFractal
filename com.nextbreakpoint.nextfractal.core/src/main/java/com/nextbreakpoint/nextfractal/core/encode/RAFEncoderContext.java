@@ -29,6 +29,7 @@ import java.io.RandomAccessFile;
 import java.util.Objects;
 
 public class RAFEncoderContext implements EncoderContext {
+	private final String sessionId;
 	private final RandomAccessFile raf;
 	private final int imageWidth;
 	private final int imageHeight;
@@ -36,12 +37,14 @@ public class RAFEncoderContext implements EncoderContext {
 
 	/**
 	 *
+	 * @param sessionId
 	 * @param raf
 	 * @param imageWidth
 	 * @param imageHeight
 	 * @param frameRate
      */
-	public RAFEncoderContext(final RandomAccessFile raf, final int imageWidth, final int imageHeight, final int frameRate) {
+	public RAFEncoderContext(final String sessionId, final RandomAccessFile raf, final int imageWidth, final int imageHeight, final int frameRate) {
+		this.sessionId = Objects.requireNonNull(sessionId);
 		this.raf = Objects.requireNonNull(raf);
 		this.imageWidth = imageWidth;
 		this.imageHeight = imageHeight;
@@ -140,5 +143,10 @@ public class RAFEncoderContext implements EncoderContext {
 	@Override
 	public int getFrameRate() {
 		return frameRate;
+	}
+
+	@Override
+	public String getSessionId() {
+		return sessionId;
 	}
 }

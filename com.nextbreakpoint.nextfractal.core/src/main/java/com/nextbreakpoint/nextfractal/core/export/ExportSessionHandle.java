@@ -24,80 +24,110 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
-import com.nextbreakpoint.nextfractal.core.common.Metadata;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.encode.Encoder;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import lombok.Getter;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class ExportHandle {
-	private final ExportSession session;
+public final class ExportSessionHandle {
 	private final Set<ExportJobHandle> jobs = new HashSet<>();
+
+	@Getter
+    private final ExportSession session;
+
 	private volatile int frameNumber;
 	private volatile float progress;
 	private volatile boolean cancelled;
 	private volatile long timestamp;
-	private volatile ExportState state;
+	private volatile ExportSessionState state;
 
-	public ExportHandle(ExportSession session) {
-		this.session = session;
+	public ExportSessionHandle(ExportSession session) {
+		this.session = Objects.requireNonNull(session);
 		this.frameNumber = 0;
-		this.state = ExportState.SUSPENDED;
+		this.state = ExportSessionState.SUSPENDED;
 		this.timestamp = System.currentTimeMillis();
-		this.jobs.addAll(session.getJobs().stream().map(job -> new ExportJobHandle(job)).collect(Collectors.toSet()));
+		this.jobs.addAll(session.getJobs().stream().map(ExportJobHandle::new).collect(Collectors.toSet()));
 	}
 
-	public int getFrameNumber() {
+	public synchronized int getFrameNumber() {
 		return frameNumber;
 	}
 
-	public float getProgress() {
+	public synchronized float getProgress() {
 		return progress;
 	}
 
-	public boolean isCancelled() {
+	public synchronized boolean isCancelled() {
 		return cancelled;
 	}
 
-	public boolean isReady() {
-		return state == ExportState.READY;
+	public synchronized void setCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
 	}
 
-	public boolean isDispatched() {
-		return state == ExportState.DISPATCHED;
+	public synchronized long getTimestamp() {
+		return timestamp;
 	}
 
-	public boolean isSuspended() {
-		return state == ExportState.SUSPENDED;
-	}
-
-	public boolean isInterrupted() {
-		return state == ExportState.INTERRUPTED;
-	}
-
-	public boolean isCompleted() {
-		return state == ExportState.COMPLETED;
-	}
-
-	public boolean isFinished() {
-		return state == ExportState.FINISHED;
-	}
-
-	public boolean isFailed() {
-		return state == ExportState.FAILED;
-	}
-
-	public ExportState getState() {
+	public synchronized ExportSessionState getState() {
 		return state;
 	}
 
-	public ExportSession getSession() {
-		return session;
+	public synchronized void setState(ExportSessionState state) {
+		timestamp = System.currentTimeMillis();
+		this.state = Objects.requireNonNull(state);
+	}
+
+	public synchronized boolean isReady() {
+		return state == ExportSessionState.READY;
+	}
+
+	public synchronized boolean isDispatched() {
+		return state == ExportSessionState.DISPATCHED;
+	}
+
+	public synchronized boolean isSuspended() {
+		return state == ExportSessionState.SUSPENDED;
+	}
+
+	public synchronized boolean isInterrupted() {
+		return state == ExportSessionState.INTERRUPTED;
+	}
+
+	public synchronized boolean isCompleted() {
+		return state == ExportSessionState.COMPLETED;
+	}
+
+	public synchronized boolean isFinished() {
+		return state == ExportSessionState.FINISHED;
+	}
+
+	public synchronized boolean isFailed() {
+		return state == ExportSessionState.FAILED;
+	}
+
+	public synchronized void updateProgress() {
+		progress = getFrameCount() > 0 ? ((getFrameNumber() + 1f) / (float)getFrameCount()) : (getCompletedJobsCount() / (float)getJobsCount());
+	}
+
+	public synchronized AnimationFrame getCurrentFrame() {
+		return session.getFrames().get(frameNumber);
+	}
+
+	public synchronized boolean nextFrame() {
+		if (frameNumber < session.getFrameCount() - 1) {
+			frameNumber += 1;
+			return true;
+		}
+		return false;
 	}
 
 	public String getSessionId() {
@@ -116,16 +146,16 @@ public final class ExportHandle {
 		return session.getEncoder();
 	}
 
-	public File getTmpFile() {
-		return session.getTmpFile();
-	}
-
 	public RendererSize getSize() {
-		return session.getSize();
+		return session.getFrameSize();
 	}
 
 	public File getFile() {
 		return session.getFile();
+	}
+
+	public File getTmpFile() {
+		return session.getTmpFile();
 	}
 
 	public int getJobsCount() {
@@ -136,56 +166,15 @@ public final class ExportHandle {
 		return Collections.unmodifiableSet(jobs);
 	}
 
-	public void updateProgress() {
-		setProgress(session.getFrameCount() > 0 ? ((getFrameNumber() + 1f) / (float)session.getFrameCount()) : (getCompletedJobsCount() / (float)session.getJobs().size()));
-	}
-
-	public void setProgress(float progress) {
-		this.progress = progress;
-	}
-
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
-
-	public void setState(ExportState state) {
-		timestamp = System.currentTimeMillis();
-		this.state = state;
-	}
-
-	public String getCurrentPluginId() {
-		return session.getFrames().get(frameNumber).pluginId();
-	}
-
-	public String getCurrentScript() {
-		return session.getFrames().get(frameNumber).script();
-	}
-
-	public Metadata getCurrentMetadata() {
-		return session.getFrames().get(frameNumber).metadata();
-	}
-
-	public boolean nextFrame() {
-		if (frameNumber < session.getFrameCount() - 1) {
-			frameNumber += 1;
-			return true;
-		}
-		return false;
-	}
-
 	public boolean isFrameCompleted() {
 		return getCompletedJobsCount() == getJobsCount();
-	}
-
-	private int getCompletedJobsCount() {
-		return jobs.stream().filter(job -> job.isCompleted()).mapToInt(job -> 1).sum();
 	}
 
     public boolean isSessionCompleted() {
         return (getFrameCount() == 0 || getFrameNumber() == getFrameCount() - 1) && isFrameCompleted();
     }
 
-	public long getTimestamp() {
-		return timestamp;
+	private int getCompletedJobsCount() {
+		return jobs.stream().filter(ExportJobHandle::isCompleted).mapToInt(_ -> 1).sum();
 	}
 }

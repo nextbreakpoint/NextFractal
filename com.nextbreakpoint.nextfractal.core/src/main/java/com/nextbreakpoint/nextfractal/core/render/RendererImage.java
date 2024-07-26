@@ -27,9 +27,9 @@ package com.nextbreakpoint.nextfractal.core.render;
 import java.nio.IntBuffer;
 
 public interface RendererImage {
-	public void draw(RendererGraphicsContext context, int x, int y);
+	void draw(RendererGraphicsContext context, int x, int y);
 	
-	public void draw(RendererGraphicsContext context, int x, int y, int w, int h);
+	void draw(RendererGraphicsContext context, int x, int y, int w, int h);
 
-	public void getPixels(IntBuffer pixels);
+	void getPixels(IntBuffer pixels);
 }

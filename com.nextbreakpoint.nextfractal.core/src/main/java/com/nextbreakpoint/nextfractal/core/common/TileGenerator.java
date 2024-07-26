@@ -74,7 +74,7 @@ public class TileGenerator {
         final IntBuffer pixels = composer.renderImage(session.script(), session.metadata());
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            writePNGImage(os, pixels, renderTile.getTileSize());
+            writePNGImage(os, pixels, renderTile.tileSize());
 
             return os.toByteArray();
         }
@@ -112,11 +112,11 @@ public class TileGenerator {
     }
 
     private static void writePNGImage(ByteArrayOutputStream os, IntBuffer pixels, RendererSize tileSize) throws IOException {
-        final BufferedImage image =  new BufferedImage(tileSize.getWidth(), tileSize.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage image =  new BufferedImage(tileSize.width(), tileSize.height(), BufferedImage.TYPE_INT_ARGB);
 
         final int[] buffer = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 
-        System.arraycopy(pixels.array(), 0, buffer, 0, tileSize.getWidth() * tileSize.getHeight());
+        System.arraycopy(pixels.array(), 0, buffer, 0, tileSize.width() * tileSize.height());
 
         ImageIO.write(image, "PNG", os);
     }

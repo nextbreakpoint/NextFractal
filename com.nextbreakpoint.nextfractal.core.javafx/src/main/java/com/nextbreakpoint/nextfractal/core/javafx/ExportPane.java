@@ -147,7 +147,7 @@ public class ExportPane extends BorderPane {
 		clipButtons.getStyleClass().add("text-small");
 
 		listView = new ListView<>();
-		listView.setFixedCellSize(tile.getTileSize().getHeight() + PADDING);
+		listView.setFixedCellSize(tile.tileSize().height() + PADDING);
 		listView.setCellFactory(view -> new ClipListCell(tile, (fromIndex, toIndex) -> {
             if (delegate != null) {
                 delegate.captureSessionMoved(fromIndex, toIndex);
@@ -428,7 +428,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, RendererSize size, boolean notifyAddClip) {
-		final BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
+		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
 		bitmap.setProperty("clip", clip);
 		listView.getItems().add(bitmap);
 		if (listView.getItems().size() == 1) {
