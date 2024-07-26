@@ -24,53 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-public class ParserError {
-	private ErrorType type;
-	private long line;
-	private long charPositionInLine;
-	private long index;
-	private long length;
-	private String message;
-
-	public ParserError(ErrorType type, long line, long charPositionInLine, long index, long length, String message) {
-		this.type = type;
-		this.line = line;
-		this.charPositionInLine = charPositionInLine;
-		this.index = index;
-		this.length = length;
-		this.message = message;
-	}
-
-	public ErrorType getType() {
-		return type;
-	}
-
-	public long getLine() {
-		return line;
-	}
-
-	public long getCharPositionInLine() {
-		return charPositionInLine;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-	
-	public long getLength() {
-		return length;
-	}
-	
-	public long getIndex() {
-		return index;
-	}
-
+public record ParserError(
+	ParserErrorType type,
+	long line,
+	long charPositionInLine,
+	long index,
+	long length,
+	String message
+){
 	@Override
 	public String toString() {
 		return "[" + line + ":" + charPositionInLine + ":" + index + ":" + length + "] " + message;
-	}
-
-	public enum ErrorType {
-		SCRIPT_COMPILER, JAVA_COMPILER, RUNTIME;
 	}
 }

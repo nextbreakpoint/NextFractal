@@ -28,5 +28,5 @@ module com.nextbreakpoint.nextfractal.runtime.javafx {
     requires com.nextbreakpoint.nextfractal.mandelbrot.javafx;
     requires com.nextbreakpoint.nextfractal.contextfree.javafx;
     exports com.nextbreakpoint.nextfractal.runtime.javafx;
-    uses com.nextbreakpoint.nextfractal.core.encode.Encoder;
+    uses com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 }

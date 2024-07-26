@@ -26,16 +26,10 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.Objects;
 
+//TODO move to other package
 public record FileEntry(String name, byte[] data) {
     public FileEntry(String name, byte[] data) {
         this.name = Objects.requireNonNull(name);
         this.data = Objects.requireNonNull(data);
-    }
-
-    @Override
-    public byte[] data() {
-        final byte[] copy = new byte[data.length];
-        System.arraycopy(data, 0, copy, 0, copy.length);
-        return copy;
     }
 }

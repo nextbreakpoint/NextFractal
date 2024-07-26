@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererError;
+import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererErrors;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import org.antlr.v4.runtime.Token;
 
@@ -38,9 +38,9 @@ public class CFDGLogger extends Logger {
     public void error(String message, Token location) {
         super.error(message, location);
         if (location != null) {
-            errors.add(new RendererError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
+            errors.add(RendererErrors.makeError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
         } else {
-            errors.add(new RendererError(0, 0, 0, 0, message));
+            errors.add(RendererErrors.makeError(0, 0, 0, 0, message));
         }
     }
 
@@ -48,9 +48,9 @@ public class CFDGLogger extends Logger {
     public void fail(String message, Token location) {
         super.fail(message, location);
         if (location != null) {
-            errors.add(new RendererError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
+            errors.add(RendererErrors.makeError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
         } else {
-            errors.add(new RendererError(0, 0, 0, 0, message));
+            errors.add(RendererErrors.makeError(0, 0, 0, 0, message));
         }
     }
 

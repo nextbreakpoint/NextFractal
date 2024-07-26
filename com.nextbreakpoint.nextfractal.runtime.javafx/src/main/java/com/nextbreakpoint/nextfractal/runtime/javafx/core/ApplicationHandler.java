@@ -31,7 +31,7 @@ import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsLoaded;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsMerged;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStarted;
@@ -151,9 +151,9 @@ public class ApplicationHandler {
         if (errors != null) {
             for (ParserError error : errors) {
                 builder.append("Line ");
-                builder.append(error.getLine());
+                builder.append(error.line());
                 builder.append(": ");
-                builder.append(error.getMessage());
+                builder.append(error.message());
                 builder.append("\n");
             }
         }

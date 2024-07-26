@@ -22,56 +22,21 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.encode;
+package com.nextbreakpoint.nextfractal.core.encoder;
 
-import java.io.IOException;
-
-/**
- * @author Andrea Medeghini
- */
-public interface EncoderContext {
+public class EncoderException extends Exception {
 	/**
-	 * @param n
-	 * @param x
-	 * @param y
-	 * @param w
-	 * @param h
-	 * @param s
-	 * @return
-	 * @throws IOException
+	 * @param message
 	 */
-	byte[] getPixelsAsByteArray(int n, int x, int y, int w, int h, int s) throws IOException;
+	public EncoderException(final String message) {
+		super(message);
+	}
 
 	/**
-	 * @param n
-	 * @param x
-	 * @param y
-	 * @param w
-	 * @param h
-	 * @param s
-	 * @param flip
-	 * @return
-	 * @throws IOException
+	 * @param message
+	 * @param cause
 	 */
-	byte[] getPixelsAsByteArray(final int n, final int x, final int y, final int w, final int h, final int s, final boolean flip) throws IOException;
-
-	/**
-	 * @return
-	 */
-	int getImageHeight();
-
-	/**
-	 * @return
-	 */
-	int getImageWidth();
-
-	/**
-	 * @return
-	 */
-	int getFrameRate();
-
-	/**
-	 * @return
-	 */
-	String getSessionId();
+	public EncoderException(final String message, final Throwable cause) {
+		super(message, cause);
+	}
 }

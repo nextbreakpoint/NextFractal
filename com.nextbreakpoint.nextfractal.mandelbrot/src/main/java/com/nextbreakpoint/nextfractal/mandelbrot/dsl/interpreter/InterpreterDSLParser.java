@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ErrorStrategy;
@@ -68,7 +69,7 @@ public class InterpreterDSLParser {
                 return fractal;
             }
         } catch (ASTException e) {
-            ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+            ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
             long line = e.getLocation().getLine();
             long charPositionInLine = e.getLocation().getCharPositionInLine();
             long index = e.getLocation().getStartIndex();
@@ -79,7 +80,7 @@ public class InterpreterDSLParser {
             errors.add(error);
             throw new ParserException("Can't parse source", errors);
         } catch (Exception e) {
-            ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+            ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
             String message = e.getMessage();
             ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
             logger.log(Level.FINE, error.toString(), e);

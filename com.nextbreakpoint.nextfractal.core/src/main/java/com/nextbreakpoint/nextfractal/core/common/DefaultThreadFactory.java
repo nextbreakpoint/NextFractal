@@ -43,9 +43,6 @@ public class DefaultThreadFactory implements ThreadFactory {
 		this.priority = priority;
 	}
 
-	/**
-	 * @see java.util.concurrent.ThreadFactory#newThread(java.lang.Runnable)
-	 */
 	@Override
 	public Thread newThread(final Runnable r) {
 		final Thread thread = new Thread(r);

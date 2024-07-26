@@ -24,4 +24,5 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
+//TODO move to other package
 public record FileManifest(String pluginId) {}

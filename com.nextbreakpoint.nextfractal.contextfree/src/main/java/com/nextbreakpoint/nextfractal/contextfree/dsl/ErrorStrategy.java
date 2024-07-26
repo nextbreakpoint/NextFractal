@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.FailedPredicateException;
@@ -48,7 +49,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	public void reportError(Parser recognizer, RecognitionException e) {
 		String message = generateErrorMessage("Parse failed", recognizer);
-		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
@@ -61,7 +62,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportInputMismatch(Parser recognizer, InputMismatchException e) {
 		String message = generateErrorMessage("Input mismatch", recognizer);
-		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
@@ -74,7 +75,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
 		String message = generateErrorMessage("Failed predicate", recognizer);
-		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
@@ -87,7 +88,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportUnwantedToken(Parser recognizer) {
 		String message = generateErrorMessage("Unwanted token", recognizer);
-		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 		long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();
@@ -100,7 +101,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportMissingToken(Parser recognizer) {
 		String message = generateErrorMessage("Missing token", recognizer);
-		ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 		long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();

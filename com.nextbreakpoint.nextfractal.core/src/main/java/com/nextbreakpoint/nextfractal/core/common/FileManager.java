@@ -50,6 +50,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
+//TODO move to other package
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FileManager {
     private static final ObjectMapper MAPPER = new ObjectMapper();

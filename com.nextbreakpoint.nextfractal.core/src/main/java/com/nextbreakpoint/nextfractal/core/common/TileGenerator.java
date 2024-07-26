@@ -39,6 +39,7 @@ import java.nio.IntBuffer;
 import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 
+//TODO move to other package
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TileGenerator {
     private static final ThreadFactory THREAD_FACTORY = ThreadUtils.createThreadFactory(TileGenerator.class.getName());

@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.common.Constants;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import lombok.Getter;
 
@@ -93,6 +93,7 @@ public final class ExportSession {
 		return "[sessionId = " + sessionId + "]";
 	}
 
+	//TODO extract code to separate class
 	private void createFrames(Session session, List<AnimationClip> clips) {
 		if (!clips.isEmpty() && clips.getFirst().events().size() > 1) {
 			final Animation animation = new Animation(clips, frameRate);
@@ -102,6 +103,7 @@ public final class ExportSession {
 		}
 	}
 
+	//TODO extract code to separate class
 	private List<ExportJob> createJobs() {
 		final List<ExportJob> jobs = new ArrayList<>();
 		final int frameWidth = frameSize.width();
@@ -141,6 +143,7 @@ public final class ExportSession {
 		return jobs;
 	}
 
+	//TODO extract code to separate class
 	private ExportProfile createProfile(final int frameWidth, final int frameHeight, int tileOffsetX, int tileOffsetY) {
 		return ExportProfile.builder()
 				.withFrameWidth(frameWidth)

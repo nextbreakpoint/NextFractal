@@ -22,54 +22,56 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.encode;
+package com.nextbreakpoint.nextfractal.core.encoder;
 
-import java.io.File;
+import java.io.IOException;
 
-public interface Encoder {
+/**
+ * @author Andrea Medeghini
+ */
+public interface EncoderContext {
 	/**
+	 * @param n
+	 * @param x
+	 * @param y
+	 * @param w
+	 * @param h
+	 * @param s
 	 * @return
+	 * @throws IOException
 	 */
-	String getId();
+	byte[] getPixelsAsByteArray(int n, int x, int y, int w, int h, int s) throws IOException;
 
 	/**
+	 * @param n
+	 * @param x
+	 * @param y
+	 * @param w
+	 * @param h
+	 * @param s
+	 * @param flip
 	 * @return
+	 * @throws IOException
 	 */
-	String getName();
-
-	/**
-	 * @return
-	 */
-	boolean isVideoSupported();
-
-	/**
-	 * @param delegate
-	 */
-	void setDelegate(EncoderDelegate delegate);
-
-	/**
-	 * @param context
-	 * @param path
-	 * @return
-	 */
-	EncoderHandle open(EncoderContext context, File path) throws EncoderException;
-
-	/**
-	 * @param handle
-	 */
-	void close(EncoderHandle handle) throws EncoderException;
-
-	/**
-	 * @param handle
-	 * @param frameIndex
-	 * @param repeatFrameCount
-	 * @param totalFrameCount
-	 * @throws EncoderException
-	 */
-	void encode(EncoderHandle handle, int frameIndex, int repeatFrameCount, int totalFrameCount) throws EncoderException;
+	byte[] getPixelsAsByteArray(final int n, final int x, final int y, final int w, final int h, final int s, final boolean flip) throws IOException;
 
 	/**
 	 * @return
 	 */
-	String getSuffix();
+	int getImageHeight();
+
+	/**
+	 * @return
+	 */
+	int getImageWidth();
+
+	/**
+	 * @return
+	 */
+	int getFrameRate();
+
+	/**
+	 * @return
+	 */
+	String getSessionId();
 }

@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.encode;
+package com.nextbreakpoint.nextfractal.core.encoder;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

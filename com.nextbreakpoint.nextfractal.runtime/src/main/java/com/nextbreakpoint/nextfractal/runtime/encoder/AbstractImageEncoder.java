@@ -25,11 +25,11 @@
 package com.nextbreakpoint.nextfractal.runtime.encoder;
 
 import com.nextbreakpoint.freeimage4java.tagRGBQUAD;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderContext;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderDelegate;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderException;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderHandle;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderContext;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderDelegate;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderException;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderHandle;
 import lombok.extern.java.Log;
 
 import java.io.File;

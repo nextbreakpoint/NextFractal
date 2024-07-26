@@ -33,10 +33,10 @@ module com.nextbreakpoint.nextfractal.core {
     exports com.nextbreakpoint.nextfractal.core.common;
     exports com.nextbreakpoint.nextfractal.core.editor;
     exports com.nextbreakpoint.nextfractal.core.params;
-    exports com.nextbreakpoint.nextfractal.core.encode;
+    exports com.nextbreakpoint.nextfractal.core.encoder;
     exports com.nextbreakpoint.nextfractal.core.export;
     exports com.nextbreakpoint.nextfractal.core.render;
     exports com.nextbreakpoint.nextfractal.core.event;
     uses com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-    uses com.nextbreakpoint.nextfractal.core.encode.Encoder;
+    uses com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 }

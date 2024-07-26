@@ -28,6 +28,7 @@ import lombok.Builder;
 
 import java.util.UUID;
 
+//TODO move to other package
 @Builder(setterPrefix = "with", toBuilder = true)
 public record TileRequest(
 	Session session,

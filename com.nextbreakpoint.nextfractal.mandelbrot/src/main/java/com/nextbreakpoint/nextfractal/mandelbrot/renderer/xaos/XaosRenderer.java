@@ -35,7 +35,7 @@ import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.renderer.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererData;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererError;
+import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererErrors;
 import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererState;
 import com.nextbreakpoint.nextfractal.mandelbrot.renderer.strategy.JuliaRendererStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.renderer.strategy.MandelbrotRendererStrategy;
@@ -232,7 +232,7 @@ public final class XaosRenderer extends Renderer {
 			updatePositions();
 		} catch (Throwable e) {
 			logger.log(Level.WARNING, "Rendering error", e);
-			errors.add(new RendererError(0, 0, 0, 0, e.getMessage()));
+			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
 		}
 	}
 

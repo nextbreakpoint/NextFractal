@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.runtime.encoder.AVIVideoEncoder;
 import com.nextbreakpoint.nextfractal.runtime.encoder.JPEGImageEncoder;
 import com.nextbreakpoint.nextfractal.runtime.encoder.MP4VideoEncoder;

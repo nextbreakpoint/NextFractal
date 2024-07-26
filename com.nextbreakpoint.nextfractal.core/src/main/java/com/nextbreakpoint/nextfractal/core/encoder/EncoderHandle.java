@@ -22,19 +22,6 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.encode;
+package com.nextbreakpoint.nextfractal.core.encoder;
 
-/**
- * @author Andrea Medeghini
- */
-public interface EncoderDelegate {
-	/**
-	 * @return
-	 */
-	boolean isInterrupted();
-
-	/**
-	 * @param progress
-	 */
-	void didProgressChanged(float progress);
-}
+public interface EncoderHandle {}

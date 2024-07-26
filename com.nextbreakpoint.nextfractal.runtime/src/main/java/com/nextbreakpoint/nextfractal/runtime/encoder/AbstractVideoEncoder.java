@@ -34,11 +34,11 @@ import com.nextbreakpoint.ffmpeg4java.AVOutputFormat;
 import com.nextbreakpoint.ffmpeg4java.AVPacket;
 import com.nextbreakpoint.ffmpeg4java.AVRational;
 import com.nextbreakpoint.ffmpeg4java.AVStream;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderContext;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderDelegate;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderException;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderHandle;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderContext;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderDelegate;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderException;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderHandle;
 import lombok.extern.java.Log;
 
 import java.io.File;
@@ -98,7 +98,7 @@ public abstract class AbstractVideoEncoder implements Encoder {
 	}
 
 	/**
-	 * @see com.nextbreakpoint.nextfractal.core.encode.Encoder#setDelegate(com.nextbreakpoint.nextfractal.core.encode.EncoderDelegate)
+	 * @see com.nextbreakpoint.nextfractal.core.encoder.Encoder#setDelegate(com.nextbreakpoint.nextfractal.core.encoder.EncoderDelegate)
 	 */
 	public void setDelegate(EncoderDelegate delegate) {
 		this.delegate = delegate;

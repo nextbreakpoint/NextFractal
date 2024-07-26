@@ -22,21 +22,54 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.encode;
+package com.nextbreakpoint.nextfractal.core.encoder;
 
-public class EncoderException extends Exception {
+import java.io.File;
+
+public interface Encoder {
 	/**
-	 * @param message
+	 * @return
 	 */
-	public EncoderException(final String message) {
-		super(message);
-	}
+	String getId();
 
 	/**
-	 * @param message
-	 * @param cause
+	 * @return
 	 */
-	public EncoderException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
+	String getName();
+
+	/**
+	 * @return
+	 */
+	boolean isVideoSupported();
+
+	/**
+	 * @param delegate
+	 */
+	void setDelegate(EncoderDelegate delegate);
+
+	/**
+	 * @param context
+	 * @param path
+	 * @return
+	 */
+	EncoderHandle open(EncoderContext context, File path) throws EncoderException;
+
+	/**
+	 * @param handle
+	 */
+	void close(EncoderHandle handle) throws EncoderException;
+
+	/**
+	 * @param handle
+	 * @param frameIndex
+	 * @param repeatFrameCount
+	 * @param totalFrameCount
+	 * @throws EncoderException
+	 */
+	void encode(EncoderHandle handle, int frameIndex, int repeatFrameCount, int totalFrameCount) throws EncoderException;
+
+	/**
+	 * @return
+	 */
+	String getSuffix();
 }

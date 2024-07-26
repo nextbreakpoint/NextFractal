@@ -27,6 +27,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.javafx;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
@@ -293,7 +294,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Can't render image: " + e.getMessage());
             }
-            return List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            return List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
         }
         return Collections.emptyList();
     }

@@ -28,6 +28,7 @@ import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
@@ -52,7 +53,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -600,7 +600,7 @@ public class BrowsePane extends BorderPane {
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }
         } catch (Exception e) {
-            item.setErrors(List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
+            item.setErrors(List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
             logger.log(Level.WARNING, "Can't create bitmap: " + e.getMessage());
         }
     }
@@ -621,7 +621,7 @@ public class BrowsePane extends BorderPane {
                 Platform.runLater(() -> item.setRenderer(renderer));
             }
         } catch (Exception e) {
-            item.setErrors(List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
+            item.setErrors(List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
             logger.log(Level.WARNING, "Can't initialize renderer", e);
         }
     }

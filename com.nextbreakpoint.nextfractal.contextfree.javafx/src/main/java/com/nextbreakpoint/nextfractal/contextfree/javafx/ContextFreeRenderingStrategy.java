@@ -7,6 +7,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererCoordinator;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
@@ -110,7 +111,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Can't render image: " + e.getMessage());
             }
-            return List.of(new ParserError(ParserError.ErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            return List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
         }
         return Collections.emptyList();
     }

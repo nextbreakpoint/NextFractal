@@ -29,6 +29,7 @@ import com.nextbreakpoint.nextfractal.core.render.RendererSize;
 import com.nextbreakpoint.nextfractal.core.render.RendererTile;
 import lombok.Builder;
 
+//TODO move to other package
 @Builder(setterPrefix = "with", toBuilder = true)
 public record TileParameters(
 	int imageWidth,

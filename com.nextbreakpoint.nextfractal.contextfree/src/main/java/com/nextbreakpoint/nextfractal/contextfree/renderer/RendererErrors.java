@@ -25,9 +25,10 @@
 package com.nextbreakpoint.nextfractal.contextfree.renderer;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 
-public class RendererError extends ParserError {
-	public RendererError(long line, long charPositionInLine, long index, long length, String message) {
-		super(ParserError.ErrorType.RUNTIME, line, charPositionInLine, index, length, message);
+public class RendererErrors {
+	public static ParserError makeError(long line, long charPositionInLine, long index, long length, String message) {
+		return new ParserError(ParserErrorType.RUNTIME, line, charPositionInLine, index, length, message);
 	}
 }

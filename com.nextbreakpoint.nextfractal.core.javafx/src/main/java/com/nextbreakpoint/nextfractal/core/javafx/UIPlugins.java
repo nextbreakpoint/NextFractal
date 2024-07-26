@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.either.Either;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 
 import java.util.Optional;
 import java.util.ServiceLoader;

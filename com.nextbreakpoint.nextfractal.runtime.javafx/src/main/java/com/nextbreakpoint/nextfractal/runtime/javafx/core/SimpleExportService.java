@@ -26,9 +26,9 @@ package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderException;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderHandle;
-import com.nextbreakpoint.nextfractal.core.encode.RAFEncoderContext;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderException;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderHandle;
+import com.nextbreakpoint.nextfractal.core.encoder.RAFEncoderContext;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobState;

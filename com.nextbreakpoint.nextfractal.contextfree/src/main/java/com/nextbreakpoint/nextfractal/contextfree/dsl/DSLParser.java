@@ -27,6 +27,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl;
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.*;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.exceptions.CFDGException;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -68,7 +69,7 @@ public class DSLParser {
 				return parser.getDriver().getCFDG();
 			}
 		} catch (CFDGException e) {
-			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
@@ -79,7 +80,7 @@ public class DSLParser {
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
 		} catch (Exception e) {
-			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 			String message = e.getMessage();
 			ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
 			logger.log(Level.FINE, error.toString(), e);

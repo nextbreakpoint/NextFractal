@@ -642,7 +642,7 @@ public class Renderer {
 			Thread.yield();
 		} catch (Throwable e) {
 			logger.log(Level.WARNING, "Can't render fractal", e);
-			errors.add(new RendererError(0, 0, 0, 0, e.getMessage()));
+			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
 		}
 	}
 

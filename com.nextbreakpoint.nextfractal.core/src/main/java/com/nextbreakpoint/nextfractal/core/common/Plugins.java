@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.common;
 
 import com.nextbreakpoint.common.either.Either;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

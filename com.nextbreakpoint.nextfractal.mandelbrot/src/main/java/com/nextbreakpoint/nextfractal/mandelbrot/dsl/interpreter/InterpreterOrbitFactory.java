@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
@@ -119,7 +120,7 @@ public class InterpreterOrbitFactory implements ClassFactory<Orbit> {
 			orbit.setTraps(traps);
 			return new InterpreterOrbit(orbit, context);
 		} catch (ASTException e) {
-			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
@@ -128,7 +129,7 @@ public class InterpreterOrbitFactory implements ClassFactory<Orbit> {
 			errors.add(new ParserError(type, line, charPositionInLine, index, length, message));
 			throw new ParserException("Can't build orbit", errors);
 		} catch (Exception e) {
-			ParserError.ErrorType type = ParserError.ErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
 			String message = e.getMessage();
 			errors.add(new ParserError(type, 0, 0, 0, 0, message));
 			throw new ParserException("Can't build orbit", errors);

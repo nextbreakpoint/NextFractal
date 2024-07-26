@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.javacompiler;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.IOUtils;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
@@ -59,7 +60,7 @@ public class JavaCompilerDSLCompiler {
 			Class<Orbit> clazz = compileToClass(report.getOrbitSource(), report.getPackageName(), report.getClassName() + "Orbit", Orbit.class, errors);
 			return new JavaClassFactory<>(clazz);
 		} catch (Throwable e) {
-			ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
+			ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 			String message = e.getMessage();
 			errors.add(new ParserError(type, 0, 0, 0, 0, message));
 			throw new CompilerException("Can't compile orbit", report.getOrbitSource(), errors);
@@ -72,7 +73,7 @@ public class JavaCompilerDSLCompiler {
 			Class<Color> clazz = compileToClass(report.getColorSource(), report.getPackageName(), report.getClassName() + "Color", Color.class, errors);
 			return new JavaClassFactory<>(clazz);
 		} catch (Throwable e) {
-			ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
+			ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 			String message = e.getMessage();
 			errors.add(new ParserError(type, 0, 0, 0, 0, message));
 			throw new CompilerException("Can't compile color", report.getColorSource(), errors);
@@ -103,7 +104,7 @@ public class JavaCompilerDSLCompiler {
 				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
 					if (diagnostic.getCode().equals("compiler.err.cant.access")) {
 						// TODO Not sure why it doesn't happen with Java 8, but only with Java 9.
-						ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
+						ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 						long line = diagnostic.getLineNumber();
 						long charPositionInLine = diagnostic.getColumnNumber();
 						long index = diagnostic.getStartPosition();
@@ -113,7 +114,7 @@ public class JavaCompilerDSLCompiler {
 						logger.log(Level.WARNING, error.toString());
 						errors.add(error);
 					} else {
-						ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
+						ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 						long line = diagnostic.getLineNumber();
 						long charPositionInLine = diagnostic.getColumnNumber();
 						long index = diagnostic.getStartPosition();
@@ -126,7 +127,7 @@ public class JavaCompilerDSLCompiler {
 				}
 			}
 		} catch (Exception e) {
-			ParserError.ErrorType type = ParserError.ErrorType.JAVA_COMPILER;
+			ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 			String message = e.getMessage();
 			ParserError error = new ParserError(type, 0, 0, 0, 0, message);
 			logger.log(Level.SEVERE, "Can't compile class", e);

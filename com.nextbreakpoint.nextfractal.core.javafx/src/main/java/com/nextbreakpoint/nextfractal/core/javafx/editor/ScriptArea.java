@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.editor;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
@@ -84,13 +85,13 @@ public class ScriptArea extends CodeArea {
         setStyleSpans(0, convertStyleSpans(result.highlighting()));
         final List<ParserError> errors = result.errors();
         if (!errors.isEmpty()) {
-            errors.sort(Comparator.comparing(ParserError::getIndex));
+            errors.sort(Comparator.comparing(ParserError::index));
             for (ParserError error : errors) {
                 if (log.isLoggable(Level.FINE)) {
                     log.fine(error.toString());
                 }
-                if (error.getType() != ParserError.ErrorType.RUNTIME) {
-                    final int lineBegin = (int) error.getIndex();
+                if (error.type() != ParserErrorType.RUNTIME) {
+                    final int lineBegin = (int) error.index();
                     final int lineEnd = lineBegin + 1;
                     try {
                         if (lineBegin < getLength() && lineEnd <= getLength()) {
