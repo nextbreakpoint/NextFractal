@@ -5,19 +5,18 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
-import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererCoordinator;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
-import com.nextbreakpoint.nextfractal.core.javafx.render.JavaFXRendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.scene.canvas.Canvas;
 import lombok.extern.java.Log;
 
@@ -35,8 +34,8 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     private final int height;
     private final int rows;
     private final int columns;
-    private final JavaFXRendererFactory renderFactory;
-    private RendererCoordinator coordinator;
+    private final GraphicsFactory renderFactory;
+    private Coordinator coordinator;
     private boolean hasError;
     private String cfdgSource;
     private CFDG cfdg;
@@ -49,14 +48,14 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         this.rows = rows;
         this.columns = columns;
 
-        renderFactory = new JavaFXRendererFactory();
+        renderFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 
         Map<String, Integer> hints = new HashMap<>();
-        coordinator = createRendererCoordinator(hints, RendererUtils.createRendererTile(width, height));
+        coordinator = createRendererCoordinator(hints, GraphicsUtils.createTile(width, height));
     }
 
     @Override
-    public RendererFactory getRenderFactory() {
+    public GraphicsFactory getRenderFactory() {
         return renderFactory;
     }
 
@@ -124,13 +123,13 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         }
     }
 
-    private RendererCoordinator createRendererCoordinator(Map<String, Integer> hints, RendererTile tile) {
+    private Coordinator createRendererCoordinator(Map<String, Integer> hints, Tile tile) {
         return createRendererCoordinator(hints, tile, Thread.MIN_PRIORITY + 2, "ContextFree Coordinator");
     }
 
-    private RendererCoordinator createRendererCoordinator(Map<String, Integer> hints, RendererTile tile, int priority, String name) {
+    private Coordinator createRendererCoordinator(Map<String, Integer> hints, Tile tile, int priority, String name) {
         final DefaultThreadFactory threadFactory = createThreadFactory(name, priority);
-        return new RendererCoordinator(threadFactory, renderFactory, tile, hints);
+        return new Coordinator(threadFactory, renderFactory, tile, hints);
     }
 
     private DefaultThreadFactory createThreadFactory(String name, int priority) {
@@ -152,7 +151,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
 
     private void redrawIfPixelsChanged(Canvas canvas) {
         if (coordinator.isPixelsChanged()) {
-            RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             coordinator.drawImage(gc, 0, 0);
         }
     }

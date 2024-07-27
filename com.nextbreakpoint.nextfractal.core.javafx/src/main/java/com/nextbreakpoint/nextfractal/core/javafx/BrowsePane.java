@@ -31,9 +31,9 @@ import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Point;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -82,7 +82,7 @@ public class BrowsePane extends BorderPane {
     private final File examples;
     private List<GridItem> items = new ArrayList<>();
     private BrowseDelegate delegate;
-    private RendererTile tile;
+    private Tile tile;
     private AnimationTimer timer;
     private Thread thread;
 
@@ -324,12 +324,12 @@ public class BrowsePane extends BorderPane {
         return importDirectoryChooser;
     }
 
-    private RendererTile createSingleTile(int width, int height) {
-        RendererSize imageSize = new RendererSize(width, height);
-        RendererSize tileSize = new RendererSize(width, height);
-        RendererSize tileBorder = new RendererSize(0, 0);
-        RendererPoint tileOffset = new RendererPoint(0, 0);
-        return new RendererTile(imageSize, tileSize, tileOffset, tileBorder);
+    private Tile createSingleTile(int width, int height) {
+        Size imageSize = new Size(width, height);
+        Size tileSize = new Size(width, height);
+        Size tileBorder = new Size(0, 0);
+        Point tileOffset = new Point(0, 0);
+        return new Tile(imageSize, tileSize, tileOffset, tileBorder);
     }
 
     private void loadFiles(Label statusLabel, GridView grid, File folder) {

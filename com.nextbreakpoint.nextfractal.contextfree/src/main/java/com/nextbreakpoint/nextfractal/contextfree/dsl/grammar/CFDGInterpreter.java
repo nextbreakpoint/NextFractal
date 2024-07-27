@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 public class CFDGInterpreter {
     private CFDG cfdg;
@@ -33,7 +33,7 @@ public class CFDGInterpreter {
         this.cfdg = cfdg;
     }
 
-    public CFDGRenderer create(RendererSize imageSize, String seed, CFDGLogger logger) {
+    public CFDGRenderer create(Size imageSize, String seed, CFDGLogger logger) {
         cfdg.getDriver().setLogger(logger);
         cfdg.rulesLoaded();
         return cfdg.renderer(imageSize.width(), imageSize.height(), 1, seed.hashCode(), 0.1);

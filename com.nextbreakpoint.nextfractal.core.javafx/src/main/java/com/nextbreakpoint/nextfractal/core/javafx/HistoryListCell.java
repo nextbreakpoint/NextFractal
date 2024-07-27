@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -42,9 +42,9 @@ public class HistoryListCell extends ListCell<Bitmap> {
 	private BorderPane pane;
 	private Canvas canvas;
 	private Label label;
-	private RendererTile tile;
+	private Tile tile;
 
-	public HistoryListCell(RendererTile tile) {
+	public HistoryListCell(Tile tile) {
 		this.tile = tile;
 		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 		label = new Label();

@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 
 public interface Tool {
@@ -44,5 +44,5 @@ public interface Tool {
 
 	boolean isChanged();
 
-	void draw(RendererGraphicsContext gc);
+	void draw(GraphicsContext gc);
 }

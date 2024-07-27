@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.common;
 
 import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -61,7 +61,7 @@ public class TileGenerator {
     public static byte[] generatePNGImage(TileRequest request) throws Exception {
         final TileParameters parameters = createTileParameters(request);
 
-        final RendererTile renderTile = parameters.createRenderTile();
+        final Tile renderTile = parameters.createRenderTile();
 
         final Session session = request.session();
 
@@ -112,7 +112,7 @@ public class TileGenerator {
                 .build();
     }
 
-    private static void writePNGImage(ByteArrayOutputStream os, IntBuffer pixels, RendererSize tileSize) throws IOException {
+    private static void writePNGImage(ByteArrayOutputStream os, IntBuffer pixels, Size tileSize) throws IOException {
         final BufferedImage image =  new BufferedImage(tileSize.width(), tileSize.height(), BufferedImage.TYPE_INT_ARGB);
 
         final int[] buffer = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();

@@ -63,9 +63,9 @@ import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.StatusPane;
 import com.nextbreakpoint.nextfractal.core.javafx.StringObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.editor.ScriptEditor;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -94,7 +94,7 @@ public class MainSidePane extends BorderPane {
     }
 
     private Pane createRootPane(PlatformEventBus eventBus) {
-        final RendererTile tile = createRendererTile();
+        final Tile tile = createRendererTile();
 
         final StringObservableValue errorProperty = new StringObservableValue();
 
@@ -292,7 +292,7 @@ public class MainSidePane extends BorderPane {
 
         exportPane.setExportDelegate(new ExportDelegate() {
             @Override
-            public void createSession(RendererSize size, String format) {
+            public void createSession(Size size, String format) {
                 if (errorProperty.getValue() == null) {
                     eventBus.postEvent(SessionExportRequested.builder().size(size).format(format).build());
                 }
@@ -506,7 +506,7 @@ public class MainSidePane extends BorderPane {
 //        }
 //    }
 
-    private static RendererTile createRendererTile() {
-        return RendererUtils.createRendererTile(Screen.getPrimary().getVisualBounds().getWidth());
+    private static Tile createRendererTile() {
+        return GraphicsUtils.createTile(Screen.getPrimary().getVisualBounds().getWidth());
     }
 }

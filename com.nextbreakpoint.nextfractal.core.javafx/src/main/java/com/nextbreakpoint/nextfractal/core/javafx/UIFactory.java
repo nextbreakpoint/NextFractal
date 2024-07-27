@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import javafx.scene.layout.Pane;
 
 import java.util.function.Supplier;
@@ -54,7 +54,7 @@ public interface UIFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	BrowseBitmap createBitmap(Session session, RendererSize size) throws Exception;
+	BrowseBitmap createBitmap(Session session, Size size) throws Exception;
 
 	/**
 	 * @param resourceName

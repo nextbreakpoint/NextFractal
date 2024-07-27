@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public interface GridItemRenderer {
     void abort();
@@ -35,5 +35,5 @@ public interface GridItemRenderer {
 
     boolean isPixelsChanged();
 
-    void drawImage(RendererGraphicsContext gc, int x, int y);
+    void drawImage(GraphicsContext gc, int x, int y);
 }

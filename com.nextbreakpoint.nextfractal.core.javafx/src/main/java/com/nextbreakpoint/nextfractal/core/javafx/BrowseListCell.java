@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ListCell;
@@ -37,11 +37,11 @@ import javafx.scene.transform.Affine;
 public class BrowseListCell extends ListCell<Bitmap[]> {
 	private HBox pane;
 	private Canvas[] canvas;
-	private RendererSize size;
-	private RendererTile tile;
+	private Size size;
+	private Tile tile;
 	private int numOfColumns;
 
-	public BrowseListCell(int numOfColumns, RendererSize size, RendererTile tile) {
+	public BrowseListCell(int numOfColumns, Size size, Tile tile) {
 		this.size = size;
 		this.tile = tile;
 		this.numOfColumns = numOfColumns;

@@ -28,13 +28,13 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.renderer.Renderer;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
-import com.nextbreakpoint.nextfractal.core.render.Java2DRendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.Java2DRendererGraphicsContext;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -48,10 +48,10 @@ public class ContextFreeImageComposer implements ImageComposer {
 
     private boolean aborted;
     private final boolean opaque;
-    private final RendererTile tile;
+    private final Tile tile;
     private final ThreadFactory threadFactory;
 
-    public ContextFreeImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque) {
+    public ContextFreeImageComposer(ThreadFactory threadFactory, Tile tile, boolean opaque) {
         this.tile = tile;
         this.opaque = opaque;
         this.threadFactory = threadFactory;
@@ -60,7 +60,7 @@ public class ContextFreeImageComposer implements ImageComposer {
     @Override
     public IntBuffer renderImage(String script, Metadata data) {
         ContextFreeMetadata metadata = (ContextFreeMetadata) data;
-        RendererSize suggestedSize = tile.tileSize();
+        Size suggestedSize = tile.tileSize();
         BufferedImage image = new BufferedImage(suggestedSize.width(), suggestedSize.height(), BufferedImage.TYPE_INT_ARGB);
         IntBuffer buffer = IntBuffer.wrap(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         Graphics2D g2d = null;
@@ -76,7 +76,7 @@ public class ContextFreeImageComposer implements ImageComposer {
             DSLParserResult report = parser.parse(script);
             DSLCompiler compiler = new DSLCompiler();
             CFDGInterpreter interpreter = compiler.compile(report);
-            Java2DRendererFactory renderFactory = new Java2DRendererFactory();
+            GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             renderer.setInterpreter(interpreter);
             renderer.setSeed(metadata.getSeed());
@@ -84,7 +84,7 @@ public class ContextFreeImageComposer implements ImageComposer {
             renderer.init();
             renderer.runTask();
             renderer.waitForTasks();
-            renderer.copyImage(new Java2DRendererGraphicsContext(g2d));
+            renderer.copyImage(renderFactory.createGraphicsContext(g2d));
             aborted = renderer.isInterrupted();
         } catch (Throwable e) {
             logger.severe(e.getMessage());
@@ -97,7 +97,7 @@ public class ContextFreeImageComposer implements ImageComposer {
     }
 
     @Override
-    public RendererSize getSize() {
+    public Size getSize() {
         return tile.tileSize();
     }
 

@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class ExportJob {
 	}
 
 	//TODO extract code to separate class
-	public void writePixels(RendererSize size, IntBuffer pixels) throws IOException {
+	public void writePixels(Size size, IntBuffer pixels) throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(session.getTmpFile(), "rw")) {
 			writeFrame(raf, size, convertToBytes(size, pixels));
 		}
@@ -56,7 +56,7 @@ public class ExportJob {
 	}
 
 	//TODO extract code to separate class
-	private void writeFrame(RandomAccessFile raf, RendererSize size, byte[] data) throws IOException {
+	private void writeFrame(RandomAccessFile raf, Size size, byte[] data) throws IOException {
 		final int sw = size.width();
 		final int sh = size.height();
 		final int tx = profile.tileOffsetX();
@@ -78,7 +78,7 @@ public class ExportJob {
 	}
 
 	//TODO extract code to separate class
-	private byte[] convertToBytes(RendererSize size, IntBuffer pixels) {
+	private byte[] convertToBytes(Size size, IntBuffer pixels) {
 		final int sw = size.width();
 		final int sh = size.height();
 		final byte[] data = new byte[sw * sh * 4];

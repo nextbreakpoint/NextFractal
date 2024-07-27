@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 import java.nio.IntBuffer;
 
@@ -39,7 +39,7 @@ public interface ImageComposer {
 	/**
 	 * @return
 	 */
-    RendererSize getSize();
+    Size getSize();
 
 	/**
 	 * @return

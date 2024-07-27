@@ -24,14 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 public interface ToolContext<T> {
 	double getWidth();
 
 	double getHeight();
 
-	RendererFactory getRendererFactory();
+	GraphicsFactory getRendererFactory();
 
 	T getMetadata();
 

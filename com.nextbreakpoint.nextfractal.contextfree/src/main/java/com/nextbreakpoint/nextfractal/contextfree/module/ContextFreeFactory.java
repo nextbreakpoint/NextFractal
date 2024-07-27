@@ -32,8 +32,8 @@ import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.MetadataCodec;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
@@ -67,15 +67,15 @@ public class ContextFreeFactory implements CoreFactory {
 	}
 
 	/**
-	 * @see CoreFactory#createImageGenerator(java.util.concurrent.ThreadFactory, com.nextbreakpoint.nextfractal.core.render.RendererFactory, com.nextbreakpoint.nextfractal.core.render.RendererTile, boolean)
+	 * @see CoreFactory#createImageGenerator(java.util.concurrent.ThreadFactory, GraphicsFactory, Tile, boolean)
 	 */
 	@Override
-	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
+	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		return new ContextFreeImageGenerator(threadFactory, renderFactory, tile, opaque);
 	}
 
 	@Override
-	public ImageComposer createImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque) {
+	public ImageComposer createImageComposer(ThreadFactory threadFactory, Tile tile, boolean opaque) {
 		return new ContextFreeImageComposer(threadFactory, tile, opaque);
 	}
 

@@ -14,7 +14,7 @@ import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonBar;
@@ -52,7 +52,7 @@ public class ApplicationUtils {
         Plugins.factories().forEach(plugin -> log.fine("Found plugin " + plugin.getId()));
     }
 
-    public static Either<BrowseBitmap> createBitmap(File file, RendererSize size) {
+    public static Either<BrowseBitmap> createBitmap(File file, Size size) {
         return Command.of(FileManager.loadBundle(file))
                 .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().pluginId()))
                 .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))
@@ -92,7 +92,7 @@ public class ApplicationUtils {
                 .get();
     }
 
-    public static ExportSession createExportSession(Encoder encoder, Session session, List<AnimationClip> clips, RendererSize size, File file) throws IOException {
+    public static ExportSession createExportSession(Encoder encoder, Session session, List<AnimationClip> clips, Size size, File file) throws IOException {
         final String uuid = UUID.randomUUID().toString();
         final File tmpFile = File.createTempFile("export-" + uuid, ".dat");
         final List<AnimationClip> clipList = encoder.isVideoSupported() ? clips : new LinkedList<>();

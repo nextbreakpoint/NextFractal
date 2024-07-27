@@ -24,9 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Point;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import lombok.Builder;
 
 @Builder(setterPrefix = "with", toBuilder = true)
@@ -40,12 +40,12 @@ public record ExportProfile(
 	int borderWidth,
 	int borderHeight
 ) {
-	public RendererTile createRenderTile() {
-		final RendererSize imageSize = new RendererSize(frameWidth, frameHeight);
-		final RendererSize tileSize = new RendererSize(tileWidth, tileHeight);
-		final RendererSize tileBorder = new RendererSize(borderWidth, borderHeight);
-		final RendererPoint tileOffset = new RendererPoint(tileOffsetX, tileOffsetY);
+	public Tile createRenderTile() {
+		final Size imageSize = new Size(frameWidth, frameHeight);
+		final Size tileSize = new Size(tileWidth, tileHeight);
+		final Size tileBorder = new Size(borderWidth, borderHeight);
+		final Point tileOffset = new Point(tileOffsetX, tileOffsetY);
 
-		return new RendererTile(imageSize, tileSize, tileOffset, tileBorder);
+		return new Tile(imageSize, tileSize, tileOffset, tileBorder);
 	}
 }

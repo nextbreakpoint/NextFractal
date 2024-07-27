@@ -25,17 +25,17 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.render.Java2DRendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.internal.Java2DGraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Point;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.Renderer;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -49,11 +49,11 @@ public class RendererTest {
 	@Test
 	public void testProgress() {
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Test", false, Thread.MIN_PRIORITY);
-		RendererFactory renderFactory = new Java2DRendererFactory();
-		RendererPoint tileOffest = new RendererPoint(0, 0);
-		RendererSize borderSize = new RendererSize(0, 0);
-		RendererSize tileSize = new RendererSize(100, 100);
-		RendererTile tile = new RendererTile(tileSize, tileSize, tileOffest, borderSize);
+		GraphicsFactory renderFactory = new Java2DGraphicsFactory();
+		Point tileOffest = new Point(0, 0);
+		Size borderSize = new Size(0, 0);
+		Size tileSize = new Size(100, 100);
+		Tile tile = new Tile(tileSize, tileSize, tileOffest, borderSize);
 		Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 		try {
 			TestOrbit orbit = new TestOrbit();

@@ -24,16 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
-import com.nextbreakpoint.nextfractal.core.javafx.render.JavaFXRendererFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphicsFactory;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 public class GridViewCell extends BorderPane {
-	private JavaFXRendererFactory renderFactory = new JavaFXRendererFactory();
+	private JavaFXGraphicsFactory renderFactory = new JavaFXGraphicsFactory();
 	private boolean redraw;
 	private Canvas canvas;
 	private Object data;
@@ -60,12 +59,12 @@ public class GridViewCell extends BorderPane {
 			GridItemRenderer renderer = item.getRenderer();
 			if (renderer != null) {
 				if (redraw || renderer.isPixelsChanged()) {
-					RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+					GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
 					renderer.drawImage(gc, 0, 0);
 					redraw = false;
 				}
 			} else if (redraw) {
-				GraphicsContext g2d = canvas.getGraphicsContext2D();
+				javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
 				g2d.setFill(Color.WHITE);
 				g2d.fillRect(0, 0, getWidth(), getHeight());
 				g2d.setFill(Color.DARKGRAY);
@@ -79,14 +78,14 @@ public class GridViewCell extends BorderPane {
 				redraw = false;
 			}
 			if (item.isSelected()) {
-				GraphicsContext g2d = canvas.getGraphicsContext2D();
+				javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
 				g2d.setStroke(Color.YELLOW);
 				g2d.setLineWidth(5);
 				g2d.strokeRect(0, 0, getWidth(), getHeight());
 			}
 		} else {
 			if (redraw) {
-				GraphicsContext g2d = canvas.getGraphicsContext2D();
+				javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
 				g2d.setFill(Color.WHITE);
 				g2d.fillRect(0, 0, getWidth(), getHeight());
 				redraw = false;

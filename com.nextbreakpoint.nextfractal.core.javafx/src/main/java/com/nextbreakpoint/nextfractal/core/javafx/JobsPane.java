@@ -30,8 +30,8 @@ import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -70,9 +70,9 @@ public class JobsPane extends BorderPane {
     private final ExecutorService executor;
     private final ListView<Bitmap> listView;
     private JobsDelegate delegate;
-    private RendererTile tile;
+    private Tile tile;
 
-    public JobsPane(RendererTile tile) {
+    public JobsPane(Tile tile) {
         this.tile = tile;
 
         listView = new ListView<>();
@@ -230,7 +230,7 @@ public class JobsPane extends BorderPane {
         return composer.renderImage(session.getFrames().getFirst().script(), session.getFrames().getFirst().metadata());
     }
 
-    private void addItem(ListView<Bitmap> listView, ExportSession session, IntBuffer pixels, RendererSize size) {
+    private void addItem(ListView<Bitmap> listView, ExportSession session, IntBuffer pixels, Size size) {
         BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
         JobEntry jobEntry = new JobEntry(session, ExportSessionState.READY, 0f, bitmap);
         exportEntries.put(session.getSessionId(), jobEntry);

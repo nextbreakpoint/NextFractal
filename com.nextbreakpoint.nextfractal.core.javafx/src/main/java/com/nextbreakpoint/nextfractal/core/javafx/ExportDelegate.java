@@ -25,12 +25,12 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 import java.util.List;
 
 public interface ExportDelegate {
-	void createSession(RendererSize size, String format);
+	void createSession(Size size, String format);
 
     void startCaptureSession();
 

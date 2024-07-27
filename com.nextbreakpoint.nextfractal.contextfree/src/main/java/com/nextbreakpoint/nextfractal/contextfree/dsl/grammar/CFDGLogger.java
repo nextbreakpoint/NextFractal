@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererErrors;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.RendererErrors;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import org.antlr.v4.runtime.Token;
 

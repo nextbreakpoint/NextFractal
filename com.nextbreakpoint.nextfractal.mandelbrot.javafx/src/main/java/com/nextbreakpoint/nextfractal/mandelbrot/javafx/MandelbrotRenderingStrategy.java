@@ -31,15 +31,14 @@ import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
-import com.nextbreakpoint.nextfractal.core.javafx.render.JavaFXRendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
@@ -51,8 +50,8 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererCoordinator;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererView;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import javafx.scene.canvas.Canvas;
 import lombok.extern.java.Log;
 
@@ -67,9 +66,9 @@ import java.util.logging.Level;
 
 @Log
 public class MandelbrotRenderingStrategy implements RenderingStrategy {
-    private final JavaFXRendererFactory renderFactory;
-    private final RendererCoordinator[] coordinators;
-    private RendererCoordinator juliaCoordinator;
+    private final GraphicsFactory renderFactory;
+    private final Coordinator[] coordinators;
+    private Coordinator juliaCoordinator;
     private final int width;
     private final int height;
     private final int rows;
@@ -94,13 +93,13 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         this.rows = rows;
         this.columns = columns;
 
-        renderFactory = new JavaFXRendererFactory();
+        renderFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 
-        final Map<String, Integer> hints = Map.of(RendererCoordinator.KEY_TYPE, RendererCoordinator.VALUE_REALTIME);
+        final Map<String, Integer> hints = Map.of(Coordinator.KEY_TYPE, Coordinator.VALUE_REALTIME);
         coordinators = createCoordinators(rows, columns, hints);
 
-        final Map<String, Integer> juliaHints = Map.of(RendererCoordinator.KEY_TYPE, RendererCoordinator.VALUE_REALTIME);
-        juliaCoordinator = createJuliaRendererCoordinator(juliaHints, RendererUtils.createRendererTile(200, 200));
+        final Map<String, Integer> juliaHints = Map.of(Coordinator.KEY_TYPE, Coordinator.VALUE_REALTIME);
+        juliaCoordinator = createJuliaRendererCoordinator(juliaHints, GraphicsUtils.createTile(200, 200));
     }
 
     public Number getInitialCenter() {
@@ -112,7 +111,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public RendererFactory getRenderFactory() {
+    public GraphicsFactory getRenderFactory() {
         return renderFactory;
     }
 
@@ -142,9 +141,9 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         boolean julia = metadata.isJulia();
         abortCoordinators();
         joinCoordinators();
-        for (RendererCoordinator coordinator : coordinators) {
+        for (Coordinator coordinator : coordinators) {
             if (coordinator != null) {
-                RendererView view = new RendererView();
+                View view = new View();
                 view.setTraslation(translation);
                 view.setRotation(rotation);
                 view.setScale(scale);
@@ -161,7 +160,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         if (metadata.getOptions().isShowPreview() && !julia && juliaCoordinator != null) {
             juliaCoordinator.abort();
             juliaCoordinator.waitFor();
-            RendererView view = new RendererView();
+            View view = new View();
             view.setTraslation(new Double4D(new double[]{0, 0, 1, 0}));
             view.setRotation(new Double4D(new double[]{0, 0, 0, 0}));
             view.setScale(new Double4D(new double[]{1, 1, 1, 1}));
@@ -223,7 +222,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             if (juliaCoordinator != null) {
                 juliaCoordinator.waitFor();
             }
-            for (RendererCoordinator coordinator : coordinators) {
+            for (Coordinator coordinator : coordinators) {
                 if (coordinator != null) {
                     if (Boolean.getBoolean("com.nextbreakpoint.nextfractal.mandelbrot.javafx.smart-render-disabled")) {
                         Orbit orbit = orbitFactory.create();
@@ -240,7 +239,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                         }
                     }
                     coordinator.init();
-                    RendererView view = new RendererView();
+                    View view = new View();
                     view.setTraslation(translation);
                     view.setRotation(rotation);
                     view.setScale(scale);
@@ -267,7 +266,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                     }
                 }
                 juliaCoordinator.init();
-                RendererView view = new RendererView();
+                View view = new View();
                 view.setTraslation(translation);
                 view.setRotation(rotation);
                 view.setScale(scale);
@@ -301,7 +300,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
 
     @Override
     public void disposeCoordinators() {
-        for (RendererCoordinator coordinator : coordinators) {
+        for (Coordinator coordinator : coordinators) {
             if (coordinator != null) {
                 coordinator.abort();
             }
@@ -323,47 +322,47 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         }
     }
 
-    private RendererCoordinator[] createCoordinators(int rows, int columns, Map<String, Integer> hints) {
-        final RendererCoordinator[] coordinators = new RendererCoordinator[rows * columns];
+    private Coordinator[] createCoordinators(int rows, int columns, Map<String, Integer> hints) {
+        final Coordinator[] coordinators = new Coordinator[rows * columns];
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
-                final RendererTile tile = RendererUtils.createRendererTile(width, height, rows, columns, row, column);
-                final RendererCoordinator rendererCoordinator = createRendererCoordinator(hints, tile);
+                final Tile tile = GraphicsUtils.createTile(width, height, rows, columns, row, column);
+                final Coordinator rendererCoordinator = createRendererCoordinator(hints, tile);
                 coordinators[row * columns + column] = rendererCoordinator;
             }
         }
         return coordinators;
     }
 
-    private RendererCoordinator createRendererCoordinator(Map<String, Integer> hints, RendererTile tile) {
+    private Coordinator createRendererCoordinator(Map<String, Integer> hints, Tile tile) {
         return createRendererCoordinator(hints, tile, Thread.MIN_PRIORITY + 2, "Mandelbrot Coordinator");
     }
 
-    private RendererCoordinator createJuliaRendererCoordinator(Map<String, Integer> hints, RendererTile tile) {
+    private Coordinator createJuliaRendererCoordinator(Map<String, Integer> hints, Tile tile) {
         return createRendererCoordinator(hints, tile, Thread.MIN_PRIORITY + 1, "Julia Coordinator");
     }
 
     private void abortCoordinators() {
-        visitCoordinators(coordinator -> true, RendererCoordinator::abort);
+        visitCoordinators(coordinator -> true, Coordinator::abort);
     }
 
     private void joinCoordinators() {
-        visitCoordinators(coordinator -> true, RendererCoordinator::waitFor);
+        visitCoordinators(coordinator -> true, Coordinator::waitFor);
     }
 
     private void startCoordinators() {
-        visitCoordinators(coordinator -> true, RendererCoordinator::run);
+        visitCoordinators(coordinator -> true, Coordinator::run);
     }
 
-    private void visitCoordinators(Predicate<RendererCoordinator> predicate, Consumer<RendererCoordinator> consumer) {
+    private void visitCoordinators(Predicate<Coordinator> predicate, Consumer<Coordinator> consumer) {
         Arrays.stream(coordinators)
                 .filter(coordinator -> coordinator != null && predicate.test(coordinator))
                 .forEach(consumer);
     }
 
-    private RendererCoordinator createRendererCoordinator(Map<String, Integer> hints, RendererTile tile, int priority, String name) {
+    private Coordinator createRendererCoordinator(Map<String, Integer> hints, Tile tile, int priority, String name) {
         final DefaultThreadFactory threadFactory = createThreadFactory(name, priority);
-        return new RendererCoordinator(threadFactory, renderFactory, tile, hints);
+        return new Coordinator(threadFactory, renderFactory, tile, hints);
     }
 
     private DefaultThreadFactory createThreadFactory(String name, int priority) {
@@ -420,14 +419,14 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     private void redrawIfPixelsChanged(Canvas canvas) {
-        RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
-        visitCoordinators(RendererCoordinator::isPixelsChanged, coordinator -> coordinator.drawImage(gc, 0, 0));
+        GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+        visitCoordinators(Coordinator::isPixelsChanged, coordinator -> coordinator.drawImage(gc, 0, 0));
     }
 
     private void redrawIfJuliaPixelsChanged(Canvas canvas) {
         MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
         if (!metadata.isJulia() && juliaCoordinator != null && juliaCoordinator.isPixelsChanged()) {
-            RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             double dw = canvas.getWidth();
             double dh = canvas.getHeight();
             gc.clearRect(0, 0, (int) dw, (int) dh);
@@ -443,7 +442,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             redrawPoint = false;
             Number size = coordinators[0].getInitialSize();
             Number center = coordinators[0].getInitialCenter();
-            RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
                 MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
                 double[] t = metadata.getTranslation().toArray();
@@ -457,7 +456,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 gc.clearRect(0, 0, (int) dw, (int) dh);
                 double cx = dw / 2;
                 double cy = dh / 2;
-                gc.setStrokeLine(((float) dw) * 0.002f, RendererGraphicsContext.CAP_BUTT, RendererGraphicsContext.JOIN_MITER, 1f);
+                gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 1, 0, 1));
                 double[] point = metadata.getPoint().toArray();
                 double zx = point[0];
@@ -484,7 +483,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             redrawOrbit = false;
             Number size = coordinators[0].getInitialSize();
             Number center = coordinators[0].getInitialCenter();
-            RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
                 MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
                 double[] t = metadata.getTranslation().toArray();
@@ -498,7 +497,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 gc.clearRect(0, 0, (int) dw, (int) dh);
                 double cx = dw / 2;
                 double cy = dh / 2;
-                gc.setStrokeLine(((float) dw) * 0.002f, RendererGraphicsContext.CAP_BUTT, RendererGraphicsContext.JOIN_MITER, 1f);
+                gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
                 Number[] state = states.getFirst();
                 double zx = state[0].r();
@@ -533,7 +532,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             redrawTraps = false;
             Number size = coordinators[0].getInitialSize();
             Number center = coordinators[0].getInitialCenter();
-            RendererGraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
                 MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
                 double[] t = metadata.getTranslation().toArray();
@@ -545,7 +544,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 double dw = canvas.getWidth();
                 double dh = canvas.getHeight();
                 gc.clearRect(0, 0, (int) dw, (int) dh);
-                gc.setStrokeLine(((float) dw) * 0.002f, RendererGraphicsContext.CAP_BUTT, RendererGraphicsContext.JOIN_MITER, 1f);
+                gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 1, 0, 1));
                 List<Trap> traps = coordinators[0].getTraps();
                 for (Trap trap : traps) {

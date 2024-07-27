@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.enums.FlagType;
-import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Point;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -35,18 +35,18 @@ import java.awt.geom.GeneralPath;
 
 public class SimpleCanvas implements CFCanvas {
     private Graphics2D g2d;
-    private RendererTile tile;
-    private RendererSize size;
+    private Tile tile;
+    private Size size;
     private AffineTransform normTransform;
 
-    public SimpleCanvas(Graphics2D g2d, RendererTile tile) {
+    public SimpleCanvas(Graphics2D g2d, Tile tile) {
         this.g2d = g2d;
         this.tile = tile;
-        final RendererSize tileSize = tile.tileSize();
-        final RendererSize borderSize = tile.borderSize();
+        final Size tileSize = tile.tileSize();
+        final Size borderSize = tile.borderSize();
         final int width = tileSize.width() + borderSize.width() * 2;
         final int height = tileSize.height() + borderSize.height() * 2;
-        size = new RendererSize(width, height);
+        size = new Size(width, height);
     }
 
     public int getWidth() {
@@ -152,9 +152,9 @@ public class SimpleCanvas implements CFCanvas {
     }
 
     public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
-        final RendererSize imageSize = tile.imageSize();
-        final RendererSize borderSize = tile.borderSize();
-        final RendererPoint tileOffset = tile.tileOffset();
+        final Size imageSize = tile.imageSize();
+        final Size borderSize = tile.borderSize();
+        final Point tileOffset = tile.tileOffset();
         normTransform = new AffineTransform();
 //        normTransform.translate(0, imageSize.height());
 //        normTransform.scale(1, -1);

@@ -33,13 +33,14 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParamsStrategy;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParserStrategy;
-import com.nextbreakpoint.nextfractal.contextfree.renderer.RendererCoordinator;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.render.RendererUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
@@ -50,11 +51,10 @@ import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
-import com.nextbreakpoint.nextfractal.core.javafx.render.JavaFXRendererFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.scene.layout.Pane;
 
 import java.util.HashMap;
@@ -73,9 +73,10 @@ public class ContextFreeUIFactory implements UIFactory {
 	@Override
 	public GridItemRenderer createRenderer(Bitmap bitmap) {
 		Map<String, Integer> hints = new HashMap<String, Integer>();
-		RendererTile tile = RendererUtils.createRendererTile(bitmap.getWidth(), bitmap.getHeight());
+		Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
-		RendererCoordinator coordinator = new RendererCoordinator(threadFactory, new JavaFXRendererFactory(), tile, hints);
+		GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
+		Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
 		CFDG cfdg = (CFDG)bitmap.getProperty("cfdg");
 		Session session = (Session)bitmap.getProperty("session");
 		coordinator.setInterpreter(new CFDGInterpreter(cfdg));
@@ -86,7 +87,7 @@ public class ContextFreeUIFactory implements UIFactory {
 	}
 
 	@Override
-	public BrowseBitmap createBitmap(Session session, RendererSize size) throws Exception {
+	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
 		DSLParser compiler = new DSLParser();
 		DSLParserResult report = compiler.parse(session.script());
 		if (!report.getErrors().isEmpty()) {
@@ -151,9 +152,9 @@ public class ContextFreeUIFactory implements UIFactory {
 	}
 
 	private static class GridItemRendererAdapter implements GridItemRenderer {
-		private final RendererCoordinator coordinator;
+		private final Coordinator coordinator;
 
-		public GridItemRendererAdapter(RendererCoordinator coordinator) {
+		public GridItemRendererAdapter(Coordinator coordinator) {
 			this.coordinator = coordinator;
 		}
 
@@ -178,7 +179,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		}
 
 		@Override
-		public void drawImage(RendererGraphicsContext gc, int x, int y) {
+		public void drawImage(GraphicsContext gc, int x, int y) {
 			coordinator.drawImage(gc, x, y);
 		}
 	}

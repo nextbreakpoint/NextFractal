@@ -30,17 +30,17 @@ import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Time;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.Renderer;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererView;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -49,11 +49,11 @@ import java.util.concurrent.ThreadFactory;
 public class MandelbrotImageGenerator implements ImageGenerator {
 	private boolean aborted;
 	private final boolean opaque;
-	private final RendererTile tile;
+	private final Tile tile;
 	private final ThreadFactory threadFactory;
-	private final RendererFactory renderFactory;
+	private final GraphicsFactory renderFactory;
 
-	public MandelbrotImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
+	public MandelbrotImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		this.tile = tile;
 		this.opaque = opaque;
 		this.threadFactory = threadFactory;
@@ -63,7 +63,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 	@Override
 	public IntBuffer renderImage(String script, Metadata data) {
 		MandelbrotMetadata metadata = (MandelbrotMetadata) data;
-		RendererSize suggestedSize = tile.tileSize();
+		Size suggestedSize = tile.tileSize();
 		int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
 		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
@@ -84,7 +84,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			renderer.setOrbit(orbit);
 			renderer.setColor(color);
 			renderer.init();
-			RendererView view = new RendererView();
+			View view = new View();
 			view .setTraslation(translation);
 			view.setRotation(rotation);
 			view.setScale(scale);
@@ -104,7 +104,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 	}
 
 	@Override
-	public RendererSize getSize() {
+	public Size getSize() {
 		return tile.tileSize();
 	}
 	

@@ -1,3 +1,5 @@
+import com.nextbreakpoint.nextfractal.core.graphics.internal.Java2DGraphicsFactory;
+
 /*
  * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
@@ -35,8 +37,10 @@ module com.nextbreakpoint.nextfractal.core {
     exports com.nextbreakpoint.nextfractal.core.params;
     exports com.nextbreakpoint.nextfractal.core.encoder;
     exports com.nextbreakpoint.nextfractal.core.export;
-    exports com.nextbreakpoint.nextfractal.core.render;
+    exports com.nextbreakpoint.nextfractal.core.graphics;
     exports com.nextbreakpoint.nextfractal.core.event;
     uses com.nextbreakpoint.nextfractal.core.common.CoreFactory;
     uses com.nextbreakpoint.nextfractal.core.encoder.Encoder;
+    uses com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+    provides com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory with Java2DGraphicsFactory;
 }

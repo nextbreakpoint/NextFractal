@@ -28,12 +28,12 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.renderer.Renderer;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -42,11 +42,11 @@ import java.util.concurrent.ThreadFactory;
 public class ContextFreeImageGenerator implements ImageGenerator {
 	private boolean aborted;
 	private final boolean opaque;
-	private final RendererTile tile;
+	private final Tile tile;
 	private final ThreadFactory threadFactory;
-	private final RendererFactory renderFactory;
+	private final GraphicsFactory renderFactory;
 
-	public ContextFreeImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
+	public ContextFreeImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		this.tile = tile;
 		this.opaque = opaque;
 		this.threadFactory = threadFactory;
@@ -56,7 +56,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 	@Override
 	public IntBuffer renderImage(String script, Metadata data) {
 		ContextFreeMetadata metadata = (ContextFreeMetadata)data;
-		RendererSize suggestedSize = tile.tileSize();
+		Size suggestedSize = tile.tileSize();
 		int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
         Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
@@ -81,7 +81,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 	}
 
 	@Override
-	public RendererSize getSize() {
+	public Size getSize() {
 		return tile.tileSize();
 	}
 	

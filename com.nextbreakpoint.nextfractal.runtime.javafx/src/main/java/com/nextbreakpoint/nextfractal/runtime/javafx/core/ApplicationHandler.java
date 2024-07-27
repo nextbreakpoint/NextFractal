@@ -62,7 +62,7 @@ import com.nextbreakpoint.nextfractal.core.event.WorkspaceChanged;
 import com.nextbreakpoint.nextfractal.core.export.ExportService;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.FileUtils;
 import javafx.scene.control.ButtonType;
@@ -367,7 +367,7 @@ public class ApplicationHandler {
                 .ifPresent(session -> eventBus.postEvent(SessionDataLoaded.builder().session(session).continuous(false).appendToHistory(true).build()));
     }
 
-    private void createExportSession(Encoder encoder, RendererSize size, File file) {
+    private void createExportSession(Encoder encoder, Size size, File file) {
         try {
             final ExportSession exportSession = ApplicationUtils.createExportSession(encoder, session, clips, size, file);
             eventBus.postEvent(ExportSessionCreated.builder().session(exportSession).build());

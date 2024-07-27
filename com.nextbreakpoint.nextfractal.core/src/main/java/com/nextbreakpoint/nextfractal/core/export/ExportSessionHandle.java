@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.export;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import lombok.Getter;
 
 import java.io.File;
@@ -146,7 +146,7 @@ public final class ExportSessionHandle {
 		return session.getEncoder();
 	}
 
-	public RendererSize getSize() {
+	public Size getSize() {
 		return session.getFrameSize();
 	}
 

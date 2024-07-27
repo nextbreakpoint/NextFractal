@@ -26,12 +26,12 @@ package com.nextbreakpoint.nextfractal.contextfree.test;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
-import com.nextbreakpoint.nextfractal.contextfree.renderer.Renderer;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.render.Java2DRendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererPoint;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.internal.Java2DGraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Point;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -98,9 +98,9 @@ public class V3RenderTest extends AbstractBaseTest {
 		BufferedImage actualImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
 
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Generator", true, Thread.MIN_PRIORITY);
-		Java2DRendererFactory rendererFactory = new Java2DRendererFactory();
+		Java2DGraphicsFactory rendererFactory = new Java2DGraphicsFactory();
 
-		RendererTile tile = new RendererTile(new RendererSize(200, 200), new RendererSize(200, 200), new RendererPoint(0, 0), new RendererSize(0, 0));
+		Tile tile = new Tile(new Size(200, 200), new Size(200, 200), new Point(0, 0), new Size(0, 0));
 		Renderer renderer = new Renderer(threadFactory, rendererFactory, tile);
 
 		CFDG cfdg = parseSource(sourceName);

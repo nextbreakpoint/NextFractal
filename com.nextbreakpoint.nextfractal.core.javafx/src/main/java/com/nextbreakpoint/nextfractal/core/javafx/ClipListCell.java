@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -52,9 +52,9 @@ public class ClipListCell extends ListCell<Bitmap> {
 	private Canvas canvas;
 	private ClipListCellDelegate delegate;
 	private Label label;
-	private RendererTile tile;
+	private Tile tile;
 
-	public ClipListCell(RendererTile tile, ClipListCellDelegate delegate) {
+	public ClipListCell(Tile tile, ClipListCellDelegate delegate) {
 		this.tile = tile;
 		this.delegate = delegate;
 		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());

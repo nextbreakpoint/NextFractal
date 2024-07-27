@@ -2,12 +2,12 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 import java.util.List;
 
 public interface RenderingStrategy {
-    RendererFactory getRenderFactory();
+    GraphicsFactory getRenderFactory();
 
     void updateAndRedraw(long timestampInMillis);
 

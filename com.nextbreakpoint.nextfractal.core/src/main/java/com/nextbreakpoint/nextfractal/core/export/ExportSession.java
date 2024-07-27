@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import lombok.Getter;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public final class ExportSession {
 	//TODO the encoder has mutable state. perhaps we should use an encoder factory instead
     private final Encoder encoder;
 	@Getter
-    private final RendererSize frameSize;
+    private final Size frameSize;
 	@Getter
     private final File tmpFile;
 	@Getter
@@ -63,7 +63,7 @@ public final class ExportSession {
 	private final List<ExportJob> jobs = new ArrayList<>();
 	private final List<AnimationFrame> frames = new ArrayList<>();
 
-	public ExportSession(String sessionId, Session session, List<AnimationClip> clips, File file, File tmpFile, RendererSize frameSize, int tileSize, Encoder encoder) {
+	public ExportSession(String sessionId, Session session, List<AnimationClip> clips, File file, File tmpFile, Size frameSize, int tileSize, Encoder encoder) {
 		this.sessionId = Objects.requireNonNull(sessionId);
 		this.tmpFile = Objects.requireNonNull(tmpFile);
 		this.file = Objects.requireNonNull(file);

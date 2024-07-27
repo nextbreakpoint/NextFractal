@@ -37,9 +37,10 @@ module com.nextbreakpoint.nextfractal.mandelbrot {
     exports com.nextbreakpoint.nextfractal.mandelbrot.module;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
-    exports com.nextbreakpoint.nextfractal.mandelbrot.renderer;
+    exports com.nextbreakpoint.nextfractal.mandelbrot.graphics;
     exports com.nextbreakpoint.nextfractal.mandelbrot.core;
     provides CoreFactory with MandelbrotFactory;
     provides MetadataCodec with MandelbrotMetadataCodec;
+    uses com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
     opens com.nextbreakpoint.nextfractal.mandelbrot.module to com.fasterxml.jackson.databind;
 }

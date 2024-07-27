@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererTransform;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Transform;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RendererTransformTest {
 	@Test
 	public void given_new_transform_should_be_identity() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		double[] p = makePoint(1, 1);
 		t.transform(p);
 		assertThat(p[0]).isEqualTo(1, Offset.offset(0.00001));
@@ -42,7 +42,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_translate_should_return_traslated_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		t.traslate(10, 20);
 		double[] p = makePoint(0, 0);
 		t.transform(p);
@@ -52,7 +52,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_scale_should_return_scaled_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		t.scale(10, 20);
 		double[] p = makePoint(1, 1);
 		t.transform(p);
@@ -62,7 +62,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_rotate_by_90_degrees_should_return_rotated_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		t.rotate(Math.PI / 2);
 		double[] p = makePoint(1, 1);
 		t.transform(p);
@@ -72,7 +72,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_rotate_by_180_degrees_should_return_rotated_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		t.rotate(Math.PI);
 		double[] p = makePoint(1, 1);
 		t.transform(p);
@@ -82,7 +82,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_rotate_should_return_rotated_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		double a = Math.PI / 7;
 		t.rotate(a);
 		double[] p = makePoint(1, 1);
@@ -93,7 +93,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_rotate_and_scale_should_return_rotated_and_scaled_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		double a = Math.PI / 7;
 		t.rotate(a);
 		t.scale(2,2);
@@ -105,7 +105,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_rotate_and_scale_and_traslate_should_return_rotated_and_scaled_and_traslated_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		double a = Math.PI / 2;
 		t.rotate(a);
 		t.scale(2,2);
@@ -118,7 +118,7 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_traslate_and_rotate_and_scale_should_return_traslated_and_rotated_and_scaled_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		double a = Math.PI / 2;
 		t.traslate(1,1);
 		t.rotate(a);
@@ -131,11 +131,11 @@ public class RendererTransformTest {
 
 	@Test
 	public void given_new_transform_when_concat_should_return_traslated_and_rotated_and_scaled_point() {
-		RendererTransform t = new RendererTransform();
+		Transform t = new Transform();
 		double a = Math.PI / 2;
-		RendererTransform tt = RendererTransform.newTraslate(1, 1);
-		RendererTransform rt = RendererTransform.newRotate(a);
-		RendererTransform st = RendererTransform.newScale(2, 2);
+		Transform tt = Transform.newTraslate(1, 1);
+		Transform rt = Transform.newRotate(a);
+		Transform st = Transform.newScale(2, 2);
 		t.concat(tt);
 		t.concat(rt);
 		t.concat(st);

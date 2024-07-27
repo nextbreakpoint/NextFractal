@@ -29,8 +29,8 @@ import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ListView;
@@ -53,9 +53,9 @@ public class HistoryPane extends BorderPane {
     private final ExecutorService executor;
     private ListView<Bitmap> listView;
     private HistoryDelegate delegate;
-    private RendererTile tile;
+    private Tile tile;
 
-    public HistoryPane(RendererTile tile) {
+    public HistoryPane(Tile tile) {
         this.tile = tile;
 
         listView = new ListView<>();
@@ -95,7 +95,7 @@ public class HistoryPane extends BorderPane {
                 .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
     }
 
-    private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, RendererSize size) {
+    private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, Size size) {
         BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
         bitmap.setProperty("session", session);
         listView.getItems().addFirst(bitmap);

@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.common;
 
 import com.nextbreakpoint.common.either.Either;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
 import java.util.concurrent.ThreadFactory;
 
@@ -58,7 +58,7 @@ public interface CoreFactory {
 	 * @param opaque
 	 * @return
 	 */
-    ImageGenerator createImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque);
+    ImageGenerator createImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque);
 
 	/**
 	 * @param threadFactory
@@ -66,7 +66,7 @@ public interface CoreFactory {
 	 * @param opaque
 	 * @return
 	 */
-    ImageComposer createImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque);
+    ImageComposer createImageComposer(ThreadFactory threadFactory, Tile tile, boolean opaque);
 
 	/**
 	 * @return

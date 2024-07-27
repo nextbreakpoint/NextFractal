@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx.tool;
 
 import com.nextbreakpoint.nextfractal.core.javafx.Tool;
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
@@ -131,7 +131,7 @@ public class ToolPick implements Tool {
 	}
 
 	@Override
-	public void draw(RendererGraphicsContext gc) {
+	public void draw(GraphicsContext gc) {
 		double dw = context.getWidth();
 		double dh = context.getHeight();
 		gc.clearRect(0, 0, (int)dw, (int)dh);

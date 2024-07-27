@@ -30,8 +30,8 @@ import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.AnimationEvent;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
@@ -63,7 +63,7 @@ public class ExportPane extends BorderPane {
 	private static Logger logger = Logger.getLogger(ExportPane.class.getName());
 	private static final int PADDING = 8;
 
-	private final RendererTile tile;
+	private final Tile tile;
 	private final ExecutorService executor;
 	private final ListView<Bitmap> listView;
 	private final BooleanObservableValue captureProperty;
@@ -72,7 +72,7 @@ public class ExportPane extends BorderPane {
 
 	private ExportDelegate delegate;
 
-	public ExportPane(RendererTile tile) {
+	public ExportPane(Tile tile) {
 		this.tile = tile;
 
 		captureProperty = new BooleanObservableValue();
@@ -302,7 +302,7 @@ public class ExportPane extends BorderPane {
 				int renderWidth = Integer.parseInt(widthField.getText());
 				int renderHeight = Integer.parseInt(heightField.getText());
 				String format = formatCombobox.getSelectionModel().getSelectedItem()[1];
-				delegate.createSession(new RendererSize(renderWidth, renderHeight), format);
+				delegate.createSession(new Size(renderWidth, renderHeight), format);
 			}
 		});
 
@@ -427,7 +427,7 @@ public class ExportPane extends BorderPane {
 		return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
 	}
 
-	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, RendererSize size, boolean notifyAddClip) {
+	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, Size size, boolean notifyAddClip) {
 		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
 		bitmap.setProperty("clip", clip);
 		listView.getItems().add(bitmap);

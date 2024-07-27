@@ -45,7 +45,7 @@ import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.PlaybackDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.PlaybackPane;
 import com.nextbreakpoint.nextfractal.core.javafx.RecordingPane;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
@@ -93,7 +93,7 @@ public class MainCentralPane extends BorderPane {
 			}
 
             @Override
-            public BrowseBitmap createBitmap(File file, RendererSize size) throws Exception {
+            public BrowseBitmap createBitmap(File file, Size size) throws Exception {
                 return ApplicationUtils.createBitmap(file, size).orThrow().get();
             }
 
