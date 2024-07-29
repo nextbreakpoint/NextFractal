@@ -100,9 +100,9 @@ public class Scope {
 	 * 
 	 */
 	public void clear() {
-		for (int i = 0; i < vars.length; i++) {
-			vars[i].set(0, 0);
-		}
+        for (MutableNumber var : vars) {
+            var.set(0, 0);
+        }
 	}
 
 	/**

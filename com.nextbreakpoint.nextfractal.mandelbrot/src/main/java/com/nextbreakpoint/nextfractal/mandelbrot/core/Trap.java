@@ -24,6 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
+import lombok.Getter;
+
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
@@ -32,17 +34,14 @@ import java.util.List;
 
 public class Trap {
 	private final Path2D.Double path2d = new Path2D.Double();
-	private final Number center;
+	@Getter
+    private final Number center;
 	
 	public Trap(Number center) {
 		this.center = center;
 	}
-	
-	public Number getCenter() {
-		return center;
-	}
 
-	public Trap moveTo(Number x) {
+    public Trap moveTo(Number x) {
 		path2d.moveTo(x.r(), -x.i());
 		return this;
 	}
@@ -102,23 +101,20 @@ public class Trap {
 	}
 
 	public List<Number> toPoints() {
-		PathIterator iterator = path2d.getPathIterator(AffineTransform.getTranslateInstance(center.r(), -center.i()), 0.005);
-		List<Number> points = new ArrayList<>();
-		double[] coords = new double[6];
+		final PathIterator iterator = path2d.getPathIterator(AffineTransform.getTranslateInstance(center.r(), -center.i()), 0.005);
+		final List<Number> points = new ArrayList<>();
+		final double[] segment = new double[6];
 		while (!iterator.isDone()) {
-			switch (iterator.currentSegment(coords)) {
-				case PathIterator.SEG_LINETO:
-					points.add(new Number(coords[0], coords[1]));
-					break;
-				case PathIterator.SEG_MOVETO:
-					points.add(new Number(coords[0], coords[1]));
-					break;
-				case PathIterator.SEG_CLOSE:
-					points.add(new Number(points.get(0).r(), points.get(0).i()));
-					break;
-				default:
-					break;
-			}
+            switch (iterator.currentSegment(segment)) {
+                case PathIterator.SEG_LINETO -> points.add(new Number(segment[0], segment[1]));
+                case PathIterator.SEG_MOVETO -> points.add(new Number(segment[0], segment[1]));
+                case PathIterator.SEG_CLOSE -> {
+                    final Number number = points.getFirst();
+                    points.add(new Number(number.r(), number.i()));
+                }
+                default -> {
+                }
+            }
 			iterator.next();
 		}
 		return points;

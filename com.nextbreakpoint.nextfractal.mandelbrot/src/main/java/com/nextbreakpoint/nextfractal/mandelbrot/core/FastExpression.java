@@ -24,12 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.math3.util.FastMath;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FastExpression {
-	public FastExpression() {
-	}
-
 	public static MutableNumber variable(Number x) {
 		return new MutableNumber(x);
 	}

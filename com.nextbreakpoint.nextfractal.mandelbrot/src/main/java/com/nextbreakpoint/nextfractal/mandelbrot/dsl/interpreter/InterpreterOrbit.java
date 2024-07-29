@@ -51,7 +51,7 @@ public class InterpreterOrbit extends Orbit implements InterpreterContext {
 	public InterpreterOrbit(CompiledOrbit orbit, ExpressionContext context) {
 		this.orbit = orbit;
 		this.context = context;
-		initializeStack();
+		initializeNumbersStack();
 	}
 
 	public void init() {

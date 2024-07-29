@@ -25,23 +25,19 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import lombok.Getter;
 import lombok.ToString;
 
-import java.io.Serial;
+import java.util.Collections;
 import java.util.List;
 
+@Getter
 @ToString
 public class ParserException extends Exception {
-	@Serial
-	private static final long serialVersionUID = 1L;
 	private final List<ParserError> errors;
 
 	public ParserException(String message, List<ParserError> errors) {
 		super(message);
-		this.errors = errors;
-	}
-	
-	public List<ParserError> getErrors() {
-		return errors;
+		this.errors = Collections.unmodifiableList(errors);
 	}
 }

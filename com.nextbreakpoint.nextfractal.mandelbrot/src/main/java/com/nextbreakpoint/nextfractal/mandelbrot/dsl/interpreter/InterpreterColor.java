@@ -52,7 +52,7 @@ public class InterpreterColor extends Color implements InterpreterContext {
 	public InterpreterColor(CompiledColor color, ExpressionContext context) {
 		this.color = color;
 		this.context = context;
-		initializeStack();
+		initializeNumbersStack();
 	}
 
 	public void init() {

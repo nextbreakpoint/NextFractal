@@ -24,6 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
+import java.util.Objects;
+
 public class Number {
 	protected double r;
 	protected double i;
@@ -79,30 +81,15 @@ public class Number {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(i);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(r);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Number number = (Number) o;
+		return Double.compare(r, number.r) == 0 && Double.compare(i, number.i) == 0;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Number other = (Number) obj;
-		if (Double.doubleToLongBits(i) != Double.doubleToLongBits(other.i))
-			return false;
-		if (Double.doubleToLongBits(r) != Double.doubleToLongBits(other.r))
-			return false;
-		return true;
+	public int hashCode() {
+		return Objects.hash(r, i);
 	}
 }
