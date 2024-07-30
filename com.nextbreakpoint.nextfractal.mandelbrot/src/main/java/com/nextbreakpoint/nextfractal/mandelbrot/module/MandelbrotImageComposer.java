@@ -114,7 +114,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             renderer.setColor(color);
             renderer.init();
             View view = new View();
-            view.setTraslation(translation);
+            view.setTranslation(translation);
             view.setRotation(rotation);
             view.setScale(scale);
             view.setState(new Integer4D(0, 0, 0, 0));
@@ -235,7 +235,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             double cx = imageSize.width() / 2d;
             double cy = imageSize.height() / 2d;
             gc.setStroke(factory.createColor(1, 0, 0, 1));
-            Number[] state = states.get(0);
+            Number[] state = states.getFirst();
             double zx = state[0].r();
             double zy = state[0].i();
             double px = (zx - tx - center.r()) / (tz * size.r());

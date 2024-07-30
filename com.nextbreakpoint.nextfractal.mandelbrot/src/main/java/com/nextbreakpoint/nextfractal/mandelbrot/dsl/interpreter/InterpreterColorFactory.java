@@ -24,65 +24,64 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.support.CompiledColor;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPalette;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.support.CompiledRule;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledColorInt;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledRule;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTPalette;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTRule;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStatement;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class InterpreterColorFactory implements ClassFactory<Color> {
-	private ASTFractal astFractal;
-	private String source;
-	private List<ParserError> errors;
+	private final ASTFractal fractal;
+	private final String source;
+	@Getter
+    private final List<ParserError> errors;
 
-	public InterpreterColorFactory(ASTFractal astFractal, String source, List<ParserError> errors) {
-		this.astFractal = astFractal;
+	public InterpreterColorFactory(ASTFractal fractal, String source, List<ParserError> errors) {
+		this.fractal = fractal;
 		this.source = source;
 		this.errors = errors;
 	}
 
-	public Color create() throws ParserException {
+	public Color create() throws DSLCompilerException {
 		try {
-			ExpressionContext context = new ExpressionContext();
-			ASTColor astColor = astFractal.getColor();
-			List<CompilerVariable> colorVars = new ArrayList<>();
-			for (CompilerVariable var : astFractal.getColorVariables()) {
+			ExpressionCompilerContext context = new ExpressionCompilerContext();
+			ASTColor astColor = fractal.getColor();
+			List<Variable> colorVars = new ArrayList<>();
+			for (Variable var : fractal.getColorVariables()) {
 				colorVars.add(var.copy());
 			}
-			List<CompilerVariable> stateVars = new ArrayList<>();
-			for (CompilerVariable var : astFractal.getStateVariables()) {
+			List<Variable> stateVars = new ArrayList<>();
+			for (Variable var : fractal.getStateVariables()) {
 				stateVars.add(var.copy());
 			}
-			Map<String, CompilerVariable> vars = new HashMap<>();
-
-			for (Iterator<CompilerVariable> s = astFractal.getStateVariables().iterator(); s.hasNext();) {
-				CompilerVariable var = s.next();
-				vars.put(var.getName(), var);
-			}
-			for (Iterator<CompilerVariable> s = astFractal.getOrbitVariables().iterator(); s.hasNext();) {
-				CompilerVariable var = s.next();
-				vars.put(var.getName(), var);
-			}
-
-			Map<String, CompilerVariable> newScope = new HashMap<>(vars);
+			Map<String, Variable> vars = new HashMap<>();
+            for (Variable var : fractal.getStateVariables()) {
+                vars.put(var.getName(), var);
+            }
+            for (Variable var : fractal.getOrbitVariables()) {
+                vars.put(var.getName(), var);
+            }
+			Map<String, Variable> newScope = new HashMap<>(vars);
 			ExpressionCompiler compiler = new ExpressionCompiler(context, newScope);
 			CompiledColor color = new CompiledColor(colorVars, stateVars, astColor.getLocation());
 			color.setBackgroundColor(astColor.getArgb().getComponents());
@@ -94,40 +93,36 @@ public class InterpreterColorFactory implements ClassFactory<Color> {
 				rule.setOpacity(astRule.getOpacity());
 				rules.add(rule);
 			}
+			color.setRules(rules);
 			List<CompiledPalette> palettes = new ArrayList<>();
 			if (astColor.getPalettes() != null) {
 				for (ASTPalette astPalette : astColor.getPalettes()) {
 					palettes.add(astPalette.compile(compiler));
 				}
 			}
+			color.setPalettes(palettes);
 			List<CompiledStatement> statements = new ArrayList<>();
 			if (astColor.getInit() != null) {
 				for (ASTStatement statement : astColor.getInit().getStatements()) {
 					statements.add(statement.compile(compiler));
 				}
 			}
-			color.setInitStatements(statements);
-			color.setPalettes(palettes);
-			color.setRules(rules);
-			return new InterpreterColor(color, context);
+			color.setInit(new CompiledColorInt(statements));
+			return new InterpretedColor(color, context);
 		} catch (ASTException e) {
-			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.COMPILE;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
 			errors.add(new ParserError(type, line, charPositionInLine, index, length, message));
-			throw new ParserException("Can't build color", errors);
+			throw new DSLCompilerException("Can't build color", source, errors);
 		} catch (Exception e) {
-			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.COMPILE;
 			String message = e.getMessage();
 			errors.add(new ParserError(type, 0, 0, 0, 0, message));
-			throw new ParserException("Can't build color", errors);
+			throw new DSLCompilerException("Can't build color", source, errors);
 		}
-	}
-
-	public List<ParserError> getErrors() {
-		return errors;
 	}
 }

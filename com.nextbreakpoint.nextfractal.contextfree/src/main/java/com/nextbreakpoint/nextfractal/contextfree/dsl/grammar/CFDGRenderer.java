@@ -414,7 +414,7 @@ public class CFDGRenderer {
 
 		currentPath = new ASTCompiledPath(cfdg.getDriver(), null);
 
-		cfdg.getSummetry(symmetryOps, this);
+		cfdg.getSymmetry(symmetryOps, this);
 
 		cfdg.initBackgroundColor(this);
 	}

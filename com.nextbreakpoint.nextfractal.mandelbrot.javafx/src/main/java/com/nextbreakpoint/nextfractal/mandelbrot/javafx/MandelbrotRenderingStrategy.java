@@ -27,31 +27,29 @@ package com.nextbreakpoint.nextfractal.mandelbrot.javafx;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
-import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.Time;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
+import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
 import javafx.scene.canvas.Canvas;
 import lombok.extern.java.Log;
 
@@ -144,7 +142,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         for (Coordinator coordinator : coordinators) {
             if (coordinator != null) {
                 View view = new View();
-                view.setTraslation(translation);
+                view.setTranslation(translation);
                 view.setRotation(rotation);
                 view.setScale(scale);
                 view.setState(new Integer4D(0, 0, continuous ? 1 : 0, timeAnimation ? 1 : 0));
@@ -161,7 +159,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             juliaCoordinator.abort();
             juliaCoordinator.waitFor();
             View view = new View();
-            view.setTraslation(new Double4D(new double[]{0, 0, 1, 0}));
+            view.setTranslation(new Double4D(new double[]{0, 0, 1, 0}));
             view.setRotation(new Double4D(new double[]{0, 0, 0, 0}));
             view.setScale(new Double4D(new double[]{1, 1, 1, 1}));
             view.setState(new Integer4D(0, 0, continuous ? 1 : 0, timeAnimation ? 1 : 0));
@@ -189,7 +187,14 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     public List<ParserError> updateCoordinators(Object result) {
         try {
             DSLParserResult parserResult = (DSLParserResult) result;
-            hasError = !parserResult.getErrors().isEmpty();
+            hasError = !parserResult.errors().isEmpty();
+            if (hasError) {
+                this.astOrbit = null;
+                this.astColor = null;
+                this.orbitFactory = null;
+                this.colorFactory = null;
+                return List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            }
             boolean[] changed = createOrbitAndColor(parserResult);
             boolean orbitChanged = changed[0];
             boolean colorChanged = changed[1];
@@ -240,7 +245,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                     }
                     coordinator.init();
                     View view = new View();
-                    view.setTraslation(translation);
+                    view.setTranslation(translation);
                     view.setRotation(rotation);
                     view.setScale(scale);
                     view.setState(new Integer4D(0, 0, 0, 0));
@@ -267,7 +272,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 }
                 juliaCoordinator.init();
                 View view = new View();
-                view.setTraslation(translation);
+                view.setTranslation(translation);
                 view.setRotation(rotation);
                 view.setScale(scale);
                 view.setState(new Integer4D(0, 0, 0, 0));
@@ -369,20 +374,13 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         return new DefaultThreadFactory(name, true, priority);
     }
 
-    private boolean[] createOrbitAndColor(DSLParserResult result) throws ParserException, CompilerException {
-        if (!result.getErrors().isEmpty()) {
-            this.astOrbit = null;
-            this.astColor = null;
-            this.orbitFactory = null;
-            this.colorFactory = null;
-            throw new ParserException("Failed to compile source", result.getErrors());
-        }
+    private boolean[] createOrbitAndColor(DSLParserResult result) throws Exception {
         try {
             boolean[] changed = new boolean[]{false, false};
-            String newASTOrbit = result.getAST().getOrbit().toString();
+            String newASTOrbit = result.orbitScript();
             changed[0] = !newASTOrbit.equals(astOrbit);
             astOrbit = newASTOrbit;
-            String newASTColor = result.getAST().getColor().toString();
+            String newASTColor = result.colorScript();
             changed[1] = !newASTColor.equals(astColor);
             astColor = newASTColor;
             DSLCompiler compiler = new DSLCompiler();

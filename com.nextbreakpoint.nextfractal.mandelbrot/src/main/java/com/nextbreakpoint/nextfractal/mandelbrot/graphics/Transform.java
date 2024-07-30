@@ -53,7 +53,7 @@ public class Transform {
 		return new Transform(1, 0, 0, 0, 1, 0, 0, 0, 1);
 	}
 	
-	public static Transform newTraslate(double tx, double ty) {
+	public static Transform newTranslate(double tx, double ty) {
 		return new Transform(1, 0, tx, 0, 1, ty, 0, 0, 1);
 	}
 	
@@ -65,7 +65,7 @@ public class Transform {
 		return new Transform(Math.cos(rz), -Math.sin(rz), 0, Math.sin(rz), Math.cos(rz), 0, 0, 0, 1);
 	}
 	
-	public void traslate(double tx, double ty) {
+	public void translate(double tx, double ty) {
 		double m00 = matrix[0];
 		double m01 = matrix[1];
 		double m02 = matrix[0] * tx + matrix[1] * ty + matrix[2];

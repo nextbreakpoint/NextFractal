@@ -25,12 +25,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTOperator extends ASTExpression {
-	private String op;
-	private ASTExpression exp1;
-	private ASTExpression exp2;
+	private final String op;
+	private final ASTExpression exp1;
+	private final ASTExpression exp2;
 
 	public ASTOperator(Token location, String op, ASTExpression exp) {
 		super(location);
@@ -46,19 +48,7 @@ public class ASTOperator extends ASTExpression {
 		this.exp2 = exp2;
 	}
 
-	public String getOp() {
-		return op;
-	}
-	
-	public ASTExpression getExp1() {
-		return exp1;
-	}
-
-	public ASTExpression getExp2() {
-		return exp2;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(exp1);

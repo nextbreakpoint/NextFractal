@@ -26,8 +26,8 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ErrorStrategy;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ErrorStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult.Type;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTBuilder;
@@ -49,13 +49,15 @@ import java.util.logging.Logger;
 public class InterpreterDSLParser {
     private static final Logger logger = Logger.getLogger(InterpreterDSLParser.class.getName());
 
-    public DSLParserResult parse(String source) throws ParserException {
+    public DSLParserResult parse(String source) throws DSLParserException {
         List<ParserError> errors = new ArrayList<>();
         ASTFractal ast = parse(source, errors);
-        return new DSLParserResult(ast, Type.INTERPRETER, source, "", "", errors, "", "");
+        final String orbitScript = ast != null && ast.getOrbit() != null ? ast.getOrbit().toString() : "";
+        final String colorScript = ast != null && ast.getColor() != null ? ast.getColor().toString() : "";
+        return new DSLParserResult(ast, Type.INTERPRETED, source, orbitScript, colorScript, "", "", errors, "", "");
     }
 
-    private ASTFractal parse(String source, List<ParserError> errors) throws ParserException {
+    private ASTFractal parse(String source, List<ParserError> errors) throws DSLParserException {
         try {
             CharStream is = CharStreams.fromReader(new StringReader(source));
             MandelbrotLexer lexer = new MandelbrotLexer(is);
@@ -63,13 +65,13 @@ public class InterpreterDSLParser {
             MandelbrotParser parser = new MandelbrotParser(tokens);
             parser.setErrorHandler(new ErrorStrategy(errors));
             ParseTree fractalTree = parser.fractal();
+            //TODO review this code
             if (fractalTree != null) {
                 ASTBuilder builder = parser.getBuilder();
-                ASTFractal fractal = builder.getFractal();
-                return fractal;
+                return builder.getFractal();
             }
         } catch (ASTException e) {
-            ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+            ParserErrorType type = ParserErrorType.COMPILE;
             long line = e.getLocation().getLine();
             long charPositionInLine = e.getLocation().getCharPositionInLine();
             long index = e.getLocation().getStartIndex();
@@ -78,14 +80,14 @@ public class InterpreterDSLParser {
             ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
             logger.log(Level.FINE, error.toString(), e);
             errors.add(error);
-            throw new ParserException("Can't parse source", errors);
+            throw new DSLParserException("Can't parse source", errors);
         } catch (Exception e) {
-            ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+            ParserErrorType type = ParserErrorType.COMPILE;
             String message = e.getMessage();
             ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
             logger.log(Level.FINE, error.toString(), e);
             errors.add(error);
-            throw new ParserException("Can't parse source", errors);
+            throw new DSLParserException("Can't parse source", errors);
         }
         return null;
     }

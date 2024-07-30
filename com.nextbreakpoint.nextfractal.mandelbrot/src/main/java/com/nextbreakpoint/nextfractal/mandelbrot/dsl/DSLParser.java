@@ -24,32 +24,28 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.JavaCompilerProvider;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpreterDSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.javacompiler.JavaCompilerDSLParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.JavaCompilerDSLParser;
 
 import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
+import java.util.Objects;
 
 public class DSLParser {
 	private final String packageName;
 	private final String className;
 
 	public DSLParser(String packageName, String className) {
-		this.packageName = packageName;
-		this.className = className;
+		this.packageName = Objects.requireNonNull(packageName);
+		this.className = Objects.requireNonNull(className);
 	}
 	
-	public DSLParserResult parse(String source) throws ParserException {
-		JavaCompiler javaCompiler = getJavaCompiler();
+	public DSLParserResult parse(String source) throws DSLParserException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
 			return new InterpreterDSLParser().parse(source);
 		} else {
 			return new JavaCompilerDSLParser(packageName, className).parse(source);
 		}
 	}
-
-	public JavaCompiler getJavaCompiler() {
-		return !Boolean.getBoolean("mandelbrot.compiler.disabled") ? ToolProvider.getSystemJavaCompiler() : null;
-	}
-}	
+}

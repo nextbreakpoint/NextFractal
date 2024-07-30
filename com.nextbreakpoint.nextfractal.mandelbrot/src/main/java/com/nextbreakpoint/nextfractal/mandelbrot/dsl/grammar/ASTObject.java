@@ -24,20 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
+@Setter
+@Getter
 public abstract class ASTObject {
 	protected Token location;
 
 	public ASTObject(Token location) {
-		this.location = location;
-	}
-
-	public Token getLocation() {
-		return location;
-	}
-
-	public void setLocation(Token location) {
 		this.location = location;
 	}
 }

@@ -25,13 +25,15 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledColorExpression;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTColorComponent extends ASTColorExpression {
-	private ASTExpression exp1;
-	private ASTExpression exp2;
-	private ASTExpression exp3;
-	private ASTExpression exp4;
+	private final ASTExpression exp1;
+	private final ASTExpression exp2;
+	private final ASTExpression exp3;
+	private final ASTExpression exp4;
 	
 	public ASTColorComponent(Token location, ASTExpression exp1, ASTExpression exp2, ASTExpression exp3, ASTExpression exp4) {
 		super(location);
@@ -57,23 +59,7 @@ public class ASTColorComponent extends ASTColorExpression {
 		this.exp4 = null;
 	}
 
-	public ASTExpression getExp1() {
-		return exp1;
-	}
-
-	public ASTExpression getExp2() {
-		return exp2;
-	}
-
-	public ASTExpression getExp3() {
-		return exp3;
-	}
-
-	public ASTExpression getExp4() {
-		return exp4;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(exp1);

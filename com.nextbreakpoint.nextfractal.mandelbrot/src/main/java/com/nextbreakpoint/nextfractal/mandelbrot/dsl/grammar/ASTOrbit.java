@@ -24,62 +24,47 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitBegin;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitEnd;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitLoop;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionCompiler;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@Getter
 public class ASTOrbit extends ASTObject {
-	private List<ASTOrbitTrap> traps = new ArrayList<>(); 
-	private ASTOrbitBegin begin; 
-	private ASTOrbitLoop loop; 
-	private ASTOrbitEnd end; 
-	private ASTRegion region; 
+	@Setter
+    private List<ASTOrbitTrap> traps = new ArrayList<>();
+	@Setter
+    private ASTOrbitBegin begin;
+	@Setter
+    private ASTOrbitLoop loop;
+	@Setter
+    private ASTOrbitEnd end;
+	private final ASTRegion region;
 
 	public ASTOrbit(Token location, ASTRegion region) {
 		super(location);
 		this.region = region;
 	}
 
-	public List<ASTOrbitTrap> getTraps() {
-		return traps;
-	}
-
-	public void setTraps(List<ASTOrbitTrap> traps) {
-		this.traps = traps;
-	}
-
-	public ASTOrbitBegin getBegin() {
-		return begin;
-	}
-
-	public void setBegin(ASTOrbitBegin begin) {
-		this.begin = begin;
-	}
-
-	public ASTOrbitLoop getLoop() {
-		return loop;
-	}
-
-	public void setLoop(ASTOrbitLoop loop) {
-		this.loop = loop;
-	}
-
-	public ASTOrbitEnd getEnd() {
-		return end;
-	}
-
-	public void setEnd(ASTOrbitEnd end) {
-		this.end = end;
-	}
-
-	public ASTRegion getRegion() {
-		return region;
-	}
-
-	public void addTrap(ASTOrbitTrap trap) {
+    public void addTrap(ASTOrbitTrap trap) {
 		if (traps == null) {
-			traps = new ArrayList<ASTOrbitTrap>();
+			traps = new ArrayList<>();
 		}
 		traps.add(trap);
 	}
@@ -94,7 +79,7 @@ public class ASTOrbit extends ASTObject {
 			suffix = ",";
 		}
 		if (begin != null) {
-			if (suffix.length() != 0) {
+			if (!suffix.isEmpty()) {
 				builder.append(suffix);
 			} else {
 				suffix = ",";
@@ -104,7 +89,7 @@ public class ASTOrbit extends ASTObject {
 			builder.append("}");
 		}
 		if (loop != null) {
-			if (suffix.length() != 0) {
+			if (!suffix.isEmpty()) {
 				builder.append(suffix);
 			} else {
 				suffix = ",";
@@ -114,7 +99,7 @@ public class ASTOrbit extends ASTObject {
 			builder.append("}");
 		}
 		if (end != null) {
-			if (suffix.length() != 0) {
+			if (!suffix.isEmpty()) {
 				builder.append(suffix);
 			} else {
 				suffix = ",";
@@ -123,7 +108,7 @@ public class ASTOrbit extends ASTObject {
 			builder.append(end);
 			builder.append("}");
 		}
-		if (suffix.length() != 0) {
+		if (!suffix.isEmpty()) {
 			builder.append(suffix);
 		} else {
 			suffix = ",";
@@ -140,5 +125,86 @@ public class ASTOrbit extends ASTObject {
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public CompiledOrbit compile(ASTVariables variables) {
+		try {
+			ExpressionCompilerContext context = new ExpressionCompilerContext();
+			double ar = getRegion().getA().r();
+			double ai = getRegion().getA().i();
+			double br = getRegion().getB().r();
+			double bi = getRegion().getB().i();
+			List<Variable> orbitVars = new ArrayList<>();
+			for (Variable var : variables.getOrbitVariables()) {
+				orbitVars.add(var.copy());
+			}
+			List<Variable> stateVars = new ArrayList<>();
+			for (Variable var : variables.getStateVariables()) {
+				stateVars.add(var.copy());
+			}
+			Map<String, Variable> vars = new HashMap<>();
+			for (Variable var : variables.getStateVariables()) {
+				vars.put(var.getName(), var);
+			}
+			for (Variable var : variables.getOrbitVariables()) {
+				vars.put(var.getName(), var);
+			}
+			Map<String, Variable> newScope = new HashMap<>(vars);
+			ExpressionCompiler compiler = new ExpressionCompiler(context, newScope);
+			CompiledOrbit orbit = new CompiledOrbit(orbitVars, stateVars, getLocation());
+			orbit.setRegion(new Number[] { new Number(ar, ai), new Number(br, bi) });
+			List<CompiledStatement> beginStatements = new ArrayList<>();
+			if (getBegin() != null) {
+				for (ASTStatement astStatement : getBegin().getStatements()) {
+					beginStatements.add(astStatement.compile(compiler));
+				}
+			}
+			orbit.setBegin(new CompiledOrbitBegin(beginStatements));
+			List<CompiledStatement> loopStatements = new ArrayList<>();
+			if (getLoop() != null) {
+				for (ASTStatement astStatement : getLoop().getStatements()) {
+					loopStatements.add(astStatement.compile(compiler));
+				}
+			}
+			final CompiledOrbitLoop orbitLoop = new CompiledOrbitLoop(loopStatements);
+			orbit.setLoop(orbitLoop);
+			if (getLoop() != null) {
+				orbitLoop.setCondition(getLoop().getExpression().compile(compiler));
+				orbitLoop.setBegin(getLoop().getBegin());
+				orbitLoop.setEnd(getLoop().getEnd());
+			}
+			List<CompiledStatement> endStatements = new ArrayList<>();
+			if (getEnd() != null) {
+				for (ASTStatement astStatement : getEnd().getStatements()) {
+					endStatements.add(astStatement.compile(compiler));
+				}
+			}
+			orbit.setEnd(new CompiledOrbitEnd(endStatements));
+			List<CompiledTrap> traps = new ArrayList<>();
+			if (getTraps() != null) {
+				for (ASTOrbitTrap astTrap : getTraps()) {
+					traps.add(astTrap.compile(compiler));
+				}
+			}
+			orbit.setTraps(traps);
+			return orbit;
+		} catch (ASTException e) {
+			ParserErrorType type = ParserErrorType.COMPILE;
+			long line = e.getLocation().getLine();
+			long charPositionInLine = e.getLocation().getCharPositionInLine();
+			long index = e.getLocation().getStartIndex();
+			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
+			String message = e.getMessage();
+			final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(type, line, charPositionInLine, index, length, message));
+//			throw new DSLParserException("Can't build orbit", errors);
+		} catch (Exception e) {
+			ParserErrorType type = ParserErrorType.COMPILE;
+			String message = e.getMessage();
+			final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(type, 0, 0, 0, 0, message));
+//			throw new DSLParserException("Can't build orbit", errors);
+		}
+		return null;
 	}
 }

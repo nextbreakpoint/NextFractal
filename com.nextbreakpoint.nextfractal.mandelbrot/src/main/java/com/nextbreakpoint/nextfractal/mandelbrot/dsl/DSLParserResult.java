@@ -25,64 +25,22 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
 
 import java.util.List;
 
-public class DSLParserResult {
-	private ASTFractal ast;
-	private Type type;
-	private String orbitSource;
-	private String colorSource;
-	private List<ParserError> errors;
-	private String source;
-	private String packageName;
-	private String className;
-
-	public DSLParserResult(ASTFractal ast, Type type, String source, String orbitSource, String colorSource, List<ParserError> errors, String packageName, String className) {
-		this.ast = ast;
-		this.type = type;
-		this.source = source;
-		this.orbitSource = orbitSource;
-		this.colorSource = colorSource;
-		this.errors = errors;
-		this.packageName = packageName;
-		this.className = className;
-	}
-
-	public ASTFractal getAST() {
-		return ast;
-	}
-
-	public String getOrbitSource() {
-		return orbitSource;
-	}
-
-	public String getColorSource() {
-		return colorSource;
-	}
-
-	public List<ParserError> getErrors() {
-		return errors;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
+public record DSLParserResult(
+		Object fractal,
+	  	Type type,
+	 	String source,
+	 	String orbitScript,
+	 	String colorScript,
+		String orbitJavaSource,
+		String colorJavaSource,
+		List<ParserError> errors,
+		String packageName,
+		String className
+) {
 	public enum Type {
-		JAVA, INTERPRETER
+		COMPILED, INTERPRETED
 	}
 }

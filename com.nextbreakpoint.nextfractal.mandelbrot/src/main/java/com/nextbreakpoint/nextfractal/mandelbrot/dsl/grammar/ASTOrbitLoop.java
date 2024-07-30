@@ -24,16 +24,20 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTOrbitLoop extends ASTObject {
-	private int begin;
-	private int end;
-	private ASTConditionExpression expression;
-	private List<ASTStatement> statements = new ArrayList<>(); 
+	private final int begin;
+	private final int end;
+	@Setter
+    private ASTConditionExpression expression;
+	private final List<ASTStatement> statements = new ArrayList<>();
 
 	public ASTOrbitLoop(Token location, int begin, int end, ASTConditionExpression expression) {
 		super(location);
@@ -42,31 +46,11 @@ public class ASTOrbitLoop extends ASTObject {
 		this.expression = expression;
 	}
 
-	public ASTConditionExpression getExpression() {
-		return expression;
-	}
-
-	public void setExpression(ASTConditionExpression expression) {
-		this.expression = expression;
-	}
-
-	public List<ASTStatement> getStatements() {
-		return statements;
-	}
-
-	public void addStatement(ASTStatement statement) {
+    public void addStatement(ASTStatement statement) {
 		statements.add(statement);
 	}
 
-	public int getBegin() {
-		return begin;
-	}
-
-	public int getEnd() {
-		return end;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("begin = ");

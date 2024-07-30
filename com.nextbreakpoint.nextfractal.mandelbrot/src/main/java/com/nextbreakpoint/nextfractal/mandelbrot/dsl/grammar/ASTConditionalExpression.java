@@ -25,12 +25,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTConditionalExpression extends ASTExpression {
-	private ASTConditionExpression conditionExp;
-	private ASTExpression thenExp;
-	private ASTExpression elseExp;
+	private final ASTConditionExpression conditionExp;
+	private final ASTExpression thenExp;
+	private final ASTExpression elseExp;
 
 	public ASTConditionalExpression(Token location, ASTConditionExpression conditionExp, ASTExpression thenExp, ASTExpression elseExp) {
 		super(location);
@@ -41,13 +43,7 @@ public class ASTConditionalExpression extends ASTExpression {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(conditionExp);
-		builder.append(" ? ");
-		builder.append(thenExp);
-		builder.append(" : ");
-		builder.append(elseExp);
-		return builder.toString();
+        return conditionExp + " ? " + thenExp + " : " + elseExp;
 	}
 
 	@Override
@@ -55,15 +51,4 @@ public class ASTConditionalExpression extends ASTExpression {
 		return compiler.compile(this);
 	}
 
-	public ASTConditionExpression getConditionExp() {
-		return conditionExp;
-	}
-
-	public ASTExpression getThenExp() {
-		return thenExp;
-	}
-
-	public ASTExpression getElseExp() {
-		return elseExp;
-	}
 }

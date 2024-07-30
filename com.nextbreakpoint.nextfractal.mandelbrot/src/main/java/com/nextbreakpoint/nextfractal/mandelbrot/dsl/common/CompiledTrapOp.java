@@ -25,18 +25,16 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.common;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public abstract class CompiledTrapOp {
-	protected Token location;
+	protected final Token location;
 
 	protected CompiledTrapOp(Token location) {
 		this.location = location;
 	}
 
 	public abstract void evaluate(Trap trap);
-
-	public Token getLocation() {
-		return location;
-	}
 }

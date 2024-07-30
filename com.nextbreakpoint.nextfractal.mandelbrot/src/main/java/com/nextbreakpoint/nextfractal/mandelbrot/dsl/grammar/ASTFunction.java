@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Arrays;
@@ -32,9 +33,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ASTFunction extends ASTExpression {
-	private String name;
-	private ASTExpression[] arguments;
-	private Set<String> realFunctions = new HashSet<>(Arrays.asList("time", "mod", "mod2", "pha", "log", "exp", "atan2", "hypot", "sqrt", "re", "im", "ceil", "floor", "abs", "square", "saw", "ramp", "pulse"));
+	@Getter
+    private final String name;
+	@Getter
+    private final ASTExpression[] arguments;
+	private final Set<String> realFunctions = new HashSet<>(Arrays.asList("time", "mod", "mod2", "pha", "log", "exp", "atan2", "hypot", "sqrt", "re", "im", "ceil", "floor", "abs", "square", "saw", "ramp", "pulse"));
 
 	public ASTFunction(Token location, String name, ASTExpression[] arguments) {
 		super(location);
@@ -46,15 +49,7 @@ public class ASTFunction extends ASTExpression {
 		this(location, name, new ASTExpression[] { argument });
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public ASTExpression[] getArguments() {
-		return arguments;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(name);

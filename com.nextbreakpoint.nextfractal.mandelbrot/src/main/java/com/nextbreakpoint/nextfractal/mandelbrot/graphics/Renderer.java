@@ -42,6 +42,9 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.JuliaStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.MandelbrotStrategy;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -52,52 +55,62 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Log
 public class Renderer {
-	private static final Logger logger = Logger.getLogger(Renderer.class.getName());
 	protected final Fractal contentRendererFractal;
 	protected final Fractal previewRendererFractal;
 	protected final ThreadFactory threadFactory;
 	protected final GraphicsFactory renderFactory;
 	protected final RendererData contentRendererData;
 	protected final RendererData previewRendererData;
-	protected volatile RendererStrategy contentRendererStrategy;
-	protected volatile RendererStrategy previewRendererStrategy;
-	protected volatile RendererDelegate rendererDelegate;
-	protected volatile Transform transform;
-	protected volatile Surface buffer;
-	protected volatile boolean aborted;
-	protected volatile boolean interrupted;
-	protected volatile boolean initialized;
-	protected volatile boolean orbitChanged;
-	protected volatile boolean colorChanged;
-	protected volatile boolean regionChanged;
-	protected volatile boolean juliaChanged;
-	protected volatile boolean pointChanged;
-	protected volatile boolean timeChanged;
-	protected volatile List<ParserError> errors = new ArrayList<>();
-	protected volatile float progress;
-	protected volatile double rotation;
-	protected volatile Time time;
-	protected volatile Tile previewTile;
-	protected boolean julia;
+	protected RendererStrategy contentRendererStrategy;
+	protected RendererStrategy previewRendererStrategy;
+	protected Transform transform;
+	protected Surface buffer;
+	protected boolean aborted;
+    @Getter
+    protected volatile boolean interrupted;
+	@Getter
+    protected boolean initialized;
+	protected boolean orbitChanged;
+	protected boolean colorChanged;
+	protected boolean regionChanged;
+	protected boolean juliaChanged;
+	protected boolean pointChanged;
+	protected boolean timeChanged;
+	protected double rotation;
+	protected Time time;
+	protected float progress;
+	@Setter
+    protected Tile previewTile;
+	@Setter
 	protected boolean opaque;
+	protected boolean julia;
 	protected Number point;
-	protected boolean multiThread;
-	protected boolean singlePass;
-	protected boolean continuous;
-	protected boolean timeAnimation;
+	@Setter
+	protected RendererDelegate rendererDelegate;
+	protected List<ParserError> errors = new ArrayList<>();
+    @Setter
+    protected boolean multiThread;
+    @Setter
+    protected boolean singlePass;
+    @Setter
+    protected boolean continuous;
+    @Setter
+    protected boolean timeAnimation;
 	protected Region previewRegion;
 	protected Region contentRegion;
-	protected Region initialRegion = new Region();
-	protected Size size;
+    @Getter
+    protected Region initialRegion = new Region();
+    @Getter
+    protected Size size;
 	protected View view;
 	protected Tile tile;
-	private final Lock lock = new Lock();
+	private Future<?> future;
 	private final RenderRunnable renderTask = new RenderRunnable();
-	private ExecutorService executor;
-	private volatile Future<?> future;
+	private final ExecutorService executor;
+	private final Lock lock = new Lock();
 
 	/**
 	 * @param threadFactory
@@ -131,21 +144,7 @@ public class Renderer {
 		free();
 	}
 
-	/**
-	 * @return
-	 */
-	public Size getSize() {
-		return size;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isInterrupted() {
-		return interrupted;
-	}
-
-	/**
+    /**
 	 * 
 	 */
 	public void abortTasks() {
@@ -181,27 +180,6 @@ public class Renderer {
 	}
 
 	/**
-	 * @return
-	 */
-	public RendererDelegate getRendererDelegate() {
-		return rendererDelegate;
-	}
-
-	/**
-	 * @param rendererDelegate
-	 */
-	public void setRendererDelegate(RendererDelegate rendererDelegate) {
-		this.rendererDelegate = rendererDelegate;
-	}
-
-	/**
-	 * @return
-	 */
-	public float getProgress() {
-		return progress;
-	}
-
-	/**
 	 * 
 	 */
 	public void init() {
@@ -215,50 +193,7 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @return
-	 */
-	public boolean isSinglePass() {
-		return singlePass;
-	}
-
-	/**
-	 * @param singlePass
-	 */
-	public void setSinglePass(boolean singlePass) {
-		this.singlePass = singlePass;
-	}
-
-	/**
-	 * @param multiThread
-	 */
-	public void setMultiThread(boolean multiThread) {
-		this.multiThread = multiThread;
-	}
-
-	/**
-	 * @param continuous
-	 */
-	public void setContinuous(boolean continuous) {
-		this.continuous = continuous;
-	}
-
-	/**
-	 * @param timeAnimation
-	 */
-	public void setTimeAnimation(boolean timeAnimation) {
-		this.timeAnimation = timeAnimation;
-	}
-
-	public Tile getPreviewTile() {
-		return previewTile;
-	}
-
-	public void setPreviewTile(Tile previewTile) {
-		this.previewTile = previewTile;
-	}
-
-	/**
+    /**
 	 * @param orbit
 	 */
 	public void setOrbit(Orbit orbit) {
@@ -332,9 +267,9 @@ public class Renderer {
 		final Region region = getInitialRegion();
 		final Number center = region.getCenter();
 		transform = new Transform();
-		transform.traslate(view.getTraslation().x() + center.r(), view.getTraslation().y() + center.i());
+		transform.translate(view.getTranslation().x() + center.r(), view.getTranslation().y() + center.i());
 		transform.rotate(-rotation * Math.PI / 180);
-		transform.traslate(-view.getTraslation().x() - center.r(), -view.getTraslation().y() - center.i());
+		transform.translate(-view.getTranslation().x() - center.r(), -view.getTranslation().y() - center.i());
 		buffer.setAffine(createTransform(rotation));
 		setContentRegion(computeContentRegion());
 		setJulia(view.isJulia());
@@ -344,14 +279,7 @@ public class Renderer {
 		lock.unlock();
 	}
 
-	/**
-	 * @return
-	 */
-	public Region getInitialRegion() {
-		return initialRegion;
-	}
-
-	/**
+    /**
 	 * @param pixels
 	 */
 	public void getPixels(int[] pixels) {
@@ -565,8 +493,8 @@ public class Renderer {
 			contentRendererData.clearPixels();
 			if (previewTile != null) {
 				previewRegion = computePreviewRegion();
-				int previewWidth = previewTile.tileSize().width();;
-				int previewHeight = previewTile.tileSize().height();;
+				int previewWidth = previewTile.tileSize().width();
+				int previewHeight = previewTile.tileSize().height();
 				previewRendererData.setSize(previewWidth, previewHeight, previewRendererFractal.getStateSize());
 				previewRendererData.setRegion(previewRegion);
 				previewRendererData.setPoint(previewRendererFractal.getPoint());
@@ -648,7 +576,7 @@ public class Renderer {
 			}
 			Thread.yield();
 		} catch (Throwable e) {
-			logger.log(Level.WARNING, "Can't render fractal", e);
+			log.log(Level.WARNING, "Can't render fractal", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
 		}
 	}
@@ -658,21 +586,19 @@ public class Renderer {
 			int kx = x + tile.tileOffset().x() - previewTile.tileOffset().x();
 			int ky = y + tile.tileOffset().y() - previewTile.tileOffset().y();
             if (kx >= 0 && kx < previewTile.tileSize().width()) {
-                if (ky >= 0 && ky < previewTile.tileSize().height()) {
-                    return true;
-                }
+                return ky >= 0 && ky < previewTile.tileSize().height();
             }
         }
 		return false;
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected Region computeContentRegion() {
-		final double tx = view.getTraslation().x();
-		final double ty = view.getTraslation().y();
-		final double tz = view.getTraslation().z();
+		final double tx = view.getTranslation().x();
+		final double ty = view.getTranslation().y();
+		final double tz = view.getTranslation().z();
 //		final double rz = view.getRotation().z();
 		
 //		double a = fastRotate ? 0 : convertDegToRad(rz);
@@ -827,17 +753,5 @@ public class Renderer {
 		List<ParserError> result = new ArrayList<>(errors);
 		errors.clear();
 		return result;
-	}
-
-	public boolean isOpaque() {
-		return opaque;
-	}
-
-	public void setOpaque(boolean opaque) {
-		this.opaque = opaque;
-	}
-
-	public boolean isInitialized() {
-		return initialized;
 	}
 }

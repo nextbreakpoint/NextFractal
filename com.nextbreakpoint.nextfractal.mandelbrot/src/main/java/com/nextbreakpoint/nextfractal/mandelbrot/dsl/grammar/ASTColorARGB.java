@@ -25,11 +25,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
+import lombok.Getter;
 
 import java.text.DecimalFormat;
 
+@Getter
 public class ASTColorARGB {
-	private static final DecimalFormat format = new DecimalFormat("0.##");
+	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
+
 	private final float[] components;
 
 	public ASTColorARGB(int argb) {
@@ -40,16 +43,12 @@ public class ASTColorARGB {
 		components = new float[] { a, r, g, b };
 	}
 
-	public float[] getComponents() {
-		return components;
-	}
-
-	public int getARGB() {
+    public int getARGB() {
 		return Colors.makeColor(components);
 	}
 
 	@Override
 	public String toString() {
-		return "(" + format.format(components[0]) + "," + format.format(components[1]) + "," + format.format(components[2]) + "," + format.format(components[3]) + ")";
+		return "(" + FORMAT.format(components[0]) + "," + FORMAT.format(components[1]) + "," + FORMAT.format(components[2]) + "," + FORMAT.format(components[3]) + ")";
 	}
 }

@@ -25,27 +25,21 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTParen extends ASTExpression {
-	private ASTExpression exp;
+	private final ASTExpression exp;
 
 	public ASTParen(Token location, ASTExpression exp) {
 		super(location);
 		this.exp = exp;
 	}
 
-	public ASTExpression getExp() {
-		return exp;
-	}
-
-	@Override
+    @Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("(");
-		builder.append(exp);
-		builder.append(")");
-		return builder.toString();
+        return "(" + exp + ")";
 	}
 
 	@Override

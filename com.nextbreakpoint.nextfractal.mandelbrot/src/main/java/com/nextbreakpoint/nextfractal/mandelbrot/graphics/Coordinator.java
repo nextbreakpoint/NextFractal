@@ -52,7 +52,6 @@ public class Coordinator implements RendererDelegate {
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
 	private volatile boolean pixelsChanged;
-	private volatile float progress;
 	private Renderer renderer;
 
 	/**
@@ -109,7 +108,6 @@ public class Coordinator implements RendererDelegate {
 	 */
 	@Override
 	public void updateImageInBackground(float progress) {
-		this.progress = progress;
 		this.pixelsChanged = true;
 	}
 
@@ -120,13 +118,6 @@ public class Coordinator implements RendererDelegate {
 		boolean result = pixelsChanged;
 		pixelsChanged = false;
 		return result;
-	}
-
-	/**
-	 * @return
-	 */
-	public float getProgress() {
-		return progress;
 	}
 
 	/**

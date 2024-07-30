@@ -24,11 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
-	private Token location;
+	private final Token location;
 
 	public ASTException(String message, Token location, Throwable cause) {
 		super(message, cause);
@@ -40,11 +41,7 @@ public class ASTException extends RuntimeException {
 		this.location = location;
 	}
 
-	public Token getLocation() {
-		return location;
-	}
-	
-	@Override
+    @Override
 	public String toString() {
 		if (location != null) {
 			return "[" + location.getLine() + ":" + location.getCharPositionInLine() + "] " + super.toString();

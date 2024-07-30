@@ -51,7 +51,7 @@ public class ASTNumber extends ASTExpression {
 		if (real) {
 			return String.valueOf(r);
 		} else {
-			return String.valueOf(r + "," + i);
+			return r + "," + i;
 		}
 	}
 

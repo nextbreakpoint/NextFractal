@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;
@@ -32,29 +32,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ASTScope {
-	private Map<String, CompilerVariable> vars = new HashMap<>();
+	private final Map<String, Variable> vars = new HashMap<>();
 
-	public Map<String, CompilerVariable> getVariables() {
+	public Map<String, Variable> getVariables() {
 		return vars;
 	}
 
-	public CompilerVariable getVariable(String name) {
+	public Variable getVariable(String name) {
 		return vars.get(name);
 	}
 	
-	public void putVariable(String varName, CompilerVariable variable) {
+	public void putVariable(String varName, Variable variable) {
 		vars.put(varName, variable);
 	}
 
 	public void registerVariable(String name, boolean real, boolean create, Token location) {
-		CompilerVariable var = vars.get(name);
+		Variable var = vars.get(name);
 		if (var == null) {
-			var = new CompilerVariable(name, real, create);
+			var = new Variable(name, real, create);
 			vars.put(var.getName(), var);
 		}
 	}
 
-	public Collection<CompilerVariable> values() {
+	public Collection<Variable> values() {
 		return vars.values();
 	}
 

@@ -24,17 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTStatementList {
-	private List<ASTStatement> statements = new ArrayList<>();
+	private final List<ASTStatement> statements = new ArrayList<>();
 
-	public List<ASTStatement> getStatements() {
-		return statements;
-	}
-
-	public void addStatement(ASTStatement statement) {
+    public void addStatement(ASTStatement statement) {
 		statements.add(statement);
 	}
 

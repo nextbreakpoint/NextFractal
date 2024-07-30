@@ -330,7 +330,7 @@ public class CFDG {
 		return true;
 	}
 
-	public void getSummetry(List<AffineTransform> syms, CFDGRenderer renderer) {
+	public void getSymmetry(List<AffineTransform> syms, CFDGRenderer renderer) {
 		syms.clear();
 		ASTExpression exp = hasParameter(CFG.Symmetry);
 		List<ASTModification> left = AST.getTransforms(driver, exp, syms, renderer, isTiled(null, null), tileMod.getTransform());

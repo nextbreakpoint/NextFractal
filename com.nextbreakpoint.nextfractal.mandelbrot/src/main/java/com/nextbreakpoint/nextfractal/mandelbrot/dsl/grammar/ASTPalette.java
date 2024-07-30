@@ -25,29 +25,23 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPalette;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTPalette extends ASTObject {
-	private String name;
-	private List<ASTPaletteElement> elements = new ArrayList<>(); 
+	private final String name;
+	private final List<ASTPaletteElement> elements = new ArrayList<>();
 
 	public ASTPalette(Token location, String name) {
 		super(location);
 		this.name = name;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public List<ASTPaletteElement> getElements() {
-		return elements;
-	}
-
-	public void addElements(ASTPaletteElement element) {
+    public void addElements(ASTPaletteElement element) {
 		elements.add(element);
 	}
 

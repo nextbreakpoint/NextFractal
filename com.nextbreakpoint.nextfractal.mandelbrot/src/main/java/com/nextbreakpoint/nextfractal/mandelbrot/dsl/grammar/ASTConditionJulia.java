@@ -34,9 +34,7 @@ public class ASTConditionJulia extends ASTConditionExpression {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("type");
-		return builder.toString();
+        return "type";
 	}
 
 	public CompiledCondition compile(ASTExpressionCompiler compiler) {

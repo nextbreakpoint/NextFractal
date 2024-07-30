@@ -25,45 +25,23 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.common;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 
+@Getter
 public class CompiledTrap {
-	private String name;
-	private Number center;
-	private List<CompiledTrapOp> operators;
-	protected Token location;
+	protected final Token location;
+	@Setter
+    private String name;
+	@Setter
+    private Number center;
+	@Setter
+    private List<CompiledTrapOp> operators;
 
 	public CompiledTrap(Token location) {
 		this.location = location;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Number getCenter() {
-		return center;
-	}
-
-	public void setCenter(Number center) {
-		this.center = center;
-	}
-
-	public List<CompiledTrapOp> getOperators() {
-		return operators;
-	}
-
-	public void setOperators(List<CompiledTrapOp> operators) {
-		this.operators = operators;
-	}
-
-	public Token getLocation() {
-		return location;
 	}
 }

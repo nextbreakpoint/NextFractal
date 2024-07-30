@@ -24,23 +24,21 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTColorInit extends ASTObject {
-	private List<ASTStatement> statements = new ArrayList<>(); 
+	private final List<ASTStatement> statements = new ArrayList<>();
 
 	public ASTColorInit(Token location) {
 		super(location);
 	}
 
-	public List<ASTStatement> getStatements() {
-		return statements;
-	}
-
-	public void addStatement(ASTStatement statement) {
+    public void addStatement(ASTStatement statement) {
 		statements.add(statement);
 	}
 

@@ -39,6 +39,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererErrors;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.State;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.JuliaStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.MandelbrotStrategy;
+import lombok.extern.java.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,23 +47,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Log
 public final class XaosRenderer extends Renderer {
-	protected static final Logger logger = Logger.getLogger(XaosRenderer.class.getName());
 	static {
 		if (XaosConstants.PRINT_MULTABLE) {
-			logger.fine("Multable:");
+			log.fine("Multable:");
 			for (int i = -XaosConstants.FPRANGE; i < XaosConstants.FPRANGE; i++) {
-				logger.fine("i = " + i + ", i * i = " + XaosConstants.MULTABLE[XaosConstants.FPRANGE + i]);
+				log.fine("i = " + i + ", i * i = " + XaosConstants.MULTABLE[XaosConstants.FPRANGE + i]);
 			}
 		}
 	}
 	
 	private boolean overlapping;
 	private boolean isSolidguessSupported;
-	private boolean isVerticalSymetrySupported;
-	private boolean isHorizontalSymetrySupported;
+	private boolean isVerticalSymmetrySupported;
+	private boolean isHorizontalSymmetrySupported;
 	private final XaosRendererData xaosRendererData;
 	private boolean cacheActive;
 	private ExecutorService executor;
@@ -152,7 +152,7 @@ public final class XaosRenderer extends Renderer {
 			final boolean oldActiveCache = cacheActive;
 			cacheActive = refresh || !continuous || orbitTimeChanged || colorTimeChanged;
 			final boolean redraw = (cacheActive && !oldActiveCache) || calculate;
-//			logger.info("julia " + julia + ", cache " + cacheActive + ", redraw " + redraw + ", refresh " + refresh + ", continuous " + continuous + ", timeChanged " + copyOfTimeChanged);
+//			log.info("julia " + julia + ", cache " + cacheActive + ", redraw " + redraw + ", refresh " + refresh + ", continuous " + continuous + ", timeChanged " + copyOfTimeChanged);
 			timeChanged = false;
 			pointChanged = false;
 			orbitChanged = false;
@@ -179,15 +179,15 @@ public final class XaosRenderer extends Renderer {
 				contentRendererData.setRegion(contentRegion);
 			}
 			if (XaosConstants.PRINT_REGION) {
-				logger.fine("Region: (" + xaosRendererData.left() + "," + xaosRendererData.bottom() + ") -> (" + xaosRendererData.right() + "," + xaosRendererData.top() + ")");
+				log.fine("Region: (" + xaosRendererData.left() + "," + xaosRendererData.bottom() + ") -> (" + xaosRendererData.right() + "," + xaosRendererData.top() + ")");
 			}
 			isSolidguessSupported = XaosConstants.USE_SOLIDGUESS && contentRendererStrategy.isSolidGuessSupported();
-			isVerticalSymetrySupported = XaosConstants.USE_SYMETRY && contentRendererStrategy.isVerticalSymmetrySupported();
-			isHorizontalSymetrySupported = XaosConstants.USE_SYMETRY && contentRendererStrategy.isHorizontalSymmetrySupported();
+			isVerticalSymmetrySupported = XaosConstants.USE_SYMETRY && contentRendererStrategy.isVerticalSymmetrySupported();
+			isHorizontalSymmetrySupported = XaosConstants.USE_SYMETRY && contentRendererStrategy.isHorizontalSymmetrySupported();
 			if (XaosConstants.DUMP) {
-				logger.fine("Solidguess supported = " + isSolidguessSupported);
-				logger.fine("Vertical symetry supported = " + isVerticalSymetrySupported);
-				logger.fine("Horizontal symetry supported = " + isHorizontalSymetrySupported);
+				log.fine("Solidguess supported = " + isSolidguessSupported);
+				log.fine("Vertical symetry supported = " + isVerticalSymmetrySupported);
+				log.fine("Horizontal symetry supported = " + isHorizontalSymmetrySupported);
 			}
 			if (executor != null && XaosConstants.USE_MULTITHREAD && !XaosConstants.DUMP_XAOS) {
 				if (redraw) {
@@ -211,16 +211,16 @@ public final class XaosRenderer extends Renderer {
 //				}
 			}
 			if (XaosConstants.PRINT_REALLOCTABLE) {
-				logger.fine("ReallocTable X:");
+				log.fine("ReallocTable X:");
 				for (XaosRealloc element : xaosRendererData.reallocX()) {
 					if (!XaosConstants.PRINT_ONLYNEW || element.calculate) {
-						logger.fine(element.toString());
+						log.fine(element.toString());
 					}
 				}
-				logger.fine("ReallocTable Y:");
+				log.fine("ReallocTable Y:");
 				for (XaosRealloc element : xaosRendererData.reallocY()) {
 					if (!XaosConstants.PRINT_ONLYNEW || element.calculate) {
-						logger.fine(element.toString());
+						log.fine(element.toString());
 					}
 				}
 			}
@@ -228,7 +228,7 @@ public final class XaosRenderer extends Renderer {
 			processReallocTable(continuous && !redraw, refresh);
 			updatePositions();
 		} catch (Throwable e) {
-			logger.log(Level.WARNING, "Rendering error", e);
+			log.log(Level.WARNING, "Rendering error", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
 		}
 	}
@@ -245,8 +245,8 @@ public final class XaosRenderer extends Renderer {
 			stepy = makeReallocTable(xaosRendererData.reallocY(), xaosRendererData.dynamicY(), beginy, endy, xaosRendererData.positionY(), !cacheActive);
 		}
 		final double symy = contentRendererStrategy.getVerticalSymmetryPoint();
-		if (isVerticalSymetrySupported && contentRendererStrategy.isVerticalSymmetrySupported() && (!((beginy > symy) || (symy > endy)))) {
-			prepareSymetry(xaosRendererData.reallocY(), (int) ((symy - beginy) / stepy), symy, stepy);
+		if (isVerticalSymmetrySupported && contentRendererStrategy.isVerticalSymmetrySupported() && (!((beginy > symy) || (symy > endy)))) {
+			prepareSymmetry(xaosRendererData.reallocY(), (int) ((symy - beginy) / stepy), symy, stepy);
 		}
 	}
 
@@ -261,14 +261,14 @@ public final class XaosRenderer extends Renderer {
 			stepy = makeReallocTable(xaosRendererData.reallocX(), xaosRendererData.dynamicX(), beginx, endx, xaosRendererData.positionX(), !cacheActive);
 		}
 		final double symy = contentRendererStrategy.getHorizontalSymmetryPoint();
-		if (isVerticalSymetrySupported && contentRendererStrategy.isVerticalSymmetrySupported() && (!((beginx > symy) || (symy > endx)))) {
-			prepareSymetry(xaosRendererData.reallocY(), (int) ((symy - beginx) / stepy), symy, stepy);
+		if (isVerticalSymmetrySupported && contentRendererStrategy.isVerticalSymmetrySupported() && (!((beginx > symy) || (symy > endx)))) {
+			prepareSymmetry(xaosRendererData.reallocY(), (int) ((symy - beginx) / stepy), symy, stepy);
 		}
 	}
 
 	private double initReallocTableAndPosition(final XaosRealloc[] realloc, final double[] position, final double begin, final double end) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Init realloc and position...");
+			log.fine("Init realloc and position...");
 		}
 		final double step = (end - begin) / (realloc.length - 1);
 		double tmpPosition = begin;
@@ -292,7 +292,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void updatePositions() {
 		if (XaosConstants.DUMP) {
-			logger.fine("Update positions...");
+			log.fine("Update positions...");
 		}
 		for (int k = 0; k < xaosRendererData.reallocX().length; k++) {
 			xaosRendererData.setPositionX(k, xaosRendererData.reallocX()[k].position);
@@ -320,9 +320,9 @@ public final class XaosRenderer extends Renderer {
 		}
 	}
 
-	private void prepareSymetry(final XaosRealloc[] realloc, final int symi, double symPosition, final double step) {
+	private void prepareSymmetry(final XaosRealloc[] realloc, final int symi, double symPosition, final double step) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Prepare symetry...");
+			log.fine("Prepare symetry...");
 		}
 		int i = 0;
 		int j = 0;
@@ -427,7 +427,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void prepareMove(final XaosChunkTable movetable, final XaosRealloc[] reallocX) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Prepare move...");
+			log.fine("Prepare move...");
 		}
 		final XaosChunk[] table = movetable.data;
 		XaosChunk tmpData = null;
@@ -456,16 +456,16 @@ public final class XaosRenderer extends Renderer {
 		tmpData = table[s];
 		tmpData.length = 0;
 		if (XaosConstants.PRINT_MOVETABLE) {
-			logger.fine("Movetable:");
+			log.fine("Movetable:");
 			for (i = 0; table[i].length > 0; i++) {
-				logger.fine("i = " + i + " " + table[i].toString());
+				log.fine("i = " + i + " " + table[i].toString());
 			}
 		}
 	}
 
 	private void prepareFill(final XaosChunkTable filltable, final XaosRealloc[] reallocX) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Prepare fill...");
+			log.fine("Prepare fill...");
 		}
 		final XaosChunk[] table = filltable.data;
 		XaosChunk tmpData = null;
@@ -509,16 +509,16 @@ public final class XaosRenderer extends Renderer {
 		tmpData = table[s];
 		tmpData.length = 0;
 		if (XaosConstants.PRINT_FILLTABLE) {
-			logger.fine("Filltable:");
+			log.fine("Filltable:");
 			for (i = 0; table[i].length > 0; i++) {
-				logger.fine("i = " + i + " " + table[i].toString());
+				log.fine("i = " + i + " " + table[i].toString());
 			}
 		}
 	}
 
 	private double makeReallocTable(final XaosRealloc[] realloc, final XaosDynamic dynamic, final double begin, final double end, final double[] position, final boolean invalidate) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Make realloc...");
+			log.fine("Make realloc...");
 		}
 		XaosRealloc tmpRealloc = null;
 		XaosPrice prevData = null;
@@ -547,16 +547,16 @@ public final class XaosRenderer extends Renderer {
 			}
 		}
 //		if (XaosConstants.DUMP_XAOS) {
-//			logger.fine("positions (fixed point):");
+//			log.fine("positions (fixed point):");
 //			for (i = 0; i < size; i++) {
-//				logger.fine(String.valueOf(delta[i]));
+//				log.fine(String.valueOf(delta[i]));
 //			}
 //		}
 		for (i = 0; i < size; i++) {
 			dynamic.swap();
 			wend = w - XaosConstants.FPRANGE;
 			if (XaosConstants.DUMP_XAOS) {
-//				logger.fine("a0) yend = " + yend);
+//				log.fine("a0) yend = " + yend);
 			}
 			if (wend < 0) {
 				wend = 0;
@@ -568,21 +568,21 @@ public final class XaosRenderer extends Renderer {
 			ps1 = p;
 			wend = w + XaosConstants.FPRANGE;
 			if (XaosConstants.DUMP_XAOS) {
-//				logger.fine("a1) yend = " + yend);
+//				log.fine("a1) yend = " + yend);
 			}
 			if (XaosConstants.DUMP_XAOS) {
-				logger.fine("b0) i = " + i + ", w = " + w + ", ps1 = " + ps1 + ", ps = " + ps + ", pe = " + pe);
+				log.fine("b0) i = " + i + ", w = " + w + ", ps1 = " + ps1 + ", ps = " + ps + ", pe = " + pe);
 			}
 			if (ps != pe && p > ps) {
 				if (p < pe) {
 					prevData = dynamic.oldBest[p - 1];
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("c0) previous = " + prevData.toString());
+						log.fine("c0) previous = " + prevData.toString());
 					}
 				} else {
 					prevData = dynamic.oldBest[pe - 1];
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("c1) previous = " + prevData.toString());
+						log.fine("c1) previous = " + prevData.toString());
 					}
 				}
 				price1 = prevData.price;
@@ -591,20 +591,20 @@ public final class XaosRenderer extends Renderer {
 					prevData = dynamic.calData[i - 1];
 					price1 = prevData.price;
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("c2) previous = " + prevData.toString());
+						log.fine("c2) previous = " + prevData.toString());
 					}
 				} else {
 					prevData = null;
 					price1 = 0;
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("c3) previous = null");
+						log.fine("c3) previous = null");
 					}
 				}
 			}
 			tmpData = dynamic.calData[i];
 			price = price1 + XaosConstants.NEW_PRICE;
 			if (XaosConstants.DUMP_XAOS) {
-				logger.fine("d0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
+				log.fine("d0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
 			}
 			bestData = tmpData;
 			bestPrice = price;
@@ -621,7 +621,7 @@ public final class XaosRenderer extends Renderer {
 						price1 = prevData.price;
 						price = price1 + price(delta[p], w);
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("g0) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
+							log.fine("g0) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
 						}
 						if (price < bestPrice) {
 							tmpData = dynamic.conData[(p << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -636,7 +636,7 @@ public final class XaosRenderer extends Renderer {
 						}
 					}
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("g2) store data: p = " + p + ", bestdata = " + bestData.toString());
+						log.fine("g2) store data: p = " + p + ", bestdata = " + bestData.toString());
 					}
 					dynamic.newBest[p++] = bestData;
 				}
@@ -650,7 +650,7 @@ public final class XaosRenderer extends Renderer {
 						price1 = prevData.price;
 						price = price1 + XaosConstants.NEW_PRICE;
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("h0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
+							log.fine("h0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
 						}
 						if (price < bestPrice) {
 							tmpData = dynamic.conData[((p - 1) << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -660,7 +660,7 @@ public final class XaosRenderer extends Renderer {
 							tmpData.pos = -1;
 							tmpData.previous = prevData;
 							if (XaosConstants.DUMP_XAOS) {
-								logger.fine("h1) store data: p - 1 = " + (p - 1) + ", bestdata = " + bestData.toString());
+								log.fine("h1) store data: p - 1 = " + (p - 1) + ", bestdata = " + bestData.toString());
 							}
 							dynamic.newBest[p - 1] = bestData;
 							if (XaosConstants.DUMP_XAOS) {
@@ -669,7 +669,7 @@ public final class XaosRenderer extends Renderer {
 						}
 						price = price1 + price(delta[p], w);
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("h3) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
+							log.fine("h3) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
 						}
 						if (price < bestPrice) {
 							tmpData = dynamic.conData[(p << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -683,7 +683,7 @@ public final class XaosRenderer extends Renderer {
 							}
 						} else if (delta[p] > w) {
 							if (XaosConstants.DUMP_XAOS) {
-//								logger.fine("h5) store data: p = " + p + ", bestdata = " + bestData.toString());
+//								log.fine("h5) store data: p = " + p + ", bestdata = " + bestData.toString());
 							}
 							dynamic.newBest[p++] = bestData;
 							break;
@@ -691,7 +691,7 @@ public final class XaosRenderer extends Renderer {
 						// }
 					}
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("h6) store data: p = " + p + ", bestdata = " + bestData.toString());
+						log.fine("h6) store data: p = " + p + ", bestdata = " + bestData.toString());
 					}
 					dynamic.newBest[p++] = bestData;
 				}
@@ -703,7 +703,7 @@ public final class XaosRenderer extends Renderer {
 						price1 = prevData.price;
 						price = price1 + XaosConstants.NEW_PRICE;
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("i0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
+							log.fine("i0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
 						}
 						if (price < bestPrice) {
 							tmpData = dynamic.conData[((p - 1) << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -713,7 +713,7 @@ public final class XaosRenderer extends Renderer {
 							tmpData.pos = -1;
 							tmpData.previous = prevData;
 							if (XaosConstants.DUMP_XAOS) {
-								logger.fine("i1) store data: p - 1 = " + (p - 1) + ", bestdata = " + bestData.toString());
+								log.fine("i1) store data: p - 1 = " + (p - 1) + ", bestdata = " + bestData.toString());
 							}
 							dynamic.newBest[p - 1] = bestData;
 							if (XaosConstants.DUMP_XAOS) {
@@ -722,7 +722,7 @@ public final class XaosRenderer extends Renderer {
 						}
 						price = price1 + price(delta[p], w);
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("i3) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
+							log.fine("i3) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
 						}
 						if (price < bestPrice) {
 							tmpData = dynamic.conData[(p << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -732,13 +732,13 @@ public final class XaosRenderer extends Renderer {
 							tmpData.pos = p;
 							tmpData.previous = prevData;
 							if (XaosConstants.DUMP_XAOS) {
-								//logger.fine("i4) bestprice = " + bestPrice + ", bestdata = " + bestData.toString());
+								//log.fine("i4) bestprice = " + bestPrice + ", bestdata = " + bestData.toString());
 							}
 						}
 						// }
 					}
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("i5) store data: p = " + p + ", bestdata = " + bestData.toString());
+						log.fine("i5) store data: p = " + p + ", bestdata = " + bestData.toString());
 					}
 					dynamic.newBest[p++] = bestData;
 				}
@@ -752,7 +752,7 @@ public final class XaosRenderer extends Renderer {
 				}
 				price = price1 + XaosConstants.NEW_PRICE;
 				if (XaosConstants.DUMP_XAOS) {
-					logger.fine("l0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
+					log.fine("l0) add element " + i + ": price = " + price + " (previous price = " + price1 + ")");
 				}
 				if ((price < bestPrice) && (p > ps1)) {
 					tmpData = dynamic.conData[((p - 1) << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -762,7 +762,7 @@ public final class XaosRenderer extends Renderer {
 					tmpData.pos = -1;
 					tmpData.previous = prevData;
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("l1) store data: p - 1 = " + (p - 1) + ", bestdata = " + bestData.toString());
+						log.fine("l1) store data: p - 1 = " + (p - 1) + ", bestdata = " + bestData.toString());
 					}
 					dynamic.newBest[p - 1] = bestData;
 					if (XaosConstants.DUMP_XAOS) {
@@ -773,7 +773,7 @@ public final class XaosRenderer extends Renderer {
 					if (delta[p] != delta[p + 1]) {
 						price = price1 + price(delta[p], w);
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("l3) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
+							log.fine("l3) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
 						}
 						if (price < bestPrice) {
 							tmpData = dynamic.conData[(p << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -790,13 +790,13 @@ public final class XaosRenderer extends Renderer {
 						}
 					}
 					if (XaosConstants.DUMP_XAOS) {
-						logger.fine("l5) store data: p = " + p + ", bestdata = " + bestData.toString());
+						log.fine("l5) store data: p = " + p + ", bestdata = " + bestData.toString());
 					}
 					dynamic.newBest[p++] = bestData;
 				}
 				while (delta[p] < wend) {
 					if (XaosConstants.DUMP_XAOS) {
-//						logger.fine("l6) store data: p = " + p + ", bestdata = " + bestData.toString());
+//						log.fine("l6) store data: p = " + p + ", bestdata = " + bestData.toString());
 					}
 					dynamic.newBest[p++] = bestData;
 				}
@@ -806,20 +806,20 @@ public final class XaosRenderer extends Renderer {
 						prevData = dynamic.calData[i - 1];
 						price1 = prevData.price;
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("e0) previous = " + prevData.toString());
+							log.fine("e0) previous = " + prevData.toString());
 						}
 					} else {
 						prevData = null;
 						price1 = 0;
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("e1) previous = null");
+							log.fine("e1) previous = null");
 						}
 					}
 					while (delta[p] < wend) {
 						if (delta[p] != delta[p + 1]) {
 							price = price1 + price(delta[p], w);
 							if (XaosConstants.DUMP_XAOS) {
-								logger.fine("f0) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
+								log.fine("f0) approximate element " + i + " with old element " + p + ": price = " + price + " (previous price = " + price1 + ")");
 							}
 							if (price < bestPrice) {
 								tmpData = dynamic.conData[(p << XaosConstants.DSIZE) + (i & XaosConstants.MASK)];
@@ -836,13 +836,13 @@ public final class XaosRenderer extends Renderer {
 							}
 						}
 						if (XaosConstants.DUMP_XAOS) {
-							logger.fine("f2) store data: p = " + p + ", bestdata = " + bestData.toString());
+							log.fine("f2) store data: p = " + p + ", bestdata = " + bestData.toString());
 						}
 						dynamic.newBest[p++] = bestData;
 					}
 					while (delta[p] < wend) {
 						if (XaosConstants.DUMP_XAOS) {
-//							logger.fine("f3) store data: p = " + p + ", bestdata = " + bestData.toString());
+//							log.fine("f3) store data: p = " + p + ", bestdata = " + bestData.toString());
 						}
 						dynamic.newBest[p++] = bestData;
 					}
@@ -860,14 +860,14 @@ public final class XaosRenderer extends Renderer {
 			flag = 2;
 		}
 		if (XaosConstants.DUMP_XAOS) {
-			logger.fine("flag = " + flag);
+			log.fine("flag = " + flag);
 		}
 		if (XaosConstants.DUMP_XAOS) {
-			logger.fine("best table:");
+			log.fine("best table:");
 		}
 		for (i = size - 1; i >= 0; i--) {
 			if (XaosConstants.DUMP_XAOS) {
-				logger.fine("data = " + bestData.toString());
+				log.fine("data = " + bestData.toString());
 			}
 			tmpData = bestData.previous;
 			tmpRealloc = realloc[i];
@@ -909,7 +909,7 @@ public final class XaosRenderer extends Renderer {
 			begin1 = end1;
 		}
 		if (XaosConstants.PRINT_POSITIONS) {
-			logger.fine("Positions :");
+			log.fine("Positions :");
 		}
 		while (s < (l - 1)) {
 			e = s + 1;
@@ -949,7 +949,7 @@ public final class XaosRenderer extends Renderer {
 							tmpRealloc.position = begin;
 							tmpRealloc.priority = 1 / (1 + (Math.abs((position[s] - begin)) * step));
 							if (XaosConstants.PRINT_POSITIONS) {
-								logger.fine("pos = " + s + ", position = " + tmpRealloc.position + ", price = " + tmpRealloc.priority);
+								log.fine("pos = " + s + ", position = " + tmpRealloc.position + ", price = " + tmpRealloc.priority);
 							}
 						}
 						break;
@@ -961,7 +961,7 @@ public final class XaosRenderer extends Renderer {
 							tmpRealloc.position = begin;
 							tmpRealloc.priority = Math.abs((position[s] - begin)) * step;
 							if (XaosConstants.PRINT_POSITIONS) {
-								logger.fine("pos = " + s + ", position = " + tmpRealloc.position + ", price = " + tmpRealloc.priority);
+								log.fine("pos = " + s + ", position = " + tmpRealloc.position + ", price = " + tmpRealloc.priority);
 							}
 						}
 						break;
@@ -973,7 +973,7 @@ public final class XaosRenderer extends Renderer {
 							tmpRealloc.position = begin;
 							tmpRealloc.priority = 1.0;
 							if (XaosConstants.PRINT_POSITIONS) {
-								logger.fine("pos = " + s + ", position = " + tmpRealloc.position + ", price = " + tmpRealloc.priority);
+								log.fine("pos = " + s + ", position = " + tmpRealloc.position + ", price = " + tmpRealloc.priority);
 							}
 						}
 						break;
@@ -995,7 +995,7 @@ public final class XaosRenderer extends Renderer {
 			total = initPrices(xaosRendererData.queue(), total, xaosRendererData.reallocX());
 			total = initPrices(xaosRendererData.queue(), total, xaosRendererData.reallocY());
 			if (XaosConstants.DUMP) {
-				logger.fine("total = " + total);
+				log.fine("total = " + total);
 			}
 			if (total > 0) {
 				if (total > 1) {
@@ -1009,7 +1009,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void refreshAll(int[] offset) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Refresh all...");
+			log.fine("Refresh all...");
 		}
 //		XaosRealloc[] tmpRealloc;
 //		int s;
@@ -1037,7 +1037,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void renderReallocTable(boolean continuous, int[] offset) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Process realloc...");
+			log.fine("Process realloc...");
 		}
 		int i;
 		int s;
@@ -1160,7 +1160,7 @@ public final class XaosRenderer extends Renderer {
 	}
 
 	private void fill() {
-		if (isVerticalSymetrySupported && isHorizontalSymetrySupported) {
+		if (isVerticalSymmetrySupported && isHorizontalSymmetrySupported) {
 			doSymetry(xaosRendererData.reallocX(), xaosRendererData.reallocY());
 		}
 		prepareFill(xaosRendererData.fillTable(), xaosRendererData.reallocX());
@@ -1216,7 +1216,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void processQueue(final int size) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Process queue...");
+			log.fine("Process queue...");
 		}
 		for (int i = 0; i < size; i++) {
 			if (xaosRendererData.queue()[i].line) {
@@ -1235,7 +1235,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void doSymetry(final XaosRealloc[] reallocX, final XaosRealloc[] reallocY) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Do symetry...");
+			log.fine("Do symetry...");
 		}
 		final int rowsize = getSize().width();
 		int from_offset = 0;
@@ -1284,7 +1284,7 @@ public final class XaosRenderer extends Renderer {
 	
 	private void doMove(final XaosChunkTable movetable, final XaosRealloc[] reallocY) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Do move...");
+			log.fine("Do move...");
 		}
 		final XaosChunk[] table = movetable.data;
 		XaosChunk tmpData = null;
@@ -1316,7 +1316,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void doFill(final XaosChunkTable filltable, final XaosRealloc[] reallocY) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Do fill...");
+			log.fine("Do fill...");
 		}
 		final XaosChunk[] table = filltable.data;
 		XaosChunk tmpData = null;
@@ -1412,7 +1412,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void renderLine(final XaosRealloc realloc, final XaosRealloc[] reallocX, final XaosRealloc[] reallocY) {
 		if (XaosConstants.PRINT_CALCULATE) {
-			logger.fine("Calculate line " + realloc.pos);
+			log.fine("Calculate line " + realloc.pos);
 		}
 		final int rowsize = getSize().width();
 		final double position = realloc.position;
@@ -1545,7 +1545,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void renderColumn(final XaosRealloc realloc, final XaosRealloc[] reallocX, final XaosRealloc[] reallocY) {
 		if (XaosConstants.PRINT_CALCULATE) {
-			logger.fine("Calculate column " + realloc.pos);
+			log.fine("Calculate column " + realloc.pos);
 		}
 		final int rowsize = getSize().width();
 		final double position = realloc.position;
@@ -1682,7 +1682,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void refreshLine(final XaosRealloc realloc, final XaosRealloc[] reallocX, final XaosRealloc[] reallocY) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Refresh line...");
+			log.fine("Refresh line...");
 		}
 		final int rowsize = getSize().width();
 		int offset = realloc.pos * rowsize;
@@ -1711,7 +1711,7 @@ public final class XaosRenderer extends Renderer {
 
 	private void refreshColumn(final XaosRealloc realloc, final XaosRealloc[] reallocX, final XaosRealloc[] reallocY) {
 		if (XaosConstants.DUMP) {
-			logger.fine("Refresh column...");
+			log.fine("Refresh column...");
 		}
 		final int rowsize = getSize().width();
 		int offset = realloc.pos;

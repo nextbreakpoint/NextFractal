@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,8 @@ public class DSLCompilerTest2 extends BaseTest {
 		try {
 			DSLParser parser = new DSLParser("test", "Compile");
 			DSLParserResult result = parser.parse(getSource("/source2.m"));
-		} catch (ParserException e) {
+			assertThat(result).isNotNull();
+		} catch (DSLException e) {
 			printErrors(e.getErrors());
 			assertThat(e.getErrors()).hasSize(1);
 		} catch (Exception e) {

@@ -32,8 +32,7 @@ import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
@@ -62,7 +61,7 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     private ParserResult createParserResult(Session session) {
         return Command.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.script()))
                 .map(MandelbrotParserStrategy::processResult)
-                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.script()), result))
+                .map(result -> new ParserResult(session, result.errors(), computeHighlighting(session.script()), result))
                 .execute()
                 .orThrow(RuntimeException::new)
                 .get();
@@ -148,10 +147,8 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private static void processCompilerErrors(DSLParserResult result, Exception e) {
-        if (e instanceof CompilerException) {
-            result.getErrors().addAll(((CompilerException)e).getErrors());
-        } else if (e instanceof ParserException) {
-            result.getErrors().addAll(((ParserException)e).getErrors());
+        if (e instanceof DSLException) {
+            result.errors().addAll(((DSLException)e).getErrors());
         }
     }
 }

@@ -24,40 +24,31 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.javacompiler.JavaCompilerDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.JavaCompilerProvider;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpreterDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.JavaCompilerDSLCompiler;
 
 import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 
 public class DSLCompiler {
-	private static final String PROPERTY_MANDELBROT_COMPILER_DISABLED = "com.nextbreakpoint.nextfractal.mandelbrot.compiler.disabled";
-
-	public DSLCompiler() {
-	}
-	
-	public ClassFactory<Orbit> compileOrbit(DSLParserResult result) throws CompilerException {
-		JavaCompiler javaCompiler = getJavaCompiler();
+	public ClassFactory<Orbit> compileOrbit(DSLParserResult result) throws DSLCompilerException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
 			return new InterpreterDSLCompiler().compileOrbit(result);
 		} else {
-			return new JavaCompilerDSLCompiler().compileOrbit(result);
+			return new JavaCompilerDSLCompiler(javaCompiler).compileOrbit(result);
 		}
 	}
 
-	public ClassFactory<Color> compileColor(DSLParserResult result) throws CompilerException {
-		JavaCompiler javaCompiler = getJavaCompiler();
+	public ClassFactory<Color> compileColor(DSLParserResult result) throws DSLCompilerException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
 			return new InterpreterDSLCompiler().compileColor(result);
 		} else {
-			return new JavaCompilerDSLCompiler().compileColor(result);
+			return new JavaCompilerDSLCompiler(javaCompiler).compileColor(result);
 		}
 	}
-
-	public JavaCompiler getJavaCompiler() {
-		return !Boolean.getBoolean(PROPERTY_MANDELBROT_COMPILER_DISABLED) ? ToolProvider.getSystemJavaCompiler() : null;
-	}
-}	
+}

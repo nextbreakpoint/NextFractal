@@ -27,7 +27,11 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class View {
 	private Double4D translation;
 	private Double4D rotation;
@@ -42,53 +46,5 @@ public class View {
 		scale = new Double4D(1, 1, 1, 1);
 		state = new Integer4D(0, 0, 0, 0);
 		point = new Number(0, 0);
-	}
-
-	public Double4D getTraslation() {
-		return translation;
-	}
-
-	public void setTraslation(Double4D translation) {
-		this.translation = translation;
-	}
-
-	public Double4D getRotation() {
-		return rotation;
-	}
-
-	public void setRotation(Double4D rotation) {
-		this.rotation = rotation;
-	}
-
-	public Double4D getScale() {
-		return scale;
-	}
-
-	public void setScale(Double4D scale) {
-		this.scale = scale;
-	}
-
-	public Number getPoint() {
-		return point;
-	}
-
-	public void setPoint(Number point) {
-		this.point = point;
-	}
-
-	public boolean isJulia() {
-		return julia;
-	}
-
-	public void setJulia(boolean julia) {
-		this.julia = julia;
-	}
-
-	public Integer4D getState() {
-		return state;
-	}
-
-	public void setState(Integer4D state) {
-		this.state = state;
 	}
 }

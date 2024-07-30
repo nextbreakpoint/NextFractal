@@ -29,12 +29,18 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
+import lombok.Getter;
+import lombok.Setter;
 
 public class Fractal {
 	private final Scope scope = new Scope();
-	private Orbit orbit;
-	private Color color;
-	private Number point;
+    @Getter
+    private Orbit orbit;
+    @Getter
+    private Color color;
+    @Setter
+    @Getter
+    private Number point;
 
 	/**
 	 * 
@@ -49,21 +55,7 @@ public class Fractal {
 		}
 	}
 
-	/**
-	 * @return
-	 */
-	public Orbit getOrbit() {
-		return orbit;
-	}
-
-	/**
-	 * @return
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
+    /**
 	 * @param orbit
 	 */
 	public void setOrbit(Orbit orbit) {
@@ -124,28 +116,28 @@ public class Fractal {
 	/**
 	 * @return
 	 */
-	public boolean isVerticalSymetrySupported() {
+	public boolean isVerticalSymmetrySupported() {
 		return false;
 	}
 
 	/**
 	 * @return
 	 */
-	public boolean isHorizontalSymetrySupported() {
+	public boolean isHorizontalSymmetrySupported() {
 		return false;
 	}
 
 	/**
 	 * @return
 	 */
-	public double getVerticalSymetryPoint() {
+	public double getVerticalSymmetryPoint() {
 		return 0;
 	}
 
 	/**
 	 * @return
 	 */
-	public double getHorizontalSymetryPoint() {
+	public double getHorizontalSymmetryPoint() {
 		return 0;
 	}
 
@@ -154,19 +146,5 @@ public class Fractal {
 	 */
 	public void clearScope() {
 		scope.clear();
-	}
-
-	/**
-	 * @return
-	 */
-	public Number getPoint() {
-		return point;
-	}
-
-	/**
-	 * @param point
-	 */
-	public void setPoint(Number point) {
-		this.point = point;
 	}
 }

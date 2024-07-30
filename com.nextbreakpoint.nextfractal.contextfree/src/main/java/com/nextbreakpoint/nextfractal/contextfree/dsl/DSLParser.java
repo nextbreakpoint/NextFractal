@@ -69,7 +69,7 @@ public class DSLParser {
 				return parser.getDriver().getCFDG();
 			}
 		} catch (CFDGException e) {
-			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.COMPILE;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
@@ -80,7 +80,7 @@ public class DSLParser {
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
 		} catch (Exception e) {
-			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.COMPILE;
 			String message = e.getMessage();
 			ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
 			logger.log(Level.FINE, error.toString(), e);

@@ -24,44 +24,44 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledColorInt;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledRule;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionCompiler;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ASTColor extends ASTObject {
-	private List<ASTPalette> palettes = new ArrayList<>(); 
-	private List<ASTRule> rules = new ArrayList<>(); 
 	private ASTColorInit colorInit;
-	private ASTColorARGB argb; 
+	@Getter
+    private final List<ASTPalette> palettes = new ArrayList<>();
+	@Getter
+    private final List<ASTRule> rules = new ArrayList<>();
+	@Getter
+    private final ASTColorARGB argb;
 
 	public ASTColor(Token location, ASTColorARGB argb) {
 		super(location);
 		this.argb = argb;
 	}
 
-	public List<ASTPalette> getPalettes() {
-		return palettes;
-	}
-
-	public void addPalette(ASTPalette palette) {
+    public void addPalette(ASTPalette palette) {
 		palettes.add(palette);
 	}
-	
-	public List<ASTRule> getRules() {
-		return rules;
-	}
 
-	public void addRule(ASTRule rule) {
+    public void addRule(ASTRule rule) {
 		rules.add(rule);
-	}
-
-	public ASTColorARGB getArgb() {
-		return argb;
-	}
-
-	public void setArgb(ASTColorARGB argb) {
-		this.argb = argb;
 	}
 
 	public void setInit(ASTColorInit colorInit) {
@@ -105,5 +105,71 @@ public class ASTColor extends ASTObject {
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public CompiledColor compile(ASTVariables variables) {
+		try {
+			ExpressionCompilerContext context = new ExpressionCompilerContext();
+			List<Variable> colorVars = new ArrayList<>();
+			for (Variable var : variables.getColorVariables()) {
+				colorVars.add(var.copy());
+			}
+			List<Variable> stateVars = new ArrayList<>();
+			for (Variable var : variables.getStateVariables()) {
+				stateVars.add(var.copy());
+			}
+			Map<String, Variable> vars = new HashMap<>();
+			for (Variable var : variables.getStateVariables()) {
+				vars.put(var.getName(), var);
+			}
+			for (Variable var : variables.getColorVariables()) {
+				vars.put(var.getName(), var);
+			}
+			Map<String, Variable> newScope = new HashMap<>(vars);
+			ExpressionCompiler compiler = new ExpressionCompiler(context, newScope);
+			CompiledColor color = new CompiledColor(colorVars, stateVars, getLocation());
+			color.setBackgroundColor(getArgb().getComponents());
+			List<CompiledRule> rules = new ArrayList<>();
+			for (ASTRule astRule : getRules()) {
+				CompiledRule rule = new CompiledRule(astRule.getLocation());
+				rule.setRuleCondition(astRule.getRuleExp().compile(compiler));
+				rule.setColorExp(astRule.getColorExp().compile(compiler));
+				rule.setOpacity(astRule.getOpacity());
+				rules.add(rule);
+			}
+			color.setRules(rules);
+			List<CompiledPalette> palettes = new ArrayList<>();
+			if (getPalettes() != null) {
+				for (ASTPalette astPalette : getPalettes()) {
+					palettes.add(astPalette.compile(compiler));
+				}
+			}
+			color.setPalettes(palettes);
+			List<CompiledStatement> statements = new ArrayList<>();
+			if (getInit() != null) {
+				for (ASTStatement statement : getInit().getStatements()) {
+					statements.add(statement.compile(compiler));
+				}
+			}
+			color.setInit(new CompiledColorInt(statements));
+			return color;
+		} catch (ASTException e) {
+			ParserErrorType type = ParserErrorType.COMPILE;
+			long line = e.getLocation().getLine();
+			long charPositionInLine = e.getLocation().getCharPositionInLine();
+			long index = e.getLocation().getStartIndex();
+			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
+			String message = e.getMessage();
+			final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(type, line, charPositionInLine, index, length, message));
+//			throw new DSLParserException("Can't build color", errors);
+		} catch (Exception e) {
+			ParserErrorType type = ParserErrorType.COMPILE;
+			String message = e.getMessage();
+			final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(type, 0, 0, 0, 0, message));
+//			throw new DSLParserException("Can't build color", errors);
+		}
+		return null;
 	}
 }

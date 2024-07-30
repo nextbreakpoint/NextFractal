@@ -25,13 +25,15 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrapOp;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTOrbitTrapOp extends ASTObject {
-	private String op;
-	private ASTNumber c1;
-	private ASTNumber c2;
-	private ASTNumber c3;
+	private final String op;
+	private final ASTNumber c1;
+	private final ASTNumber c2;
+	private final ASTNumber c3;
 
 	public ASTOrbitTrapOp(Token location, String op) {
 		super(location);
@@ -65,23 +67,7 @@ public class ASTOrbitTrapOp extends ASTObject {
 		this.c3 = c3;
 	}
 
-	public String getOp() {
-		return op;
-	}
-	
-	public ASTNumber getC1() {
-		return c1;
-	}
-
-	public ASTNumber getC2() {
-		return c2;
-	}
-
-	public ASTNumber getC3() {
-		return c3;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(op);

@@ -25,12 +25,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledCondition;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTRuleLogicOp extends ASTRuleExpression {
-	private String op;
-	private ASTRuleExpression exp1;
-	private ASTRuleExpression exp2;
+	private final String op;
+	private final ASTRuleExpression exp1;
+	private final ASTRuleExpression exp2;
 	
 	public ASTRuleLogicOp(Token location, String op, ASTRuleExpression exp1, ASTRuleExpression exp2) {
 		super(location);
@@ -38,20 +40,8 @@ public class ASTRuleLogicOp extends ASTRuleExpression {
 		this.exp1 = exp1;
 		this.exp2 = exp2;
 	}
-	
-	public String getOp() {
-		return op;
-	}
-	
-	public ASTRuleExpression getExp1() {
-		return exp1;
-	}
 
-	public ASTRuleExpression getExp2() {
-		return exp2;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(exp1);

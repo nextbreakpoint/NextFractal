@@ -25,15 +25,17 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTOrbitTrap extends ASTObject {
-	private String name;
-	private ASTNumber center;
-	private List<ASTOrbitTrapOp> operators = new ArrayList<>(); 
+	private final String name;
+	private final ASTNumber center;
+	private final List<ASTOrbitTrapOp> operators = new ArrayList<>();
 
 	public ASTOrbitTrap(Token location, String name, ASTNumber center) {
 		super(location);
@@ -41,26 +43,14 @@ public class ASTOrbitTrap extends ASTObject {
 		this.name = name;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public ASTNumber getCenter() {
-		return center;
-	}
-
-	public void addOperator(ASTOrbitTrapOp operator) {
+    public void addOperator(ASTOrbitTrapOp operator) {
 		if ((operator.getOp().equals("MOVETO") || operator.getOp().equals("MOVETOREL")) && operators.size() > 0) {
 			throw new ASTException("Only one initial MOVETO or MOVETOREL operator is allowed", operator.location);
 		}
 		operators.add(operator);
 	}
 
-	public List<ASTOrbitTrapOp> getOperators() {
-		return operators;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("name = ");

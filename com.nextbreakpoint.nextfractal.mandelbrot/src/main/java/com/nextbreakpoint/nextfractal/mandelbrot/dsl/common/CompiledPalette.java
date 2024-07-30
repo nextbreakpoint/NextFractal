@@ -24,36 +24,21 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.common;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 
+@Getter
 public class CompiledPalette {
-	private String name;
-	private List<CompiledPaletteElement> elements;
-	private Token location;
+	private final Token location;
+	@Setter
+    private String name;
+	@Setter
+    private List<CompiledPaletteElement> elements;
 
 	public CompiledPalette(Token location) {
 		this.location = location;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public List<CompiledPaletteElement> getElements() {
-		return elements;
-	}
-
-	public void setElements(List<CompiledPaletteElement> elements) {
-		this.elements = elements;
-	}
-
-	public Token getLocation() {
-		return location;
 	}
 }

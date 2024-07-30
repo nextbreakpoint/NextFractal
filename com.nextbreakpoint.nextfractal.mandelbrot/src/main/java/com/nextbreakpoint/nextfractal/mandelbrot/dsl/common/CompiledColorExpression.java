@@ -24,22 +24,20 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.common;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpreterContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionContext;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Map;
 
+@Getter
 public abstract class CompiledColorExpression {
-	protected Token location;
+	protected final Token location;
 
 	protected CompiledColorExpression(Token location) {
 		this.location = location;
 	}
 	
-	public abstract float[] evaluate(InterpreterContext context, Map<String, CompilerVariable> scope);
-
-	public Token getLocation() {
-		return location;
-	}
+	public abstract float[] evaluate(ExpressionContext context, Map<String, Variable> scope);
 }

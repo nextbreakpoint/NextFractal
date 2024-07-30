@@ -85,7 +85,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			renderer.setColor(color);
 			renderer.init();
 			View view = new View();
-			view .setTraslation(translation);
+			view .setTranslation(translation);
 			view.setRotation(rotation);
 			view.setScale(scale);
 			view.setState(new Integer4D(0, 0, 0, 0));

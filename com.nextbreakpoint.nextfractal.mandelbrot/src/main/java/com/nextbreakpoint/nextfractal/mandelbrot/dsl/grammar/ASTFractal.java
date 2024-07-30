@@ -24,18 +24,27 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledFractal;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbit;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;
 import java.util.Stack;
 
 public class ASTFractal extends ASTObject {
-	private ASTScope stateVars = new ASTScope();
-	private Stack<ASTScope> orbitVars = new Stack<>();
-	private Stack<ASTScope> colorVars = new Stack<>();
-	private ASTOrbit orbit;
-	private ASTColor color;
+	private final ASTScope stateVars = new ASTScope();
+	private final Stack<ASTScope> orbitVars = new Stack<>();
+	private final Stack<ASTScope> colorVars = new Stack<>();
+	@Setter
+    @Getter
+    private ASTOrbit orbit;
+	@Setter
+    @Getter
+    private ASTColor color;
 
 	public ASTFractal(Token location) {
 		super(location);
@@ -46,24 +55,8 @@ public class ASTFractal extends ASTObject {
 		registerOrbitVariable("n", true, false, location);
 	}
 
-	public ASTOrbit getOrbit() {
-		return orbit;
-	}
-	
-	public void setOrbit(ASTOrbit orbit) {
-		this.orbit = orbit;
-	}
-	
-	public ASTColor getColor() {
-		return color;
-	}
-	
-	public void setColor(ASTColor color) {
-		this.color = color;
-	}
-
-	public void registerStateVariable(String varName, boolean real, Token location) {
-		CompilerVariable variable = orbitVars.peek().getVariable(varName);
+    public void registerStateVariable(String varName, boolean real, Token location) {
+		Variable variable = orbitVars.peek().getVariable(varName);
 		if (variable == null) {
 			registerOrbitVariable(varName, real, true, location);
 		} else if (variable.isReal() != real) {
@@ -95,16 +88,16 @@ public class ASTFractal extends ASTObject {
 		colorVars.peek().deleteVariable(name);
 	}
 
-	public CompilerVariable getOrbitVariable(String name, Token location) {
-		CompilerVariable var = orbitVars.peek().getVariable(name);
+	public Variable getOrbitVariable(String name, Token location) {
+		Variable var = orbitVars.peek().getVariable(name);
 		if (var == null) {
 			throw new ASTException("Variable not defined: " + location.getText(), location);
 		}
 		return var;
 	}
 
-	public CompilerVariable getColorVariable(String name, Token location) {
-		CompilerVariable var = colorVars.peek().getVariable(name);
+	public Variable getColorVariable(String name, Token location) {
+		Variable var = colorVars.peek().getVariable(name);
 		if (var == null) {
 			var = orbitVars.peek().getVariable(name);
 			if (var == null) {
@@ -114,26 +107,20 @@ public class ASTFractal extends ASTObject {
 		return var;
 	}
 
-	public Collection<CompilerVariable> getStateVariables() {
+	public Collection<Variable> getStateVariables() {
 		return stateVars.values();
 	}
 
-	public Collection<CompilerVariable> getOrbitVariables() {
+	public Collection<Variable> getOrbitVariables() {
 		return orbitVars.peek().values();
 	}
 
-	public Collection<CompilerVariable> getColorVariables() {
+	public Collection<Variable> getColorVariables() {
 		return colorVars.peek().values();
 	}
 
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("orbit = {");
-		builder.append(orbit);
-		builder.append("},color = {");
-		builder.append(color);
-		builder.append("}");
-		return builder.toString();
+        return "orbit = {" + orbit + "},color = {" + color + "}";
 	}
 
 	public void pushOrbitScope() {
@@ -154,5 +141,12 @@ public class ASTFractal extends ASTObject {
 
 	public void popColorScope() {
 		colorVars.pop();
+	}
+
+	public CompiledFractal compile() {
+		final ASTVariables variables = new ASTVariables(orbitVars.peek(), colorVars.peek(), stateVars);
+		final CompiledOrbit compiledOrbit = orbit.compile(variables);
+		final CompiledColor compiledColor = color.compile(variables);
+		return new CompiledFractal(compiledOrbit, compiledColor, location);
 	}
 }

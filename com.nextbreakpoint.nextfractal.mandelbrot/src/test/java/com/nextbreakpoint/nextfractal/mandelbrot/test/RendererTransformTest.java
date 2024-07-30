@@ -43,7 +43,7 @@ public class RendererTransformTest {
 	@Test
 	public void given_new_transform_when_translate_should_return_traslated_point() {
 		Transform t = new Transform();
-		t.traslate(10, 20);
+		t.translate(10, 20);
 		double[] p = makePoint(0, 0);
 		t.transform(p);
 		assertThat(p[0]).isEqualTo(10, Offset.offset(0.00001));
@@ -104,12 +104,12 @@ public class RendererTransformTest {
 	}
 
 	@Test
-	public void given_new_transform_when_rotate_and_scale_and_traslate_should_return_rotated_and_scaled_and_traslated_point() {
+	public void given_new_transform_when_rotate_and_scale_and_translate_should_return_rotated_and_scaled_and_traslated_point() {
 		Transform t = new Transform();
 		double a = Math.PI / 2;
 		t.rotate(a);
 		t.scale(2,2);
-		t.traslate(1,1);
+		t.translate(1,1);
 		double[] p = makePoint(1, 1);
 		t.transform(p);
 		assertThat(p[0]).isEqualTo(-4, Offset.offset(0.00001));
@@ -117,10 +117,10 @@ public class RendererTransformTest {
 	}
 
 	@Test
-	public void given_new_transform_when_traslate_and_rotate_and_scale_should_return_traslated_and_rotated_and_scaled_point() {
+	public void given_new_transform_when_translate_and_rotate_and_scale_should_return_traslated_and_rotated_and_scaled_point() {
 		Transform t = new Transform();
 		double a = Math.PI / 2;
-		t.traslate(1,1);
+		t.translate(1,1);
 		t.rotate(a);
 		t.scale(2,2);
 		double[] p = makePoint(1, 1);
@@ -133,7 +133,7 @@ public class RendererTransformTest {
 	public void given_new_transform_when_concat_should_return_traslated_and_rotated_and_scaled_point() {
 		Transform t = new Transform();
 		double a = Math.PI / 2;
-		Transform tt = Transform.newTraslate(1, 1);
+		Transform tt = Transform.newTranslate(1, 1);
 		Transform rt = Transform.newRotate(a);
 		Transform st = Transform.newScale(2, 2);
 		t.concat(tt);

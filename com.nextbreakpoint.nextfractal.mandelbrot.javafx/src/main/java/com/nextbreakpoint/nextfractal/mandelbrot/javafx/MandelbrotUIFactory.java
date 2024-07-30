@@ -91,7 +91,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		coordinator.init();
 		MandelbrotMetadata data = (MandelbrotMetadata) session.metadata();
 		View view = new View();
-		view.setTraslation(data.getTranslation());
+		view.setTranslation(data.getTranslation());
 		view.setRotation(data.getRotation());
 		view.setScale(data.getScale());
 		view.setState(new Integer4D(0, 0, 0, 0));

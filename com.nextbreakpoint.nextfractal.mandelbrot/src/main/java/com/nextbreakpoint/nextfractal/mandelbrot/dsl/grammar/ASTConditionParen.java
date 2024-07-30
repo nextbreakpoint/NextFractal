@@ -25,8 +25,10 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledCondition;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTConditionParen extends ASTConditionExpression {
 	private ASTConditionExpression exp;
 
@@ -35,17 +37,9 @@ public class ASTConditionParen extends ASTConditionExpression {
 		this.exp = exp;
 	}
 
-	public ASTConditionExpression getExp() {
-		return exp;
-	}
-
-	@Override
+    @Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("(");
-		builder.append(exp);
-		builder.append(")");
-		return builder.toString();
+        return "(" + exp + ")";
 	}
 
 	public CompiledCondition compile(ASTExpressionCompiler compiler) {

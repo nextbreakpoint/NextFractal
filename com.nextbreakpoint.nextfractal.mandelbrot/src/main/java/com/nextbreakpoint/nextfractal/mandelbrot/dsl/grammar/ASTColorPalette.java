@@ -25,11 +25,13 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledColorExpression;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTColorPalette extends ASTColorExpression {
-	private String name;
-	private ASTExpression exp;
+	private final String name;
+	private final ASTExpression exp;
 	
 	public ASTColorPalette(Token location, String name, ASTExpression exp) {
 		super(location);
@@ -37,22 +39,9 @@ public class ASTColorPalette extends ASTColorExpression {
 		this.exp = exp;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public ASTExpression getExp() {
-		return exp;
-	}
-
-	@Override
+    @Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(name);
-		builder.append("[");
-		builder.append(exp);
-		builder.append("]");
-		return builder.toString();
+        return name + "[" + exp + "]";
 	}
 
 	@Override

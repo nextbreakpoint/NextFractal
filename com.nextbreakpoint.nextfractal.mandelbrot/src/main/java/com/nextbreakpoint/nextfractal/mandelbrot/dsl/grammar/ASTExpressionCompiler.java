@@ -34,49 +34,49 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrapOp;
 
 public interface ASTExpressionCompiler {
-	public CompiledExpression compile(ASTNumber number);
+	CompiledExpression compile(ASTNumber number);
 
-	public CompiledExpression compile(ASTFunction function);
+	CompiledExpression compile(ASTFunction function);
 
-	public CompiledExpression compile(ASTOperator operator);
+	CompiledExpression compile(ASTOperator operator);
 
-	public CompiledExpression compile(ASTParen paren);
+	CompiledExpression compile(ASTParen paren);
 
-	public CompiledExpression compile(ASTVariable variable);
+	CompiledExpression compile(ASTVariable variable);
 
-	public CompiledCondition compile(ASTConditionCompareOp compareOp);
+	CompiledCondition compile(ASTConditionCompareOp compareOp);
 
-	public CompiledCondition compile(ASTConditionLogicOp logicOp);
+	CompiledCondition compile(ASTConditionLogicOp logicOp);
 
-	public CompiledCondition compile(ASTConditionTrap trap);
+	CompiledCondition compile(ASTConditionTrap trap);
 
-	public CompiledCondition compile(ASTConditionJulia condition);
+	CompiledCondition compile(ASTConditionJulia condition);
 
-	public CompiledCondition compile(ASTConditionParen condition);
+	CompiledCondition compile(ASTConditionParen condition);
 
-	public CompiledCondition compile(ASTConditionNeg condition);
+	CompiledCondition compile(ASTConditionNeg condition);
 
-	public CompiledCondition compile(ASTRuleLogicOp logicOp);
+	CompiledCondition compile(ASTRuleLogicOp logicOp);
 
-	public CompiledCondition compile(ASTRuleCompareOp compareOp);
+	CompiledCondition compile(ASTRuleCompareOp compareOp);
 
-	public CompiledColorExpression compile(ASTColorPalette palette);
+	CompiledColorExpression compile(ASTColorPalette palette);
 
-	public CompiledColorExpression compile(ASTColorComponent component);
+	CompiledColorExpression compile(ASTColorComponent component);
 
-	public CompiledStatement compile(ASTConditionalStatement statement);
+	CompiledStatement compile(ASTConditionalStatement statement);
 
-	public CompiledStatement compile(ASTAssignStatement statement);
+	CompiledStatement compile(ASTAssignStatement statement);
 
-	public CompiledStatement compile(ASTStopStatement statement);
+	CompiledStatement compile(ASTStopStatement statement);
 
-	public CompiledTrap compile(ASTOrbitTrap astOrbitTrap);
+	CompiledTrap compile(ASTOrbitTrap astOrbitTrap);
 
-	public CompiledTrapOp compile(ASTOrbitTrapOp astOrbitTrapOp);
+	CompiledTrapOp compile(ASTOrbitTrapOp astOrbitTrapOp);
 
-	public CompiledPalette compile(ASTPalette astPalette);
+	CompiledPalette compile(ASTPalette astPalette);
 
-	public CompiledPaletteElement compile(ASTPaletteElement astPaletteElement);
+	CompiledPaletteElement compile(ASTPaletteElement astPaletteElement);
 
-	public CompiledExpression compile(ASTConditionalExpression astConditionalExpression);
+	CompiledExpression compile(ASTConditionalExpression astConditionalExpression);
 }

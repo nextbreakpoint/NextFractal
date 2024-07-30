@@ -52,12 +52,12 @@ public interface RendererStrategy {
     boolean isSolidGuessSupported();
 
 	/**
-	 * @return true if vertical symetry is supported.
+	 * @return true if vertical symmetry is supported.
 	 */
     boolean isVerticalSymmetrySupported();
 
 	/**
-	 * @return true if horizontal symetry is supported.
+	 * @return true if horizontal symmetry is supported.
 	 */
     boolean isHorizontalSymmetrySupported();
 

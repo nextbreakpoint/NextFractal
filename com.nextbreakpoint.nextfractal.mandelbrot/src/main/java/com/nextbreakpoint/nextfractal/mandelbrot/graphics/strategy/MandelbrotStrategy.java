@@ -31,7 +31,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.graphics.State;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy;
 
 public class MandelbrotStrategy implements RendererStrategy {
-		private Fractal rendererFractal;
+		private final Fractal rendererFractal;
 
 		public MandelbrotStrategy(Fractal rendererFractal) {
 			this.rendererFractal = rendererFractal;
@@ -71,7 +71,7 @@ public class MandelbrotStrategy implements RendererStrategy {
 		 */
 		@Override
 		public boolean isVerticalSymmetrySupported() {
-			return rendererFractal.isVerticalSymetrySupported();
+			return rendererFractal.isVerticalSymmetrySupported();
 		}
 
 		/**
@@ -79,7 +79,7 @@ public class MandelbrotStrategy implements RendererStrategy {
 		 */
 		@Override
 		public boolean isHorizontalSymmetrySupported() {
-			return rendererFractal.isHorizontalSymetrySupported();
+			return rendererFractal.isHorizontalSymmetrySupported();
 		}
 
 		/**
@@ -87,7 +87,7 @@ public class MandelbrotStrategy implements RendererStrategy {
 		 */
 		@Override
 		public double getVerticalSymmetryPoint() {
-			return rendererFractal.getVerticalSymetryPoint();
+			return rendererFractal.getVerticalSymmetryPoint();
 		}
 
 		/**
@@ -95,6 +95,6 @@ public class MandelbrotStrategy implements RendererStrategy {
 		 */
 		@Override
 		public double getHorizontalSymmetryPoint() {
-			return rendererFractal.getHorizontalSymetryPoint();
+			return rendererFractal.getHorizontalSymmetryPoint();
 		}
 	}

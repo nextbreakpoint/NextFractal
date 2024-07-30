@@ -25,14 +25,19 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import lombok.Getter;
+
+import java.util.Objects;
 
 public class Region {
 	private double x0;
 	private double y0;
 	private double x1;
 	private double y1;
-	private Number center;
-	private Number size;
+    @Getter
+    private Number center;
+    @Getter
+    private Number size;
 
 	public Region() {
 		setPoints(new Number(0,0), new Number(0,0));
@@ -59,21 +64,7 @@ public class Region {
 		center = new Number((x0 + x1) / (2 * size.r()), (y0 + y1) / (2 * size.i()));
 	}
 
-	/**
-	 * @return
-	 */
-	public Number getCenter() {
-		return center;
-	}
-
-	/**
-	 * @return
-	 */
-	public Number getSize() {
-		return size;
-	}
-	
-	/**
+    /**
 	 * @return
 	 */
 	public double left() {
@@ -107,50 +98,15 @@ public class Region {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((center == null) ? 0 : center.hashCode());
-		result = prime * result + ((size == null) ? 0 : size.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(x0);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(x1);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y0);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y1);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Region region = (Region) o;
+		return Double.compare(x0, region.x0) == 0 && Double.compare(y0, region.y0) == 0 && Double.compare(x1, region.x1) == 0 && Double.compare(y1, region.y1) == 0 && Objects.equals(center, region.center) && Objects.equals(size, region.size);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Region other = (Region) obj;
-		if (center == null) {
-			if (other.center != null)
-				return false;
-		} else if (!center.equals(other.center))
-			return false;
-		if (size == null) {
-			if (other.size != null)
-				return false;
-		} else if (!size.equals(other.size))
-			return false;
-		if (Double.doubleToLongBits(x0) != Double.doubleToLongBits(other.x0))
-			return false;
-		if (Double.doubleToLongBits(x1) != Double.doubleToLongBits(other.x1))
-			return false;
-		if (Double.doubleToLongBits(y0) != Double.doubleToLongBits(other.y0))
-			return false;
-		if (Double.doubleToLongBits(y1) != Double.doubleToLongBits(other.y1))
-			return false;
-		return true;
+	public int hashCode() {
+		return Objects.hash(x0, y0, x1, y1, center, size);
 	}
 }

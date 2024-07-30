@@ -25,13 +25,15 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPaletteElement;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTPaletteElement extends ASTObject {
-	private ASTColorARGB beginColor; 
-	private ASTColorARGB endColor; 
-	private int steps; 
-	private ASTExpression exp;
+	private final ASTColorARGB beginColor;
+	private final ASTColorARGB endColor;
+	private final int steps;
+	private final ASTExpression exp;
 	
 	public ASTPaletteElement(Token location, ASTColorARGB beginColor, ASTColorARGB endColor, int steps, ASTExpression exp) {
 		super(location);
@@ -43,36 +45,10 @@ public class ASTPaletteElement extends ASTObject {
 	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("beginColor = ");
-		builder.append(beginColor);
-		builder.append(",endColor = ");
-		builder.append(endColor);
-		builder.append(",steps = ");
-		builder.append(steps);
-		builder.append(",exp = {");
-		builder.append(exp);
-		builder.append("}");
-		return builder.toString();
+        return "beginColor = " + beginColor + ",endColor = " + endColor + ",steps = " + steps + ",exp = {" + exp + "}";
 	}
 
-	public int getSteps() {
-		return steps;
-	}
-
-	public ASTColorARGB getBeginColor() {
-		return beginColor;
-	}
-
-	public ASTColorARGB getEndColor() {
-		return endColor;
-	}
-
-	public ASTExpression getExp() {
-		return exp;
-	}
-
-	public CompiledPaletteElement compile(ASTExpressionCompiler compiler) {
+    public CompiledPaletteElement compile(ASTExpressionCompiler compiler) {
 		return compiler.compile(this);
 	}
 }

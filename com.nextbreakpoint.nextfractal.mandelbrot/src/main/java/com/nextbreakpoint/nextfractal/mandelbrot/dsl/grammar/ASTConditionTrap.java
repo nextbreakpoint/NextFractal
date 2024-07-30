@@ -25,12 +25,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledCondition;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTConditionTrap extends ASTConditionExpression {
-	private String name;
-	private ASTExpression exp;
-	private boolean contains;
+	private final String name;
+	private final ASTExpression exp;
+	private final boolean contains;
 
 	public ASTConditionTrap(Token location, String name, ASTExpression exp, boolean contains) {
 		super(location);
@@ -39,28 +41,9 @@ public class ASTConditionTrap extends ASTConditionExpression {
 		this.contains = contains;
 	}
 
-	public String getName() {
-		return name;
-	}
-	
-	public ASTExpression getExp() {
-		return exp;
-	}
-	
-	public boolean isContains() {
-		return contains;
-	}
-	
-	@Override
+    @Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(name);
-		builder.append("[");
-		builder.append(exp);
-		builder.append(",");
-		builder.append(contains);
-		builder.append("]");
-		return builder.toString();
+        return name + "[" + exp + "," + contains + "]";
 	}
 
 	public CompiledCondition compile(ASTExpressionCompiler compiler) {

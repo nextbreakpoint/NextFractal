@@ -24,12 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTRule extends ASTObject {
-	private ASTRuleExpression ruleExp;
-	private ASTColorExpression colorExp;
-	private float opacity;
+	private final ASTRuleExpression ruleExp;
+	private final ASTColorExpression colorExp;
+	private final float opacity;
 
 	public ASTRule(Token location, float opacity, ASTRuleExpression ruleExp, ASTColorExpression colorExp) {
 		super(location);
@@ -38,28 +40,8 @@ public class ASTRule extends ASTObject {
 		this.colorExp = colorExp;
 	}
 
-	public ASTRuleExpression getRuleExp() {
-		return ruleExp;
-	}
-
-	public ASTColorExpression getColorExp() {
-		return colorExp;
-	}
-
-	public float getOpacity() {
-		return opacity;
-	}
-
-	@Override
+    @Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("opacity = ");
-		builder.append(opacity);
-		builder.append(",ruleExp = {");
-		builder.append(ruleExp);
-		builder.append("},colorExp = {");
-		builder.append(colorExp);
-		builder.append("}");
-		return builder.toString();
+        return "opacity = " + opacity + ",ruleExp = {" + ruleExp + "},colorExp = {" + colorExp + "}";
 	}
 }

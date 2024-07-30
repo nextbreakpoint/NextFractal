@@ -24,14 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
 import org.antlr.v4.runtime.Token;
 
 public class ASTVariable extends ASTExpression {
-	private CompilerVariable variable;
+	private final Variable variable;
 
-	public ASTVariable(Token location, CompilerVariable variable) {
+	public ASTVariable(Token location, Variable variable) {
 		super(location);
 		this.variable = variable;
 	}

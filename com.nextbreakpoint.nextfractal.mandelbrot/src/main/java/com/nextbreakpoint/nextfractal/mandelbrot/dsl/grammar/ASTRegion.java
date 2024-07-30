@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 public class ASTRegion {
-	private ASTNumber a; 
-	private ASTNumber b; 
+	private final ASTNumber a;
+	private final ASTNumber b;
 
 	public ASTRegion(ASTNumber a, ASTNumber b) {
 		this.a = a;
@@ -43,12 +43,6 @@ public class ASTRegion {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[");
-		builder.append(a);
-		builder.append(",");
-		builder.append(b);
-		builder.append("]");
-		return builder.toString();
+        return "[" + a + "," + b + "]";
 	}
 }

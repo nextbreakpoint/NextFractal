@@ -31,7 +31,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.graphics.State;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy;
 
 public class JuliaStrategy implements RendererStrategy {
-	private Fractal rendererFractal;
+	private final Fractal rendererFractal;
 
 	public JuliaStrategy(Fractal rendererFractal) {
 		this.rendererFractal = rendererFractal;
@@ -86,7 +86,7 @@ public class JuliaStrategy implements RendererStrategy {
 	 */
 	@Override
 	public double getVerticalSymmetryPoint() {
-		return rendererFractal.getVerticalSymetryPoint();
+		return rendererFractal.getVerticalSymmetryPoint();
 	}
 
 	/**
@@ -94,6 +94,6 @@ public class JuliaStrategy implements RendererStrategy {
 	 */
 	@Override
 	public double getHorizontalSymmetryPoint() {
-		return rendererFractal.getHorizontalSymetryPoint();
+		return rendererFractal.getHorizontalSymmetryPoint();
 	}
 }

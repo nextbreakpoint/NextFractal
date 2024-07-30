@@ -29,13 +29,15 @@ import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.Objects;
 
 @EqualsAndHashCode(exclude = "time")
 @Builder(setterPrefix = "with", toBuilder = true)
 public class ContextFreeMetadata implements Metadata {
-	private final String seed;
+	@Getter
+    private final String seed;
 	private final Time time = new Time(0, 1);
 
 	public ContextFreeMetadata() {
@@ -49,25 +51,6 @@ public class ContextFreeMetadata implements Metadata {
 	public ContextFreeMetadata(ContextFreeMetadata other) {
 		seed = other.seed;
 	}
-
-	public String getSeed() {
-		return seed;
-	}
-
-//	@Override
-//	public boolean equals(Object o) {
-//		if (this == o) return true;
-//		if (o == null || getClass() != o.getClass()) return false;
-//
-//		ContextFreeMetadata that = (ContextFreeMetadata) o;
-//
-//		return seed.equals(that.seed);
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		return seed.hashCode();
-//	}
 
 	@JsonProperty("time")
 	@Override

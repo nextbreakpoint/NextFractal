@@ -26,5 +26,5 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 @FunctionalInterface
 public interface RendererDelegate {
-	public void updateImageInBackground(float progress);
+	void updateImageInBackground(float progress);
 }

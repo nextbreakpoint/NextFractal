@@ -24,33 +24,27 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.common;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpreterContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Map;
 
+@Getter
 public abstract class CompiledExpression {
-	protected Token location;
-	protected int index;
+	protected final Token location;
+	protected final int index;
 
 	protected CompiledExpression(int index, Token location) {
 		this.location = location;
 		this.index = index;
 	}
 	
-	public abstract double evaluateReal(InterpreterContext context, Map<String, CompilerVariable> scope);
+	public abstract double evaluateReal(ExpressionContext context, Map<String, Variable> scope);
 	
-	public abstract Number evaluate(InterpreterContext context, Map<String, CompilerVariable> scope);
+	public abstract Number evaluate(ExpressionContext context, Map<String, Variable> scope);
 
 	public abstract boolean isReal();
-
-	public Token getLocation() {
-		return location;
-	}
-
-	public int getIndex() {
-		return index;
-	}
 }

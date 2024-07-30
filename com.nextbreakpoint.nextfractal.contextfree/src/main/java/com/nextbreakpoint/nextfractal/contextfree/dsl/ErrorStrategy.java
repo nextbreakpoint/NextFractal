@@ -49,7 +49,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	public void reportError(Parser recognizer, RecognitionException e) {
 		String message = generateErrorMessage("Parse failed", recognizer);
-		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.COMPILE;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
@@ -62,7 +62,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportInputMismatch(Parser recognizer, InputMismatchException e) {
 		String message = generateErrorMessage("Input mismatch", recognizer);
-		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.COMPILE;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
@@ -75,7 +75,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
 		String message = generateErrorMessage("Failed predicate", recognizer);
-		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.COMPILE;
 		long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
@@ -88,7 +88,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportUnwantedToken(Parser recognizer) {
 		String message = generateErrorMessage("Unwanted token", recognizer);
-		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.COMPILE;
 		long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();
@@ -101,7 +101,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 	@Override
 	protected void reportMissingToken(Parser recognizer) {
 		String message = generateErrorMessage("Missing token", recognizer);
-		ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+		ParserErrorType type = ParserErrorType.COMPILE;
 		long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();

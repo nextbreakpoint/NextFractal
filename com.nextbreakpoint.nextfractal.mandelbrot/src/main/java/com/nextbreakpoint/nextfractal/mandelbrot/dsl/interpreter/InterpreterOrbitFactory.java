@@ -24,119 +24,121 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.support.CompiledOrbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitBegin;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitEnd;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitLoop;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitTrap;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStatement;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class InterpreterOrbitFactory implements ClassFactory<Orbit> {
-	private ASTFractal astFractal;
-	private String source;
-	private List<ParserError> errors;
+	private final ASTFractal fractal;
+	private final String source;
+	@Getter
+    private final List<ParserError> errors;
 	
-	public InterpreterOrbitFactory(ASTFractal astFractal, String source, List<ParserError> errors) {
-		this.astFractal = astFractal;
+	public InterpreterOrbitFactory(ASTFractal fractal, String source, List<ParserError> errors) {
+		this.fractal = fractal;
 		this.source = source;
 		this.errors = errors;
 	}
 	
-	public Orbit create() throws ParserException {
+	public Orbit create() throws DSLCompilerException {
 		try {
-			ExpressionContext context = new ExpressionContext();
-			ASTOrbit astOrbit = astFractal.getOrbit();
+			ExpressionCompilerContext context = new ExpressionCompilerContext();
+			ASTOrbit astOrbit = fractal.getOrbit();
 			double ar = astOrbit.getRegion().getA().r();
 			double ai = astOrbit.getRegion().getA().i();
 			double br = astOrbit.getRegion().getB().r();
 			double bi = astOrbit.getRegion().getB().i();
-			List<CompilerVariable> orbitVars = new ArrayList<>();
-			for (CompilerVariable var : astFractal.getOrbitVariables()) {
+			List<Variable> orbitVars = new ArrayList<>();
+			for (Variable var : fractal.getOrbitVariables()) {
 				orbitVars.add(var.copy());
 			}
-			List<CompilerVariable> stateVars = new ArrayList<>();
-			for (CompilerVariable var : astFractal.getStateVariables()) {
+			List<Variable> stateVars = new ArrayList<>();
+			for (Variable var : fractal.getStateVariables()) {
 				stateVars.add(var.copy());
 			}
-			Map<String, CompilerVariable> vars = new HashMap<>();
-			for (Iterator<CompilerVariable> s = astFractal.getStateVariables().iterator(); s.hasNext();) {
-				CompilerVariable var = s.next();
-				vars.put(var.getName(), var);
-			}
-			for (Iterator<CompilerVariable> s = astFractal.getOrbitVariables().iterator(); s.hasNext();) {
-				CompilerVariable var = s.next();
-				vars.put(var.getName(), var);
-			}
-			Map<String, CompilerVariable> newScope = new HashMap<>(vars);
+			Map<String, Variable> vars = new HashMap<>();
+            for (Variable var : fractal.getStateVariables()) {
+                vars.put(var.getName(), var);
+            }
+            for (Variable var : fractal.getOrbitVariables()) {
+                vars.put(var.getName(), var);
+            }
+			Map<String, Variable> newScope = new HashMap<>(vars);
 			ExpressionCompiler compiler = new ExpressionCompiler(context, newScope);
 			CompiledOrbit orbit = new CompiledOrbit(orbitVars, stateVars, astOrbit.getLocation());
 			orbit.setRegion(new Number[] { new Number(ar, ai), new Number(br, bi) });
 			List<CompiledStatement> beginStatements = new ArrayList<>();
-			List<CompiledStatement> loopStatements = new ArrayList<>();
-			List<CompiledStatement> endStatements = new ArrayList<>();
-			List<CompiledTrap> traps = new ArrayList<>();
 			if (astOrbit.getBegin() != null) {
 				for (ASTStatement astStatement : astOrbit.getBegin().getStatements()) {
 					beginStatements.add(astStatement.compile(compiler));
 				}
 			}
+			orbit.setBegin(new CompiledOrbitBegin(beginStatements));
+			List<CompiledStatement> loopStatements = new ArrayList<>();
 			if (astOrbit.getLoop() != null) {
 				for (ASTStatement astStatement : astOrbit.getLoop().getStatements()) {
 					loopStatements.add(astStatement.compile(compiler));
 				}
-				orbit.setLoopCondition(astOrbit.getLoop().getExpression().compile(compiler));
-				orbit.setLoopBegin(astOrbit.getLoop().getBegin());
-				orbit.setLoopEnd(astOrbit.getLoop().getEnd());
 			}
+			final CompiledOrbitLoop orbitLoop = new CompiledOrbitLoop(loopStatements);
+			orbit.setLoop(orbitLoop);
+			if (astOrbit.getLoop() != null) {
+				orbitLoop.setCondition(astOrbit.getLoop().getExpression().compile(compiler));
+				orbitLoop.setBegin(astOrbit.getLoop().getBegin());
+				orbitLoop.setEnd(astOrbit.getLoop().getEnd());
+			}
+			List<CompiledStatement> endStatements = new ArrayList<>();
 			if (astOrbit.getEnd() != null) {
 				for (ASTStatement astStatement : astOrbit.getEnd().getStatements()) {
 					endStatements.add(astStatement.compile(compiler));
 				}
 			}
+			orbit.setEnd(new CompiledOrbitEnd(endStatements));
+			List<CompiledTrap> traps = new ArrayList<>();
 			if (astOrbit.getTraps() != null) {
 				for (ASTOrbitTrap astTrap : astOrbit.getTraps()) {
 					traps.add(astTrap.compile(compiler));
 				}
 			}
-			orbit.setBeginStatements(beginStatements);
-			orbit.setLoopStatements(loopStatements);
-			orbit.setEndStatements(endStatements);
 			orbit.setTraps(traps);
-			return new InterpreterOrbit(orbit, context);
+			return new InterpretedOrbit(orbit, context);
 		} catch (ASTException e) {
-			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.COMPILE;
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			String message = e.getMessage();
 			errors.add(new ParserError(type, line, charPositionInLine, index, length, message));
-			throw new ParserException("Can't build orbit", errors);
+			throw new DSLCompilerException("Can't build orbit", source, errors);
 		} catch (Exception e) {
-			ParserErrorType type = ParserErrorType.SCRIPT_COMPILER;
+			ParserErrorType type = ParserErrorType.COMPILE;
 			String message = e.getMessage();
 			errors.add(new ParserError(type, 0, 0, 0, 0, message));
-			throw new ParserException("Can't build orbit", errors);
+			throw new DSLCompilerException("Can't build orbit", source, errors);
 		}
-	}
-
-	public List<ParserError> getErrors() {
-		return errors;
 	}
 }

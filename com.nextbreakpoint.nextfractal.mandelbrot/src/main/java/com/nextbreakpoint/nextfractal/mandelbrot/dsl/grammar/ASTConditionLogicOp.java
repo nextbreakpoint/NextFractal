@@ -25,12 +25,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledCondition;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTConditionLogicOp extends ASTConditionExpression {
-	private String op;
-	private ASTConditionExpression exp1;
-	private ASTConditionExpression exp2;
+	private final String op;
+	private final ASTConditionExpression exp1;
+	private final ASTConditionExpression exp2;
 
 	public ASTConditionLogicOp(Token location, String op, ASTConditionExpression exp1, ASTConditionExpression exp2) {
 		super(location);
@@ -39,19 +41,7 @@ public class ASTConditionLogicOp extends ASTConditionExpression {
 		this.exp2 = exp2;
 	}
 
-	public String getOp() {
-		return op;
-	}
-	
-	public ASTConditionExpression getExp1() {
-		return exp1;
-	}
-
-	public ASTConditionExpression getExp2() {
-		return exp2;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(exp1);

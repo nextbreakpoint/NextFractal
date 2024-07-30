@@ -24,20 +24,22 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.CompilerVariable;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Stack;
 
 public class ASTBuilder {
-	private ASTFractal fractal;
-	private boolean isColorContext;
+	private final Stack<ASTStatementList> stack = new Stack<>();
+	@Getter
 	private ASTStatementList statementList = new ASTStatementList();
-	private Stack<ASTStatementList> stack = new Stack<>();
+	@Setter
+    @Getter
+    private ASTFractal fractal;
+	private boolean isColorContext;
 
-	public ASTBuilder() {
-	}
-	
 	public void setOrbit(ASTOrbit orbit) {
 		fractal.setOrbit(orbit);
 	}
@@ -71,8 +73,8 @@ public class ASTBuilder {
 	}
 
 	public void addOrbitTrapOp(ASTOrbitTrapOp orbitTrapOp) {
-		if (fractal.getOrbit().getTraps().size() > 0) {
-			ASTOrbitTrap trap = fractal.getOrbit().getTraps().get(fractal.getOrbit().getTraps().size() - 1);
+		if (!fractal.getOrbit().getTraps().isEmpty()) {
+			ASTOrbitTrap trap = fractal.getOrbit().getTraps().getLast();
 			trap.addOperator(orbitTrapOp);
 		}
 	}
@@ -98,21 +100,13 @@ public class ASTBuilder {
 	}
 
 	public void addPaletteElement(ASTPaletteElement element) {
-		if (fractal.getColor().getPalettes().size() > 0) {
-			ASTPalette palette = fractal.getColor().getPalettes().get(fractal.getColor().getPalettes().size() - 1);
+		if (!fractal.getColor().getPalettes().isEmpty()) {
+			ASTPalette palette = fractal.getColor().getPalettes().getLast();
 			palette.addElements(element);
 		}
 	}
 
-	public ASTFractal getFractal() {
-		return fractal;
-	}
-	
-	public void setFractal(ASTFractal fractal) {
-		this.fractal = fractal;
-	}
-
-	public double parseDouble(String text) {
+    public double parseDouble(String text) {
 		return Double.parseDouble(text);
 	}
 
@@ -160,7 +154,7 @@ public class ASTBuilder {
 		}
 	}
 
-	public CompilerVariable getVariable(String name, Token location) {
+	public Variable getVariable(String name, Token location) {
 		if (isColorContext) {
 			return fractal.getColorVariable(name, location);
 		} else {
@@ -201,11 +195,7 @@ public class ASTBuilder {
 		}
 	}
 
-	public ASTStatementList getStatementList() {
-		return statementList;
-	}
-
-	public void appendStatement(ASTStatement statement) {
+    public void appendStatement(ASTStatement statement) {
 		statementList.addStatement(statement);
 	}
 

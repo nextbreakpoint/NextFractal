@@ -24,19 +24,20 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.ClassFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
 
 import java.util.ArrayList;
 
 public class InterpreterDSLCompiler {
 	public ClassFactory<Orbit> compileOrbit(DSLParserResult result) {
-		return new InterpreterOrbitFactory(result.getAST(), result.getOrbitSource(), new ArrayList<>());
+		return new InterpreterOrbitFactory((ASTFractal) result.fractal(), result.orbitJavaSource(), new ArrayList<>());
 	}
 
 	public ClassFactory<Color> compileColor(DSLParserResult result) {
-		return new InterpreterColorFactory(result.getAST(), result.getColorSource(), new ArrayList<>());
+		return new InterpreterColorFactory((ASTFractal) result.fractal(), result.colorJavaSource(), new ArrayList<>());
 	}
 }	

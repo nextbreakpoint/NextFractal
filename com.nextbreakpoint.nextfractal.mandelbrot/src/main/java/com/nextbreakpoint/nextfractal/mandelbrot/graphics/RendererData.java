@@ -26,11 +26,11 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import lombok.Setter;
 
 public class RendererData {
 	protected double[] positionX;
 	protected double[] positionY;
-	protected Region region;
 	protected MutableNumber point;
 	protected int[] newPixels;
 	protected int[] oldPixels;
@@ -39,6 +39,8 @@ public class RendererData {
 	protected int width; 
 	protected int height;
 	protected int depth;
+	@Setter
+	protected Region region;
 
 	public RendererData() {
 		region = new Region();
@@ -132,14 +134,7 @@ public class RendererData {
 		return region.top();
 	}
 
-	/**
-	 * @param region
-	 */
-	public void setRegion(Region region) {
-		this.region = region;
-	}
-	
-	/**
+    /**
 	 * @return
 	 */
 	public Number point() {
