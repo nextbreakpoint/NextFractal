@@ -24,98 +24,91 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Palette;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrapOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLInterpreterContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOp;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InterpretedOrbit extends Orbit implements ExpressionContext {
-	private final CompiledOrbit orbit;
-	private final ExpressionCompilerContext context;
+public class InterpretedOrbit extends Orbit implements DSLInterpreterContext {
+	private final DSLOrbit orbit;
+	private final ExpressionContext context;
 	private final Map<String, Trap> traps = new HashMap<>();
-	private final Map<String, Palette> palettes = new HashMap<>();
-	private final Map<String, Variable> vars = new HashMap<>();
+	private final Map<String, Variable> variables = new HashMap<>();
 
-	public InterpretedOrbit(CompiledOrbit orbit, ExpressionCompilerContext context) {
+	public InterpretedOrbit(DSLOrbit orbit) {
 		this.orbit = orbit;
-		this.context = context;
+		this.context = orbit.getExpressionContext();
 		initializeNumbersStack();
 	}
 
 	public void init() {
-        for (Variable var : orbit.getStateVariables()) {
-            vars.put(var.getName(), var);
+        for (VariableDeclaration var : orbit.getStateVariables()) {
+            variables.put(var.getName(), var.asVariable());
         }
-        for (Variable var : orbit.getOrbitVariables()) {
-            vars.put(var.getName(), var);
+        for (VariableDeclaration var : orbit.getOrbitVariables()) {
+            variables.put(var.getName(), var.asVariable());
         }
 		setInitialRegion(orbit.getRegion()[0], orbit.getRegion()[1]);
-        for (Variable var : orbit.getStateVariables()) {
+        for (VariableDeclaration var : orbit.getStateVariables()) {
+			final Variable variable = variables.get(var.getName());
             if (var.isReal()) {
-                addVariable(var.getRealValue());
+                addVariable(variable.getRealValue());
             } else {
-                addVariable(var.getValue());
+                addVariable(variable.getValue());
             }
         }
 		resetTraps();
 		traps.clear();
-		for (CompiledTrap cTrap : orbit.getTraps()) {
-			Trap trap = new Trap(cTrap.getCenter());
-			addTrap(trap);
-			for (CompiledTrapOp cTrapOp : cTrap.getOperators()) {
-				cTrapOp.evaluate(trap);
+		for (DSLTrap trap : orbit.getTraps()) {
+			Trap newTrap = new Trap(trap.getCenter());
+			addTrap(newTrap);
+			for (DSLTrapOp trapOp : trap.getOperators()) {
+				trapOp.evaluate(newTrap);
 			}
-			traps.put(cTrap.getName(), trap);
+			traps.put(trap.getName(), newTrap);
 		}
 	}
 
-	public void render(List<Number[]> states) {
+	public void render(List<ComplexNumber[]> states) {
 		n = orbit.getLoop().getBegin();
-		ensureVariable(vars, "n", n);
-		ensureVariable(vars, "x", x);
-		ensureVariable(vars, "w", w);
+		ensureVariable(variables, "n", n);
+		ensureVariable(variables, "x", x);
+		ensureVariable(variables, "w", w);
 		if (states != null) {
 			updateState();
 			saveState(states);
 		}
-		for (CompiledStatement statement : orbit.getBegin().getStatements()) {
-			statement.evaluate(this, vars);
-		} 
-		boolean stop = false;
-		Map<String, Variable> newScope = new HashMap<>(vars);
-		for (int i = orbit.getLoop().getBegin() + 1; i <= orbit.getLoop().getEnd(); i++) {
-			for (CompiledStatement statement : orbit.getLoop().getStatements()) {
-				stop = statement.evaluate(this, vars);
-				if (stop) {
+		if (orbit.getBegin() != null) {
+			orbit.getBegin().evaluate(this, variables);
+		}
+		if (orbit.getLoop() != null) {
+			for (int i = orbit.getLoop().getBegin() + 1; i <= orbit.getLoop().getEnd(); i++) {
+				if (orbit.getLoop().evaluate(this, variables) || orbit.getLoop().getCondition().evaluate(this, variables)) {
+					n = i;
 					break;
 				}
-			} 
-			if (stop || orbit.getLoop().getCondition().evaluate(this, newScope)) {
-				n = i;
-				break;
-			}
-			if (states != null) {
-				updateState();
-				saveState(states);
+				if (states != null) {
+					updateState();
+					saveState(states);
+				}
 			}
 		}
-		ensureVariable(vars, "n", n);
-		newScope = new HashMap<>(vars);
-		for (CompiledStatement statement : orbit.getEnd().getStatements()) {
-			statement.evaluate(this, newScope);
-		} 
+		ensureVariable(variables, "n", n);
+		if (orbit.getEnd() != null) {
+            orbit.getEnd().evaluate(this, variables);
+		}
 		updateState();
 		if (states != null) {
 			saveState(states);
@@ -125,22 +118,22 @@ public class InterpretedOrbit extends Orbit implements ExpressionContext {
 	private void ensureVariable(Map<String, Variable> scope, String name, double value) {
 		Variable var = scope.get(name);
 		if (var == null) {
-			var = new Variable(name, true, true);
+			var = new Variable(name, true);
 			scope.put(name, var);
 		}
 		var.setValue(value);
 	}
 
-	private void ensureVariable(Map<String, Variable> scope, String name, Number value) {
+	private void ensureVariable(Map<String, Variable> scope, String name, ComplexNumber value) {
 		Variable var = scope.get(name);
 		if (var == null) {
-			var = new Variable(name, true, true);
+			var = new Variable(name, true);
 			scope.put(name, var);
 		}
 		var.setValue(value);
 	}
 
-	private void saveState(List<Number[]> states) {
+	private void saveState(List<ComplexNumber[]> states) {
 		MutableNumber[] state = new MutableNumber[scope.stateSize()];
 		for (int k = 0; k < state.length; k++) {
 			state[k] = new MutableNumber();
@@ -151,11 +144,11 @@ public class InterpretedOrbit extends Orbit implements ExpressionContext {
 
 	private void updateState() {
 		int i = 0;
-        for (Variable var : orbit.getStateVariables()) {
+        for (VariableDeclaration var : orbit.getStateVariables()) {
             if (var.isReal()) {
-                setVariable(i, vars.get(var.getName()).getRealValue());
+                setVariable(i, variables.get(var.getName()).getRealValue());
             } else {
-                setVariable(i, vars.get(var.getName()).getValue());
+                setVariable(i, variables.get(var.getName()).getValue());
             }
             i++;
         }
@@ -175,7 +168,7 @@ public class InterpretedOrbit extends Orbit implements ExpressionContext {
 
 	@Override
 	public Palette getPalette(String name) {
-		return palettes.get(name);
+		return null;
 	}
 
 	@Override

@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledColorExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColorExpression;
 import org.antlr.v4.runtime.Token;
 
 public abstract class ASTColorExpression extends ASTObject {
@@ -32,5 +32,5 @@ public abstract class ASTColorExpression extends ASTObject {
 		super(location);
 	}
 
-	public abstract CompiledColorExpression compile(ASTExpressionCompiler compiler);
+	public abstract DSLColorExpression compile(ASTCompiler compiler);
 }

@@ -24,10 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledColor;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledFractal;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.Token;
@@ -56,7 +54,7 @@ public class ASTFractal extends ASTObject {
 	}
 
     public void registerStateVariable(String varName, boolean real, Token location) {
-		Variable variable = orbitVars.peek().getVariable(varName);
+		VariableDeclaration variable = orbitVars.peek().getVariable(varName);
 		if (variable == null) {
 			registerOrbitVariable(varName, real, true, location);
 		} else if (variable.isReal() != real) {
@@ -88,16 +86,16 @@ public class ASTFractal extends ASTObject {
 		colorVars.peek().deleteVariable(name);
 	}
 
-	public Variable getOrbitVariable(String name, Token location) {
-		Variable var = orbitVars.peek().getVariable(name);
+	public VariableDeclaration getOrbitVariable(String name, Token location) {
+		VariableDeclaration var = orbitVars.peek().getVariable(name);
 		if (var == null) {
 			throw new ASTException("Variable not defined: " + location.getText(), location);
 		}
 		return var;
 	}
 
-	public Variable getColorVariable(String name, Token location) {
-		Variable var = colorVars.peek().getVariable(name);
+	public VariableDeclaration getColorVariable(String name, Token location) {
+		VariableDeclaration var = colorVars.peek().getVariable(name);
 		if (var == null) {
 			var = orbitVars.peek().getVariable(name);
 			if (var == null) {
@@ -107,15 +105,15 @@ public class ASTFractal extends ASTObject {
 		return var;
 	}
 
-	public Collection<Variable> getStateVariables() {
+	public Collection<VariableDeclaration> getStateVariables() {
 		return stateVars.values();
 	}
 
-	public Collection<Variable> getOrbitVariables() {
+	public Collection<VariableDeclaration> getOrbitVariables() {
 		return orbitVars.peek().values();
 	}
 
-	public Collection<Variable> getColorVariables() {
+	public Collection<VariableDeclaration> getColorVariables() {
 		return colorVars.peek().values();
 	}
 
@@ -143,10 +141,8 @@ public class ASTFractal extends ASTObject {
 		colorVars.pop();
 	}
 
-	public CompiledFractal compile() {
+	public DSLFractal compile() {
 		final ASTVariables variables = new ASTVariables(orbitVars.peek(), colorVars.peek(), stateVars);
-		final CompiledOrbit compiledOrbit = orbit.compile(variables);
-		final CompiledColor compiledColor = color.compile(variables);
-		return new CompiledFractal(compiledOrbit, compiledColor, location);
+        return new DSLFractal(orbit.compile(variables), color.compile(variables));
 	}
 }

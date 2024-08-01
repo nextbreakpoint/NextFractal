@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import lombok.Getter;
@@ -40,7 +40,7 @@ public class Fractal {
     private Color color;
     @Setter
     @Getter
-    private Number point;
+    private ComplexNumber point;
 
 	/**
 	 * 
@@ -80,7 +80,7 @@ public class Fractal {
 	 * @param x
 	 * @param w
 	 */
-	public void renderOrbit(MutableNumber[] state, Number x, Number w) {
+	public void renderOrbit(MutableNumber[] state, ComplexNumber x, ComplexNumber w) {
 		orbit.reset();
 		orbit.setX(x);
 		orbit.setW(w);
@@ -92,7 +92,7 @@ public class Fractal {
 	 * @param state
 	 * @return
 	 */
-	public float[] renderColor(Number[] state) {
+	public float[] renderColor(ComplexNumber[] state) {
 		color.reset();
 		color.setState(state);
 		color.render();

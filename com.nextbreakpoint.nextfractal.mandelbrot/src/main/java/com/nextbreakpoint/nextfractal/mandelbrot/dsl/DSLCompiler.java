@@ -24,31 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.JavaCompilerProvider;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpreterDSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.JavaCompilerDSLCompiler;
-
-import javax.tools.JavaCompiler;
-
-public class DSLCompiler {
-	public ClassFactory<Orbit> compileOrbit(DSLParserResult result) throws DSLCompilerException {
-		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
-		if (javaCompiler == null) {
-			return new InterpreterDSLCompiler().compileOrbit(result);
-		} else {
-			return new JavaCompilerDSLCompiler(javaCompiler).compileOrbit(result);
-		}
-	}
-
-	public ClassFactory<Color> compileColor(DSLParserResult result) throws DSLCompilerException {
-		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
-		if (javaCompiler == null) {
-			return new InterpreterDSLCompiler().compileColor(result);
-		} else {
-			return new JavaCompilerDSLCompiler(javaCompiler).compileColor(result);
-		}
+public class DSLCompiler extends DSLCompilerV2 {
+	public DSLCompiler(String packageName, String classNamePrefix) {
+		super(packageName, classNamePrefix);
 	}
 }

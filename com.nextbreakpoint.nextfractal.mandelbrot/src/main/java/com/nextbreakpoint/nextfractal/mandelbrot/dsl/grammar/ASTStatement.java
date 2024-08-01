@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
 import org.antlr.v4.runtime.Token;
 
 public abstract class ASTStatement extends ASTObject {
@@ -32,5 +32,5 @@ public abstract class ASTStatement extends ASTObject {
 		super(location);
 	}
 
-	public abstract CompiledStatement compile(ASTExpressionCompiler compiler);
+	public abstract DSLStatement compile(ASTCompiler compiler);
 }

@@ -32,8 +32,11 @@ import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
@@ -45,21 +48,18 @@ import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotParamsStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotParserStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotSession;
-import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
-import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import javafx.scene.layout.Pane;
 
 import java.util.HashMap;
@@ -95,7 +95,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		view.setRotation(data.getRotation());
 		view.setScale(data.getScale());
 		view.setState(new Integer4D(0, 0, 0, 0));
-		view.setPoint(new Number(data.getPoint().x(), data.getPoint().y()));
+		view.setPoint(new ComplexNumber(data.getPoint().x(), data.getPoint().y()));
 		view.setJulia(data.isJulia());
 		coordinator.setView(view);
 		coordinator.run();
@@ -104,10 +104,10 @@ public class MandelbrotUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
-		String source = session.script();
-		DSLParser parser = new DSLParser(DSLCompiler.class.getPackage().getName() + ".generated", "Compile" + System.nanoTime());
-		DSLParserResult result = parser.parse(source);
-		DSLCompiler compiler = new DSLCompiler();
+		String script = session.script();
+		DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
+		DSLParser parser = new DSLParser();
+		DSLParserResultV2 result = parser.parse(script);
 		Orbit orbit = compiler.compileOrbit(result).create();
 		Color color = compiler.compileColor(result).create();
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);

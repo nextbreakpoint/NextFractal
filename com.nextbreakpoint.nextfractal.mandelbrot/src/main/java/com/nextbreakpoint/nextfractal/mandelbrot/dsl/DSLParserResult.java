@@ -28,6 +28,7 @@ import com.nextbreakpoint.nextfractal.core.common.ParserError;
 
 import java.util.List;
 
+@Deprecated
 public record DSLParserResult(
 		Object fractal,
 	  	Type type,

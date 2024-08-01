@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledCondition;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCondition;
 import org.antlr.v4.runtime.Token;
 
 public class ASTConditionJulia extends ASTConditionExpression {
@@ -37,7 +37,7 @@ public class ASTConditionJulia extends ASTConditionExpression {
         return "type";
 	}
 
-	public CompiledCondition compile(ASTExpressionCompiler compiler) {
+	public DSLCondition compile(ASTCompiler compiler) {
 		return compiler.compile(this);
 	}
 }

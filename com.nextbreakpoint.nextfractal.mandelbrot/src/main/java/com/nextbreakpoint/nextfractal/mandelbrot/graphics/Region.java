@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -35,19 +35,19 @@ public class Region {
 	private double x1;
 	private double y1;
     @Getter
-    private Number center;
+    private ComplexNumber center;
     @Getter
-    private Number size;
+    private ComplexNumber size;
 
 	public Region() {
-		setPoints(new Number(0,0), new Number(0,0));
+		setPoints(new ComplexNumber(0,0), new ComplexNumber(0,0));
 	}
 	
-	public Region(Number a, Number b) {
+	public Region(ComplexNumber a, ComplexNumber b) {
 		setPoints(a, b);
 	}
 	
-	public Region(Number[] points) {
+	public Region(ComplexNumber[] points) {
 		setPoints(points[0], points[1]);
 	}
 
@@ -55,13 +55,13 @@ public class Region {
 	 * @param a
 	 * @param b
 	 */
-	public void setPoints(Number a, Number b) {
+	public void setPoints(ComplexNumber a, ComplexNumber b) {
 		this.x0 = a.r();
 		this.y0 = a.i();
 		this.x1 = b.r();
 		this.y1 = b.i();
-		size = new Number(x1 - x0, y1 - y0);
-		center = new Number((x0 + x1) / (2 * size.r()), (y0 + y1) / (2 * size.i()));
+		size = new ComplexNumber(x1 - x0, y1 - y0);
+		center = new ComplexNumber((x0 + x1) / (2 * size.r()), (y0 + y1) / (2 * size.i()));
 	}
 
     /**

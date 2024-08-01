@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPaletteElement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPaletteElement;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
@@ -48,7 +48,7 @@ public class ASTPaletteElement extends ASTObject {
         return "beginColor = " + beginColor + ",endColor = " + endColor + ",steps = " + steps + ",exp = {" + exp + "}";
 	}
 
-    public CompiledPaletteElement compile(ASTExpressionCompiler compiler) {
+    public DSLPaletteElement compile(ASTCompiler compiler) {
 		return compiler.compile(this);
 	}
 }

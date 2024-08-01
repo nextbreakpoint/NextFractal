@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import lombok.Setter;
 
 public class RendererData {
@@ -137,14 +137,14 @@ public class RendererData {
     /**
 	 * @return
 	 */
-	public Number point() {
+	public ComplexNumber point() {
 		return point;
 	}
 	
 	/**
 	 * @return
 	 */
-	public void setPoint(Number point) {
+	public void setPoint(ComplexNumber point) {
 		this.point.set(point);
 	}
 

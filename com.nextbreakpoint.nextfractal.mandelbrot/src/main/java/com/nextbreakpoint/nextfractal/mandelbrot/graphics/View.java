@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,7 +37,7 @@ public class View {
 	private Double4D rotation;
 	private Double4D scale;
 	private Integer4D state;
-	private Number point;
+	private ComplexNumber point;
 	private boolean julia;
 	
 	public View() {
@@ -45,6 +45,6 @@ public class View {
 		rotation = new Double4D(0, 0, 0, 0);
 		scale = new Double4D(1, 1, 1, 1);
 		state = new Integer4D(0, 0, 0, 0);
-		point = new Number(0, 0);
+		point = new ComplexNumber(0, 0);
 	}
 }

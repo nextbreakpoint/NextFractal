@@ -90,7 +90,7 @@ public class CompilerAdapter {
 			} else {
 				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
 //					if (diagnostic.getCode().equals("compiler.err.cant.access")) {
-//						// TODO Not sure why it doesn't happen with Java 8, but only with Java 9.
+//						// Not sure why it doesn't happen with Java 8, but only with Java 9.
 //						ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 //						long line = diagnostic.getLineNumber();
 //						long charPositionInLine = diagnostic.getColumnNumber();

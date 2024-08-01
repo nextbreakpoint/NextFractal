@@ -31,25 +31,26 @@ import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
-import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Region;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;
@@ -87,9 +88,9 @@ public class MandelbrotImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            DSLParser parser = new DSLParser(DSLParser.class.getPackage().getName() + ".generated", "Compile" + System.nanoTime());
-            DSLParserResult result = parser.parse(script);
-            DSLCompiler compiler = new DSLCompiler();
+            DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
+            DSLParser parser = new DSLParser();
+            DSLParserResultV2 result = parser.parse(script);
             Orbit orbit = compiler.compileOrbit(result).create();
             Color color = compiler.compileColor(result).create();
             GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
@@ -119,7 +120,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             view.setScale(scale);
             view.setState(new Integer4D(0, 0, 0, 0));
             view.setJulia(julia);
-            view.setPoint(new Number(constant.x(), constant.y()));
+            view.setPoint(new ComplexNumber(constant.x(), constant.y()));
             renderer.setView(view);
             renderer.setTime(time);
             renderer.runTask();
@@ -133,7 +134,7 @@ public class MandelbrotImageComposer implements ImageComposer {
                 drawTraps(renderFactory, renderContext, tile.imageSize(), region, metadata, orbit.getTraps());
             }
             if (metadata.getOptions().isShowOrbit()) {
-                java.util.List<Number[]> states = renderOrbit(orbit, constant);
+                java.util.List<ComplexNumber[]> states = renderOrbit(orbit, constant);
                 drawOrbit(renderFactory, renderContext, tile.imageSize(), region, metadata, states);
             }
             if (metadata.getOptions().isShowPoint()) {
@@ -162,14 +163,14 @@ public class MandelbrotImageComposer implements ImageComposer {
         return affine;
     }
 
-    private java.util.List<Number[]> renderOrbit(Orbit orbit, Double2D point) {
-        java.util.List<Number[]> states = new ArrayList<>();
+    private java.util.List<ComplexNumber[]> renderOrbit(Orbit orbit, Double2D point) {
+        java.util.List<ComplexNumber[]> states = new ArrayList<>();
         try {
             if (orbit != null) {
                 Scope scope = new Scope();
                 orbit.setScope(scope);
                 orbit.init();
-                orbit.setW(new Number(point.x(), point.y()));
+                orbit.setW(new ComplexNumber(point.x(), point.y()));
                 orbit.setX(orbit.getInitialPoint());
                 orbit.render(states);
             }
@@ -188,8 +189,8 @@ public class MandelbrotImageComposer implements ImageComposer {
     }
 
     private void drawPoint(GraphicsFactory factory, GraphicsContext gc, Size imageSize, Region region, MandelbrotMetadata metadata) {
-        Number size = region.getSize();
-        Number center = region.getCenter();
+        ComplexNumber size = region.getSize();
+        ComplexNumber center = region.getCenter();
         double[] t = metadata.getTranslation().toArray();
         double[] r = metadata.getRotation().toArray();
         double tx = t[0];
@@ -220,10 +221,10 @@ public class MandelbrotImageComposer implements ImageComposer {
         gc.stroke();
     }
 
-    private void drawOrbit(GraphicsFactory factory, GraphicsContext gc, Size imageSize, Region region, MandelbrotMetadata metadata, List<Number[]> states) {
+    private void drawOrbit(GraphicsFactory factory, GraphicsContext gc, Size imageSize, Region region, MandelbrotMetadata metadata, List<ComplexNumber[]> states) {
         if (states.size() > 1) {
-            Number size = region.getSize();
-            Number center = region.getCenter();
+            ComplexNumber size = region.getSize();
+            ComplexNumber center = region.getCenter();
             double[] t = metadata.getTranslation().toArray();
             double[] r = metadata.getRotation().toArray();
             double tx = t[0];
@@ -235,7 +236,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             double cx = imageSize.width() / 2d;
             double cy = imageSize.height() / 2d;
             gc.setStroke(factory.createColor(1, 0, 0, 1));
-            Number[] state = states.getFirst();
+            ComplexNumber[] state = states.getFirst();
             double zx = state[0].r();
             double zy = state[0].i();
             double px = (zx - tx - center.r()) / (tz * size.r());
@@ -264,8 +265,8 @@ public class MandelbrotImageComposer implements ImageComposer {
 
     private void drawTraps(GraphicsFactory factory, GraphicsContext gc, Size imageSize, Region region, MandelbrotMetadata metadata, java.util.List<Trap> traps) {
         if (!traps.isEmpty()) {
-            Number size = region.getSize();
-            Number center = region.getCenter();
+            ComplexNumber size = region.getSize();
+            ComplexNumber center = region.getCenter();
             double[] t = metadata.getTranslation().toArray();
             double[] r = metadata.getRotation().toArray();
             double tx = t[0];
@@ -278,7 +279,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             double cy = imageSize.height() / 2d;
             gc.setStroke(factory.createColor(1, 1, 0, 1));
             for (Trap trap : traps) {
-                java.util.List<Number> points = trap.toPoints();
+                java.util.List<ComplexNumber> points = trap.toPoints();
                 if (!points.isEmpty()) {
                     double zx = points.getFirst().r();
                     double zy = points.getFirst().i();

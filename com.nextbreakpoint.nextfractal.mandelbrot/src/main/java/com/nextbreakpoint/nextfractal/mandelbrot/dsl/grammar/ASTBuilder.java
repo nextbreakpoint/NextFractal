@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.Token;
@@ -154,7 +154,7 @@ public class ASTBuilder {
 		}
 	}
 
-	public Variable getVariable(String name, Token location) {
+	public VariableDeclaration getVariable(String name, Token location) {
 		if (isColorContext) {
 			return fractal.getColorVariable(name, location);
 		} else {

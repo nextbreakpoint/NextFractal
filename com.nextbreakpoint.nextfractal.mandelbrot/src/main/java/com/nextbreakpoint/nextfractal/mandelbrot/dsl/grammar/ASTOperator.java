@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpression;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
@@ -60,7 +60,7 @@ public class ASTOperator extends ASTExpression {
 	}
 
 	@Override
-	public CompiledExpression compile(ASTExpressionCompiler compiler) {
+	public DSLExpression compile(ASTCompiler compiler) {
 		return compiler.compile(this);
 	}
 

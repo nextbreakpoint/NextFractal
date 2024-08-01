@@ -32,30 +32,14 @@ import lombok.ToString;
 public class Variable {
 	private final String name;
 	private final boolean real;
-	private final boolean create;
 	private final MutableNumber value = new MutableNumber();
 
-	public Variable(String name, boolean real, boolean create) {
+	public Variable(String name, boolean real) {
 		this.name = name;
 		this.real = real;
-		this.create = create;
 	}
 
-	public Variable(String name, boolean real, boolean create, Number value) {
-		this(name, real, create);
-		setValue(value);
-	}
-
-	public Variable(String name, boolean real, boolean create, double value) {
-		this(name, real, create);
-		setValue(value);
-	}
-
-    public void setValue(MutableNumber value) {
-		this.value.set(value);
-	}
-
-	public void setValue(Number value) {
+	public void setValue(ComplexNumber value) {
 		this.value.set(value);
 	}
 
@@ -65,9 +49,5 @@ public class Variable {
 
 	public double getRealValue() {
 		return value.r();
-	}
-
-	public Variable copy() {
-		return new Variable(name, real, create, value);
 	}
 }

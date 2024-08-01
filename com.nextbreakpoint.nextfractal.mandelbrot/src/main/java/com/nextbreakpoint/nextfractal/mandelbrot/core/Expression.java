@@ -30,7 +30,7 @@ import org.apache.commons.math3.util.FastMath;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Expression {
-	public static MutableNumber variable(Number x) {
+	public static MutableNumber variable(ComplexNumber x) {
 		return new MutableNumber(x);
 	}
 
@@ -42,19 +42,19 @@ public class Expression {
 		return new MutableNumber(r, i);
 	}
 
-	public static Number number(Number x) {
-		return new Number(x);
+	public static ComplexNumber number(ComplexNumber x) {
+		return new ComplexNumber(x);
 	}
 
-	public static Number number(double r) {
-		return new Number(r, 0);
+	public static ComplexNumber number(double r) {
+		return new ComplexNumber(r, 0);
 	}
 
-	public static Number number(double r, double i) {
-		return new Number(r, i);
+	public static ComplexNumber number(double r, double i) {
+		return new ComplexNumber(r, i);
 	}
 
-	public static double real(Number x) {
+	public static double real(ComplexNumber x) {
 		return x.r();
 	}
 
@@ -62,62 +62,62 @@ public class Expression {
 		return r;
 	}
 
-	public static Number opAdd(MutableNumber out, Number a, Number b) {
+	public static ComplexNumber opAdd(MutableNumber out, ComplexNumber a, ComplexNumber b) {
 		return out.set(a.r() + b.r(), a.i() + b.i());
 	}
 
-	public static Number opSub(MutableNumber out, Number a, Number b) {
+	public static ComplexNumber opSub(MutableNumber out, ComplexNumber a, ComplexNumber b) {
 		return out.set(a.r() - b.r(), a.i() - b.i());
 	}
 
-	public static Number opMul(MutableNumber out, Number a, Number b) {
+	public static ComplexNumber opMul(MutableNumber out, ComplexNumber a, ComplexNumber b) {
 		return out.set(a.r() * b.r() - a.i() * b.i(), a.r() * b.i() + a.i() * b.r());
 	}
 
-	public static Number opDiv(MutableNumber out, Number a, Number b) {
+	public static ComplexNumber opDiv(MutableNumber out, ComplexNumber a, ComplexNumber b) {
 		double m = b.r() * b.r() + b.i() * b.i();
 		return out.set((a.r() * b.r() + a.i() * b.i()) / m, (-a.r() * b.i() + a.i() * b.r()) / m);
 	}
 
-	public static Number opAdd(MutableNumber out, Number a, double b) {
+	public static ComplexNumber opAdd(MutableNumber out, ComplexNumber a, double b) {
 		return out.set(a.r() + b, a.i());
 	}
 
-	public static Number opSub(MutableNumber out, Number a, double b) {
+	public static ComplexNumber opSub(MutableNumber out, ComplexNumber a, double b) {
 		return out.set(a.r() - b, a.i());
 	}
 
-	public static Number opMul(MutableNumber out, Number a, double b) {
+	public static ComplexNumber opMul(MutableNumber out, ComplexNumber a, double b) {
 		return out.set(a.r() * b, a.i() * b);
 	}
 
-	public static Number opDiv(MutableNumber out, Number a, double b) {
+	public static ComplexNumber opDiv(MutableNumber out, ComplexNumber a, double b) {
 		return out.set(a.r() / b, a.i() / b);
 	}
 
-	public static Number opAdd(MutableNumber out, double a, Number b) {
+	public static ComplexNumber opAdd(MutableNumber out, double a, ComplexNumber b) {
 		return out.set(a + b.r(), +b.i());
 	}
 
-	public static Number opSub(MutableNumber out, double a, Number b) {
+	public static ComplexNumber opSub(MutableNumber out, double a, ComplexNumber b) {
 		return out.set(a - b.r(), -b.i());
 	}
 
-	public static Number opMul(MutableNumber out, double a, Number b) {
+	public static ComplexNumber opMul(MutableNumber out, double a, ComplexNumber b) {
 		return out.set(a * b.r(), a * b.i());
 	}
 
-	public static Number opPow(MutableNumber out, Number a, double b) {
+	public static ComplexNumber opPow(MutableNumber out, ComplexNumber a, double b) {
 		double m = Math.pow(FastMath.hypot(a.r(), a.i()), b);
 		double f = Math.atan2(a.i(), a.r()) * b;
 		return out.set(m * Math.cos(f), m * Math.sin(f));
 	}
 
-	public static Number opNeg(MutableNumber out, Number a) {
+	public static ComplexNumber opNeg(MutableNumber out, ComplexNumber a) {
 		return out.set(-a.r(), -a.i());
 	}
 
-	public static Number opPos(MutableNumber out, Number a) {
+	public static ComplexNumber opPos(MutableNumber out, ComplexNumber a) {
 		return out.set(+a.r(), +a.i());
 	}
 
@@ -229,51 +229,51 @@ public class Expression {
 		return Math.min(y, x);
 	}
 
-	public static double funcMod(Number x) {
+	public static double funcMod(ComplexNumber x) {
 		return FastMath.hypot(x.r(), x.i());
 	}
 
-	public static double funcMod2(Number x) {
+	public static double funcMod2(ComplexNumber x) {
 		return Math.pow(x.r(), 2) + Math.pow(x.i(), 2);
 	}
 
-	public static double funcPha(Number x) {
+	public static double funcPha(ComplexNumber x) {
 		return Math.atan2(x.i(), x.r());
 	}
 
-	public static double funcRe(Number n) {
+	public static double funcRe(ComplexNumber n) {
 		return n.r();
 	}
 
-	public static double funcIm(Number n) {
+	public static double funcIm(ComplexNumber n) {
 		return n.i();
 	}
 
-	public static Number funcSin(MutableNumber out, Number x) {
+	public static ComplexNumber funcSin(MutableNumber out, ComplexNumber x) {
 		return out.set(Math.sin(x.r()) * Math.cosh(x.i()), +Math.cos(x.r()) * Math.sinh(x.i()));
 	}
 
-	public static Number funcCos(MutableNumber out, Number x) {
+	public static ComplexNumber funcCos(MutableNumber out, ComplexNumber x) {
 		return out.set(Math.cos(x.r()) * Math.cosh(x.i()), -Math.sin(x.r()) * Math.sinh(x.i()));
 	}
 
-	public static Number funcTan(MutableNumber out, Number x) {
+	public static ComplexNumber funcTan(MutableNumber out, ComplexNumber x) {
 		double d = Math.pow(Math.cos(x.r()), 2) + Math.pow(Math.sinh(x.i()), 2);
 		return out.set((Math.sin(x.r()) * Math.cos(x.r())) / d, (Math.sinh(x.i()) * Math.cosh(x.i())) / d);
 	}
 
-	public static Number funcExp(MutableNumber out, Number x) {
+	public static ComplexNumber funcExp(MutableNumber out, ComplexNumber x) {
 		double d = Math.exp(x.r());
 		return out.set(d * Math.cos(x.i()), d * Math.sin(x.i()));
 	}
 
-	public static Number funcPow(MutableNumber out, Number x, double e) {
+	public static ComplexNumber funcPow(MutableNumber out, ComplexNumber x, double e) {
 		double d = Math.pow(FastMath.hypot(x.r(), x.i()), e);
 		double f = Math.atan2(x.i(), x.r()) * e;
 		return out.set(d * Math.cos(f), d * Math.sin(f));
 	}
 
-	public static Number funcSqrt(MutableNumber out, Number x) {
+	public static ComplexNumber funcSqrt(MutableNumber out, ComplexNumber x) {
 		double d = Math.sqrt(FastMath.hypot(x.r(), x.i()));
 		double f = Math.atan2(x.i(), x.r()) * 0.5;
 		return out.set(d * Math.cos(f), d * Math.sin(f));

@@ -51,7 +51,7 @@ public class Scope {
 	 * @param index
 	 * @param value
 	 */
-	public void setVariable(int index, Number value) {
+	public void setVariable(int index, ComplexNumber value) {
 		vars[index].set(value);
 	}
 
@@ -90,7 +90,7 @@ public class Scope {
 	/**
 	 * @param state
 	 */
-	public void setState(Number[] state) {
+	public void setState(ComplexNumber[] state) {
 		for (int i = 0; i < vars.length; i++) {
 			vars[i].set(state[i]);
 		}

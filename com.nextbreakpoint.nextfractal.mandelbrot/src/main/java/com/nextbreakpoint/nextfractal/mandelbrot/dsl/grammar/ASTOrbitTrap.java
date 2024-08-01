@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
@@ -71,7 +71,7 @@ public class ASTOrbitTrap extends ASTObject {
 		return builder.toString();
 	}
 
-	public CompiledTrap compile(ASTExpressionCompiler compiler) {
+	public DSLTrap compile(ASTCompiler compiler) {
 		return compiler.compile(this);
 	}
 }

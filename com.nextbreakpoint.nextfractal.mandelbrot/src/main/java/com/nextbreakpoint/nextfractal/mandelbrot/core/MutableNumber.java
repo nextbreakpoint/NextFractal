@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
-public class MutableNumber extends Number {
+public class MutableNumber extends ComplexNumber {
 	public MutableNumber(int n) {
 		super(n, 0);
 	}
@@ -41,11 +41,11 @@ public class MutableNumber extends Number {
 		super(0, 0);
 	}
 	
-	public MutableNumber(Number value) {
+	public MutableNumber(ComplexNumber value) {
 		super(value.r, value.i);
 	}
 
-	public MutableNumber set(Number x) {
+	public MutableNumber set(ComplexNumber x) {
 		this.r = x.r();
 		this.i = x.i();
 		return this;

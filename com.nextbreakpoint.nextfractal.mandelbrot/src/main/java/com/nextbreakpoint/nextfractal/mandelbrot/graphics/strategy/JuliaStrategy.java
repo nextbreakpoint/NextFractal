@@ -25,10 +25,10 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Fractal;
-import com.nextbreakpoint.nextfractal.mandelbrot.graphics.State;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.State;
 
 public class JuliaStrategy implements RendererStrategy {
 	private final Fractal rendererFractal;
@@ -44,7 +44,7 @@ public class JuliaStrategy implements RendererStrategy {
 	}
 
 	@Override
-	public int renderPoint(State p, Number x, Number w) {
+	public int renderPoint(State p, ComplexNumber x, ComplexNumber w) {
 		rendererFractal.renderOrbit(p.vars(), w, x);
 		return renderColor(p);
 	}

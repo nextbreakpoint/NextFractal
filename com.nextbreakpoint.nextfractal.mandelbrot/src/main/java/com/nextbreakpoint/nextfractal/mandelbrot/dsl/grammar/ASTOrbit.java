@@ -26,16 +26,16 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitBegin;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitEnd;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledOrbitLoop;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.ExpressionCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.SimpleASTCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbitBegin;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbitEnd;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbitLoop;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
 import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.Token;
@@ -127,67 +127,55 @@ public class ASTOrbit extends ASTObject {
 		return builder.toString();
 	}
 
-	public CompiledOrbit compile(ASTVariables variables) {
+	public DSLOrbit compile(ASTVariables variables) {
 		try {
-			ExpressionCompilerContext context = new ExpressionCompilerContext();
+			ExpressionContext context = new ExpressionContext();
 			double ar = getRegion().getA().r();
 			double ai = getRegion().getA().i();
 			double br = getRegion().getB().r();
 			double bi = getRegion().getB().i();
-			List<Variable> orbitVars = new ArrayList<>();
-			for (Variable var : variables.getOrbitVariables()) {
-				orbitVars.add(var.copy());
-			}
-			List<Variable> stateVars = new ArrayList<>();
-			for (Variable var : variables.getStateVariables()) {
-				stateVars.add(var.copy());
-			}
-			Map<String, Variable> vars = new HashMap<>();
-			for (Variable var : variables.getStateVariables()) {
+            List<VariableDeclaration> orbitVars = new ArrayList<>(variables.getOrbitVariables());
+            List<VariableDeclaration> stateVars = new ArrayList<>(variables.getStateVariables());
+			Map<String, VariableDeclaration> vars = new HashMap<>();
+			for (VariableDeclaration var : variables.getStateVariables()) {
 				vars.put(var.getName(), var);
 			}
-			for (Variable var : variables.getOrbitVariables()) {
+			for (VariableDeclaration var : variables.getOrbitVariables()) {
 				vars.put(var.getName(), var);
 			}
-			Map<String, Variable> newScope = new HashMap<>(vars);
-			ExpressionCompiler compiler = new ExpressionCompiler(context, newScope);
-			CompiledOrbit orbit = new CompiledOrbit(orbitVars, stateVars, getLocation());
-			orbit.setRegion(new Number[] { new Number(ar, ai), new Number(br, bi) });
-			List<CompiledStatement> beginStatements = new ArrayList<>();
+            SimpleASTCompiler compiler = new SimpleASTCompiler(context, new HashMap<>(vars));
+			List<DSLStatement> beginStatements = new ArrayList<>();
 			if (getBegin() != null) {
 				for (ASTStatement astStatement : getBegin().getStatements()) {
 					beginStatements.add(astStatement.compile(compiler));
 				}
 			}
-			orbit.setBegin(new CompiledOrbitBegin(beginStatements));
-			List<CompiledStatement> loopStatements = new ArrayList<>();
-			if (getLoop() != null) {
-				for (ASTStatement astStatement : getLoop().getStatements()) {
-					loopStatements.add(astStatement.compile(compiler));
-				}
-			}
-			final CompiledOrbitLoop orbitLoop = new CompiledOrbitLoop(loopStatements);
-			orbit.setLoop(orbitLoop);
-			if (getLoop() != null) {
-				orbitLoop.setCondition(getLoop().getExpression().compile(compiler));
-				orbitLoop.setBegin(getLoop().getBegin());
-				orbitLoop.setEnd(getLoop().getEnd());
-			}
-			List<CompiledStatement> endStatements = new ArrayList<>();
+			final DSLOrbitBegin orbitBegin = new DSLOrbitBegin(location, beginStatements);
+			final DSLOrbitLoop orbitLoop = getOrbitLoop(getLoop(), compiler, stateVars);
+			List<DSLStatement> endStatements = new ArrayList<>();
 			if (getEnd() != null) {
 				for (ASTStatement astStatement : getEnd().getStatements()) {
 					endStatements.add(astStatement.compile(compiler));
 				}
 			}
-			orbit.setEnd(new CompiledOrbitEnd(endStatements));
-			List<CompiledTrap> traps = new ArrayList<>();
+			final DSLOrbitEnd orbitEnd = new DSLOrbitEnd(location, endStatements);
+			List<DSLTrap> traps = new ArrayList<>();
 			if (getTraps() != null) {
 				for (ASTOrbitTrap astTrap : getTraps()) {
 					traps.add(astTrap.compile(compiler));
 				}
 			}
-			orbit.setTraps(traps);
-			return orbit;
+			return DSLOrbit.builder()
+					.widthLocation(getLocation())
+					.widthRegion(getRegion(ar, ai, br, bi))
+					.widthBegin(orbitBegin)
+					.widthLoop(orbitLoop)
+					.widthEnd(orbitEnd)
+					.widthTraps(traps)
+					.widthOrbitVariables(orbitVars)
+					.widthStateVariables(stateVars)
+					.widthExpressionContext(context)
+					.build();
 		} catch (ASTException e) {
 			ParserErrorType type = ParserErrorType.COMPILE;
 			long line = e.getLocation().getLine();
@@ -206,5 +194,24 @@ public class ASTOrbit extends ASTObject {
 //			throw new DSLParserException("Can't build orbit", errors);
 		}
 		return null;
+	}
+
+	private static DSLOrbitLoop getOrbitLoop(ASTOrbitLoop astOrbitLoop, SimpleASTCompiler compiler, List<VariableDeclaration> stateVars) {
+		List<DSLStatement> loopStatements = new ArrayList<>();
+		for (ASTStatement astStatement : astOrbitLoop.getStatements()) {
+			loopStatements.add(astStatement.compile(compiler));
+		}
+        return new DSLOrbitLoop(
+				astOrbitLoop.getLocation(),
+				astOrbitLoop.getExpression().compile(compiler),
+				astOrbitLoop.getBegin(),
+				astOrbitLoop.getEnd(),
+                loopStatements,
+                stateVars
+        );
+	}
+
+	private static ComplexNumber[] getRegion(double ar, double ai, double br, double bi) {
+		return new ComplexNumber[]{new ComplexNumber(ar, ai), new ComplexNumber(br, bi)};
 	}
 }

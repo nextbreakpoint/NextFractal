@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import javafx.scene.input.MouseEvent;
 
 public class ToolMove implements Tool {
@@ -103,7 +103,7 @@ public class ToolMove implements Tool {
 			double y = t[1];
 			double z = t[2];
 			double a = r[2] * Math.PI / 180;
-			Number size = context.getInitialSize();
+			ComplexNumber size = context.getInitialSize();
 			double dx = x1 - x0;
 			double dy = y1 - y0;
 			x -= z * size.r() * (Math.cos(a) * dx + Math.sin(a) * dy);

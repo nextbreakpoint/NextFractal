@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
@@ -61,7 +61,7 @@ public class ASTConditionalStatement extends ASTStatement {
 	}
 
 	@Override
-	public CompiledStatement compile(ASTExpressionCompiler compiler) {
+	public DSLStatement compile(ASTCompiler compiler) {
 		return compiler.compile(this);
 	}
 }

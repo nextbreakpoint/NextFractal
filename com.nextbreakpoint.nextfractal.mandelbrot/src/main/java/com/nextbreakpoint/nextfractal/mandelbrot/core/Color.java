@@ -43,6 +43,7 @@ public abstract class Color {
     protected Time time = new Time(0, 1);;
 
 	public Color() {
+		//TODO invoke init explicitly in generated code
 		initializeNumbersStack();
 	}
 
@@ -90,7 +91,7 @@ public abstract class Color {
 		return new float[] { (float) a, (float) r, (float) g, (float) b };
 	}
 
-	public void setState(Number[] state) {
+	public void setState(ComplexNumber[] state) {
 		scope.setState(state);
 	}
 

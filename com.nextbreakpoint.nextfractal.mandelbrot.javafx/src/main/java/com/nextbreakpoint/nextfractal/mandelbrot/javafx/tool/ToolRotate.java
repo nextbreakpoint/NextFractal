@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import javafx.scene.input.MouseEvent;
 
 public class ToolRotate implements Tool {
@@ -121,7 +121,7 @@ public class ToolRotate implements Tool {
 			double[] p = oldMetadata.getPoint().toArray();
 			boolean j = oldMetadata.isJulia();
 			double z = t[2];
-			Number size = context.getInitialSize();
+			ComplexNumber size = context.getInitialSize();
 			double a2 = Math.atan2(y1 - y0, x1 - x0) - a1;
 			double tx = x0 * z * size.r(); 
 			double ty = y0 * z * size.r(); 

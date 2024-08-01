@@ -30,7 +30,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedOrbit;
 
@@ -45,7 +44,7 @@ public class SimpleDSLCompiler {
 			throw new DSLCompilerException("Can't compile orbit", result.source(), errors);
 		}
 
-		return () -> new InterpretedOrbit(result.fractal().getOrbit(), new ExpressionCompilerContext());
+		return () -> new InterpretedOrbit(result.fractal().getOrbit());
 	}
 
 	public ClassFactory<Color> compileColor(DSLParserResultV2 result) throws DSLCompilerException {
@@ -54,6 +53,6 @@ public class SimpleDSLCompiler {
 			throw new DSLCompilerException("Can't compile color", result.source(), errors);
 		}
 
-		return () -> new InterpretedColor(result.fractal().getColor(), new ExpressionCompilerContext());
+		return () -> new InterpretedColor(result.fractal().getColor());
 	}
 }	

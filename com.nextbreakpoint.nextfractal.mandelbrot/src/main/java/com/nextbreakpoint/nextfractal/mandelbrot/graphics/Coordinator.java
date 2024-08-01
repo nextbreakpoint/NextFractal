@@ -26,12 +26,12 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.xaos.XaosRenderer;
@@ -130,7 +130,7 @@ public class Coordinator implements RendererDelegate {
 	/**
 	 * @param point
 	 */
-	public void setPoint(Number point) {
+	public void setPoint(ComplexNumber point) {
 		renderer.setPoint(point);
 	}
 
@@ -178,14 +178,14 @@ public class Coordinator implements RendererDelegate {
 	/**
 	 * @return
 	 */
-	public Number getInitialCenter() {
+	public ComplexNumber getInitialCenter() {
 		return renderer.getInitialRegion().getCenter();
 	}
 
 	/**
 	 * @return
 	 */
-	public Number getInitialSize() {
+	public ComplexNumber getInitialSize() {
 		return renderer.getInitialRegion().getSize();
 	}
 

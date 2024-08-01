@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 
 public interface RendererStrategy {
 	/**
@@ -44,7 +44,7 @@ public interface RendererStrategy {
 	 * @param w
 	 * @return the color
 	 */
-    int renderPoint(State p, Number x, Number w);
+    int renderPoint(State p, ComplexNumber x, ComplexNumber w);
 	
 	/**
 	 * @return

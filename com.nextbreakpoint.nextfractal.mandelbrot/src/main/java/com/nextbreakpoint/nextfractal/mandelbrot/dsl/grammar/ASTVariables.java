@@ -1,6 +1,6 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 
 import java.util.Collection;
 
@@ -15,15 +15,15 @@ public class ASTVariables {
         this.stateVariables = stateVariables;
     }
 
-    public Collection<Variable> getOrbitVariables() {
+    public Collection<VariableDeclaration> getOrbitVariables() {
         return orbitVariables.values();
     }
 
-    public Collection<Variable> getColorVariables() {
+    public Collection<VariableDeclaration> getColorVariables() {
         return colorVariables.values();
     }
 
-    public Collection<Variable> getStateVariables() {
+    public Collection<VariableDeclaration> getStateVariables() {
         return stateVariables.values();
     }
 }

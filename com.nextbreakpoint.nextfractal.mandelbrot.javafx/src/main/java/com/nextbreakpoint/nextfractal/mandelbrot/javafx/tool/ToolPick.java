@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import javafx.scene.input.MouseEvent;
 import lombok.extern.java.Log;
 
@@ -104,8 +104,8 @@ public class ToolPick implements Tool {
 				double y = t[1];
 				double z = t[2];
 				double a = r[2] * Math.PI / 180;
-				Number size = context.getInitialSize();
-				Number center = context.getInitialCenter();
+				ComplexNumber size = context.getInitialSize();
+				ComplexNumber center = context.getInitialCenter();
 				x += center.r() + z * size.r() * (Math.cos(a) * x1 + Math.sin(a) * y1);
 				y += center.i() + z * size.i() * (Math.cos(a) * y1 - Math.sin(a) * x1);
 				MandelbrotMetadata newMetadata = new MandelbrotMetadata(t, r, s, new double[] { x, y }, time, j, oldMetadata.getOptions());

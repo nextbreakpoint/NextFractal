@@ -36,8 +36,8 @@ import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Surface;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.JuliaStrategy;
@@ -87,7 +87,7 @@ public class Renderer {
 	@Setter
 	protected boolean opaque;
 	protected boolean julia;
-	protected Number point;
+	protected ComplexNumber point;
 	@Setter
 	protected RendererDelegate rendererDelegate;
 	protected List<ParserError> errors = new ArrayList<>();
@@ -224,7 +224,7 @@ public class Renderer {
 	/**
 	 * @param point
 	 */
-	public void setPoint(Number point) {
+	public void setPoint(ComplexNumber point) {
 		if (this.point == null || !this.point.equals(point)) {
 			this.point = point;
 			pointChanged = true;
@@ -265,7 +265,7 @@ public class Renderer {
 			rotation = view.getRotation().z();
 		}
 		final Region region = getInitialRegion();
-		final Number center = region.getCenter();
+		final ComplexNumber center = region.getCenter();
 		transform = new Transform();
 		transform.translate(view.getTranslation().x() + center.r(), view.getTranslation().y() + center.i());
 		transform.rotate(-rotation * Math.PI / 180);
@@ -612,8 +612,8 @@ public class Renderer {
 
 		final Region region = getInitialRegion();
 		
-		final Number size = region.getSize();
-		final Number center = region.getCenter();
+		final ComplexNumber size = region.getSize();
+		final ComplexNumber center = region.getCenter();
 
 		final double dx = tz * size.r() * 0.5;
 		final double dy = tz * size.i() * 0.5;
@@ -632,7 +632,7 @@ public class Renderer {
 		final double sx = dx * (getSize().width() / (double)baseImageSize.width());
 		final double sy = dy * (getSize().height() / (double)baseImageSize.width());
 
-		final Region newRegion = new Region(new Number(fx - sx, fy - sy), new Number(fx + sx, fy + sy));
+		final Region newRegion = new Region(new ComplexNumber(fx - sx, fy - sy), new ComplexNumber(fx + sx, fy + sy));
 //		logger.info(newRegion.toString());
 		return newRegion;
 	}
@@ -645,8 +645,8 @@ public class Renderer {
 
 		final Region region = getInitialRegion();
 
-		final Number size = region.getSize();
-		final Number center = region.getCenter();
+		final ComplexNumber size = region.getSize();
+		final ComplexNumber center = region.getCenter();
 
 		final double dx = size.r() * 0.25;
 		final double dy = size.i() * 0.25 * baseImageSize.height() / baseImageSize.width();
@@ -665,7 +665,7 @@ public class Renderer {
 		final double sx = dx * (getSize().width() / (double)baseImageSize.width());
 		final double sy = dy * (getSize().height() / (double)baseImageSize.width());
 
-		final Region newRegion = new Region(new Number(fx - sx, fy - sy), new Number(fx + sx, fy + sy));
+		final Region newRegion = new Region(new ComplexNumber(fx - sx, fy - sy), new ComplexNumber(fx + sx, fy + sy));
 //		logger.info(newRegion.toString());
 		return newRegion;
 	}

@@ -25,14 +25,18 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -42,16 +46,16 @@ public class DSLCompilerTest1 extends BaseTest {
 	public void Compiler1() {
 		try {
 //			assertThat(Pattern.matches("([A-Z][a-z]*)-(\\d).(.jpg|.png)", "Andrea-10.png")).isTrue();
-			DSLParser parser = new DSLParser("test", "Compile");
-			DSLParserResult result = parser.parse(getSource("/source1.m"));
+			DSLParser parser = new DSLParser();
+			DSLParserResultV2 result = parser.parse(getSource("/source1.m"));
 			assertThat(result.errors()).isEmpty();
 			assertThat(result.fractal()).isNotNull();
 			System.out.println(result.fractal());
-			assertThat(result.orbitJavaSource()).isNotNull();
-			System.out.println(result.orbitJavaSource());
-			assertThat(result.colorJavaSource()).isNotNull();
-			System.out.println(result.colorJavaSource());
-			DSLCompiler compiler = new DSLCompiler();
+//			assertThat(result.orbitJavaSource()).isNotNull();
+//			System.out.println(result.orbitJavaSource());
+//			assertThat(result.colorJavaSource()).isNotNull();
+//			System.out.println(result.colorJavaSource());
+			DSLCompiler compiler = new DSLCompiler("test", "Compile");
 			Orbit orbit = compiler.compileOrbit(result).create();
 			Color color = compiler.compileColor(result).create();
 			assertThat(orbit).isNotNull();
@@ -60,13 +64,17 @@ public class DSLCompilerTest1 extends BaseTest {
 			orbit.setScope(scope);
 			color.setScope(scope);
 			orbit.init();
-			orbit.setX(new Number(0, 0));
-			orbit.setW(new Number(0, 0));
-			orbit.render(null);
+			orbit.setX(new ComplexNumber(0, 0));
+			orbit.setW(new ComplexNumber(0.1, 1.9));
+			final List<ComplexNumber[]> states = new ArrayList<>();
+			orbit.render(states);
+			states.stream().map(Arrays::toString).forEach(System.out::println);
+			color.init();
+			color.render();
 			float[] c = color.getColor();
 			assertThat(c).isNotNull();
 			System.out.println(String.format("%f,%f,%f,%f", c[0], c[1], c[2], c[3]));
-			Number z = orbit.getVariable(0);
+			ComplexNumber z = orbit.getVariable(0);
 			assertThat(z).isNotNull();
 			System.out.println(String.format("%f,%f", z.r(), z.i()));
 		} catch (DSLException e) {

@@ -24,32 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledColorExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledCondition;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPalette;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledPaletteElement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.CompiledTrapOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionCompilerContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledConditionalExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpArcRel;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpArcTo;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpClose;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpCurveRel;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpCurveTo;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpLineRel;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpLineTo;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpMoveRel;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpMoveTo;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpQuadRel;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledTrapOpQuadTo;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTAssignStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTColorComponent;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTColorPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionCompareOp;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionExpression;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionJulia;
@@ -61,7 +43,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionalExpre
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionalStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTExpressionCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFunction;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOperator;
@@ -76,6 +57,26 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTRuleLogicOp;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStopStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTVariable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColorExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCondition;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLConditionalExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPaletteElement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpArcRel;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpArcTo;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpClose;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpCurveRel;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpCurveTo;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpLineRel;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpLineTo;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpMoveRel;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpMoveTo;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpQuadRel;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpQuadTo;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -83,13 +84,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExpressionCompiler implements ASTExpressionCompiler {
-	private final Map<String, Variable> variables;
-	private final ExpressionCompilerContext context;
+@Deprecated
+public class ExpressionCompiler implements ASTCompiler {
+	private final Map<String, VariableDeclaration> variables;
+	private final ExpressionContext context;
 	private final StringBuilder builder;
 	private final ClassType classType;
 
-	public ExpressionCompiler(ExpressionCompilerContext context, Map<String, Variable> variables, StringBuilder builder, ClassType classType) {
+	public ExpressionCompiler(ExpressionContext context, Map<String, VariableDeclaration> variables, StringBuilder builder, ClassType classType) {
 		this.variables = variables;
 		this.context = context;
 		this.builder = builder;
@@ -97,7 +99,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledExpression compile(ASTNumber number) {
+	public DSLExpression compile(ASTNumber number) {
 		if (number.isReal()) {
 			builder.append(number.r());
 		} else {
@@ -113,7 +115,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledExpression compile(ASTFunction function) {
+	public DSLExpression compile(ASTFunction function) {
 		final Token location = function.getLocation();
 		if (function.getName().equals("time")) {
 			if (classType.equals(ClassType.ORBIT)) {
@@ -128,7 +130,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 			builder.append("time()");
 		} else {
 			builder.append("func");
-			builder.append(function.getName().toUpperCase().charAt(0));
+			builder.append(function.getName().toUpperCase().substring(0, 1));
 			builder.append(function.getName().substring(1));
 			builder.append("(");
             switch (function.getName()) {
@@ -195,7 +197,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledExpression compile(ASTOperator operator) {
+	public DSLExpression compile(ASTOperator operator) {
 		ASTExpression exp1 = operator.getExp1();
 		ASTExpression exp2 = operator.getExp2();
 		final Token location = operator.getLocation();
@@ -291,7 +293,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledExpression compile(ASTParen paren) {
+	public DSLExpression compile(ASTParen paren) {
 		builder.append("(");
 		paren.getExp().compile(this);
 		builder.append(")");
@@ -299,20 +301,20 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledExpression compile(ASTVariable variable) {
+	public DSLExpression compile(ASTVariable variable) {
 		builder.append(variable.getName());
 		return null;
 	}
 
 	@Override
-	public CompiledCondition compile(ASTConditionCompareOp compareOp) {
-		ASTExpression exp1 = compareOp.getExp1();
-		ASTExpression exp2 = compareOp.getExp2();
-		final Token location = compareOp.getLocation();
+	public DSLCondition compile(ASTConditionCompareOp condition) {
+		ASTExpression exp1 = condition.getExp1();
+		ASTExpression exp2 = condition.getExp2();
+		final Token location = condition.getLocation();
 		if (exp1.isReal() && exp2.isReal()) {
 			builder.append("(");
 			exp1.compile(this);
-            switch (compareOp.getOp()) {
+            switch (condition.getOp()) {
                 case ">" -> builder.append(">");
                 case "<" -> builder.append("<");
                 case ">=" -> builder.append(">=");
@@ -330,13 +332,13 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledCondition compile(ASTConditionLogicOp logicOp) {
-		ASTConditionExpression exp1 = logicOp.getExp1();
-		ASTConditionExpression exp2 = logicOp.getExp2();
-		final Token location = logicOp.getLocation();
+	public DSLCondition compile(ASTConditionLogicOp condition) {
+		ASTConditionExpression exp1 = condition.getExp1();
+		ASTConditionExpression exp2 = condition.getExp2();
+		final Token location = condition.getLocation();
 		builder.append("(");
 		exp1.compile(this);
-		switch (logicOp.getOp()) {
+		switch (condition.getOp()) {
 			case "&":
 				builder.append("&&");
 				break;
@@ -358,27 +360,27 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledCondition compile(ASTConditionTrap trap) {
-		if (!trap.isContains()) {
+	public DSLCondition compile(ASTConditionTrap condition) {
+		if (!condition.isContains()) {
 			builder.append("!");
 		}
 		builder.append("trap");
-		builder.append(trap.getName().toUpperCase().charAt(0));
-		builder.append(trap.getName().substring(1));
+		builder.append(condition.getName().toUpperCase().substring(0, 1));
+		builder.append(condition.getName().substring(1));
 		builder.append(".contains(");
-		trap.getExp().compile(this);
+		condition.getExp().compile(this);
 		builder.append(")");
 		return null;
 	}
 
 	@Override
-	public CompiledCondition compile(ASTRuleLogicOp logicOp) {
-		ASTRuleExpression exp1 = logicOp.getExp1();
-		ASTRuleExpression exp2 = logicOp.getExp2();
-		final Token location = logicOp.getLocation();
+	public DSLCondition compile(ASTRuleLogicOp operator) {
+		ASTRuleExpression exp1 = operator.getExp1();
+		ASTRuleExpression exp2 = operator.getExp2();
+		final Token location = operator.getLocation();
 		builder.append("(");
 		exp1.compile(this);
-        switch (logicOp.getOp()) {
+        switch (operator.getOp()) {
             case "&" -> builder.append("&&");
             case "|" -> builder.append("||");
             case "^" -> builder.append("^^");
@@ -390,14 +392,14 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledCondition compile(ASTRuleCompareOp compareOp) {
-		ASTExpression exp1 = compareOp.getExp1();
-		ASTExpression exp2 = compareOp.getExp2();
-		final Token location = compareOp.getLocation();
+	public DSLCondition compile(ASTRuleCompareOp operator) {
+		ASTExpression exp1 = operator.getExp1();
+		ASTExpression exp2 = operator.getExp2();
+		final Token location = operator.getLocation();
 		if (exp1.isReal() && exp2.isReal()) {
 			builder.append("(");
 			exp1.compile(this);
-            switch (compareOp.getOp()) {
+            switch (operator.getOp()) {
                 case ">" -> builder.append(">");
                 case "<" -> builder.append("<");
                 case ">=" -> builder.append(">=");
@@ -416,10 +418,10 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledColorExpression compile(ASTColorPalette palette) {
+	public DSLColorExpression compile(ASTColorPalette palette) {
 		final Token location = palette.getLocation();
 		builder.append("palette");
-		builder.append(palette.getName().toUpperCase().charAt(0));
+		builder.append(palette.getName().toUpperCase().substring(0, 1));
 		builder.append(palette.getName().substring(1));
 		builder.append(".get(");
 		if (palette.getExp().isReal()) {
@@ -432,7 +434,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledColorExpression compile(ASTColorComponent component) {
+	public DSLColorExpression compile(ASTColorComponent component) {
 		builder.append("color(");
 		component.getExp1().compile(this);
 		if (component.getExp2() != null) {
@@ -452,11 +454,11 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledStatement compile(ASTConditionalStatement statement) {
+	public DSLStatement compile(ASTConditionalStatement statement) {
 		builder.append("if (");
 		statement.getConditionExp().compile(this);
 		builder.append(") {\n");
-		Map<String, Variable> vars = new HashMap<String, Variable>(variables);
+		Map<String, VariableDeclaration> vars = new HashMap<String, VariableDeclaration>(variables);
 		for (ASTStatement innerStatement : statement.getThenStatementList().getStatements()) {
 			innerStatement.compile(new ExpressionCompiler(context, vars, builder, classType));
 		}
@@ -471,8 +473,8 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledStatement compile(ASTAssignStatement statement) {
-		Variable var = variables.get(statement.getName());
+	public DSLStatement compile(ASTAssignStatement statement) {
+		VariableDeclaration var = variables.get(statement.getName());
 		if (var != null) {
 			if (var.isReal() && statement.getExp().isReal()) {
 				builder.append(statement.getName());
@@ -493,7 +495,7 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 				throw new ASTException("Can't assign expression: " + statement.getLocation().getText(), statement.getLocation());
 			}
 		} else {
-			var = new Variable(statement.getName(), statement.getExp().isReal(), false);
+			var = new VariableDeclaration(statement.getName(), statement.getExp().isReal(), false);
 			variables.put(statement.getName(), var);
 			if (var.isReal()) {
 				builder.append("double ");
@@ -515,19 +517,19 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledStatement compile(ASTStopStatement statement) {
+	public DSLStatement compile(ASTStopStatement statement) {
 		builder.append("n = i;\nbreak;\n");
 		return null;
 	}
 
 	@Override
-	public CompiledCondition compile(ASTConditionJulia condition) {
+	public DSLCondition compile(ASTConditionJulia condition) {
 		builder.append("isJulia()");
 		return null;
 	}
 
 	@Override
-	public CompiledCondition compile(ASTConditionParen condition) {
+	public DSLCondition compile(ASTConditionParen condition) {
 		builder.append("(");
 		condition.getExp().compile(this);
 		builder.append(")");
@@ -535,18 +537,18 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledCondition compile(ASTConditionNeg condition) {
+	public DSLCondition compile(ASTConditionNeg condition) {
 		builder.append("!");
 		condition.getExp().compile(this);
 		return null;
 	}
 
 	@Override
-	public CompiledTrap compile(ASTOrbitTrap orbitTrap) {
-		CompiledTrap trap = new CompiledTrap(orbitTrap.getLocation());
+	public DSLTrap compile(ASTOrbitTrap orbitTrap) {
+		DSLTrap trap = new DSLTrap(orbitTrap.getLocation());
 		trap.setName(orbitTrap.getName());
-		trap.setCenter(new Number(orbitTrap.getCenter().r(), orbitTrap.getCenter().i()));
-		List<CompiledTrapOp> operators = new ArrayList<>();
+		trap.setCenter(new ComplexNumber(orbitTrap.getCenter().r(), orbitTrap.getCenter().i()));
+		List<DSLTrapOp> operators = new ArrayList<>();
 		for (ASTOrbitTrapOp astTrapOp : orbitTrap.getOperators()) {
 			operators.add(astTrapOp.compile(this));
 		}
@@ -555,55 +557,52 @@ public class ExpressionCompiler implements ASTExpressionCompiler {
 	}
 
 	@Override
-	public CompiledTrapOp compile(ASTOrbitTrapOp orbitTrapOp) {
-		Number c1 = null;
-		Number c2 = null;
-		Number c3 = null;
+	public DSLTrapOp compile(ASTOrbitTrapOp orbitTrapOp) {
+		ComplexNumber c1 = null;
+		ComplexNumber c2 = null;
+		ComplexNumber c3 = null;
 		if (orbitTrapOp.getC1() != null) {
-			c1 = new Number(orbitTrapOp.getC1().r(), orbitTrapOp.getC1().i());
+			c1 = new ComplexNumber(orbitTrapOp.getC1().r(), orbitTrapOp.getC1().i());
 		}
 		if (orbitTrapOp.getC2() != null) {
-			c2 = new Number(orbitTrapOp.getC2().r(), orbitTrapOp.getC2().i());
+			c2 = new ComplexNumber(orbitTrapOp.getC2().r(), orbitTrapOp.getC2().i());
 		}
 		if (orbitTrapOp.getC3() != null) {
-			c3 = new Number(orbitTrapOp.getC3().r(), orbitTrapOp.getC3().i());
+			c3 = new ComplexNumber(orbitTrapOp.getC3().r(), orbitTrapOp.getC3().i());
 		}
 		final Token location = orbitTrapOp.getLocation();
 		return switch (orbitTrapOp.getOp()) {
-            case "MOVETO" -> new CompiledTrapOpMoveTo(c1, location);
-            case "MOVEREL", "MOVETOREL" -> new CompiledTrapOpMoveRel(c1, location);
-            case "LINETO" -> new CompiledTrapOpLineTo(c1, location);
-            case "LINEREL", "LINETOREL" -> new CompiledTrapOpLineRel(c1, location);
-            case "ARCTO" -> new CompiledTrapOpArcTo(c1, c2, location);
-            case "ARCREL", "ARCTOREL" -> new CompiledTrapOpArcRel(c1, c2, location);
-            case "QUADTO" -> new CompiledTrapOpQuadTo(c1, c2, location);
-            case "QUADREL", "QUADTOREL" -> new CompiledTrapOpQuadRel(c1, c2, location);
-            case "CURVETO" -> new CompiledTrapOpCurveTo(c1, c2, c3, location);
-            case "CURVEREL", "CURVETOREL" -> new CompiledTrapOpCurveRel(c1, c2, c3, location);
-            case "CLOSE" -> new CompiledTrapOpClose(location);
+            case "MOVETO" -> new DSLTrapOpMoveTo(location, c1);
+            case "MOVEREL", "MOVETOREL" -> new DSLTrapOpMoveRel(location, c1);
+            case "LINETO" -> new DSLTrapOpLineTo(location, c1);
+            case "LINEREL", "LINETOREL" -> new DSLTrapOpLineRel(location, c1);
+            case "ARCTO" -> new DSLTrapOpArcTo(location, c1, c2);
+            case "ARCREL", "ARCTOREL" -> new DSLTrapOpArcRel(location, c1, c2);
+            case "QUADTO" -> new DSLTrapOpQuadTo(location, c1, c2);
+            case "QUADREL", "QUADTOREL" -> new DSLTrapOpQuadRel(location, c1, c2);
+            case "CURVETO" -> new DSLTrapOpCurveTo(location, c1, c2, c3);
+            case "CURVEREL", "CURVETOREL" -> new DSLTrapOpCurveRel(location, c1, c2, c3);
+            case "CLOSE" -> new DSLTrapOpClose(location);
             default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
         };
 	}
 
 	@Override
-	public CompiledPalette compile(ASTPalette astPalette) {
-		CompiledPalette palette = new CompiledPalette(astPalette.getLocation());
-		palette.setName(astPalette.getName());
-		List<CompiledPaletteElement> elements = new ArrayList<>();
-		for (ASTPaletteElement astElement : astPalette.getElements()) {
+	public DSLPalette compile(ASTPalette palette) {
+		List<DSLPaletteElement> elements = new ArrayList<>();
+		for (ASTPaletteElement astElement : palette.getElements()) {
 			elements.add(astElement.compile(this));
 		}
-		palette.setElements(elements);
-		return palette;
+        return new DSLPalette(palette.getLocation(), palette.getName(), elements);
 	}
 
 	@Override
-	public CompiledPaletteElement compile(ASTPaletteElement astElement) {
-		return new CompiledPaletteElement(astElement.getBeginColor().getComponents(), astElement.getEndColor().getComponents(), astElement.getSteps(), astElement.getExp() != null ? astElement.getExp().compile(this) : null, astElement.getLocation());
+	public DSLPaletteElement compile(ASTPaletteElement paletteElement) {
+		return new DSLPaletteElement(paletteElement.getLocation(), paletteElement.getBeginColor().getComponents(), paletteElement.getEndColor().getComponents(), paletteElement.getSteps(), paletteElement.getExp() != null ? paletteElement.getExp().compile(this) : null);
 	}
 
 	@Override
-	public CompiledExpression compile(ASTConditionalExpression astConditionalExpression) {
-		return new CompiledConditionalExpression(context, astConditionalExpression.getConditionExp().compile(this), astConditionalExpression.getThenExp().compile(this), astConditionalExpression.getElseExp().compile(this), astConditionalExpression.getLocation());
+	public DSLExpression compile(ASTConditionalExpression conditional) {
+		return new DSLConditionalExpression(conditional.getLocation(), conditional.getConditionExp().compile(this), conditional.getThenExp().compile(this), conditional.getElseExp().compile(this), context.newNumberIndex());
 	}
 }

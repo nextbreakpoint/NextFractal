@@ -31,7 +31,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotLexer;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledFractal;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import lombok.extern.java.Log;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -51,7 +51,7 @@ public class DSLParserV2 {
 		final ASTFractal astFractal = parse(source, errors);
 		final String orbitScript = astFractal != null && astFractal.getOrbit() != null ? astFractal.getOrbit().toString() : "";
 		final String colorScript = astFractal != null && astFractal.getColor() != null ? astFractal.getColor().toString() : "";
-		final CompiledFractal compiledFractal = astFractal != null ? astFractal.compile() : null;
+		final DSLFractal compiledFractal = astFractal != null ? astFractal.compile() : null;
 		return new DSLParserResultV2(compiledFractal, source, orbitScript, colorScript, errors);
 	}
 
@@ -62,6 +62,7 @@ public class DSLParserV2 {
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			MandelbrotParser parser = new MandelbrotParser(tokens);
 			parser.setErrorHandler(new ErrorStrategy(errors));
+			parser.fractal();
 			ASTBuilder builder = parser.getBuilder();
 			return builder.getFractal();
 		} catch (ASTException e) {

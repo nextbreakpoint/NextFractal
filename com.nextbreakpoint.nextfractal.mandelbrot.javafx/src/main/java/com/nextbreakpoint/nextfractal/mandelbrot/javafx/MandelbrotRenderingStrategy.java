@@ -40,13 +40,14 @@ import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
@@ -81,7 +82,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     private ClassFactory<Color> colorFactory;
     private String astOrbit;
     private String astColor;
-    private List<Number[]> states = new ArrayList<>();
+    private List<ComplexNumber[]> states = new ArrayList<>();
 
     public MandelbrotRenderingStrategy(RenderingContext renderingContext, MetadataDelegate delegate, int width, int height, int rows, int columns) {
         this.renderingContext = renderingContext;
@@ -100,11 +101,11 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         juliaCoordinator = createJuliaRendererCoordinator(juliaHints, GraphicsUtils.createTile(200, 200));
     }
 
-    public Number getInitialCenter() {
+    public ComplexNumber getInitialCenter() {
         return coordinators[0].getInitialCenter();
     }
 
-    public Number getInitialSize() {
+    public ComplexNumber getInitialSize() {
         return coordinators[0].getInitialSize();
     }
 
@@ -147,7 +148,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 view.setScale(scale);
                 view.setState(new Integer4D(0, 0, continuous ? 1 : 0, timeAnimation ? 1 : 0));
                 view.setJulia(julia);
-                view.setPoint(new Number(point.x(), point.y()));
+                view.setPoint(new ComplexNumber(point.x(), point.y()));
                 coordinator.setView(view);
 //				if (timeAnimation) {
                 coordinator.setTime(time);
@@ -164,7 +165,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             view.setScale(new Double4D(new double[]{1, 1, 1, 1}));
             view.setState(new Integer4D(0, 0, continuous ? 1 : 0, timeAnimation ? 1 : 0));
             view.setJulia(true);
-            view.setPoint(new Number(point.x(), point.y()));
+            view.setPoint(new ComplexNumber(point.x(), point.y()));
             juliaCoordinator.setView(view);
 //			if (timeAnimation) {
             juliaCoordinator.setTime(time);
@@ -186,7 +187,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     @Override
     public List<ParserError> updateCoordinators(Object result) {
         try {
-            DSLParserResult parserResult = (DSLParserResult) result;
+            DSLParserResultV2 parserResult = (DSLParserResultV2) result;
             hasError = !parserResult.errors().isEmpty();
             if (hasError) {
                 this.astOrbit = null;
@@ -250,7 +251,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                     view.setScale(scale);
                     view.setState(new Integer4D(0, 0, 0, 0));
                     view.setJulia(julia);
-                    view.setPoint(new Number(point.x(), point.y()));
+                    view.setPoint(new ComplexNumber(point.x(), point.y()));
                     coordinator.setView(view);
                     coordinator.setTime(time);
                 }
@@ -277,7 +278,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 view.setScale(scale);
                 view.setState(new Integer4D(0, 0, 0, 0));
                 view.setJulia(true);
-                view.setPoint(new Number(point.x(), point.y()));
+                view.setPoint(new ComplexNumber(point.x(), point.y()));
                 juliaCoordinator.setView(view);
                 juliaCoordinator.setTime(time);
             }
@@ -374,16 +375,16 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         return new DefaultThreadFactory(name, true, priority);
     }
 
-    private boolean[] createOrbitAndColor(DSLParserResult result) throws Exception {
+    private boolean[] createOrbitAndColor(DSLParserResultV2 result) throws Exception {
         try {
             boolean[] changed = new boolean[]{false, false};
-            String newASTOrbit = result.orbitScript();
+            String newASTOrbit = result.orbitDSL();
             changed[0] = !newASTOrbit.equals(astOrbit);
             astOrbit = newASTOrbit;
-            String newASTColor = result.colorScript();
+            String newASTColor = result.colorDSL();
             changed[1] = !newASTColor.equals(astColor);
             astColor = newASTColor;
-            DSLCompiler compiler = new DSLCompiler();
+            DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
             this.orbitFactory = compiler.compileOrbit(result);
             this.colorFactory = compiler.compileColor(result);
             return changed;
@@ -396,8 +397,8 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         }
     }
 
-    private List<Number[]> renderOrbit(Double2D point) {
-        List<Number[]> states = new ArrayList<>();
+    private List<ComplexNumber[]> renderOrbit(Double2D point) {
+        List<ComplexNumber[]> states = new ArrayList<>();
         try {
             if (orbitFactory != null) {
                 Orbit orbit = orbitFactory.create();
@@ -405,7 +406,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                     Scope scope = new Scope();
                     orbit.setScope(scope);
                     orbit.init();
-                    orbit.setW(new Number(point.x(), point.y()));
+                    orbit.setW(new ComplexNumber(point.x(), point.y()));
                     orbit.setX(orbit.getInitialPoint());
                     orbit.render(states);
                 }
@@ -438,8 +439,8 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     private void redrawIfPointChanged(Canvas canvas) {
         if (redrawPoint) {
             redrawPoint = false;
-            Number size = coordinators[0].getInitialSize();
-            Number center = coordinators[0].getInitialCenter();
+            ComplexNumber size = coordinators[0].getInitialSize();
+            ComplexNumber center = coordinators[0].getInitialCenter();
             GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
                 MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
@@ -479,8 +480,8 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     private void redrawIfOrbitChanged(Canvas canvas) {
         if (redrawOrbit) {
             redrawOrbit = false;
-            Number size = coordinators[0].getInitialSize();
-            Number center = coordinators[0].getInitialCenter();
+            ComplexNumber size = coordinators[0].getInitialSize();
+            ComplexNumber center = coordinators[0].getInitialCenter();
             GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
                 MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
@@ -497,7 +498,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 double cy = dh / 2;
                 gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
-                Number[] state = states.getFirst();
+                ComplexNumber[] state = states.getFirst();
                 double zx = state[0].r();
                 double zy = state[0].i();
                 double px = (zx - tx - center.r()) / (tz * size.r());
@@ -528,8 +529,8 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     private void redrawIfTrapChanged(Canvas canvas) {
         if (redrawTraps) {
             redrawTraps = false;
-            Number size = coordinators[0].getInitialSize();
-            Number center = coordinators[0].getInitialCenter();
+            ComplexNumber size = coordinators[0].getInitialSize();
+            ComplexNumber center = coordinators[0].getInitialCenter();
             GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
                 MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
@@ -546,7 +547,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 gc.setStroke(renderFactory.createColor(1, 1, 0, 1));
                 List<Trap> traps = coordinators[0].getTraps();
                 for (Trap trap : traps) {
-                    List<Number> points = trap.toPoints();
+                    List<ComplexNumber> points = trap.toPoints();
                     if (!points.isEmpty()) {
                         double zx = points.getFirst().r();
                         double zy = points.getFirst().i();

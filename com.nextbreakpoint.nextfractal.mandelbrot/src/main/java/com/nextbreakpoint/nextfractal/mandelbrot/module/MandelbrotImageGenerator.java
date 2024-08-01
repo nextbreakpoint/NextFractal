@@ -33,12 +33,12 @@ import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 
@@ -68,9 +68,9 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			DSLParser parser = new DSLParser(DSLParser.class.getPackage().getName() + ".generated", "Compile" + System.nanoTime());
-			DSLParserResult result = parser.parse(script);
-			DSLCompiler compiler = new DSLCompiler();
+			DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
+			DSLParser parser = new DSLParser();
+			DSLParserResultV2 result = parser.parse(script);
 			Orbit orbit = compiler.compileOrbit(result).create();
 			Color color = compiler.compileColor(result).create();
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
@@ -90,7 +90,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			view.setScale(scale);
 			view.setState(new Integer4D(0, 0, 0, 0));
 			view.setJulia(julia);
-			view.setPoint(new Number(constant.x(), constant.y()));
+			view.setPoint(new ComplexNumber(constant.x(), constant.y()));
 			renderer.setView(view);
 			renderer.setTime(time);
 			renderer.runTask();

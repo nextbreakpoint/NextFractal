@@ -24,12 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ErrorStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult.Type;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ErrorStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTBuilder;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Deprecated
 public class InterpreterDSLParser {
     private static final Logger logger = Logger.getLogger(InterpreterDSLParser.class.getName());
 

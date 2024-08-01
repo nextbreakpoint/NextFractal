@@ -4,7 +4,7 @@ import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
 
 public class MandelbrotToolContext implements ToolContext<MandelbrotMetadata> {
@@ -22,11 +22,11 @@ public class MandelbrotToolContext implements ToolContext<MandelbrotMetadata> {
         this.height = height;
     }
 
-    public Number getInitialSize() {
+    public ComplexNumber getInitialSize() {
         return renderingStrategy.getInitialSize();
     }
 
-    public Number getInitialCenter() {
+    public ComplexNumber getInitialCenter() {
         return renderingStrategy.getInitialCenter();
     }
 

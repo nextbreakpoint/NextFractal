@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiled.CompiledFractal;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 
 import java.util.List;
 
-public record DSLParserResultV2(CompiledFractal fractal, String source, String orbitDSL, String colorDSL, List<ParserError> errors) {}
+public record DSLParserResultV2(DSLFractal fractal, String source, String orbitDSL, String colorDSL, List<ParserError> errors) {}

@@ -32,10 +32,10 @@ import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,8 +59,8 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.script()))
-                .map(MandelbrotParserStrategy::processResult)
+        return Command.of(() -> new DSLParser().parse(session.script()))
+                .map(this::processResult)
                 .map(result -> new ParserResult(session, result.errors(), computeHighlighting(session.script()), result))
                 .execute()
                 .orThrow(RuntimeException::new)
@@ -68,7 +68,7 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private String getClassName() {
-        return "Compile" + System.nanoTime();
+        return "C" + System.nanoTime();
     }
 
     private String getPackageName() {
@@ -125,10 +125,10 @@ public class MandelbrotParserStrategy implements ParserStrategy {
         );
     }
 
-    public static DSLParserResult processResult(DSLParserResult parserResult) {
-        return Block.begin(DSLParserResult.class)
-                .andThen(MandelbrotParserStrategy::compileOrbit)
-                .andThen(MandelbrotParserStrategy::compileColor)
+    public DSLParserResultV2 processResult(DSLParserResultV2 parserResult) {
+        return Block.begin(DSLParserResultV2.class)
+                .andThen(this::compileOrbit)
+                .andThen(this::compileColor)
                 .end(parserResult)
                 .execute()
                 .observe()
@@ -138,15 +138,15 @@ public class MandelbrotParserStrategy implements ParserStrategy {
                 .get();
     }
 
-    private static void compileOrbit(DSLParserResult result) {
-        Command.of(() -> new DSLCompiler().compileOrbit(result).create()).execute();
+    private void compileOrbit(DSLParserResultV2 result) {
+        Command.of(() -> new DSLCompilerV2(getPackageName(), getClassName()).compileOrbit(result).create()).execute();
     }
 
-    private static void compileColor(DSLParserResult result) {
-        Command.of(() -> new DSLCompiler().compileColor(result).create()).execute();
+    private void compileColor(DSLParserResultV2 result) {
+        Command.of(() -> new DSLCompilerV2(getPackageName(), getClassName()).compileColor(result).create()).execute();
     }
 
-    private static void processCompilerErrors(DSLParserResult result, Exception e) {
+    private static void processCompilerErrors(DSLParserResultV2 result, Exception e) {
         if (e instanceof DSLException) {
             result.errors().addAll(((DSLException)e).getErrors());
         }

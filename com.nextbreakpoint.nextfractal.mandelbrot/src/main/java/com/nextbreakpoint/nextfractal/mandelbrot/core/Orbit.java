@@ -53,26 +53,27 @@ public abstract class Orbit {
 	public Orbit() {
 		region[0] = new MutableNumber();
 		region[1] = new MutableNumber();
+		//TODO invoke init explicitly in generated code
 		initializeNumbersStack();
 	}
 
-    public void setX(Number x) {
+    public void setX(ComplexNumber x) {
 		this.x.set(x);
 	}
 
-	public void setW(Number w) {
+	public void setW(ComplexNumber w) {
 		this.w.set(w);
 	}
 
-	public Number getX() {
+	public ComplexNumber getX() {
 		return x;
 	}
 
-	public Number getW() {
+	public ComplexNumber getW() {
 		return w;
 	}
 
-	protected Trap trap(Number center) {
+	protected Trap trap(ComplexNumber center) {
 		return new Trap(center);
 	}
 
@@ -108,15 +109,15 @@ public abstract class Orbit {
 		scope.addVariable(value);
 	}
 
-	public Number[] getInitialRegion() {
+	public ComplexNumber[] getInitialRegion() {
 		return region;
 	}
 
-	public Number getInitialPoint() {
+	public ComplexNumber getInitialPoint() {
 		return point;
 	}
 
-	public void setInitialRegion(Number a, Number b) {
+	public void setInitialRegion(ComplexNumber a, ComplexNumber b) {
 		this.region[0].set(a);
 		this.region[1].set(b);
 	}
@@ -138,7 +139,7 @@ public abstract class Orbit {
 
     public abstract void init();
 
-	public abstract void render(List<Number[]> states);
+	public abstract void render(List<ComplexNumber[]> states);
 	
     public abstract boolean useTime();
 

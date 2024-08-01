@@ -24,14 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.IOUtils;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
+import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import lombok.extern.java.Log;
 
 import javax.tools.Diagnostic;
@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
+@Deprecated
 @Log
 public class JavaCompilerDSLCompiler {
 	private final JavaCompiler javaCompiler;
@@ -107,7 +108,7 @@ public class JavaCompilerDSLCompiler {
 			} else {
 				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
 //					if (diagnostic.getCode().equals("compiler.err.cant.access")) {
-//						// TODO Not sure why it doesn't happen with Java 8, but only with Java 9.
+//						// Not sure why it doesn't happen with Java 8, but only with Java 9.
 //						ParserErrorType type = ParserErrorType.JAVA_COMPILER;
 //						long line = diagnostic.getLineNumber();
 //						long charPositionInLine = diagnostic.getColumnNumber();
