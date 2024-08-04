@@ -25,16 +25,16 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 
 public class MandelbrotParserStrategy implements ParserStrategy {
     private static final Pattern HIGHLIGHTING_PATTERN = createHighlightingPattern();
@@ -63,18 +63,18 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     private ParserResult createParserResult(Session session) {
         try {
             final DSLParser parser = new DSLParser();
-            final DSLParserResultV2 result = parser.parse(session.script());
-            final DSLCompilerV2 compiler = new DSLCompilerV2(getPackageName(), getClassName());
+            final DSLParserResult result = parser.parse(session.script());
+            final DSLCompiler compiler = new DSLCompiler(getPackageName(), getClassName());
             compiler.compileOrbit(result).create();
             compiler.compileColor(result).create();
             return new ParserResult(session, result.errors(), computeHighlighting(session.script()), result);
         } catch (DSLException e) {
-            final DSLParserResultV2 result = new DSLParserResultV2(null, session.script(), null, null, e.getErrors());
+            final DSLParserResult result = new DSLParserResult(null, session.script(), null, null, e.getErrors());
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {
-            final List<ParserError> errors = new ArrayList<>();
-            errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
-            final DSLParserResultV2 result = new DSLParserResultV2(null, session.script(), null, null, errors);
+            final List<ScriptError> errors = new ArrayList<>();
+            errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final DSLParserResult result = new DSLParserResult(null, session.script(), null, null, errors);
             return new ParserResult(session, errors, computeHighlighting(session.script()), result);
         }
     }

@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
@@ -194,7 +194,7 @@ public class Coordinator implements RendererDelegate {
 	/**
 	 * @return
 	 */
-	public List<ParserError> getErrors() {
+	public List<ScriptError> getErrors() {
 		return renderer.getErrors();
 	}
 

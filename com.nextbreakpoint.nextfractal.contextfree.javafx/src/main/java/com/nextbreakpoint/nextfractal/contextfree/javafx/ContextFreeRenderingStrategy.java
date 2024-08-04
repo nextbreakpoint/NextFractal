@@ -4,19 +4,18 @@ import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
-import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
+import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.scene.canvas.Canvas;
 import lombok.extern.java.Log;
 
@@ -25,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
 
 @Log
 public class ContextFreeRenderingStrategy implements RenderingStrategy {
@@ -84,7 +85,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public List<ParserError> updateCoordinators(Object result) {
+    public List<ScriptError> updateCoordinators(Object result) {
         try {
             DSLParserResult parserResult = (DSLParserResult) result;
             hasError = !parserResult.getErrors().isEmpty();
@@ -110,7 +111,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Can't render image: " + e.getMessage());
             }
-            return List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            return List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, "Can't render image"));
         }
         return Collections.emptyList();
     }

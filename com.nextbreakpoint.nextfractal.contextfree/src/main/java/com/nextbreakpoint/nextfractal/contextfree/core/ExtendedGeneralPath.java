@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.core;
 
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;

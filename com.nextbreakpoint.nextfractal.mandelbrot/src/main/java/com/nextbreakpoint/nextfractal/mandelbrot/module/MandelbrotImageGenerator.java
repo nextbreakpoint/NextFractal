@@ -39,7 +39,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import lombok.extern.java.Log;
@@ -74,7 +74,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 		try {
 			DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
 			DSLParser parser = new DSLParser();
-			DSLParserResultV2 result = parser.parse(script);
+			DSLParserResult result = parser.parse(script);
 			Orbit orbit = compiler.compileOrbit(result).create();
 			Color color = compiler.compileColor(result).create();
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);

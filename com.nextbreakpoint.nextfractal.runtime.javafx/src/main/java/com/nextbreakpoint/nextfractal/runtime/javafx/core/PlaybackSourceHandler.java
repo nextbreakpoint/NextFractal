@@ -71,7 +71,8 @@ public class PlaybackSourceHandler {
     }
 
     private CompletionStage<PlaybackReportChanged> computeEvent(String text, boolean appendToHistory) {
-        return parserStrategy.compute(executor, createModifiedSession(text)).thenApply(result -> createReportChangedEvent(result, appendToHistory));
+        return parserStrategy.compute(executor, createModifiedSession(text))
+                .thenApply(result -> createReportChangedEvent(result, appendToHistory));
     }
 
     private Session createModifiedSession(String text) {

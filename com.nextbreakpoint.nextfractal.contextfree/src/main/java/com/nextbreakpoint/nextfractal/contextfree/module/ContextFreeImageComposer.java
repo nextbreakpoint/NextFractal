@@ -24,10 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -35,17 +36,18 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import lombok.extern.java.Log;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 
+@Log
 public class ContextFreeImageComposer implements ImageComposer {
-    private static final Logger logger = Logger.getLogger(ContextFreeImageComposer.class.getName());
-
     private boolean aborted;
     private final boolean opaque;
     private final Tile tile;
@@ -86,8 +88,10 @@ public class ContextFreeImageComposer implements ImageComposer {
             renderer.waitForTasks();
             renderer.copyImage(renderFactory.createGraphicsContext(g2d));
             aborted = renderer.isInterrupted();
+        } catch (ParserException e) {
+            log.log(Level.WARNING, e.getMessage(), e);
         } catch (Throwable e) {
-            logger.severe(e.getMessage());
+            log.severe(e.getMessage());
         } finally {
             if (g2d != null) {
                 g2d.dispose();

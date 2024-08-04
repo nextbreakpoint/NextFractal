@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.core.common.IOUtils;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import lombok.extern.java.Log;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
-import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 
 @Log
 public class CompilerAdapter {
@@ -63,8 +63,8 @@ public class CompilerAdapter {
 		} catch (DSLCompilerException e) {
 			throw e;
 		} catch (Throwable e) {
-            final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
 			throw new DSLCompilerException("Can't compile class", javaSource, errors);
 		}
 	}
@@ -72,7 +72,7 @@ public class CompilerAdapter {
 	@SuppressWarnings("unchecked")
 	private <T> Class<T> compile(String source, String packageName, String className, Class<T> clazz) throws Exception {
 		log.log(Level.FINE, "Compile Java source:\n" + source);
-		final List<ParserError> errors = new ArrayList<>();
+		final List<ScriptError> errors = new ArrayList<>();
 		List<SimpleJavaFileObject> compilationUnits = new ArrayList<>();
 		compilationUnits.add(new JavaSourceFileObject(className, source));
 		final List<String> options = getCompilerOptions();
@@ -108,7 +108,7 @@ public class CompilerAdapter {
 					long index = diagnostic.getStartPosition();
 					long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
 					String message = diagnostic.getMessage(null);
-					ParserError error = new ParserError(JAVA_COMPILE, line, charPositionInLine, index, length, message);
+					ScriptError error = new ScriptError(COMPILE, line, charPositionInLine, index, length, message);
 					log.log(Level.WARNING, error.toString());
 					errors.add(error);
 					throw new DSLCompilerException("Can't compile class", source, errors);

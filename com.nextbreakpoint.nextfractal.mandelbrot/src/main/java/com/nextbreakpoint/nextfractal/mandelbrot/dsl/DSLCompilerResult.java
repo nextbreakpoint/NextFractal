@@ -22,18 +22,20 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.common;
+package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-public record ParserError(
-	ParserErrorType type,
-	long line,
-	long charPositionInLine,
-	long index,
-	long length,
-	String message
-){
-	@Override
-	public String toString() {
-		return "[" + line + ":" + charPositionInLine + ":" + index + ":" + length + "] " + message;
-	}
-}
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+
+import java.util.List;
+
+public record DSLCompilerResult(
+        DSLParserResult parserResult,
+        ClassFactory<Orbit> orbitClassFactory,
+        ClassFactory<Color> colorClassFactory,
+        String orbitJava,
+        String colorJava,
+        List<ScriptError> javaErrors
+) {}

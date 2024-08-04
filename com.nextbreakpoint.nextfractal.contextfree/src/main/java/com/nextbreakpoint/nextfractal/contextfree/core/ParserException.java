@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.core;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.ToString;
 
 import java.io.Serial;
@@ -34,14 +34,14 @@ import java.util.List;
 public class ParserException extends Exception {
 	@Serial
 	private static final long serialVersionUID = 1L;
-	private final List<ParserError> errors;
+	private final List<ScriptError> errors;
 
-	public ParserException(String message, List<ParserError> errors) {
+	public ParserException(String message, List<ScriptError> errors) {
 		super(message);
 		this.errors = errors;
 	}
 	
-	public List<ParserError> getErrors() {
+	public List<ScriptError> getErrors() {
 		return errors;
 	}
 }

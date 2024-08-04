@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.viewer;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStarted;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStopped;
 import com.nextbreakpoint.nextfractal.core.event.EditorLoadFileRequested;
@@ -263,7 +263,7 @@ public class Viewer extends BorderPane {
 		}
 
 		if (renderingStrategy != null) {
-			final List<ParserError> errorList = renderingStrategy.updateCoordinators(report.result());
+			final List<ScriptError> errorList = renderingStrategy.updateCoordinators(report.result());
 
 			errorProperty.setValue(!errorList.isEmpty());
 		}

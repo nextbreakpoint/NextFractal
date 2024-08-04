@@ -90,9 +90,6 @@ public class ContextFreeUIFactory implements UIFactory {
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
 		DSLParser compiler = new DSLParser();
 		DSLParserResult report = compiler.parse(session.script());
-		if (!report.getErrors().isEmpty()) {
-			throw new RuntimeException("Failed to compile source");
-		}
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("cfdg", report.getCFDG());
 		bitmap.setProperty("session", session);

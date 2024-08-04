@@ -24,14 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RendererErrors {
-	public static ParserError makeError(long line, long charPositionInLine, long index, long length, String message) {
-		return new ParserError(ParserErrorType.RUNTIME, line, charPositionInLine, index, length, message);
+	public static ScriptError makeError(long line, long charPositionInLine, long index, long length, String message) {
+		return new ScriptError(EXECUTE, line, charPositionInLine, index, length, message);
 	}
 }

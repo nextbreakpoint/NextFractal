@@ -24,21 +24,25 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
 
+@Log
 public class ContextFreeImageGenerator implements ImageGenerator {
 	private boolean aborted;
 	private final boolean opaque;
@@ -74,8 +78,10 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 			renderer.waitForTasks();
 			renderer.getPixels(pixels);
 			aborted = renderer.isInterrupted();
-		} catch (Exception e) {
-			//TODO display errors
+		} catch (ParserException e) {
+			log.log(Level.WARNING, e.getMessage(), e);
+		} catch (Throwable e) {
+			log.severe(e.getMessage());
 		}
 		return buffer;
 	}

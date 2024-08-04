@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -34,9 +34,9 @@ import java.util.List;
 @Getter
 @ToString
 public abstract class DSLException extends Exception {
-	private final List<ParserError> errors;
+	private final List<ScriptError> errors;
 
-	public DSLException(String message, List<ParserError> errors) {
+	public DSLException(String message, List<ScriptError> errors) {
 		super(message);
 		this.errors = Collections.unmodifiableList(errors);
 	}

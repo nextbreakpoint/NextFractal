@@ -29,4 +29,9 @@ import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import java.util.Collection;
 import java.util.List;
 
-public record ParserResult(Session session, List<ParserError> errors, GenericStyleSpans<Collection<String>> highlighting, Object result) {}
+public record ParserResult(
+        Session session,
+        List<ScriptError> errors,
+        GenericStyleSpans<Collection<String>> highlighting,
+        Object result
+) {}

@@ -24,12 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
 import java.util.List;
 
 public class DSLParserException extends DSLException {
-	public DSLParserException(String message, List<ParserError> errors) {
+	public DSLParserException(String message, List<ScriptError> errors) {
 		super(message, errors);
 	}
 }

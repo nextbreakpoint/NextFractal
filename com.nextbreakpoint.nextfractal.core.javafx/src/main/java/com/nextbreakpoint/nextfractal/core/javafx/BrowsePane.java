@@ -28,9 +28,8 @@ import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
@@ -67,6 +66,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
 
 public class BrowsePane extends BorderPane {
     private static final Logger logger = Logger.getLogger(BrowsePane.class.getName());
@@ -600,7 +601,7 @@ public class BrowsePane extends BorderPane {
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }
         } catch (Exception e) {
-            item.setErrors(List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
+            item.setErrors(List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, e.getMessage())));
             logger.log(Level.WARNING, "Can't create bitmap: " + e.getMessage());
         }
     }
@@ -621,7 +622,7 @@ public class BrowsePane extends BorderPane {
                 Platform.runLater(() -> item.setRenderer(renderer));
             }
         } catch (Exception e) {
-            item.setErrors(List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, e.getMessage())));
+            item.setErrors(List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, e.getMessage())));
             logger.log(Level.WARNING, "Can't initialize renderer", e);
         }
     }

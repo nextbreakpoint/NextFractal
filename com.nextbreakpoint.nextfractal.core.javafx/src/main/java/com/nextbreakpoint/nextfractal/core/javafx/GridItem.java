@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -41,7 +41,7 @@ public class GridItem {
 	private volatile GridItemRenderer renderer;
 	private volatile Future<GridItem> loadItemFuture;
 	private volatile Future<GridItem> initItemFuture;
-	private volatile List<ParserError> errors = new LinkedList<>();
+	private volatile List<ScriptError> errors = new LinkedList<>();
 
 	public File getFile() {
 		return file;
@@ -95,11 +95,11 @@ public class GridItem {
 		return lastChanged;
 	}
 
-	public List<ParserError> getErrors() {
+	public List<ScriptError> getErrors() {
 		return errors;
 	}
 
-	public void setErrors(List<ParserError> errors) {
+	public void setErrors(List<ScriptError> errors) {
 		this.errors.clear();
 		this.errors.addAll(errors);
 		dirty = true;

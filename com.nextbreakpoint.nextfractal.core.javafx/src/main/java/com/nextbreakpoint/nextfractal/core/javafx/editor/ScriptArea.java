@@ -24,9 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.editor;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
 import com.nextbreakpoint.nextfractal.core.event.EditorReportChanged;
@@ -44,6 +43,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
 
 @Log
 public class ScriptArea extends CodeArea {
@@ -83,15 +84,15 @@ public class ScriptArea extends CodeArea {
 
     private void updateTextStyles(ParserResult result) {
         setStyleSpans(0, convertStyleSpans(result.highlighting()));
-        final List<ParserError> errors = result.errors()
+        final List<ScriptError> errors = result.errors()
                 .stream()
-                .sorted(Comparator.comparing(ParserError::index))
+                .sorted(Comparator.comparing(ScriptError::index))
                 .toList();
-        for (ParserError error : errors) {
+        for (ScriptError error : errors) {
             if (log.isLoggable(Level.FINE)) {
                 log.fine(error.toString());
             }
-            if (error.type() != ParserErrorType.RUNTIME) {
+            if (error.type() != EXECUTE) {
                 final int lineBegin = (int) error.index();
                 final int lineEnd = lineBegin + 1;
                 try {

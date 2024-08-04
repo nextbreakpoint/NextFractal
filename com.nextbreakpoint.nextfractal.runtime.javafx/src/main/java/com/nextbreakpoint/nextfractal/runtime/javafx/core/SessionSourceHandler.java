@@ -82,7 +82,8 @@ public class SessionSourceHandler {
     }
 
     private CompletionStage<EditorReportChanged> computeEvent(String text, boolean continuous, boolean appendToHistory) {
-        return parserStrategy.compute(executor, createModifiedSession(text)).thenApply(result -> createReportChangedEvent(result, continuous, appendToHistory));
+        return parserStrategy.compute(executor, createModifiedSession(text))
+                .thenApply(result -> createReportChangedEvent(result, continuous, appendToHistory));
     }
 
     private Session createModifiedSession(String text) {

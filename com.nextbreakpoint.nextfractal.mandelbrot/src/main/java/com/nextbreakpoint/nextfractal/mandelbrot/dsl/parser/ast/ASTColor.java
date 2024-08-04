@@ -24,9 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColorInt;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 
 public class ASTColor extends ASTObject {
 	private ASTColorInit colorInit;
@@ -107,7 +109,7 @@ public class ASTColor extends ASTObject {
 		return builder.toString();
 	}
 
-	public DSLColor compile(ASTVariables variables) {
+	public DSLColor compile(ASTVariables variables) throws DSLParserException {
 		try {
 			final DSLExpressionContext context = new DSLExpressionContext();
 			final List<VariableDeclaration> colorVars = new ArrayList<>(variables.getColorVariables());
@@ -160,18 +162,13 @@ public class ASTColor extends ASTObject {
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-			String message = e.getMessage();
-			final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(ParserErrorType.COMPILE, line, charPositionInLine, index, length, message));
-			//TODO should it throw?
-//			throw new DSLParserException("Can't build color", errors);
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
+			throw new DSLParserException("Can't build color", errors);
 		} catch (Exception e) {
-            String message = e.getMessage();
-			final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(ParserErrorType.COMPILE, 0, 0, 0, 0, message));
-			//TODO should it throw?
-//			throw new DSLParserException("Can't build color", errors);
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+			throw new DSLParserException("Can't build color", errors);
 		}
-		return null;
 	}
 }

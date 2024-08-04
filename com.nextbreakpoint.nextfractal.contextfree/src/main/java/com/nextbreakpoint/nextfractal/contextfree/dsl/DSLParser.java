@@ -25,10 +25,14 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.*;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLexer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLogger;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.exceptions.CFDGException;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import lombok.extern.java.Log;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -38,22 +42,20 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
+
+@Log
 public class DSLParser {
-	private static final Logger logger = Logger.getLogger(DSLParser.class.getName());
 	private static final String INCLUDE_LOCATION = "include.location";
 
-	public DSLParser() {
-	}
-	
 	public DSLParserResult parse(String source) throws ParserException {
-		List<ParserError> errors = new ArrayList<>();
+		List<ScriptError> errors = new ArrayList<>();
 		CFDG cfdg = parse(source, errors);
 		return new DSLParserResult(cfdg, DSLParserResult.Type.INTERPRETER, source, errors);
 	}
 
-	private CFDG parse(String source, List<ParserError> errors) throws ParserException {
+	private CFDG parse(String source, List<ScriptError> errors) throws ParserException {
 		try {
 			CharStream is = CharStreams.fromReader(new StringReader(source));
 			CFDGLexer lexer = new CFDGLexer(is);
@@ -64,29 +66,28 @@ public class DSLParser {
 			parser.getDriver().setLogger(logger);
 			parser.setErrorHandler(new ErrorStrategy(errors));
 			parser.getDriver().setCurrentPath(getIncludeDir());
-			if (parser.choose() != null) {
-				errors.addAll(logger.getErrors());
-				return parser.getDriver().getCFDG();
+			parser.choose();
+			errors.addAll(logger.getErrors());
+			final CFDG cfdg = parser.getDriver().getCFDG();
+			if (cfdg == null || !errors.isEmpty()) {
+				throw new ParserException("Can't parse source", errors);
 			}
+			return cfdg;
 		} catch (CFDGException e) {
-			ParserErrorType type = ParserErrorType.COMPILE;
-			long line = e.getLocation().getLine();
+            long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-			String message = e.getMessage();
-			ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-			logger.log(Level.FINE, error.toString(), e);
+            ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
+			log.log(Level.FINE, error.toString(), e);
 			errors.add(error);
 			throw new ParserException("Can't parse source", errors);
 		} catch (Exception e) {
-			ParserErrorType type = ParserErrorType.COMPILE;
-			String message = e.getMessage();
-			ParserError error = new ParserError(type, 0L, 0L, 0L, 0L, message);
-			logger.log(Level.FINE, error.toString(), e);
+            ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
+			log.log(Level.FINE, error.toString(), e);
 			errors.add(error);
+			throw new ParserException("Can't parse source", errors);
 		}
-		return null;
 	}
 
 	private String getIncludeDir() {
@@ -97,7 +98,7 @@ public class DSLParser {
 		defaultBrowserDir = defaultBrowserDir.replace("[current.path]", currentDir);
 		defaultBrowserDir = defaultBrowserDir.replace("[user.home]", userHome);
 		defaultBrowserDir = defaultBrowserDir.replace("[user.dir]", userDir);
-		logger.info("includeDir = " + defaultBrowserDir);
+		log.info("includeDir = " + defaultBrowserDir);
 		return defaultBrowserDir;
 	}
 }

@@ -5,9 +5,9 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult.Type;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 
 public class ContextFreeParserStrategy implements ParserStrategy {
     private static final Pattern HIGHLIGHTING_PATTERN = createHighlightingPattern();
@@ -45,8 +45,8 @@ public class ContextFreeParserStrategy implements ParserStrategy {
             final DSLParserResult result = new DSLParserResult(null, Type.INTERPRETER, session.script(), e.getErrors());
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {
-            final List<ParserError> errors = new ArrayList<>();
-            errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final List<ScriptError> errors = new ArrayList<>();
+            errors.add(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
             final DSLParserResult result = new DSLParserResult(null, Type.INTERPRETER, session.script(), errors);
             return new ParserResult(session, errors, computeHighlighting(session.script()), result);
         }

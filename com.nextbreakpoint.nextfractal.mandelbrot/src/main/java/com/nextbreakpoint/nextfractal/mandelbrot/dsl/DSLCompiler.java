@@ -24,8 +24,42 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-public class DSLCompiler extends DSLCompilerV2 {
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.FastDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.SimpleDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.JavaCompilerProvider;
+
+import javax.tools.JavaCompiler;
+import java.util.Objects;
+
+public class DSLCompiler {
+	private final String packageName;
+	private final String classNamePrefix;
+
 	public DSLCompiler(String packageName, String classNamePrefix) {
-		super(packageName, classNamePrefix);
+		this.packageName = Objects.requireNonNull(packageName);
+		this.classNamePrefix = Objects.requireNonNull(classNamePrefix);
+	}
+
+	//TODO introduce DSLCompilerResult
+	public ClassFactory<Orbit> compileOrbit(DSLParserResult result) throws DSLCompilerException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
+		if (javaCompiler == null) {
+			return new SimpleDSLCompiler().compileOrbit(result);
+		} else {
+			return new FastDSLCompiler(packageName, classNamePrefix, javaCompiler).compileOrbit(result);
+		}
+	}
+
+	//TODO introduce DSLCompilerResult
+	public ClassFactory<Color> compileColor(DSLParserResult result) throws DSLCompilerException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
+		if (javaCompiler == null) {
+			return new SimpleDSLCompiler().compileColor(result);
+		} else {
+			return new FastDSLCompiler(packageName, classNamePrefix, javaCompiler).compileColor(result);
+		}
 	}
 }

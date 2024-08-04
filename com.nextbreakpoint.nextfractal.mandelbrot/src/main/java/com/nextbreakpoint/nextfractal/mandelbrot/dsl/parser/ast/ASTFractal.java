@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import lombok.Getter;
@@ -142,7 +143,7 @@ public class ASTFractal extends ASTObject {
 		colorVars.pop();
 	}
 
-	public DSLFractal compile() {
+	public DSLFractal compile() throws DSLParserException {
 		final ASTVariables variables = new ASTVariables(orbitVars.peek(), colorVars.peek(), stateVars);
         return new DSLFractal(orbit.compile(variables), color.compile(variables));
 	}

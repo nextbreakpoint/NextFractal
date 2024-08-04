@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import lombok.extern.java.Log;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.antlr.v4.runtime.InputMismatchException;
@@ -36,79 +36,74 @@ import org.antlr.v4.runtime.misc.IntervalSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
+
+@Log
 public class ErrorStrategy extends DefaultErrorStrategy {
-	private static final Logger logger = Logger.getLogger(ErrorStrategy.class.getName());
-
-	private final List<ParserError> errors;
+	private final List<ScriptError> errors;
 	
-	public ErrorStrategy(List<ParserError> errors) {
+	public ErrorStrategy(List<ScriptError> errors) {
 		this.errors = errors;
 	}
 
 	@Override
 	public void reportError(Parser recognizer, RecognitionException e) {
 		String message = generateErrorMessage("Parse failed", recognizer);
-		ParserErrorType type = ParserErrorType.COMPILE;
-		long line = e.getOffendingToken().getLine();
+        long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-		logger.log(Level.FINE, error.toString(), e);
+		ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, message);
+		log.log(Level.FINE, error.toString(), e);
 		errors.add(error);
 	}
 
 	@Override
 	protected void reportInputMismatch(Parser recognizer, InputMismatchException e) {
 		String message = generateErrorMessage("Input mismatch", recognizer);
-		ParserErrorType type = ParserErrorType.COMPILE;
-		long line = e.getOffendingToken().getLine();
+        long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-		logger.log(Level.FINE, error.toString(), e);
+		ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, message);
+		log.log(Level.FINE, error.toString(), e);
 		errors.add(error);
 	}
 
 	@Override
 	protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
 		String message = generateErrorMessage("Failed predicate", recognizer);
-		ParserErrorType type = ParserErrorType.COMPILE;
-		long line = e.getOffendingToken().getLine();
+        long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-		logger.log(Level.FINE, error.toString(), e);
+		ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, message);
+		log.log(Level.FINE, error.toString(), e);
 		errors.add(error);
 	}
 
 	@Override
 	protected void reportUnwantedToken(Parser recognizer) {
 		String message = generateErrorMessage("Unwanted token", recognizer);
-		ParserErrorType type = ParserErrorType.COMPILE;
-		long line = recognizer.getCurrentToken().getLine();
+        long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-		logger.log(Level.FINE, error.toString());
+		ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, message);
+		log.log(Level.FINE, error.toString());
 		errors.add(error);
 	}
 
 	@Override
 	protected void reportMissingToken(Parser recognizer) {
 		String message = generateErrorMessage("Missing token", recognizer);
-		ParserErrorType type = ParserErrorType.COMPILE;
-		long line = recognizer.getCurrentToken().getLine();
+        long line = recognizer.getCurrentToken().getLine();
 		long charPositionInLine = recognizer.getCurrentToken().getCharPositionInLine();
 		long index = recognizer.getCurrentToken().getStartIndex();
 		long length = recognizer.getCurrentToken().getStopIndex() - recognizer.getCurrentToken().getStartIndex();
-		ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-		logger.log(Level.FINE, error.toString());
+		ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, message);
+		log.log(Level.FINE, error.toString());
 		errors.add(error);
 	}
 

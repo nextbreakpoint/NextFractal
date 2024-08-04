@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.core;
 
-import java.awt.*;
+import java.awt.Shape;
 
 /**
  * The <code>ExtendedShape</code> class represents a geometric

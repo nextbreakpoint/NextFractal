@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
@@ -173,7 +173,7 @@ public class Coordinator implements RendererDelegate {
 		renderer.getPixels(pixels);
 	}
 
-	public List<ParserError> getErrors() {
+	public List<ScriptError> getErrors() {
 		return renderer.getErrors();
 	}
 

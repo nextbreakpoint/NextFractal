@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
@@ -38,7 +38,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCompilerContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -53,8 +53,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
-import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
-import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.PARSE;
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_EXPRESSION_OPTIMISATION_ENABLED;
 
 @Log
@@ -69,7 +68,7 @@ public class FastDSLCompiler {
 		this.compilerAdapter = new CompilerAdapter(javaCompiler);
 	}
 
-	public ClassFactory<Orbit> compileOrbit(DSLParserResultV2 report) throws DSLCompilerException {
+	public ClassFactory<Orbit> compileOrbit(DSLParserResult report) throws DSLCompilerException {
 		try {
 			final StringBuilder builder = new StringBuilder();
             if (report.fractal() != null) {
@@ -90,17 +89,17 @@ public class FastDSLCompiler {
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-            final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(PARSE, line, charPositionInLine, index, length, e.getMessage()));
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
 			throw new DSLCompilerException("Can't compile orbit", report.orbitDSL(), errors);
 		} catch (Throwable e) {
-            final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
 			throw new DSLCompilerException("Can't compile orbit", report.orbitDSL(), errors);
 		}
 	}
 
-	public ClassFactory<Color> compileColor(DSLParserResultV2 report) throws DSLCompilerException {
+	public ClassFactory<Color> compileColor(DSLParserResult report) throws DSLCompilerException {
 		try {
 			final StringBuilder builder = new StringBuilder();
             if (report.fractal() != null) {
@@ -121,12 +120,12 @@ public class FastDSLCompiler {
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-            final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(PARSE, line, charPositionInLine, index, length, e.getMessage()));
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
 			throw new DSLCompilerException("Can't compile color", report.colorDSL(), errors);
 		} catch (Throwable e) {
-            final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
 			throw new DSLCompilerException("Can't compile color", report.colorDSL(), errors);
 		}
 	}

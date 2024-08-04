@@ -28,7 +28,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLogger;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.SimpleCanvas;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
@@ -62,7 +62,7 @@ public class Renderer {
 	protected final GraphicsFactory renderFactory;
 	protected volatile RendererDelegate rendererDelegate;
 	protected volatile Surface buffer;
-	protected volatile List<ParserError> errors = new ArrayList<>();
+	protected volatile List<ScriptError> errors = new ArrayList<>();
 	protected volatile boolean aborted;
 	protected volatile boolean interrupted;
 	protected volatile boolean cfdgChanged;
@@ -343,7 +343,7 @@ public class Renderer {
 				didChanged(progress, pixels);
 			}
 		} catch (Throwable e) {
-			logger.log(Level.WARNING, "Can't render fractal", e);
+			logger.log(Level.WARNING, "Can't render image", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
 		} finally {
 			if (g2d != null) {
@@ -432,8 +432,8 @@ public class Renderer {
 		}
 	}
 
-	public List<ParserError> getErrors() {
-		List<ParserError> result = new ArrayList<>(errors);
+	public List<ScriptError> getErrors() {
+		List<ScriptError> result = new ArrayList<>(errors);
 		errors.clear();
 		return result;
 	}

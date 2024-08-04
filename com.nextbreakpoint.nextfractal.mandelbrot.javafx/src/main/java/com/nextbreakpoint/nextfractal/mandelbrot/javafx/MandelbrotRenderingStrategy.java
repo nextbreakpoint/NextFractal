@@ -28,8 +28,7 @@ import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -47,7 +46,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
@@ -62,6 +61,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
 
 @Log
 public class MandelbrotRenderingStrategy implements RenderingStrategy {
@@ -185,16 +186,16 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public List<ParserError> updateCoordinators(Object result) {
+    public List<ScriptError> updateCoordinators(Object result) {
         try {
-            DSLParserResultV2 parserResult = (DSLParserResultV2) result;
+            DSLParserResult parserResult = (DSLParserResult) result;
             hasError = !parserResult.errors().isEmpty();
             if (hasError) {
                 this.astOrbit = null;
                 this.astColor = null;
                 this.orbitFactory = null;
                 this.colorFactory = null;
-                return List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+                return List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, "Can't render image"));
             }
             boolean[] changed = createOrbitAndColor(parserResult);
             boolean orbitChanged = changed[0];
@@ -299,7 +300,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Can't render image: " + e.getMessage());
             }
-            return List.of(new ParserError(ParserErrorType.RUNTIME, 0, 0, 0, 0, "Can't render image"));
+            return List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, "Can't render image"));
         }
         return Collections.emptyList();
     }
@@ -375,7 +376,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         return new DefaultThreadFactory(name, true, priority);
     }
 
-    private boolean[] createOrbitAndColor(DSLParserResultV2 result) throws Exception {
+    private boolean[] createOrbitAndColor(DSLParserResult result) throws Exception {
         try {
             boolean[] changed = new boolean[]{false, false};
             String newASTOrbit = result.orbitDSL();

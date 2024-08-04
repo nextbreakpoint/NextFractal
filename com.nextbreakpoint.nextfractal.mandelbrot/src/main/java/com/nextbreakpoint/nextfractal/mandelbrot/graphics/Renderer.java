@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -90,7 +90,7 @@ public class Renderer {
 	protected ComplexNumber point;
 	@Setter
 	protected RendererDelegate rendererDelegate;
-	protected List<ParserError> errors = new ArrayList<>();
+	protected List<ScriptError> errors = new ArrayList<>();
     @Setter
     protected boolean multiThread;
     @Setter
@@ -655,8 +655,8 @@ public class Renderer {
 		return contentRendererFractal.getOrbit().getTraps();
 	}
 
-	public List<ParserError> getErrors() {
-		List<ParserError> result = new ArrayList<>(errors);
+	public List<ScriptError> getErrors() {
+		List<ScriptError> result = new ArrayList<>(errors);
 		errors.clear();
 		return result;
 	}

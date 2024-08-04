@@ -31,8 +31,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.PrimShape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.Color;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;

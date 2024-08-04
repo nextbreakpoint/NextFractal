@@ -53,7 +53,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
@@ -107,7 +107,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		String script = session.script();
 		DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
 		DSLParser parser = new DSLParser();
-		DSLParserResultV2 result = parser.parse(script);
+		DSLParserResult result = parser.parse(script);
 		Orbit orbit = compiler.compileOrbit(result).create();
 		Color color = compiler.compileColor(result).create();
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);

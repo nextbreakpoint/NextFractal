@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsLoaded;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsMerged;
@@ -146,10 +146,10 @@ public class ApplicationHandler {
         eventBus.subscribe(TimeAnimationActionFired.class.getSimpleName(), event -> handleTimeAnimationAction(((TimeAnimationActionFired)event).action()));
     }
 
-	private String formatErrors(List<ParserError> errors) {
+	private String formatErrors(List<ScriptError> errors) {
         final StringBuilder builder = new StringBuilder();
         if (errors != null) {
-            for (ParserError error : errors) {
+            for (ScriptError error : errors) {
                 builder.append("Line ");
                 builder.append(error.line());
                 builder.append(": ");

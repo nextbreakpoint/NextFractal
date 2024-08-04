@@ -24,24 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 
 import java.util.List;
 
-@Deprecated
 public record DSLParserResult(
-		Object fractal,
-	  	Type type,
-	 	String source,
-	 	String orbitScript,
-	 	String colorScript,
-		String orbitJavaSource,
-		String colorJavaSource,
-		List<ParserError> errors,
-		String packageName,
-		String className
-) {
-	public enum Type {
-		COMPILED, INTERPRETED
-	}
-}
+        DSLFractal fractal,
+        String source,
+        String orbitDSL,
+        String colorDSL,
+        List<ScriptError> errors
+) {}
