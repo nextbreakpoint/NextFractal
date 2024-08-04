@@ -24,10 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLogger;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGRenderer;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.SimpleCanvas;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;

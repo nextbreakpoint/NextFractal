@@ -25,12 +25,13 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGDriver;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLexer;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLogger;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.exceptions.CFDGException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLexer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ErrorStrategy;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.CFDGException;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.extern.java.Log;
 import org.antlr.v4.runtime.CharStream;

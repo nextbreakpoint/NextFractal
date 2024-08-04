@@ -24,11 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.Bounds;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFCanvas;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CommandInfo;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.PrimShape;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.enums.FlagType;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Bounds;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFCanvas;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CommandInfo;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.PrimShape;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.Color;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;

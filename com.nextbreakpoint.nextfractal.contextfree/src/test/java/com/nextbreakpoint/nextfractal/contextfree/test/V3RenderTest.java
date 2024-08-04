@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.test;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;

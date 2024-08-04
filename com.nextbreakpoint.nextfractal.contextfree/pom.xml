@@ -22,8 +22,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDirectory>src/main/java/com/nextbreakpoint/nextfractal/contextfree/dsl/grammar</sourceDirectory>
-                    <outputDirectory>src/main/antlr4/com/nextbreakpoint/nextfractal/contextfree/dsl/grammar</outputDirectory>
+                    <sourceDirectory>src/main/java/com/nextbreakpoint/nextfractal/contextfree/dsl/parser</sourceDirectory>
+                    <outputDirectory>src/main/antlr4/com/nextbreakpoint/nextfractal/contextfree/dsl/parser</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>

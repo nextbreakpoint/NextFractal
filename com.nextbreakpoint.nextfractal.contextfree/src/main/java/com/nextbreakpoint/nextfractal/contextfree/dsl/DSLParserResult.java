@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
 import java.util.List;

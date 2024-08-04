@@ -24,10 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.test;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGDriver;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLexer;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLexer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

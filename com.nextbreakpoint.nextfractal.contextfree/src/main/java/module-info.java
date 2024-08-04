@@ -35,7 +35,7 @@ module com.nextbreakpoint.nextfractal.contextfree {
     exports com.nextbreakpoint.nextfractal.contextfree.module;
     exports com.nextbreakpoint.nextfractal.contextfree.core;
     exports com.nextbreakpoint.nextfractal.contextfree.dsl;
-    exports com.nextbreakpoint.nextfractal.contextfree.dsl.grammar;
+    exports com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
     exports com.nextbreakpoint.nextfractal.contextfree.graphics;
     provides CoreFactory with ContextFreeFactory;
     provides MetadataCodec with ContextFreeMetadataCodec;

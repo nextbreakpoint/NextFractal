@@ -28,7 +28,7 @@ import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;

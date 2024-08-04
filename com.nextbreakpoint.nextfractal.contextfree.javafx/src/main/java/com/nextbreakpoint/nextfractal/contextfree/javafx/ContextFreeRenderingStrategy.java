@@ -2,8 +2,8 @@ package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
