@@ -27,8 +27,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
@@ -36,8 +35,8 @@ public class DSLVariable extends DSLExpression {
 	private final String name;
 	private final boolean real;
 
-	public DSLVariable(ExpressionContext context, String name, boolean real, Token location) {
-		super(context.newNumberIndex(), location);
+	public DSLVariable(DSLToken token, DSLExpressionContext context, String name, boolean real) {
+		super(token, context.newNumberIndex());
 		this.name = name;
 		this.real = real;
 	}

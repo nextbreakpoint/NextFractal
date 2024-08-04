@@ -2,17 +2,16 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Collection;
 import java.util.Map;
 
-public class DSLOrbitEnd {
-    private final Token location;
+public class DSLOrbitEnd extends DSLObject {
     private final Collection<DSLStatement> statements;
 
-    public DSLOrbitEnd(Token location, Collection<DSLStatement> statements) {
-        this.location = location;
+    public DSLOrbitEnd(DSLToken token, Collection<DSLStatement> statements) {
+        super(token);
         this.statements = statements;
     }
 

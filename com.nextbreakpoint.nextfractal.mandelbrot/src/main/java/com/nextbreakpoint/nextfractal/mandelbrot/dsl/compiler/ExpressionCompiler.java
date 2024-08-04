@@ -27,40 +27,12 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTAssignStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTColorComponent;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTColorPalette;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionCompareOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionJulia;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionLogicOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionNeg;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionParen;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionalExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTConditionalStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFunction;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTNumber;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOperator;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitTrapOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTPalette;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTPaletteElement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTParen;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTRuleCompareOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTRuleExpression;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTRuleLogicOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStopStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTVariable;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColorExpression;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCondition;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLConditionalExpression;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPalette;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPaletteElement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
@@ -77,7 +49,35 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpMoveRel;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpMoveTo;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpQuadRel;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOpQuadTo;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTAssignStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTColorComponent;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTColorPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionCompareOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionJulia;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionLogicOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionNeg;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionParen;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionalExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionalStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTFunction;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTNumber;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOperator;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitTrapOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTPaletteElement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTParen;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTRuleCompareOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTRuleExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTRuleLogicOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTStopStatement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTVariable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,11 +87,11 @@ import java.util.Map;
 @Deprecated
 public class ExpressionCompiler implements ASTCompiler {
 	private final Map<String, VariableDeclaration> variables;
-	private final ExpressionContext context;
+	private final DSLExpressionContext context;
 	private final StringBuilder builder;
 	private final ClassType classType;
 
-	public ExpressionCompiler(ExpressionContext context, Map<String, VariableDeclaration> variables, StringBuilder builder, ClassType classType) {
+	public ExpressionCompiler(DSLExpressionContext context, Map<String, VariableDeclaration> variables, StringBuilder builder, ClassType classType) {
 		this.variables = variables;
 		this.context = context;
 		this.builder = builder;
@@ -116,7 +116,7 @@ public class ExpressionCompiler implements ASTCompiler {
 
 	@Override
 	public DSLExpression compile(ASTFunction function) {
-		final Token location = function.getLocation();
+		final DSLToken location = function.getLocation();
 		if (function.getName().equals("time")) {
 			if (classType.equals(ClassType.ORBIT)) {
 				context.setOrbitUseTime(true);
@@ -200,7 +200,7 @@ public class ExpressionCompiler implements ASTCompiler {
 	public DSLExpression compile(ASTOperator operator) {
 		ASTExpression exp1 = operator.getExp1();
 		ASTExpression exp2 = operator.getExp2();
-		final Token location = operator.getLocation();
+		final DSLToken location = operator.getLocation();
 		if (exp2 == null) {
             switch (operator.getOp()) {
                 case "-" -> {
@@ -310,7 +310,7 @@ public class ExpressionCompiler implements ASTCompiler {
 	public DSLCondition compile(ASTConditionCompareOp condition) {
 		ASTExpression exp1 = condition.getExp1();
 		ASTExpression exp2 = condition.getExp2();
-		final Token location = condition.getLocation();
+		final DSLToken location = condition.getLocation();
 		if (exp1.isReal() && exp2.isReal()) {
 			builder.append("(");
 			exp1.compile(this);
@@ -335,7 +335,7 @@ public class ExpressionCompiler implements ASTCompiler {
 	public DSLCondition compile(ASTConditionLogicOp condition) {
 		ASTConditionExpression exp1 = condition.getExp1();
 		ASTConditionExpression exp2 = condition.getExp2();
-		final Token location = condition.getLocation();
+		final DSLToken location = condition.getLocation();
 		builder.append("(");
 		exp1.compile(this);
 		switch (condition.getOp()) {
@@ -377,7 +377,7 @@ public class ExpressionCompiler implements ASTCompiler {
 	public DSLCondition compile(ASTRuleLogicOp operator) {
 		ASTRuleExpression exp1 = operator.getExp1();
 		ASTRuleExpression exp2 = operator.getExp2();
-		final Token location = operator.getLocation();
+		final DSLToken location = operator.getLocation();
 		builder.append("(");
 		exp1.compile(this);
         switch (operator.getOp()) {
@@ -395,7 +395,7 @@ public class ExpressionCompiler implements ASTCompiler {
 	public DSLCondition compile(ASTRuleCompareOp operator) {
 		ASTExpression exp1 = operator.getExp1();
 		ASTExpression exp2 = operator.getExp2();
-		final Token location = operator.getLocation();
+		final DSLToken location = operator.getLocation();
 		if (exp1.isReal() && exp2.isReal()) {
 			builder.append("(");
 			exp1.compile(this);
@@ -419,7 +419,7 @@ public class ExpressionCompiler implements ASTCompiler {
 
 	@Override
 	public DSLColorExpression compile(ASTColorPalette palette) {
-		final Token location = palette.getLocation();
+		final DSLToken location = palette.getLocation();
 		builder.append("palette");
 		builder.append(palette.getName().toUpperCase().substring(0, 1));
 		builder.append(palette.getName().substring(1));
@@ -458,7 +458,7 @@ public class ExpressionCompiler implements ASTCompiler {
 		builder.append("if (");
 		statement.getConditionExp().compile(this);
 		builder.append(") {\n");
-		Map<String, VariableDeclaration> vars = new HashMap<String, VariableDeclaration>(variables);
+		Map<String, VariableDeclaration> vars = new HashMap<>(variables);
 		for (ASTStatement innerStatement : statement.getThenStatementList().getStatements()) {
 			innerStatement.compile(new ExpressionCompiler(context, vars, builder, classType));
 		}
@@ -476,28 +476,28 @@ public class ExpressionCompiler implements ASTCompiler {
 	public DSLStatement compile(ASTAssignStatement statement) {
 		VariableDeclaration var = variables.get(statement.getName());
 		if (var != null) {
-			if (var.isReal() && statement.getExp().isReal()) {
+			if (var.real() && statement.getExp().isReal()) {
 				builder.append(statement.getName());
 				builder.append(" = real(");
 				statement.getExp().compile(this);
 				builder.append(");\n");
-			} else if (!var.isReal() && !statement.getExp().isReal()) {
+			} else if (!var.real() && !statement.getExp().isReal()) {
 				builder.append(statement.getName());
 				builder.append(".set(");
 				statement.getExp().compile(this);
 				builder.append(");\n");
-			} else if (!var.isReal() && statement.getExp().isReal()) {
+			} else if (!var.real() && statement.getExp().isReal()) {
 				builder.append(statement.getName());
 				builder.append(".set(");
 				statement.getExp().compile(this);
 				builder.append(");\n");
-			} else if (var.isReal() && !statement.getExp().isReal()) {
+			} else if (var.real() && !statement.getExp().isReal()) {
 				throw new ASTException("Can't assign expression: " + statement.getLocation().getText(), statement.getLocation());
 			}
 		} else {
 			var = new VariableDeclaration(statement.getName(), statement.getExp().isReal(), false);
 			variables.put(statement.getName(), var);
-			if (var.isReal()) {
+			if (var.real()) {
 				builder.append("double ");
 				builder.append(statement.getName());
 				builder.append(" = real(");
@@ -570,7 +570,7 @@ public class ExpressionCompiler implements ASTCompiler {
 		if (orbitTrapOp.getC3() != null) {
 			c3 = new ComplexNumber(orbitTrapOp.getC3().r(), orbitTrapOp.getC3().i());
 		}
-		final Token location = orbitTrapOp.getLocation();
+		final DSLToken location = orbitTrapOp.getLocation();
 		return switch (orbitTrapOp.getOp()) {
             case "MOVETO" -> new DSLTrapOpMoveTo(location, c1);
             case "MOVEREL", "MOVETOREL" -> new DSLTrapOpMoveRel(location, c1);

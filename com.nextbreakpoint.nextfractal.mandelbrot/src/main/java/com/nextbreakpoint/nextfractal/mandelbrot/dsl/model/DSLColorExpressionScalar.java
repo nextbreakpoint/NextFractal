@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
@@ -36,8 +36,8 @@ public class DSLColorExpressionScalar extends DSLColorExpression {
 	private final DSLExpression exp3;
 	private final DSLExpression exp4;
 	
-	public DSLColorExpressionScalar(Token location, DSLExpression exp1, DSLExpression exp2, DSLExpression exp3, DSLExpression exp4) {
-		super(location);
+	public DSLColorExpressionScalar(DSLToken token, DSLExpression exp1, DSLExpression exp2, DSLExpression exp3, DSLExpression exp4) {
+		super(token);
 		this.exp1 = exp1;
 		this.exp2 = exp2;
 		this.exp3 = exp3;

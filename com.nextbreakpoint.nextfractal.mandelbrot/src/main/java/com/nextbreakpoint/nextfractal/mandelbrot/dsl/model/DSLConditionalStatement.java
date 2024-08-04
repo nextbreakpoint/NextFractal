@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +37,8 @@ public class DSLConditionalStatement extends DSLStatement {
 	private final List<DSLStatement> thenStatements;
 	private final List<DSLStatement> elseStatements;
 
-    public DSLConditionalStatement(Token location, DSLCondition condition, List<DSLStatement> thenStatements, List<DSLStatement> elseStatements) {
-		super(location);
+    public DSLConditionalStatement(DSLToken token, DSLCondition condition, List<DSLStatement> thenStatements, List<DSLStatement> elseStatements) {
+		super(token);
 		this.condition = condition;
 		this.thenStatements = thenStatements;
 		this.elseStatements = elseStatements;

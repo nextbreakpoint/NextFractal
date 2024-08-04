@@ -25,22 +25,19 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
 import java.util.Map;
 
-public class DSLRule {
-	private final Token location;
-	@Getter
+@Getter
+public class DSLRule extends DSLObject {
 	private final DSLCondition ruleCondition;
-	@Getter
 	private final DSLColorExpression colorExp;
-	@Getter
 	private final double opacity;
 
-	public DSLRule(Token location, DSLCondition ruleCondition, DSLColorExpression colorExp, double opacity) {
-		this.location = location;
+	public DSLRule(DSLToken token, DSLCondition ruleCondition, DSLColorExpression colorExp, double opacity) {
+		super(token);
         this.ruleCondition = ruleCondition;
         this.colorExp = colorExp;
         this.opacity = opacity;

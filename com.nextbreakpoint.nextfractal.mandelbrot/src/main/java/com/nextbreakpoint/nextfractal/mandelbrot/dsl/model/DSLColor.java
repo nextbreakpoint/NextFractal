@@ -25,66 +25,44 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
 import lombok.Getter;
-import lombok.Setter;
-import org.antlr.v4.runtime.Token;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-//TODO add builder
-public class DSLColor {
-	private final Token location;
-	@Getter
+@Getter
+@SuperBuilder(setterPrefix = "with", toBuilder = true)
+public class DSLColor extends DSLObject {
 	private final Collection<VariableDeclaration> colorVariables;
-	@Getter
 	private final Collection<VariableDeclaration> stateVariables;
-	@Getter
-	private final ExpressionContext expressionContext;
-	@Getter
-	@Setter
-    private float[] backgroundColor;
-	@Getter
-	@Setter
-    private boolean julia;
-	@Getter
-	@Setter
-    private List<DSLRule> rules;
-	@Getter
-	@Setter
-    private List<DSLPalette> palettes;
-	@Getter
-    @Setter
-    private DSLColorInt init;
-
-	public DSLColor(Token location, ExpressionContext expressionContext, Collection<VariableDeclaration> colorVariables, Collection<VariableDeclaration> stateVariables) {
-		this.location = location;
-		this.expressionContext = expressionContext;
-		this.colorVariables = colorVariables;
-		this.stateVariables = stateVariables;
-	}
+	private final DSLExpressionContext expressionContext;
+	private float[] backgroundColor;
+	private boolean julia;
+	private List<DSLRule> rules;
+	private List<DSLPalette> palettes;
+	private DSLColorInt init;
 
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
 		for (DSLPalette palette : palettes) {
 			context.append("private Palette palette");
-			context.append(palette.name().toUpperCase().substring(0, 1));
-			context.append(palette.name().substring(1));
+			context.append(palette.getName().toUpperCase().substring(0, 1));
+			context.append(palette.getName().substring(1));
 			context.append(";\n");
 		}
 		context.append("public void init() {\n");
 		int i = 0;
 		for (VariableDeclaration var : stateVariables) {
-			if (var.isReal()) {
+			if (var.real()) {
 				context.append("double ");
-				context.append(var.getName());
+				context.append(var.name());
 				context.append(" = getRealVariable(");
 				context.append(i++);
 				context.append(");\n");
 			} else {
 				context.append("final MutableNumber ");
-				context.append(var.getName());
+				context.append(var.name());
 				context.append(" = getVariable(");
 				context.append(i++);
 				context.append(");\n");
@@ -93,13 +71,13 @@ public class DSLColor {
 		i = 0;
 		for (VariableDeclaration var : scope.values()) {
 			if (!stateVariables.contains(var)) {
-				if (var.isReal()) {
+				if (var.real()) {
 					context.append("double ");
-					context.append(var.getName());
+					context.append(var.name());
 					context.append(" = 0;\n");
 				} else {
 					context.append("final MutableNumber ");
-					context.append(var.getName());
+					context.append(var.name());
 					context.append(" = getNumber(");
 					context.append(i++);
 					context.append(");\n");
@@ -111,20 +89,20 @@ public class DSLColor {
 		}
 		context.append("}\n");
 		for (VariableDeclaration var : stateVariables) {
-			scope.put(var.getName(), var);
+			scope.put(var.name(), var);
 		}
 		context.append("public void render() {\n");
 		i = 0;
 		for (VariableDeclaration var : stateVariables) {
-			if (var.isReal()) {
+			if (var.real()) {
 				context.append("double ");
-				context.append(var.getName());
+				context.append(var.name());
 				context.append(" = getRealVariable(");
 				context.append(i++);
 				context.append(");\n");
 			} else {
 				context.append("final MutableNumber ");
-				context.append(var.getName());
+				context.append(var.name());
 				context.append(" = getVariable(");
 				context.append(i++);
 				context.append(");\n");
@@ -133,13 +111,13 @@ public class DSLColor {
 		i = 0;
 		for (VariableDeclaration var : scope.values()) {
 			if (!stateVariables.contains(var)) {
-				if (var.isReal()) {
+				if (var.real()) {
 					context.append("double ");
-					context.append(var.getName());
+					context.append(var.name());
 					context.append(" = 0;\n");
 				} else {
 					context.append("final MutableNumber ");
-					context.append(var.getName());
+					context.append(var.name());
 					context.append(" = getNumber(");
 					context.append(i++);
 					context.append(");\n");

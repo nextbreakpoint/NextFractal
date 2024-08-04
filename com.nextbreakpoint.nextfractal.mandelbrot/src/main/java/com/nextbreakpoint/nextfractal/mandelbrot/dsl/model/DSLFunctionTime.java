@@ -28,13 +28,13 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public class DSLFunctionTime extends DSLFunction {
-    public DSLFunctionTime(Token location, int numberIndex) {
-		super(location, new DSLExpression[0], numberIndex);
+    public DSLFunctionTime(DSLToken token, int numberIndex) {
+		super(token, new DSLExpression[0], numberIndex);
     }
 
 	@Override
@@ -61,7 +61,7 @@ public class DSLFunctionTime extends DSLFunction {
 			context.setColorUseTime(true);
 		}
 		if (arguments.length != 0) {
-			throw new DSLException("Invalid number of arguments: " + location.getText(), location);
+			throw new DSLException("Invalid number of arguments: " + token.getText(), token);
 		}
 		context.append("time()");
 	}

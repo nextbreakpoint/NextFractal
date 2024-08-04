@@ -24,22 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
-import lombok.Getter;
-import lombok.ToString;
-
-@Getter
-@ToString
-public class VariableDeclaration {
-	private final String name;
-	private final boolean real;
-	private final boolean create;
-
-	public VariableDeclaration(String name, boolean real, boolean create) {
-		this.name = name;
-		this.real = real;
-		this.create = create;
-	}
-
+public record VariableDeclaration(String name, boolean real, boolean create) {
 	public Variable asVariable() {
 		return new Variable(name, real);
 	}

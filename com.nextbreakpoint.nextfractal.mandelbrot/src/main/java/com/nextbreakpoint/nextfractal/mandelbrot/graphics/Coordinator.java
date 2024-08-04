@@ -54,12 +54,6 @@ public class Coordinator implements RendererDelegate {
 	private volatile boolean pixelsChanged;
 	private Renderer renderer;
 
-	/**
-	 * @param threadFactory
-	 * @param renderFactory
-	 * @param tile
-	 * @param hints
-	 */
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
@@ -75,61 +69,37 @@ public class Coordinator implements RendererDelegate {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	public final void dispose() {
 		free();
 	}
 	
-	/**
-	 * 
-	 */
 	public void abort() {
 		renderer.abortTasks();
 	}
 	
-	/**
-	 * 
-	 */
 	public void waitFor() {
 		renderer.waitForTasks();
 	}
 	
-	/**
-	 * 
-	 */
 	public void run() {
 		renderer.runTask();
 	}
 
-	/**
-	 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererDelegate#updateImageInBackground(float)
-	 */
 	@Override
 	public void updateImageInBackground(float progress) {
 		this.pixelsChanged = true;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isPixelsChanged() {
 		boolean result = pixelsChanged;
 		pixelsChanged = false;
 		return result;
 	}
 
-	/**
-	 * @return
-	 */
 	public Size getSize() {
 		return renderer.getSize();
 	}
 
-	/**
-	 * @param point
-	 */
 	public void setPoint(ComplexNumber point) {
 		renderer.setPoint(point);
 	}
@@ -138,87 +108,47 @@ public class Coordinator implements RendererDelegate {
 		renderer.setTime(time);
 	}
 
-	/**
-	 * @param julia
-	 */
 	public void setJulia(final boolean julia) {
 		renderer.setJulia(julia);
 	}
 
-	/**
-	 * @param orbit
-	 * @param color
-	 */
 	public void setOrbitAndColor(Orbit orbit, Color color) {
 		renderer.setOrbit(orbit);
 		renderer.setColor(color);
 	}
 
-	/**
-	 * @param color
-	 */
 	public void setColor(Color color) {
 		renderer.setColor(color);
 	}
 
-	/**
-	 * 
-	 */
 	public void init() {
 		renderer.init();
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isTileSupported() {
 		return true;
 	}
 
-	/**
-	 * @return
-	 */
 	public ComplexNumber getInitialCenter() {
 		return renderer.getInitialRegion().getCenter();
 	}
 
-	/**
-	 * @return
-	 */
 	public ComplexNumber getInitialSize() {
 		return renderer.getInitialRegion().getSize();
 	}
 
-	/**
-	 * @param view
-	 */
 	public void setView(View view) {
 		renderer.setView(view);
 	}
 
-	/**
-	 * @param gc
-	 * @param x
-	 * @param y
-	 */
 	public void drawImage(final GraphicsContext gc, final int x, final int y) {
 		renderer.drawImage(gc, x, y);
 	}
 
-//	/**
-//	 * @param gc
-//	 * @param x
-//	 * @param y
-//	 * @param w
-//	 * @param h
-//	 */
 //	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		renderer.drawImage(gc, x, y, w, h);
 //	}
 
-	/**
-	 * 
-	 */
 	protected void free() {
 		if (renderer != null) {
 			renderer.dispose();
@@ -226,10 +156,6 @@ public class Coordinator implements RendererDelegate {
 		}
 	}
 
-	/**
-	 * @param tile 
-	 * @return
-	 */
 	protected Renderer createRenderer(Tile tile) {
 		Integer type = hints.get(KEY_TYPE);
 		if (type != null && type.equals(VALUE_REALTIME)) {
@@ -239,23 +165,14 @@ public class Coordinator implements RendererDelegate {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	public List<Trap> getTraps() {
 		return renderer.getTraps();
 	}
 
-	/**
-	 * @param pixels
-	 */
 	public void getPixels(int[] pixels) {
 		renderer.getPixels(pixels);
 	}
 
-	/**
-	 * @return
-	 */
 	public List<ParserError> getErrors() {
 		return renderer.getErrors();
 	}

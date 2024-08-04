@@ -26,13 +26,14 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 public class DSLCompareOperatorLesser extends DSLCompareOperator {
-	public DSLCompareOperatorLesser(Token location, DSLExpression[] operands) {
-		super(location, operands);
+	public DSLCompareOperatorLesser(DSLToken token, DSLExpression[] operands) {
+		super(token, operands);
 	}
 
 	@Override
@@ -42,6 +43,6 @@ public class DSLCompareOperatorLesser extends DSLCompareOperator {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileCompareOperator(context, scope, "<", operands[0], operands[1]);
+		CompilerUtils.compileCompareOperator(context, scope, "<", operands[0], operands[1]);
 	}
 }

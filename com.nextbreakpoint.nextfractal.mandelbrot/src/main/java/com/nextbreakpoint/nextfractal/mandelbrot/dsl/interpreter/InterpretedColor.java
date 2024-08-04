@@ -30,8 +30,8 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Palette;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLInterpreterContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPalette;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLRule;
@@ -41,7 +41,7 @@ import java.util.Map;
 
 public class InterpretedColor extends Color implements DSLInterpreterContext {
 	private final DSLColor color;
-	private final ExpressionContext context;
+	private final DSLExpressionContext context;
 	private final Map<String, Palette> palettes = new HashMap<>();
 	private final Map<String, Variable> variables = new HashMap<>();
 
@@ -54,13 +54,13 @@ public class InterpretedColor extends Color implements DSLInterpreterContext {
 	public void init() {
 		variables.clear();
         for (VariableDeclaration var : color.getStateVariables()) {
-            variables.put(var.getName(), var.asVariable());
+            variables.put(var.name(), var.asVariable());
         }
         for (VariableDeclaration var : color.getColorVariables()) {
-            variables.put(var.getName(), var.asVariable());
+            variables.put(var.name(), var.asVariable());
         }
 		for (DSLPalette palette : color.getPalettes()) {
-            palettes.put(palette.name(), palette.evaluate(this, variables).build());
+            palettes.put(palette.getName(), palette.evaluate(this, variables).build());
 		}
 	}
 
@@ -78,7 +78,7 @@ public class InterpretedColor extends Color implements DSLInterpreterContext {
 	private void updateStateVars(Map<String, Variable> vars) {
 		int i = 0;
         for (VariableDeclaration var : color.getStateVariables()) {
-            vars.get(var.getName()).setValue(scope.getVariable(i));
+            vars.get(var.name()).setValue(scope.getVariable(i));
             i++;
         }
 	}

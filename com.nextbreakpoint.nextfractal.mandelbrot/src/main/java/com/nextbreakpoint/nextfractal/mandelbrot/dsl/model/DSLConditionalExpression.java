@@ -27,7 +27,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
@@ -36,8 +36,8 @@ public class DSLConditionalExpression extends DSLExpression {
 	private final DSLExpression thenExp;
 	private final DSLExpression elseExp;
 	
-	public DSLConditionalExpression(Token location, DSLCondition condition, DSLExpression thenExp, DSLExpression elseExp, int numberIndex) {
-		super(numberIndex, location);
+	public DSLConditionalExpression(DSLToken token, DSLCondition condition, DSLExpression thenExp, DSLExpression elseExp, int numberIndex) {
+		super(token, numberIndex);
 		this.condition = condition;
 		this.thenExp = thenExp;
 		this.elseExp = elseExp;

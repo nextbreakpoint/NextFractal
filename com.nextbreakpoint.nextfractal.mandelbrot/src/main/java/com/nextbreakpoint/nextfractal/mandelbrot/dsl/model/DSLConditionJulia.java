@@ -26,13 +26,13 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public class DSLConditionJulia extends DSLCondition {
-	public DSLConditionJulia(Token location) {
-		super(location);
+	public DSLConditionJulia(DSLToken token) {
+		super(token);
 	}
 
 	@Override

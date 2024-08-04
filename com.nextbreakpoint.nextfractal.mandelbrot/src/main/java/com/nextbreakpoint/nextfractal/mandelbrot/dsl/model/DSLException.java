@@ -1,14 +1,14 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
 @Getter
 public class DSLException extends RuntimeException {
-    private final Token location;
+    private final DSLToken token;
 
-    public DSLException(String message, Token location) {
+    public DSLException(String message, DSLToken token) {
         super(message);
-        this.location = location;
+        this.token = token;
     }
 }

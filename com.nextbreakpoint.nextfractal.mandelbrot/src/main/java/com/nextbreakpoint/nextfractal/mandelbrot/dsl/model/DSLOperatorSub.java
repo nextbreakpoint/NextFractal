@@ -27,15 +27,16 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.opSub;
 
 public class DSLOperatorSub extends DSLOperator {
-	public DSLOperatorSub(Token location, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
-		super(location, exp1, exp2, numberIndex);
+	public DSLOperatorSub(DSLToken token, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
+		super(token, exp1, exp2, numberIndex);
 	}
 
 	@Override
@@ -55,6 +56,6 @@ public class DSLOperatorSub extends DSLOperator {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileRealMathOperator(context, scope, "-", exp1, exp2);
+		CompilerUtils.compileRealMathOperator(context, scope, "-", exp1, exp2);
 	}
 }

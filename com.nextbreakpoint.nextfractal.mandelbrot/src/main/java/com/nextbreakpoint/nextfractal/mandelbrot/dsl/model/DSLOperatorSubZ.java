@@ -27,21 +27,21 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.opSub;
 
 public class DSLOperatorSubZ extends DSLOperator {
-	public DSLOperatorSubZ(Token location, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
-		super(location, exp1, exp2, numberIndex);
+	public DSLOperatorSubZ(DSLToken token, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
+		super(token, exp1, exp2, numberIndex);
 	}
 
 	@Override
 	public double evaluateReal(DSLInterpreterContext context, Map<String, Variable> scope) {
-		throw new ASTException("Can't assign operator result to real number", location);
+		throw new DSLException("Can't assign operator result to real number", token);
 	}
 
 	@Override
@@ -56,6 +56,6 @@ public class DSLOperatorSubZ extends DSLOperator {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileComplexMathOperator(context, scope, "opSub", exp1, exp2, numberIndex);
+		CompilerUtils.compileComplexMathOperator(context, scope, "opSub", exp1, exp2, numberIndex);
 	}
 }

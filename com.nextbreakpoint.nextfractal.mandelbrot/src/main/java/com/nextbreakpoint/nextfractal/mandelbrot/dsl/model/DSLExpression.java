@@ -27,16 +27,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
-public abstract class DSLExpression {
-	protected final Token location;
+public abstract class DSLExpression extends DSLObject {
 	protected final int numberIndex;
 
-	protected DSLExpression(int numberIndex, Token location) {
-		this.location = location;
+	protected DSLExpression(DSLToken token, int numberIndex) {
+		super(token);
 		this.numberIndex = numberIndex;
 	}
 	

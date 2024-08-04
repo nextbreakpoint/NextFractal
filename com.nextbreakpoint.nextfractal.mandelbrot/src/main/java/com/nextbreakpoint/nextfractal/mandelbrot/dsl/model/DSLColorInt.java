@@ -2,17 +2,16 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.List;
 import java.util.Map;
 
-public class DSLColorInt {
-    private final Token location;
+public class DSLColorInt extends DSLObject {
     private final List<DSLStatement> statements;
 
-    public DSLColorInt(Token location, List<DSLStatement> statements) {
-        this.location = location;
+    public DSLColorInt(DSLToken token, List<DSLStatement> statements) {
+        super(token);
         this.statements = statements;
     }
 

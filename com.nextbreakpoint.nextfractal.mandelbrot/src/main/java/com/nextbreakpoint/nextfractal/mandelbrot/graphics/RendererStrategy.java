@@ -27,47 +27,19 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 
 public interface RendererStrategy {
-	/**
-	 * 
-	 */
     void prepare();
 
-	/**
-	 * @param p
-	 * @return the color
-	 */
     int renderColor(State p);
 	
-	/**
-	 * @param p
-	 * @param x
-	 * @param w
-	 * @return the color
-	 */
     int renderPoint(State p, ComplexNumber x, ComplexNumber w);
 	
-	/**
-	 * @return
-	 */
     boolean isSolidGuessSupported();
 
-	/**
-	 * @return true if vertical symmetry is supported.
-	 */
     boolean isVerticalSymmetrySupported();
 
-	/**
-	 * @return true if horizontal symmetry is supported.
-	 */
     boolean isHorizontalSymmetrySupported();
 
-	/**
-	 * @return
-	 */
     double getVerticalSymmetryPoint();
 
-	/**
-	 * @return
-	 */
     double getHorizontalSymmetryPoint();
 }

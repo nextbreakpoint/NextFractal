@@ -24,13 +24,13 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 public abstract class DSLCompareOperator extends DSLCondition {
 	protected final DSLExpression[] operands;
 
-	public DSLCompareOperator(Token location, DSLExpression[] operands) {
-		super(location);
+	public DSLCompareOperator(DSLToken token, DSLExpression[] operands) {
+		super(token);
         this.operands = operands;
 	}
 }

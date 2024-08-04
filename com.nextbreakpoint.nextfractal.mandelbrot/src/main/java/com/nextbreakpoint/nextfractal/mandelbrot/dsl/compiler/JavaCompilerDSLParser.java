@@ -40,28 +40,27 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult.Type;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ErrorStrategy;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTColor;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitBegin;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitEnd;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitLoop;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTOrbitTrapOp;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTPalette;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTPaletteElement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTRule;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotLexer;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ErrorStrategy;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotLexer;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTBuilder;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTFractal;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitBegin;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitEnd;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitLoop;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitTrap;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTOrbitTrapOp;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTPalette;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTPaletteElement;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTRule;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTStatement;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -90,9 +89,9 @@ public class JavaCompilerDSLParser {
 	public DSLParserResult parse(String source) throws DSLParserException {
 		List<ParserError> errors = new ArrayList<>();
 		ASTFractal ast = parse(source, errors);
-		ExpressionContext orbitContext = new ExpressionContext();
+		DSLExpressionContext orbitContext = new DSLExpressionContext();
 		String orbitSource = buildOrbit(orbitContext, ast, errors);
-		ExpressionContext colorContext = new ExpressionContext();
+		DSLExpressionContext colorContext = new DSLExpressionContext();
 		String colorSource = buildColor(colorContext, ast, errors);
 		if (logger.isLoggable(Level.FINE)) {
 			logger.fine(orbitSource);
@@ -110,11 +109,9 @@ public class JavaCompilerDSLParser {
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			MandelbrotParser parser = new MandelbrotParser(tokens);
 			parser.setErrorHandler(new ErrorStrategy(errors));
-			ParseTree fractalTree = parser.fractal();
-            if (fractalTree != null) {
-            	ASTBuilder builder = parser.getBuilder();
-                return builder.getFractal();
-            }
+			parser.fractal();
+			ASTBuilder builder = parser.getBuilder();
+			return builder.getFractal();
 		} catch (ASTException e) {
 			ParserErrorType type = ParserErrorType.COMPILE;
 			long line = e.getLocation().getLine();
@@ -134,10 +131,9 @@ public class JavaCompilerDSLParser {
 			errors.add(error);
 			throw new DSLParserException("Can't parse source", errors);
 		}
-		return null;
 	}
 
-	private String buildOrbit(ExpressionContext context, ASTFractal fractal, List<ParserError> errors) throws DSLParserException {
+	private String buildOrbit(DSLExpressionContext context, ASTFractal fractal, List<ParserError> errors) throws DSLParserException {
 		try {
 			StringBuilder builder = new StringBuilder();
 			Map<String, VariableDeclaration> variables = new HashMap<>();
@@ -157,7 +153,7 @@ public class JavaCompilerDSLParser {
 		}
 	}
 	
-	private String buildColor(ExpressionContext context, ASTFractal fractal, List<ParserError> errors) throws DSLParserException {
+	private String buildColor(DSLExpressionContext context, ASTFractal fractal, List<ParserError> errors) throws DSLParserException {
 		try {
 			StringBuilder builder = new StringBuilder();
 			Map<String, VariableDeclaration> variables = new HashMap<>();
@@ -177,7 +173,7 @@ public class JavaCompilerDSLParser {
 		}
 	}
 	
-	private String compileOrbit(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTFractal fractal) {
+	private String compileOrbit(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTFractal fractal) {
 		builder.append("package ");
 		builder.append(packageName);
 		builder.append(";\n");
@@ -215,7 +211,7 @@ public class JavaCompilerDSLParser {
 		return builder.toString();
 	}
 
-	private String compileColor(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTFractal fractal) {
+	private String compileColor(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTFractal fractal) {
 		builder.append("package ");
 		builder.append(packageName);
 		builder.append(";\n");
@@ -250,31 +246,31 @@ public class JavaCompilerDSLParser {
 		return builder.toString();
 	}
 
-	private void buildOrbit(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, ASTFractal fractal) {
+	private void buildOrbit(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, ASTFractal fractal) {
 		if (fractal != null) {
 			for (VariableDeclaration var : fractal.getOrbitVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			for (VariableDeclaration var : fractal.getStateVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			compile(context, builder, scope, fractal.getStateVariables(), fractal.getOrbit());
 		}
 	}
 
-	private void buildColor(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, ASTFractal fractal) {
+	private void buildColor(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, ASTFractal fractal) {
 		if (fractal != null) {
 			for (VariableDeclaration var : fractal.getColorVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			for (VariableDeclaration var : fractal.getStateVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			compile(context, builder, scope, fractal.getStateVariables(), fractal.getColor());
 		}
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, Collection<VariableDeclaration> stateVariables, ASTOrbit orbit) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, Collection<VariableDeclaration> stateVariables, ASTOrbit orbit) {
 		builder.append("public void init() {\n");
 		if (orbit != null) {
 			builder.append("setInitialRegion(");
@@ -285,7 +281,7 @@ public class JavaCompilerDSLParser {
 			builder.append("));\n");
 			for (VariableDeclaration var : stateVariables) {
 				builder.append("addVariable(");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(");\n");
 			}
 			builder.append("resetTraps();\n");
@@ -298,15 +294,15 @@ public class JavaCompilerDSLParser {
 		}
 		builder.append("}\n");
 		for (VariableDeclaration var : scope.values()) {
-			scope.put(var.getName(), var);
-			if (var.isCreate()) {
-				if (var.isReal()) {
+			scope.put(var.name(), var);
+			if (var.create()) {
+				if (var.real()) {
 					builder.append("private double ");
-					builder.append(var.getName());
+					builder.append(var.name());
 					builder.append(" = 0.0;\n");
 				} else {
 					builder.append("private final MutableNumber ");
-					builder.append(var.getName());
+					builder.append(var.name());
 					builder.append(" = getNumber(");
 					builder.append(context.newNumberIndex());
 					builder.append(").set(0.0,0.0);\n");
@@ -330,7 +326,7 @@ public class JavaCompilerDSLParser {
 			builder.append("setVariable(");
 			builder.append(i++);
 			builder.append(",");
-			builder.append(var.getName());
+			builder.append(var.name());
 			builder.append(");\n");
 		}
 		builder.append("}\n");
@@ -345,7 +341,7 @@ public class JavaCompilerDSLParser {
 		builder.append(";\n}\n");
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, Collection<VariableDeclaration> stateVariables, ASTColor color) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> scope, Collection<VariableDeclaration> stateVariables, ASTColor color) {
 		if (color != null) {
 			for (ASTPalette palette : color.getPalettes()) {
 				builder.append("private Palette palette");
@@ -357,15 +353,15 @@ public class JavaCompilerDSLParser {
 		builder.append("public void init() {\n");
 		int i = 0;
 		for (VariableDeclaration var : stateVariables) {
-			if (var.isReal()) {
+			if (var.real()) {
 				builder.append("double ");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(" = getRealVariable(");
 				builder.append(i++);
 				builder.append(");\n");
 			} else {
 				builder.append("final MutableNumber ");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(" = getVariable(");
 				builder.append(i++);
 				builder.append(");\n");
@@ -374,13 +370,13 @@ public class JavaCompilerDSLParser {
 		i = 0;
 		for (VariableDeclaration var : scope.values()) {
 			if (!stateVariables.contains(var)) {
-				if (var.isReal()) {
+				if (var.real()) {
 					builder.append("double ");
-					builder.append(var.getName());
+					builder.append(var.name());
 					builder.append(" = 0;\n");
 				} else {
 					builder.append("final MutableNumber ");
-					builder.append(var.getName());
+					builder.append(var.name());
 					builder.append(" = getNumber(");
 					builder.append(i++);
 					builder.append(");\n");
@@ -394,20 +390,20 @@ public class JavaCompilerDSLParser {
 		}
 		builder.append("}\n");
 		for (VariableDeclaration var : stateVariables) {
-			scope.put(var.getName(), var);
+			scope.put(var.name(), var);
 		}
 		builder.append("public void render() {\n");
 		i = 0;
 		for (VariableDeclaration var : stateVariables) {
-			if (var.isReal()) {
+			if (var.real()) {
 				builder.append("double ");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(" = getRealVariable(");
 				builder.append(i++);
 				builder.append(");\n");
 			} else {
 				builder.append("final MutableNumber ");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(" = getVariable(");
 				builder.append(i++);
 				builder.append(");\n");
@@ -416,13 +412,13 @@ public class JavaCompilerDSLParser {
 		i = 0;
 		for (VariableDeclaration var : scope.values()) {
 			if (!stateVariables.contains(var)) {
-				if (var.isReal()) {
+				if (var.real()) {
 					builder.append("double ");
-					builder.append(var.getName());
+					builder.append(var.name());
 					builder.append(" = 0;\n");
 				} else {
 					builder.append("final MutableNumber ");
-					builder.append(var.getName());
+					builder.append(var.name());
 					builder.append(" = getNumber(");
 					builder.append(i++);
 					builder.append(");\n");
@@ -460,7 +456,7 @@ public class JavaCompilerDSLParser {
 		builder.append(";\n}\n");
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTRule rule) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTRule rule) {
 		builder.append("if (");
 		rule.getRuleExp().compile(new ExpressionCompiler(context, variables, builder, ClassType.COLOR));
 		builder.append(") {\n");
@@ -471,7 +467,7 @@ public class JavaCompilerDSLParser {
 		builder.append(");\n}\n");
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTPalette palette) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTPalette palette) {
 		builder.append("palette");
 		builder.append(palette.getName().toUpperCase().substring(0, 1));
 		builder.append(palette.getName().substring(1));
@@ -484,7 +480,7 @@ public class JavaCompilerDSLParser {
 		builder.append(".build();\n");
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTPaletteElement element) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTPaletteElement element) {
 		builder.append("element(");
 		builder.append(createArray(element.getBeginColor().getComponents()));
 		builder.append(",");
@@ -504,7 +500,7 @@ public class JavaCompilerDSLParser {
 		builder.append(";})");
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitTrap trap) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitTrap trap) {
 		builder.append("private Trap trap");
 		builder.append(trap.getName().toUpperCase().substring(0, 1));
 		builder.append(trap.getName().substring(1));
@@ -562,7 +558,7 @@ public class JavaCompilerDSLParser {
 		builder.append(";\n");
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitBegin begin, Collection<VariableDeclaration> stateVariables) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitBegin begin, Collection<VariableDeclaration> stateVariables) {
 		if (begin != null) {
 			for (ASTStatement statement : begin.getStatements()) {
 				compile(context, builder, variables, statement, ClassType.ORBIT);
@@ -570,7 +566,7 @@ public class JavaCompilerDSLParser {
 		}
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitEnd end, Collection<VariableDeclaration> stateVariables) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitEnd end, Collection<VariableDeclaration> stateVariables) {
 		if (end != null) {
 			for (ASTStatement statement : end.getStatements()) {
 				compile(context, builder, variables, statement, ClassType.ORBIT);
@@ -578,7 +574,7 @@ public class JavaCompilerDSLParser {
 		}
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitLoop loop, Collection<VariableDeclaration> stateVariables) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTOrbitLoop loop, Collection<VariableDeclaration> stateVariables) {
 		if (loop != null) {
 			builder.append("n = ");
 			builder.append(loop.getBegin());
@@ -591,7 +587,7 @@ public class JavaCompilerDSLParser {
 					builder.append(", ");
 				}
 				builder.append("number(");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(")");
 				i += 1;
 			}
@@ -616,7 +612,7 @@ public class JavaCompilerDSLParser {
 					builder.append(", ");
 				}
 				builder.append("number(");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(")");
 				i += 1;
 			}
@@ -631,7 +627,7 @@ public class JavaCompilerDSLParser {
 					builder.append(", ");
 				}
 				builder.append("number(");
-				builder.append(var.getName());
+				builder.append(var.name());
 				builder.append(")");
 				i += 1;
 			}
@@ -640,7 +636,7 @@ public class JavaCompilerDSLParser {
 		}
 	}
 
-	private void compile(ExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTStatement statement, ClassType classType) {
+	private void compile(DSLExpressionContext context, StringBuilder builder, Map<String, VariableDeclaration> variables, ASTStatement statement, ClassType classType) {
 		if (statement != null) {
 			statement.compile(new ExpressionCompiler(context, variables, builder, classType));
 		}		

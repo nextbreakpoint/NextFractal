@@ -26,13 +26,14 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 public class DSLLogicOperatorAnd extends DSLLogicOperator {
-	public DSLLogicOperatorAnd(Token location, DSLCondition[] operands) {
-		super(location, operands);
+	public DSLLogicOperatorAnd(DSLToken token, DSLCondition[] operands) {
+		super(token, operands);
 	}
 
 	@Override
@@ -42,6 +43,6 @@ public class DSLLogicOperatorAnd extends DSLLogicOperator {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileLogicOperator(context, scope, "&&", operands[0], operands[1]);
+		CompilerUtils.compileLogicOperator(context, scope, "&&", operands[0], operands[1]);
 	}
 }

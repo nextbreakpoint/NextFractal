@@ -73,11 +73,6 @@ public final class XaosRenderer extends Renderer {
 	private final Runnable redrawColumnsRunnable = () -> prepareColumns(true);
 	private final Runnable refreshColumnsRunnable = () -> prepareColumns(false);
 
-	/**
-	 * @param threadFactory
-	 * @param renderFactory
-	 * @param tile
-	 */
 	public XaosRenderer(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile) {
 		super(threadFactory, renderFactory, tile);
 		this.xaosRendererData = (XaosRendererData) contentRendererData;
@@ -89,9 +84,6 @@ public final class XaosRenderer extends Renderer {
 		}
 	}
 	
-	/**
-	 * 
-	 */
 	@Override
 	public void dispose() {
 		if (executor != null) {
@@ -104,9 +96,6 @@ public final class XaosRenderer extends Renderer {
 		super.dispose();
 	}
 
-	/**
-	 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer#createRendererData()
-	 */
 	@Override
 	protected RendererData createRendererData() {
 		return new XaosRendererData();
@@ -1738,9 +1727,6 @@ public final class XaosRenderer extends Renderer {
 		Thread.yield();
 	}
 
-	/**
-	 * @param pixels
-	 */
 	@Override
 	public void getPixels(int[] pixels) {
 //		int bufferWidth = buffer.getSize().getWidth();
@@ -1764,11 +1750,6 @@ public final class XaosRenderer extends Renderer {
 //		int borderHeight = tile.getBorderSize().getHeight();
 	}
 
-	/**
-	 * @param tile
-	 * @param rotation
-	 * @return
-	 */
 	@Override
 	protected Tile computeOptimalBufferSize(Tile tile, double rotation) {
 		Size tileSize = tile.tileSize();
@@ -1800,10 +1781,6 @@ public final class XaosRenderer extends Renderer {
 		}
 	}
 
-	/**
-	 * @param rotation
-	 * @return
-	 */
 	@Override
 	protected AffineTransform createTransform(double rotation) {
 		Size baseImageSize = tile.imageSize();

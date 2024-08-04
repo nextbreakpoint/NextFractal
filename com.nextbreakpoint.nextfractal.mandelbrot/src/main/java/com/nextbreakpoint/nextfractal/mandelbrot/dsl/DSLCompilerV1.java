@@ -27,9 +27,9 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.JavaCompilerProvider;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.JavaCompilerDSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpreterDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.JavaCompilerProvider;
 
 import javax.tools.JavaCompiler;
 

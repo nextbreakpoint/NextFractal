@@ -28,7 +28,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
@@ -36,8 +36,8 @@ public class DSLNumber extends DSLExpression {
 	private final double r;
 	private final double i;
 
-	public DSLNumber(Token location, double r, double i, int numberIndex) {
-		super(numberIndex, location);
+	public DSLNumber(DSLToken token, double r, double i, int numberIndex) {
+		super(token, numberIndex);
 		this.r = r;
 		this.i = i;
 	}

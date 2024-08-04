@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
@@ -34,8 +34,8 @@ public class DSLTrapCondition extends DSLCondition {
 	private final String name;
 	private final DSLExpression exp;
 
-	public DSLTrapCondition(Token location, String name, DSLExpression exp) {
-		super(location);
+	public DSLTrapCondition(DSLToken token, String name, DSLExpression exp) {
+		super(token);
 		this.name = name;
         this.exp = exp;
 	}

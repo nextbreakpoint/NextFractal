@@ -47,9 +47,6 @@ public class RendererData {
 		point = new MutableNumber(0, 0);
 	}
 
-	/**
-	 * 
-	 */
 	public void free() {
 		positionX = null;
 		positionY = null;
@@ -61,11 +58,6 @@ public class RendererData {
 		oldCache = null;
 	}
 
-	/**
-	 * @param width
-	 * @param height
-	 * @param depth
-	 */
 	public void setSize(final int width, final int height, final int depth) {
 		if (this.width != width || this.height != height) {
 			realloc(width, height);
@@ -83,10 +75,6 @@ public class RendererData {
 		}
 	}
 
-	/**
-	 * @param width
-	 * @param height
-	 */
 	protected void realloc(final int width, final int height) {
 		positionX = new double[width];
 		positionY = new double[height];
@@ -94,9 +82,6 @@ public class RendererData {
 		oldPixels = new int[width * height];
 	}
 
-	/**
-	 * 
-	 */
 	public void swap() {
 		final double[] tmpCache = oldCache;
 		oldCache = newCache;
@@ -106,120 +91,66 @@ public class RendererData {
 		newPixels = tmpPixels;
 	}
 
-	/**
-	 * @return
-	 */
 	public double left() {
 		return region.left();
 	}
 
-	/**
-	 * @return
-	 */
 	public double right() {
 		return region.right();
 	}
 
-	/**
-	 * @return
-	 */
 	public double bottom() {
 		return region.bottom();
 	}
 
-	/**
-	 * @return
-	 */
 	public double top() {
 		return region.top();
 	}
 
-    /**
-	 * @return
-	 */
 	public ComplexNumber point() {
 		return point;
 	}
 	
-	/**
-	 * @return
-	 */
 	public void setPoint(ComplexNumber point) {
 		this.point.set(point);
 	}
 
-	/**
-	 * @param offset
-	 * @param argb
-	 */
 	public void setPixel(int offset, int argb) {
 		newPixels[offset] = argb;
 	}
 
-	/**
-	 * @param offset
-	 * @return
-	 */
 	public int getPixel(int offset) {
 		return newPixels[offset];
 	}
 
-	/**
-	 * @return
-	 */
 	public int[] getPixels() {
 		return newPixels;
 	}
 
-	/**
-	 * @param i
-	 * @return
-	 */
 	public double positionX(int i) {
 		return positionX[i];
 	}
 
-	/**
-	 * @param i
-	 * @return
-	 */
 	public double positionY(int i) {
 		return positionY[i];
 	}
 
-	/**
-	 * @return
-	 */
 	public double[] positionX() {
 		return positionX;
 	}
 
-	/**
-	 * @return
-	 */
 	public double[] positionY() {
 		return positionY;
 	}
 
-	/**
-	 * @param i
-	 * @param position
-	 */
 	public void setPositionX(int i, double position) {
 		positionX[i] = position;
 	}
 
-	/**
-	 * @param i
-	 * @param position
-	 */
 	public void setPositionY(int i, double position) {
 		positionY[i] = position;
 	}
 
-	/**
-	 * 
-	 */
 	public void initPositions() {
 		final int sizex = width;
 		final int sizey = height;
@@ -237,17 +168,10 @@ public class RendererData {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	public State newPoint() {
 		return new State(depth);
 	}
 
-	/**
-	 * @param offset
-	 * @param p
-	 */
 	public void getPoint(int offset, State p) {
 		int d2 = depth * 2;
 		int o1 = offset * d2 + 0;
@@ -259,10 +183,6 @@ public class RendererData {
 		}
 	}
 
-	/**
-	 * @param offset
-	 * @param p
-	 */
 	public void setPoint(int offset, State p) {
 		int d2 = depth * 2;
 		int o1 = offset * d2 + 0;
@@ -274,47 +194,24 @@ public class RendererData {
 		}
 	}
 
-	/**
-	 * @param from
-	 * @param to
-	 * @param length
-	 */
 	public void movePixels(int from, int to, int length) {
 		System.arraycopy(newPixels, from, newPixels, to, length);
 	}
 
-	/**
-	 * @param from
-	 * @param to
-	 * @param length
-	 */
 	public void moveCache(int from, int to, int length) {
 		int d2 = 2 * depth;
 		System.arraycopy(newCache, from * d2, newCache, to * d2, length * d2);
 	}
 
-	/**
-	 * @param from
-	 * @param to
-	 * @param length
-	 */
 	public void copyPixels(int from, int to, int length) {
 		System.arraycopy(oldPixels, from, newPixels, to, length);
 	}
 
-	/**
-	 * @param from
-	 * @param to
-	 * @param length
-	 */
 	public void copyCache(int from, int to, int length) {
 		int d2 = 2 * depth;
 		System.arraycopy(oldCache, from * d2, newCache, to * d2, length * d2);
 	}
 
-	/**
-	 * 
-	 */
 	public void clearPixels() {
 		for (int i = 0; i < width; i++) {
 			newPixels[i] = 0xFF000000;

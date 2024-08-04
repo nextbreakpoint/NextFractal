@@ -26,13 +26,14 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 public class DSLTrapOpClose extends DSLTrapOp {
-	public DSLTrapOpClose(Token location) {
-		super(location, null, null, null);
+	public DSLTrapOpClose(DSLToken token) {
+		super(token, null, null, null);
 	}
 
 	@Override
@@ -42,6 +43,6 @@ public class DSLTrapOpClose extends DSLTrapOp {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileTrapOp(context, "close");
+		CompilerUtils.compileTrapOp(context, "close");
 	}
 }

@@ -27,16 +27,16 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcSin;
 
 public class DSLFunctionSin extends DSLFunction {
-	public DSLFunctionSin(Token location, ExpressionContext context, DSLExpression[] arguments) {
-		super(location, arguments, context.newNumberIndex());
+	public DSLFunctionSin(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
+		super(token, arguments, context.newNumberIndex());
 	}
 
 	@Override
@@ -56,6 +56,6 @@ public class DSLFunctionSin extends DSLFunction {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileComplexFunctionOneArgument(location, context, scope, "funcSin", arguments, numberIndex);
+		CompilerUtils.compileComplexFunctionOneArgument(token, context, scope, "funcSin", arguments, numberIndex);
 	}
 }

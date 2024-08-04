@@ -39,11 +39,11 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCompilerContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTException;
 import lombok.extern.java.Log;
 
 import javax.tools.JavaCompiler;
@@ -73,7 +73,7 @@ public class FastDSLCompiler {
 		try {
 			final StringBuilder builder = new StringBuilder();
             if (report.fractal() != null) {
-				final ExpressionContext expressionContext = report.fractal().getOrbit().getExpressionContext();
+				final DSLExpressionContext expressionContext = report.fractal().getOrbit().getExpressionContext();
 				final HashMap<String, VariableDeclaration> scope = new HashMap<>();
 				final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.ORBIT);
 				compileOrbit(context, report.fractal().getOrbit(), scope);
@@ -104,7 +104,7 @@ public class FastDSLCompiler {
 		try {
 			final StringBuilder builder = new StringBuilder();
             if (report.fractal() != null) {
-				final ExpressionContext expressionContext = report.fractal().getColor().getExpressionContext();
+				final DSLExpressionContext expressionContext = report.fractal().getColor().getExpressionContext();
 				final HashMap<String, VariableDeclaration> scope = new HashMap<>();
 				final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.COLOR);
 				compileColor(context, report.fractal().getColor(), scope);
@@ -166,10 +166,10 @@ public class FastDSLCompiler {
 		context.append("Orbit extends Orbit {\n");
 		if (orbit != null) {
 			for (VariableDeclaration var : orbit.getOrbitVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			for (VariableDeclaration var : orbit.getStateVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			orbit.compile(context, scope);
 		}
@@ -208,10 +208,10 @@ public class FastDSLCompiler {
 		context.append("Color extends Color {\n");
 		if (color != null) {
 			for (VariableDeclaration var : color.getColorVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			for (VariableDeclaration var : color.getStateVariables()) {
-				scope.put(var.getName(), var);
+				scope.put(var.name(), var);
 			}
 			color.compile(context, scope);
 		}

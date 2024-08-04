@@ -50,49 +50,31 @@ public class MandelbrotStrategy implements RendererStrategy {
 			return renderColor(p);
 		}
 
-		/**
-		 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy#renderColor(State)
-		 */
 		@Override
 		public int renderColor(State p) {
 			return Colors.makeColor(rendererFractal.renderColor(p.vars()));
 		}
 
-		/**
-		 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy#isSolidGuessSupported()
-		 */
 		@Override
 		public boolean isSolidGuessSupported() {
 			return rendererFractal.isSolidGuessSupported();
 		}
 
-		/**
-		 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy#isVerticalSymmetrySupported()
-		 */
 		@Override
 		public boolean isVerticalSymmetrySupported() {
 			return rendererFractal.isVerticalSymmetrySupported();
 		}
 
-		/**
-		 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy#isHorizontalSymmetrySupported()
-		 */
 		@Override
 		public boolean isHorizontalSymmetrySupported() {
 			return rendererFractal.isHorizontalSymmetrySupported();
 		}
 
-		/**
-		 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy#getVerticalSymmetryPoint()
-		 */
 		@Override
 		public double getVerticalSymmetryPoint() {
 			return rendererFractal.getVerticalSymmetryPoint();
 		}
 
-		/**
-		 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererStrategy#getHorizontalSymmetryPoint()
-		 */
 		@Override
 		public double getHorizontalSymmetryPoint() {
 			return rendererFractal.getHorizontalSymmetryPoint();

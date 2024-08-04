@@ -112,11 +112,6 @@ public class Renderer {
 	private final ExecutorService executor;
 	private final Lock lock = new Lock();
 
-	/**
-	 * @param threadFactory
-	 * @param renderFactory
-	 * @param tile
-	 */
 	public Renderer(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
@@ -136,17 +131,11 @@ public class Renderer {
 		executor = Executors.newSingleThreadExecutor(threadFactory);
 	}
 
-	/**
-	 * 
-	 */
 	public void dispose() {
 		shutdown();
 		free();
 	}
 
-    /**
-	 * 
-	 */
 	public void abortTasks() {
 		interrupted = true;
 //		if (future != null) {
@@ -154,9 +143,6 @@ public class Renderer {
 //		}
 	}
 
-	/**
-	 * 
-	 */
 	public void waitForTasks() {
 		try {
 			if (future != null) {
@@ -169,9 +155,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	public void runTask() {
 		if (future == null) {
 			interrupted = false;
@@ -179,9 +162,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	public void init() {
 		initialized = true;
 		contentRendererFractal.initialize();
@@ -193,27 +173,18 @@ public class Renderer {
 		}
 	}
 
-    /**
-	 * @param orbit
-	 */
 	public void setOrbit(Orbit orbit) {
 		contentRendererFractal.setOrbit(orbit);
 		previewRendererFractal.setOrbit(orbit);
 		orbitChanged = true;
 	}
 
-	/**
-	 * @param color
-	 */
 	public void setColor(Color color) {
 		contentRendererFractal.setColor(color);
 		previewRendererFractal.setColor(color);
 		colorChanged = true;
 	}
 
-	/**
-	 * @param julia
-	 */
 	public void setJulia(boolean julia) {
 		if (this.julia != julia) {
 			this.julia = julia;
@@ -221,9 +192,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @param point
-	 */
 	public void setPoint(ComplexNumber point) {
 		if (this.point == null || !this.point.equals(point)) {
 			this.point = point;
@@ -231,9 +199,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @param time
-	 */
 	public void setTime(Time time) {
 		if (this.time == null || !this.time.equals(time)) {
 			this.time = time;
@@ -241,9 +206,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @param contentRegion
-	 */
 	public void setContentRegion(Region contentRegion) {
 		if (this.contentRegion == null || !this.contentRegion.equals(contentRegion)) {
 			this.contentRegion = contentRegion;
@@ -251,9 +213,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @param view
-	 */
 	public void setView(View view) {
 		this.view = view;
 		lock.lock();
@@ -279,9 +238,6 @@ public class Renderer {
 		lock.unlock();
 	}
 
-    /**
-	 * @param pixels
-	 */
 	public void getPixels(int[] pixels) {
 		int bufferWidth = buffer.getSize().width();
 		int bufferHeight = buffer.getSize().height();
@@ -303,9 +259,6 @@ public class Renderer {
 		}
 	}
 	
-	/**
-	 * @param gc
-	 */
 	public void drawImage(final GraphicsContext gc, final int x, final int y) {
 		lock.lock();
 		if (buffer != null) {
@@ -322,9 +275,6 @@ public class Renderer {
 		lock.unlock();
 	}
 
-	/**
-	 * @param gc
-	 */
 	public void copyImage(final GraphicsContext gc) {
 		lock.lock();
 		if (buffer != null) {
@@ -335,13 +285,6 @@ public class Renderer {
 		lock.unlock();
 	}
 
-//	/**
-//	 * @param gc
-//	 * @param x
-//	 * @param y
-//	 * @param w
-//	 * @param h
-//	 */
 //	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		lock.lock();
 //		if (buffer != null) {
@@ -369,11 +312,6 @@ public class Renderer {
 		buffer.setBuffer(renderFactory.createBuffer(size.width(), size.height()));
 	}
 
-	/**
-	 * @param tile
-	 * @param rotation
-	 * @return
-	 */
 	protected Tile computeOptimalBufferSize(Tile tile, double rotation) {
 		Size tileSize = tile.tileSize();
 		Size imageSize = tile.imageSize();
@@ -382,10 +320,6 @@ public class Renderer {
 		return new Tile(imageSize, tileSize, tileOffset, borderSize);
 	}
 
-	/**
-	 * @param size
-	 * @return
-	 */
 	protected Size computeBufferSize(Size size) {
 		int tw = size.width();
 		int th = size.height();
@@ -393,11 +327,6 @@ public class Renderer {
 		return new Size(tileDim, tileDim);
 	}
 
-	/**
-	 * @param size
-	 * @param borderSize
-	 * @return
-	 */
 	protected Size computeBufferSize(Size size, Size borderSize) {
 		Size bufferSize = computeBufferSize(size);
 		int tw = bufferSize.width();
@@ -407,9 +336,6 @@ public class Renderer {
 		return new Size(tw + bw * 2, th + bh * 2);
 	}
 
-	/**
-	 * 
-	 */
 	protected void doRender() {
 		try {
 //			if (isInterrupted()) {
@@ -592,9 +518,6 @@ public class Renderer {
 		return false;
 	}
 
-	/**
-	 *
-	 */
 	protected Region computeContentRegion() {
 		final double tx = view.getTranslation().x();
 		final double ty = view.getTranslation().y();
@@ -670,10 +593,6 @@ public class Renderer {
 		return newRegion;
 	}
 
-	/**
-	 * @param rotation
-	 * @return
-	 */
 	protected AffineTransform createTransform(double rotation) {
 		final Size tileSize = buffer.getTile().tileSize();
 		final Size borderSize = buffer.getTile().borderSize();
@@ -689,10 +608,6 @@ public class Renderer {
 		return affine;
 	}
 	
-	/**
-	 * @param progress
-	 * @param pixels
-	 */
 	protected void didChanged(float progress, int[] pixels) {
 		lock.lock();
 		if (buffer != null) {
@@ -704,16 +619,10 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	protected RendererData createRendererData() {
 		return new RendererData();
 	}
 
-	/**
-	 * 
-	 */
 	protected void free() {
 		contentRendererData.free();
 		if (previewTile != null) {
@@ -725,9 +634,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	protected void shutdown() {
 		executor.shutdownNow();
 		try {

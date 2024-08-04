@@ -3,15 +3,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public class DSLParen extends DSLExpression {
     private final DSLExpression exp;
 
-    public DSLParen(Token location, DSLExpression exp, int numberIndex) {
-        super(numberIndex, location);
+    public DSLParen(DSLToken token, DSLExpression exp, int numberIndex) {
+        super(token, numberIndex);
         this.exp = exp;
     }
 

@@ -25,13 +25,13 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ErrorStrategy;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotLexer;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ErrorStrategy;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotLexer;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTBuilder;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTFractal;
 import lombok.extern.java.Log;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;

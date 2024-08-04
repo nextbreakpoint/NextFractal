@@ -42,16 +42,10 @@ class XaosRealloc {
 	boolean changeIsFilled;
 	double changePosition;
 
-	/**
-	 * @param line
-	 */
 	public XaosRealloc(final boolean line) {
 		this.line = line;
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return "pos = " + pos + ", symref = " + symRef + ", symto = " + symTo + ", plus = " + plus + ", dirty = " + dirty + ", calculate = " + calculate + ", refreshed = " + refreshed + ", line = " + line + ", priority = " + priority + ", position = " + position + ", cached = " + isCached  + ", filled = " + isFilled;

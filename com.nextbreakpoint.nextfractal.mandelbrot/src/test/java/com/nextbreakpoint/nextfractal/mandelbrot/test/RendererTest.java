@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
@@ -49,7 +50,7 @@ public class RendererTest {
 	@Test
 	public void testProgress() {
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Test", false, Thread.MIN_PRIORITY);
-		GraphicsFactory renderFactory = new Java2DGraphicsFactory();
+		GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
 		Point tileOffest = new Point(0, 0);
 		Size borderSize = new Size(0, 0);
 		Size tileSize = new Size(100, 100);

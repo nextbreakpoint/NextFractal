@@ -2,18 +2,17 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
 import lombok.Getter;
 
 import java.util.Objects;
 
 public class DSLCompilerContext {
-    private final ExpressionContext expressionContext;
+    private final DSLExpressionContext expressionContext;
     private final StringBuilder builder;
     @Getter
     private final ClassType classType;
 
-    public DSLCompilerContext(ExpressionContext expressionContext, StringBuilder builder, ClassType classType) {
+    public DSLCompilerContext(DSLExpressionContext expressionContext, StringBuilder builder, ClassType classType) {
         this.expressionContext = Objects.requireNonNull(expressionContext);
         this.builder = Objects.requireNonNull(builder);
         this.classType = Objects.requireNonNull(classType);

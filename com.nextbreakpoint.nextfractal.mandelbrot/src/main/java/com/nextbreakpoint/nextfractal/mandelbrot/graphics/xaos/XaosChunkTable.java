@@ -27,9 +27,6 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics.xaos;
 class XaosChunkTable {
 	XaosChunk[] data;
 
-	/**
-	 * @param width
-	 */
 	public XaosChunkTable(final int width) {
 		data = new XaosChunk[width + 1];
 		for (int i = 0; i <= width; i++) {

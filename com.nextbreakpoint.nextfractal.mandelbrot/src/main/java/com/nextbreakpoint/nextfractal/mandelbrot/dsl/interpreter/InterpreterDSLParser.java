@@ -29,16 +29,15 @@ import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult.Type;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ErrorStrategy;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotLexer;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.MandelbrotParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ErrorStrategy;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotLexer;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTBuilder;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTFractal;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -65,12 +64,9 @@ public class InterpreterDSLParser {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MandelbrotParser parser = new MandelbrotParser(tokens);
             parser.setErrorHandler(new ErrorStrategy(errors));
-            ParseTree fractalTree = parser.fractal();
-            //TODO review this code
-            if (fractalTree != null) {
-                ASTBuilder builder = parser.getBuilder();
-                return builder.getFractal();
-            }
+            parser.fractal();
+            ASTBuilder builder = parser.getBuilder();
+            return builder.getFractal();
         } catch (ASTException e) {
             ParserErrorType type = ParserErrorType.COMPILE;
             long line = e.getLocation().getLine();
@@ -90,6 +86,5 @@ public class InterpreterDSLParser {
             errors.add(error);
             throw new DSLParserException("Can't parse source", errors);
         }
-        return null;
     }
 }	

@@ -28,7 +28,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTFractal;
 
 import java.util.ArrayList;
 

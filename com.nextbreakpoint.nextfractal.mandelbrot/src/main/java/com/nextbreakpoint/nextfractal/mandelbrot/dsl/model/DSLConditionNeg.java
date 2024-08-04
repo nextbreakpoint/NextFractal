@@ -26,15 +26,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public class DSLConditionNeg extends DSLCondition {
 	private final DSLCondition condition;
 	
-	public DSLConditionNeg(Token location, DSLCondition condition) {
-		super(location);
+	public DSLConditionNeg(DSLToken token, DSLCondition condition) {
+		super(token);
 		this.condition = condition;
 	}
 

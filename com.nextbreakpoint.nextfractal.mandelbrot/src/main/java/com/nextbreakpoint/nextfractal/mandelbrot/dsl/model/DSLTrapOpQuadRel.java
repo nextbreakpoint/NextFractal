@@ -27,13 +27,14 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 public class DSLTrapOpQuadRel extends DSLTrapOp {
-	public DSLTrapOpQuadRel(Token location, ComplexNumber c1, ComplexNumber c2) {
-		super(location, c1, c2, null);
+	public DSLTrapOpQuadRel(DSLToken token, ComplexNumber c1, ComplexNumber c2) {
+		super(token, c1, c2, null);
 	}
 
 	@Override
@@ -43,6 +44,6 @@ public class DSLTrapOpQuadRel extends DSLTrapOp {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileTrapOp(context, "quadRel", c1, c2);
+		CompilerUtils.compileTrapOp(context, "quadRel", c1, c2);
 	}
 }

@@ -37,7 +37,6 @@ module com.nextbreakpoint.nextfractal.mandelbrot {
     exports com.nextbreakpoint.nextfractal.mandelbrot.module;
     exports com.nextbreakpoint.nextfractal.mandelbrot.core;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl;
-    exports com.nextbreakpoint.nextfractal.mandelbrot.dsl.common;
     exports com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
     exports com.nextbreakpoint.nextfractal.mandelbrot.graphics;
     provides CoreFactory with MandelbrotFactory;

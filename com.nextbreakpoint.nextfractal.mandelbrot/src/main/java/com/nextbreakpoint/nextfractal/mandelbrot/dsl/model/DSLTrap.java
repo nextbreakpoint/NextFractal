@@ -26,15 +26,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 import java.util.Map;
 
 public class DSLTrap {
-	protected final Token location;
+	protected final DSLToken token;
 	@Getter
 	@Setter
     private String name;
@@ -45,8 +45,8 @@ public class DSLTrap {
 	@Setter
     private List<DSLTrapOp> operators;
 
-	public DSLTrap(Token location) {
-		this.location = location;
+	public DSLTrap(DSLToken token) {
+		this.token = token;
 	}
 
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {

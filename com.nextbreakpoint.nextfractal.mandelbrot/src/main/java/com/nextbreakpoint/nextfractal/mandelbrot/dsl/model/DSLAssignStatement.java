@@ -26,8 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
@@ -36,8 +35,8 @@ public class DSLAssignStatement extends DSLStatement {
 	private final int numberIndex;
 	private final DSLExpression exp;
 
-	public DSLAssignStatement(Token location, String name, DSLExpression exp, int numberIndex) {
-		super(location);
+	public DSLAssignStatement(DSLToken token, String name, DSLExpression exp, int numberIndex) {
+		super(token);
 		this.name = name;
 		this.exp = exp;
 		this.numberIndex = numberIndex;
@@ -52,7 +51,7 @@ public class DSLAssignStatement extends DSLStatement {
 			} else if (!var.isReal()) {
 				var.setValue(exp.evaluate(context, scope));
 			} else {
-				throw new ASTException("Can't assign expression", location);
+				throw new DSLException("Can't assign expression: " + exp.token.getText(), exp.token);
 			}
 		} else {
 			var = new Variable(name, exp.isReal());
@@ -70,28 +69,28 @@ public class DSLAssignStatement extends DSLStatement {
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
 		VariableDeclaration var = scope.get(name);
 		if (var != null) {
-			if (var.isReal() && exp.isReal()) {
+			if (var.real() && exp.isReal()) {
 				context.append(name);
 				context.append(" = real(");
 				exp.compile(context, scope);
 				context.append(");\n");
-			} else if (!var.isReal() && !exp.isReal()) {
+			} else if (!var.real() && !exp.isReal()) {
 				context.append(name);
 				context.append(".set(");
 				exp.compile(context, scope);
 				context.append(");\n");
-			} else if (!var.isReal() && exp.isReal()) {
+			} else if (!var.real() && exp.isReal()) {
 				context.append(name);
 				context.append(".set(");
 				exp.compile(context, scope);
 				context.append(");\n");
-			} else if (var.isReal() && !exp.isReal()) {
-				throw new DSLException("Can't assign expression: " + exp.location.getText(), exp.location);
+			} else if (var.real() && !exp.isReal()) {
+				throw new DSLException("Can't assign expression: " + exp.token.getText(), exp.token);
 			}
 		} else {
 			var = new VariableDeclaration(name, exp.isReal(), false);
 			scope.put(name, var);
-			if (var.isReal()) {
+			if (var.real()) {
 				context.append("double ");
 				context.append(name);
 				context.append(" = real(");

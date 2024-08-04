@@ -27,22 +27,21 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerUtils;
 
 import java.util.Map;
 
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcCos;
 
 public class DSLFunctionCosZ extends DSLFunction {
-	public DSLFunctionCosZ(Token location, ExpressionContext context, DSLExpression[] arguments) {
-		super(location, arguments, context.newNumberIndex());
+	public DSLFunctionCosZ(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
+		super(token, arguments, context.newNumberIndex());
 	}
 
 	@Override
 	public double evaluateReal(DSLInterpreterContext context, Map<String, Variable> scope) {
-		throw new ASTException("Can't assign function output to real number", location);
+		throw new DSLException("Can't assign function output to real number", token);
 	}
 
 	@Override
@@ -57,6 +56,6 @@ public class DSLFunctionCosZ extends DSLFunction {
 
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		DSLUtils.compileComplexFunctionOneArgument(location, context, scope, "funcCos", arguments, numberIndex);
+		CompilerUtils.compileComplexFunctionOneArgument(token, context, scope, "funcCos", arguments, numberIndex);
 	}
 }

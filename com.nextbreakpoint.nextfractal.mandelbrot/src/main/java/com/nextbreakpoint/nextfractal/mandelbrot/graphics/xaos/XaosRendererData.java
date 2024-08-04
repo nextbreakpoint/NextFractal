@@ -37,9 +37,6 @@ class XaosRendererData extends RendererData {
 	private XaosChunkTable fillTable;
 	private XaosRealloc[] queue;
 
-	/**
-	 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererData#free()
-	 */
 	@Override
 	public void free() {
 		reallocX = null;
@@ -52,9 +49,6 @@ class XaosRendererData extends RendererData {
 		super.free();
 	}
 
-	/**
-	 * @see com.nextbreakpoint.nextfractal.mandelbrot.graphics.RendererData#realloc(int, int)
-	 */
 	@Override
 	protected void realloc(final int width, final int height) {
 		super.realloc(width, height);

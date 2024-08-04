@@ -26,13 +26,13 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public class DSLTrapConditionNeg extends DSLTrapCondition {
-	public DSLTrapConditionNeg(String name, DSLExpression exp, Token location) {
-		super(location, name, exp);
+	public DSLTrapConditionNeg(String name, DSLExpression exp, DSLToken token) {
+		super(token, name, exp);
 	}
 
 	@Override

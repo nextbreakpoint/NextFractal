@@ -27,21 +27,21 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public abstract class DSLTrapOp {
-	protected final Token location;
+	protected final DSLToken token;
 	protected final ComplexNumber c1;
 	protected final ComplexNumber c2;
 	protected final ComplexNumber c3;
 
-	protected DSLTrapOp(Token location, ComplexNumber c1, ComplexNumber c2, ComplexNumber c3) {
+	protected DSLTrapOp(DSLToken token, ComplexNumber c1, ComplexNumber c2, ComplexNumber c3) {
         this.c1 = c1;
         this.c2 = c2;
         this.c3 = c3;
-        this.location = location;
+        this.token = token;
 	}
 
 	public abstract void evaluate(Trap trap);

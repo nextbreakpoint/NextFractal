@@ -26,13 +26,13 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 public class DSLStatementStop extends DSLStatement {
-	public DSLStatementStop(Token location) {
-		super(location);
+	public DSLStatementStop(DSLToken token) {
+		super(token);
 	}
 
 	@Override

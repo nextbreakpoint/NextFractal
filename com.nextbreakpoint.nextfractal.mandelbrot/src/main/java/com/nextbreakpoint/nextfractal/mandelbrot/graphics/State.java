@@ -29,9 +29,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;
 public class State {
 	private final MutableNumber[] vars;
 	
-	/**
-	 * @param size
-	 */
 	public State(int size) {
 		vars = new MutableNumber[size];
 		for (int i = 0; i < size; i++) {
@@ -39,16 +36,10 @@ public class State {
 		}
 	}
 	
-	/**
-	 * @return
-	 */
 	public MutableNumber[] vars() {
 		return vars;
 	}
 
-	/**
-	 * @return
-	 */
 	public int size() {
 		return vars.length;
 	}

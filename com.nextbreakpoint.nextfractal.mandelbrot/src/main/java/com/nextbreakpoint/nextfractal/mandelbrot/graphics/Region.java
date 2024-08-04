@@ -51,10 +51,6 @@ public class Region {
 		setPoints(points[0], points[1]);
 	}
 
-	/**
-	 * @param a
-	 * @param b
-	 */
 	public void setPoints(ComplexNumber a, ComplexNumber b) {
 		this.x0 = a.r();
 		this.y0 = a.i();
@@ -64,30 +60,18 @@ public class Region {
 		center = new ComplexNumber((x0 + x1) / (2 * size.r()), (y0 + y1) / (2 * size.i()));
 	}
 
-    /**
-	 * @return
-	 */
 	public double left() {
 		return x0;
 	}
 
-	/**
-	 * @return
-	 */
 	public double right() {
 		return x1;
 	}
 
-	/**
-	 * @return
-	 */
 	public double bottom() {
 		return y0;
 	}
 
-	/**
-	 * @return
-	 */
 	public double top() {
 		return y1;
 	}

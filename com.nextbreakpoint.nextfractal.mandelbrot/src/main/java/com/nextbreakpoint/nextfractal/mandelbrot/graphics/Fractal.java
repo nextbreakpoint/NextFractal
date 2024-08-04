@@ -42,9 +42,6 @@ public class Fractal {
     @Getter
     private ComplexNumber point;
 
-	/**
-	 * 
-	 */
 	public void initialize() {
 		scope.empty();
 		if (orbit != null) {
@@ -55,9 +52,6 @@ public class Fractal {
 		}
 	}
 
-    /**
-	 * @param orbit
-	 */
 	public void setOrbit(Orbit orbit) {
 		this.orbit = orbit;
 		if (orbit != null) {
@@ -65,9 +59,6 @@ public class Fractal {
 		}
 	}
 
-	/**
-	 * @param color
-	 */
 	public void setColor(Color color) {
 		this.color = color;
 		if (color != null) {
@@ -75,11 +66,6 @@ public class Fractal {
 		}
 	}
 
-	/**
-	 * @param state
-	 * @param x
-	 * @param w
-	 */
 	public void renderOrbit(MutableNumber[] state, ComplexNumber x, ComplexNumber w) {
 		orbit.reset();
 		orbit.setX(x);
@@ -88,10 +74,6 @@ public class Fractal {
 		orbit.getState(state);
 	}
 
-	/**
-	 * @param state
-	 * @return
-	 */
 	public float[] renderColor(ComplexNumber[] state) {
 		color.reset();
 		color.setState(state);
@@ -99,51 +81,30 @@ public class Fractal {
 		return color.getColor();
 	}
 
-	/**
-	 * @return
-	 */
 	public int getStateSize() {
 		return orbit.stateSize();
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isSolidGuessSupported() {
 		return false;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isVerticalSymmetrySupported() {
 		return false;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isHorizontalSymmetrySupported() {
 		return false;
 	}
 
-	/**
-	 * @return
-	 */
 	public double getVerticalSymmetryPoint() {
 		return 0;
 	}
 
-	/**
-	 * @return
-	 */
 	public double getHorizontalSymmetryPoint() {
 		return 0;
 	}
 
-	/**
-	 * 
-	 */
 	public void clearScope() {
 		scope.clear();
 	}

@@ -26,34 +26,25 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import lombok.Builder;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@Builder(setterPrefix = "width", toBuilder = true)
-public class DSLOrbit {
-	private final Token location;
-	@Getter
+@Getter
+@SuperBuilder(setterPrefix = "with", toBuilder = true)
+public class DSLOrbit extends DSLObject {
 	private final DSLOrbitBegin begin;
-	@Getter
 	private final DSLOrbitLoop loop;
-	@Getter
 	private final DSLOrbitEnd end;
-	@Getter
 	private final Collection<VariableDeclaration> orbitVariables;
-	@Getter
 	private final Collection<VariableDeclaration> stateVariables;
-	@Getter
-	private final ExpressionContext expressionContext;
-	@Getter
+	private final DSLExpressionContext expressionContext;
+	//TODO replace it with DSLRegion
     private final ComplexNumber[] region;
-	@Getter
-    private final List<DSLTrap> traps;
+	private final List<DSLTrap> traps;
 
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
 		context.append("public void init() {\n");
@@ -65,7 +56,7 @@ public class DSLOrbit {
 		context.append("));\n");
 		for (VariableDeclaration var : stateVariables) {
 			context.append("addVariable(");
-			context.append(var.getName());
+			context.append(var.name());
 			context.append(");\n");
 		}
 		context.append("resetTraps();\n");
@@ -77,15 +68,15 @@ public class DSLOrbit {
 		}
 		context.append("}\n");
 		for (VariableDeclaration var : scope.values()) {
-			scope.put(var.getName(), var);
-			if (var.isCreate()) {
-				if (var.isReal()) {
+			scope.put(var.name(), var);
+			if (var.create()) {
+				if (var.real()) {
 					context.append("private double ");
-					context.append(var.getName());
+					context.append(var.name());
 					context.append(" = 0.0;\n");
 				} else {
 					context.append("private final MutableNumber ");
-					context.append(var.getName());
+					context.append(var.name());
 					context.append(" = getNumber(");
 					context.append(context.newNumberIndex());
 					context.append(").set(0.0,0.0);\n");
@@ -110,7 +101,7 @@ public class DSLOrbit {
 			context.append("setVariable(");
 			context.append(i++);
 			context.append(",");
-			context.append(var.getName());
+			context.append(var.name());
 			context.append(");\n");
 		}
 		context.append("}\n");

@@ -2,14 +2,13 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;
 import java.util.Map;
 
-public class DSLOrbitLoop {
-    private final Token location;
+public class DSLOrbitLoop extends DSLObject {
     private final Collection<DSLStatement> statements;
     private final Collection<VariableDeclaration> stateVariables;
     @Getter
@@ -19,8 +18,8 @@ public class DSLOrbitLoop {
     @Getter
     private final int end;
 
-    public DSLOrbitLoop(Token location, DSLCondition condition, int begin, int end, Collection<DSLStatement> statements, Collection<VariableDeclaration> stateVariables) {
-        this.location = location;
+    public DSLOrbitLoop(DSLToken token, DSLCondition condition, int begin, int end, Collection<DSLStatement> statements, Collection<VariableDeclaration> stateVariables) {
+        super(token);
         this.condition = condition;
         this.begin = begin;
         this.end = end;
@@ -49,7 +48,7 @@ public class DSLOrbitLoop {
                 context.append(", ");
             }
             context.append("number(");
-            context.append(var.getName());
+            context.append(var.name());
             context.append(")");
             i += 1;
         }
@@ -74,7 +73,7 @@ public class DSLOrbitLoop {
                 context.append(", ");
             }
             context.append("number(");
-            context.append(var.getName());
+            context.append(var.name());
             context.append(")");
             i += 1;
         }
@@ -89,7 +88,7 @@ public class DSLOrbitLoop {
                 context.append(", ");
             }
             context.append("number(");
-            context.append(var.getName());
+            context.append(var.name());
             context.append(")");
             i += 1;
         }

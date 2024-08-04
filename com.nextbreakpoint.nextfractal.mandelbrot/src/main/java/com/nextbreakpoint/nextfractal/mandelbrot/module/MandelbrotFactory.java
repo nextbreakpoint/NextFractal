@@ -42,9 +42,6 @@ public class MandelbrotFactory implements CoreFactory {
 	public static final String PLUGIN_ID = "Mandelbrot";
 	public static final String GRAMMAR = "Mandelbrot";
 
-	/**
-	 * @see CoreFactory#getId()
-	 */
 	public String getId() {
 		return PLUGIN_ID;
 	}
@@ -53,9 +50,6 @@ public class MandelbrotFactory implements CoreFactory {
 		return GRAMMAR;
 	}
 
-	/**
-	 * @see CoreFactory#createSession()
-	 */
 	@Override
 	public Session createSession() {
 		return new MandelbrotSession();
@@ -66,9 +60,6 @@ public class MandelbrotFactory implements CoreFactory {
 		return new MandelbrotSession(script, (MandelbrotMetadata)metadata);
 	}
 
-	/**
-	 * @see CoreFactory#createImageGenerator(java.util.concurrent.ThreadFactory, GraphicsFactory, Tile, boolean)
-	 */
 	@Override
 	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		return new MandelbrotImageGenerator(threadFactory, renderFactory, tile, opaque);

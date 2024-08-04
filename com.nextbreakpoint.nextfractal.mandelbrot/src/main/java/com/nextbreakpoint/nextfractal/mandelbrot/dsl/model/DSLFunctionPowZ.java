@@ -27,22 +27,20 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcPow;
 
 public class DSLFunctionPowZ extends DSLFunction {
-	public DSLFunctionPowZ(Token location, ExpressionContext context, DSLExpression[] arguments) {
-		super(location, arguments, context.newNumberIndex());
+	public DSLFunctionPowZ(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
+		super(token, arguments, context.newNumberIndex());
 	}
 
 	@Override
 	public double evaluateReal(DSLInterpreterContext context, Map<String, Variable> scope) {
-		throw new ASTException("Can't assign function output to real number", location);
+		throw new DSLException("Can't assign function output to real number", token);
 	}
 
 	@Override
@@ -60,10 +58,10 @@ public class DSLFunctionPowZ extends DSLFunction {
 		context.append("funcPow");
 		context.append("(");
 		if (arguments.length != 2) {
-			throw new DSLException("Invalid number of arguments: " + location.getText(), location);
+			throw new DSLException("Invalid number of arguments: " + token.getText(), token);
 		}
 		if (!arguments[1].isReal()) {
-			throw new DSLException("Invalid type of arguments: " + location.getText(), location);
+			throw new DSLException("Invalid type of arguments: " + token.getText(), token);
 		}
 		if (!arguments[0].isReal()) {
 			context.append("getNumber(");

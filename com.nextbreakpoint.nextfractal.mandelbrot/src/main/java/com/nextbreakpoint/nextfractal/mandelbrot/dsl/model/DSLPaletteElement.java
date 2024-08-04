@@ -28,56 +28,70 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.PaletteElement;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.PaletteExpression;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTException;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import lombok.Getter;
 
 import java.util.Map;
 
-public record DSLPaletteElement(
-		Token location,
-		float[] beginColor,
-		float[] endColor,
-		int steps,
-		DSLExpression exp
-) {
-	public PaletteElement evaluate(DSLInterpreterContext context, Map<String, Variable> scope) {
-		return new PaletteElement(beginColor, endColor, steps, getPaletteExpression(context, scope));
-	}
+@Getter
+public final class DSLPaletteElement extends DSLObject {
+    private final float[] beginColor;
+    private final float[] endColor;
+    private final int steps;
+    private final DSLExpression exp;
 
-	private PaletteExpression getPaletteExpression(DSLInterpreterContext context, Map<String, Variable> scope) {
-		if (exp != null) {
-			return step -> {
-				final Variable variable = new Variable("step", true);
-				variable.setValue(step);
-				scope.put("step", variable);
-				return exp.evaluateReal(context, scope);
-			};
-		} else {
-			return step -> step;
-		}
-	}
+    public DSLPaletteElement(
+            DSLToken token,
+            float[] beginColor,
+            float[] endColor,
+            int steps,
+            DSLExpression exp
+    ) {
+        super(token);
+        this.beginColor = beginColor;
+        this.endColor = endColor;
+        this.steps = steps;
+        this.exp = exp;
+    }
 
-	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
-		context.append("element(");
-		context.append(createArray(beginColor));
-		context.append(",");
-		context.append(createArray(endColor));
-		context.append(",");
-		context.append(steps);
-		context.append(",s -> { return ");
-		if (exp != null) {
-			if (exp.isReal()) {
-				exp.compile(context, scope);
-			} else {
-				throw new ASTException("Invalid expression type: " + exp.location.getText(), exp.location);
-			}
-		} else {
-			context.append("s");
-		}
-		context.append(";})");
-	}
+    public PaletteElement evaluate(DSLInterpreterContext context, Map<String, Variable> scope) {
+        return new PaletteElement(beginColor, endColor, steps, getPaletteExpression(context, scope));
+    }
 
-	private String createArray(float[] components) {
-		return "new float[] {" + components[0] + "f," + components[1] + "f," + components[2] + "f," + components[3] + "f}";
-	}
+    private PaletteExpression getPaletteExpression(DSLInterpreterContext context, Map<String, Variable> scope) {
+        if (exp != null) {
+            return step -> {
+                final Variable variable = new Variable("step", true);
+                variable.setValue(step);
+                scope.put("step", variable);
+                return exp.evaluateReal(context, scope);
+            };
+        } else {
+            return step -> step;
+        }
+    }
+
+    public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
+        context.append("element(");
+        context.append(createArray(beginColor));
+        context.append(",");
+        context.append(createArray(endColor));
+        context.append(",");
+        context.append(steps);
+        context.append(",s -> { return ");
+        if (exp != null) {
+            if (exp.isReal()) {
+                exp.compile(context, scope);
+            } else {
+                throw new DSLException("Invalid expression type: " + exp.token.getText(), exp.token);
+            }
+        } else {
+            context.append("s");
+        }
+        context.append(";})");
+    }
+
+    private String createArray(float[] components) {
+        return "new float[] {" + components[0] + "f," + components[1] + "f," + components[2] + "f," + components[3] + "f}";
+    }
 }

@@ -27,15 +27,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.opPow;
 
 public class DSLOperatorPow extends DSLOperator {
-	public DSLOperatorPow(Token location, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
-		super(location, exp1, exp2, numberIndex);
+	public DSLOperatorPow(DSLToken token, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
+		super(token, exp1, exp2, numberIndex);
 	}
 
 	@Override
@@ -56,10 +56,10 @@ public class DSLOperatorPow extends DSLOperator {
 	@Override
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {
 		if (!exp1.isReal()) {
-			throw new DSLException("Invalid expression type: " + exp1.location.getText(), exp1.location);
+			throw new DSLException("Invalid expression type: " + exp1.token.getText(), exp1.token);
 		}
 		if (!exp2.isReal()) {
-			throw new DSLException("Invalid expression type: " + exp2.location.getText(), exp2.location);
+			throw new DSLException("Invalid expression type: " + exp2.token.getText(), exp2.token);
 		}
 		context.append("opPow");
 		context.append("(");

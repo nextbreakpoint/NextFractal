@@ -31,9 +31,6 @@ class XaosDynamic {
 	XaosPrice[] calData;
 	XaosPrice[] conData;
 
-	/**
-	 * @param size
-	 */
 	public XaosDynamic(final int size) {
 		delta = new int[size + 1];
 		oldBest = new XaosPrice[size];
@@ -55,9 +52,6 @@ class XaosDynamic {
 		conData = null;
 	}
 
-	/**
-	 * 
-	 */
 	public void swap() {
 		final XaosPrice[] tmp_best = newBest;
 		newBest = oldBest;

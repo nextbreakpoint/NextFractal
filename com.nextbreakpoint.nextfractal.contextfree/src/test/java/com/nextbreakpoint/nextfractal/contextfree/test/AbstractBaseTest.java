@@ -28,7 +28,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGLexer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGParser;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -38,10 +39,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public abstract class AbstractBaseTest {
 	protected CFDG parseSource(String resourceName) throws IOException {
-		ANTLRInputStream is = new ANTLRInputStream(getResourceAsStream(resourceName));
+		CharStream is = CharStreams.fromReader(new InputStreamReader(getResourceAsStream(resourceName)));
 		CFDGParser parser = new CFDGParser(new CommonTokenStream(new CFDGLexer(is)));
 		parser.setDriver(new CFDGDriver());
 		parser.getDriver().setCurrentPath(System.getProperty("cfdg.root", "src/test/resources"));

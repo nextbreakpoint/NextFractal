@@ -26,17 +26,15 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import org.antlr.v4.runtime.Token;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 import java.util.Map;
 
-public abstract class DSLColorExpression {
-	protected final Token location;
-
-	protected DSLColorExpression(Token location) {
-		this.location = location;
+public abstract class DSLColorExpression extends DSLObject {
+	protected DSLColorExpression(DSLToken token) {
+		super(token);
 	}
-	
+
 	public abstract float[] evaluate(DSLInterpreterContext context, Map<String, Variable> scope);
 
 	public abstract void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope);

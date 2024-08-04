@@ -31,7 +31,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Palette;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.common.ExpressionContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLInterpreterContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
@@ -43,7 +43,7 @@ import java.util.Map;
 
 public class InterpretedOrbit extends Orbit implements DSLInterpreterContext {
 	private final DSLOrbit orbit;
-	private final ExpressionContext context;
+	private final DSLExpressionContext context;
 	private final Map<String, Trap> traps = new HashMap<>();
 	private final Map<String, Variable> variables = new HashMap<>();
 
@@ -55,15 +55,15 @@ public class InterpretedOrbit extends Orbit implements DSLInterpreterContext {
 
 	public void init() {
         for (VariableDeclaration var : orbit.getStateVariables()) {
-            variables.put(var.getName(), var.asVariable());
+            variables.put(var.name(), var.asVariable());
         }
         for (VariableDeclaration var : orbit.getOrbitVariables()) {
-            variables.put(var.getName(), var.asVariable());
+            variables.put(var.name(), var.asVariable());
         }
 		setInitialRegion(orbit.getRegion()[0], orbit.getRegion()[1]);
         for (VariableDeclaration var : orbit.getStateVariables()) {
-			final Variable variable = variables.get(var.getName());
-            if (var.isReal()) {
+			final Variable variable = variables.get(var.name());
+            if (var.real()) {
                 addVariable(variable.getRealValue());
             } else {
                 addVariable(variable.getValue());
@@ -145,10 +145,10 @@ public class InterpretedOrbit extends Orbit implements DSLInterpreterContext {
 	private void updateState() {
 		int i = 0;
         for (VariableDeclaration var : orbit.getStateVariables()) {
-            if (var.isReal()) {
-                setVariable(i, variables.get(var.getName()).getRealValue());
+            if (var.real()) {
+                setVariable(i, variables.get(var.name()).getRealValue());
             } else {
-                setVariable(i, variables.get(var.getName()).getValue());
+                setVariable(i, variables.get(var.name()).getValue());
             }
             i++;
         }

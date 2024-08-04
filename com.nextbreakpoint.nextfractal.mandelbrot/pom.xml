@@ -22,8 +22,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDirectory>src/main/java/com/nextbreakpoint/nextfractal/mandelbrot/dsl/grammar</sourceDirectory>
-                    <outputDirectory>src/main/antlr4/com/nextbreakpoint/nextfractal/mandelbrot/dsl/grammar</outputDirectory>
+                    <sourceDirectory>src/main/java/com/nextbreakpoint/nextfractal/mandelbrot/dsl/parser</sourceDirectory>
+                    <outputDirectory>src/main/antlr4/com/nextbreakpoint/nextfractal/mandelbrot/dsl/parser</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>
