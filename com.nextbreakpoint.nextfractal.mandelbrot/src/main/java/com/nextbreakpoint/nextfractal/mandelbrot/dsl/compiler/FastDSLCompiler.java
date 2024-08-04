@@ -83,19 +83,19 @@ public class FastDSLCompiler {
 				log.fine(javaSource);
 			}
 			return compilerAdapter.compile(Orbit.class, javaSource, packageName, classNamePrefix + "Orbit");
+		} catch (DSLCompilerException e) {
+			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-			String message = e.getMessage();
-			final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(PARSE, line, charPositionInLine, index, length, message));
+            final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(PARSE, line, charPositionInLine, index, length, e.getMessage()));
 			throw new DSLCompilerException("Can't compile orbit", report.orbitDSL(), errors);
 		} catch (Throwable e) {
-            final String message = e.getMessage();
-			final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, message));
+            final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
 			throw new DSLCompilerException("Can't compile orbit", report.orbitDSL(), errors);
 		}
 	}
@@ -114,19 +114,19 @@ public class FastDSLCompiler {
 				log.fine(javaSource);
 			}
 			return compilerAdapter.compile(Color.class, javaSource, packageName, classNamePrefix + "Color");
+		} catch (DSLCompilerException e) {
+			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-			String message = e.getMessage();
-			final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(PARSE, line, charPositionInLine, index, length, message));
+            final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(PARSE, line, charPositionInLine, index, length, e.getMessage()));
 			throw new DSLCompilerException("Can't compile color", report.colorDSL(), errors);
 		} catch (Throwable e) {
-			final String message = e.getMessage();
-			final List<ParserError> errors = new ArrayList<>();
-			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, message));
+            final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
 			throw new DSLCompilerException("Can't compile color", report.colorDSL(), errors);
 		}
 	}

@@ -43,11 +43,13 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Region;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
+import lombok.extern.java.Log;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -57,11 +59,10 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 
+@Log
 public class MandelbrotImageComposer implements ImageComposer {
-    private static final Logger logger = Logger.getLogger(MandelbrotImageComposer.class.getName());
-
     private boolean aborted;
     private final boolean opaque;
     private final Tile tile;
@@ -141,8 +142,10 @@ public class MandelbrotImageComposer implements ImageComposer {
                 drawPoint(renderFactory, renderContext, tile.imageSize(), region, metadata);
             }
             aborted = renderer.isInterrupted();
+        } catch (DSLException e) {
+            log.log(Level.WARNING, e.getMessage(), e);
         } catch (Throwable e) {
-            logger.severe(e.getMessage());
+            log.severe(e.getMessage());
         } finally {
             if (g2d != null) {
                 g2d.dispose();

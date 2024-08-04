@@ -30,7 +30,6 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.graphics.internal.Java2DGraphicsFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.MutableNumber;

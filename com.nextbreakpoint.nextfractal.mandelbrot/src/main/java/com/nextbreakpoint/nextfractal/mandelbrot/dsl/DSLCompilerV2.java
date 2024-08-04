@@ -43,6 +43,7 @@ public class DSLCompilerV2 {
 		this.classNamePrefix = Objects.requireNonNull(classNamePrefix);
 	}
 
+	//TODO introduce DSLCompilerResult
 	public ClassFactory<Orbit> compileOrbit(DSLParserResultV2 result) throws DSLCompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
@@ -52,6 +53,7 @@ public class DSLCompilerV2 {
 		}
 	}
 
+	//TODO introduce DSLCompilerResult
 	public ClassFactory<Color> compileColor(DSLParserResultV2 result) throws DSLCompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {

@@ -48,10 +48,10 @@ import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.PARSE;
 public class DSLParserV2 {
 	public DSLParserResultV2 parse(String source) throws DSLParserException {
 		final List<ParserError> errors = new ArrayList<>();
-		final ASTFractal astFractal = parse(source, errors);
-		final String orbitScript = astFractal != null && astFractal.getOrbit() != null ? astFractal.getOrbit().toString() : "";
-		final String colorScript = astFractal != null && astFractal.getColor() != null ? astFractal.getColor().toString() : "";
-		final DSLFractal compiledFractal = astFractal != null ? astFractal.compile() : null;
+		final ASTFractal fractal = parse(source, errors);
+		final String orbitScript = fractal.getOrbit().toString();
+		final String colorScript = fractal.getColor().toString();
+		final DSLFractal compiledFractal = fractal.compile();
 		return new DSLParserResultV2(compiledFractal, source, orbitScript, colorScript, errors);
 	}
 
@@ -64,7 +64,17 @@ public class DSLParserV2 {
 			parser.setErrorHandler(new ErrorStrategy(errors));
 			parser.fractal();
 			ASTBuilder builder = parser.getBuilder();
-			return builder.getFractal();
+			final ASTFractal fractal = builder.getFractal();
+			if (fractal == null || !errors.isEmpty()) {
+				throw new DSLParserException("Can't parse script", errors);
+			}
+			if (fractal.getOrbit() == null) {
+				throw new DSLParserException("Can't parse orbit", errors);
+			}
+			if (fractal.getColor() == null) {
+				throw new DSLParserException("Can't parse color", errors);
+			}
+			return fractal;
 		} catch (ASTException e) {
             long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
@@ -74,13 +84,13 @@ public class DSLParserV2 {
 			ParserError error = new ParserError(PARSE, line, charPositionInLine, index, length, message);
 			log.log(Level.INFO, error.toString(), e);
 			errors.add(error);
-			throw new DSLParserException("Can't parse source", errors);
+			throw new DSLParserException("Can't parse script", errors);
 		} catch (Exception e) {
             String message = e.getMessage();
 			ParserError error = new ParserError(PARSE, 0L, 0L, 0L, 0L, message);
 			log.log(Level.INFO, error.toString(), e);
 			errors.add(error);
-			throw new DSLParserException("Can't parse source", errors);
+			throw new DSLParserException("Can't parse script", errors);
 		}
 	}
 }

@@ -26,7 +26,6 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.core.common.IOUtils;
 import com.nextbreakpoint.nextfractal.core.common.ParserError;
-import com.nextbreakpoint.nextfractal.core.common.ParserErrorType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import lombok.extern.java.Log;
@@ -48,6 +47,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
+
 @Log
 public class CompilerAdapter {
 	private final JavaCompiler javaCompiler;
@@ -57,20 +58,21 @@ public class CompilerAdapter {
 	}
 
 	public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws DSLCompilerException {
-		List<ParserError> errors = new ArrayList<>();
 		try {
-			return new JavaClassFactory<>(compileToClass(javaSource, packageName, className, clazz, errors));
+			return new JavaClassFactory<>(compile(javaSource, packageName, className, clazz));
+		} catch (DSLCompilerException e) {
+			throw e;
 		} catch (Throwable e) {
-			ParserErrorType type = ParserErrorType.JAVA_COMPILE;
-			String message = e.getMessage();
-			errors.add(new ParserError(type, 0, 0, 0, 0, message));
-			throw new DSLCompilerException("Can't compile orbit", javaSource, errors);
+            final List<ParserError> errors = new ArrayList<>();
+			errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+			throw new DSLCompilerException("Can't compile class", javaSource, errors);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Class<T> compileToClass(String source, String packageName, String className, Class<T> clazz, List<ParserError> errors) throws DSLCompilerException {
+	private <T> Class<T> compile(String source, String packageName, String className, Class<T> clazz) throws Exception {
 		log.log(Level.FINE, "Compile Java source:\n" + source);
+		final List<ParserError> errors = new ArrayList<>();
 		List<SimpleJavaFileObject> compilationUnits = new ArrayList<>();
 		compilationUnits.add(new JavaSourceFileObject(className, source));
 		final List<String> options = getCompilerOptions();
@@ -101,29 +103,21 @@ public class CompilerAdapter {
 //						log.log(Level.WARNING, error.toString());
 //						errors.add(error);
 //					} else {
-						ParserErrorType type = ParserErrorType.JAVA_COMPILE;
-						long line = diagnostic.getLineNumber();
-						long charPositionInLine = diagnostic.getColumnNumber();
-						long index = diagnostic.getStartPosition();
-						long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
-						String message = diagnostic.getMessage(null);
-						ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-						log.log(Level.WARNING, error.toString());
-						errors.add(error);
-//					}
+                    long line = diagnostic.getLineNumber();
+					long charPositionInLine = diagnostic.getColumnNumber();
+					long index = diagnostic.getStartPosition();
+					long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
+					String message = diagnostic.getMessage(null);
+					ParserError error = new ParserError(JAVA_COMPILE, line, charPositionInLine, index, length, message);
+					log.log(Level.WARNING, error.toString());
+					errors.add(error);
+					throw new DSLCompilerException("Can't compile class", source, errors);
 				}
 			}
-		} catch (Exception e) {
-			ParserErrorType type = ParserErrorType.JAVA_COMPILE;
-			String message = e.getMessage();
-			ParserError error = new ParserError(type, 0, 0, 0, 0, message);
-			log.log(Level.SEVERE, "Can't compile class", e);
-			errors.add(error);
-			throw new DSLCompilerException("Can't compile class", source, errors);
 		} finally {
 			try {
 				fileManager.close();
-			} catch (IOException e) {
+			} catch (IOException _) {
 			}
 		}
 		return null;

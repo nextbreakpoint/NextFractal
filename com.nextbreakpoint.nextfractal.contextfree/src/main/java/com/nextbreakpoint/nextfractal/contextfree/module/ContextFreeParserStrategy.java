@@ -1,17 +1,18 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.core.common.Block;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult.Type;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -19,6 +20,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
 
 public class ContextFreeParserStrategy implements ParserStrategy {
     private static final Pattern HIGHLIGHTING_PATTERN = createHighlightingPattern();
@@ -34,12 +37,19 @@ public class ContextFreeParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser().parse(session.script()))
-                .map(ContextFreeParserStrategy::processResult)
-                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.script()), result))
-                .execute()
-                .orThrow(RuntimeException::new)
-                .get();
+        try {
+            final DSLParser parser = new DSLParser();
+            final DSLParserResult result = parser.parse(session.script());
+            return new ParserResult(session, result.getErrors(), computeHighlighting(session.script()), result);
+        } catch (ParserException e) {
+            final DSLParserResult result = new DSLParserResult(null, Type.INTERPRETER, session.script(), e.getErrors());
+            return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
+        } catch (Exception e) {
+            final List<ParserError> errors = new ArrayList<>();
+            errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final DSLParserResult result = new DSLParserResult(null, Type.INTERPRETER, session.script(), errors);
+            return new ParserResult(session, errors, computeHighlighting(session.script()), result);
+        }
     }
 
     private GenericStyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -90,22 +100,5 @@ public class ContextFreeParserStrategy implements ParserStrategy {
                         + "|(?<OPERATOR>" + OPERATOR_PATTERN + ")"
                         + "|(?<PATHOP>" + PATHOP_PATTERN + ")"
         );
-    }
-
-    public static DSLParserResult processResult(DSLParserResult parserResult) {
-        return Block.begin(DSLParserResult.class)
-                .end(parserResult)
-                .execute()
-                .observe()
-                .onFailure(e -> processCompilerErrors(parserResult, e))
-                .get()
-                .orThrow(RuntimeException::new)
-                .get();
-    }
-
-    private static void processCompilerErrors(DSLParserResult result, Exception e) {
-        if (e instanceof ParserException) {
-            result.getErrors().addAll(((ParserException) e).getErrors());
-        }
     }
 }

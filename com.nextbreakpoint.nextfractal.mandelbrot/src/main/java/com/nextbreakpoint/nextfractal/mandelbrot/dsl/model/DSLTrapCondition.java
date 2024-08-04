@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
@@ -42,7 +43,12 @@ public class DSLTrapCondition extends DSLCondition {
 
 	@Override
 	public boolean evaluate(DSLInterpreterContext context, Map<String, Variable> scope) {
-		return context.getTrap(name).contains(exp.evaluate(context, scope));
+		final Trap trap = context.getTrap(name);
+		if (trap == null) {
+			//TODO should it produce an error?
+			return false;
+		}
+		return trap.contains(exp.evaluate(context, scope));
 	}
 
 	@Override

@@ -24,35 +24,19 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
-import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedOrbit;
 
-import java.util.List;
-
-import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.COMPILE;
-
 public class SimpleDSLCompiler {
-	public ClassFactory<Orbit> compileOrbit(DSLParserResultV2 result) throws DSLCompilerException {
-		if (result.fractal() == null) {
-			final List<ParserError> errors = List.of(new ParserError(COMPILE, 0, 0, 0, 0, "Can't compile orbit"));
-			throw new DSLCompilerException("Can't compile orbit", result.source(), errors);
-		}
-
+	public ClassFactory<Orbit> compileOrbit(DSLParserResultV2 result) {
 		return () -> new InterpretedOrbit(result.fractal().getOrbit());
 	}
 
-	public ClassFactory<Color> compileColor(DSLParserResultV2 result) throws DSLCompilerException {
-		if (result.fractal() == null) {
-			final List<ParserError> errors = List.of(new ParserError(COMPILE, 0, 0, 0, 0, "Can't compile color"));
-			throw new DSLCompilerException("Can't compile color", result.source(), errors);
-		}
-
+	public ClassFactory<Color> compileColor(DSLParserResultV2 result) {
 		return () -> new InterpretedColor(result.fractal().getColor());
 	}
 }	

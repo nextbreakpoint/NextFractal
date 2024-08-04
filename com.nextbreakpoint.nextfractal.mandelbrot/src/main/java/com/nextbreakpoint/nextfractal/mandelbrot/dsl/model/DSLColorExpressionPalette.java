@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Palette;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
@@ -31,6 +32,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import java.util.Map;
 
 public class DSLColorExpressionPalette extends DSLColorExpression {
+	private static final float[] COLOR_BLACK = new float[] {1,0,0,0};
 	private final String name;
 	private final DSLExpression exp;
 	
@@ -41,7 +43,12 @@ public class DSLColorExpressionPalette extends DSLColorExpression {
 	}
 
 	public float[] evaluate(DSLInterpreterContext context, Map<String, Variable> scope) {
-		return context.getPalette(name).get(exp.evaluateReal(context, scope));
+		final Palette palette = context.getPalette(name);
+		//TODO should it produce an error?
+		if (palette == null) {
+			return COLOR_BLACK;
+		}
+		return palette.get(exp.evaluateReal(context, scope));
 	}
 
 	public void compile(DSLCompilerContext context, Map<String, VariableDeclaration> scope) {

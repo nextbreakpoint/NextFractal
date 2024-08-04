@@ -31,6 +31,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -55,15 +56,15 @@ public final class DSLPaletteElement extends DSLObject {
     }
 
     public PaletteElement evaluate(DSLInterpreterContext context, Map<String, Variable> scope) {
-        return new PaletteElement(beginColor, endColor, steps, getPaletteExpression(context, scope));
+        return new PaletteElement(beginColor, endColor, steps, getPaletteExpression(context, new HashMap<>(scope)));
     }
 
     private PaletteExpression getPaletteExpression(DSLInterpreterContext context, Map<String, Variable> scope) {
         if (exp != null) {
             return step -> {
-                final Variable variable = new Variable("step", true);
+                final Variable variable = new Variable("s", true);
                 variable.setValue(step);
-                scope.put("step", variable);
+                scope.put(variable.getName(), variable);
                 return exp.evaluateReal(context, scope);
             };
         } else {

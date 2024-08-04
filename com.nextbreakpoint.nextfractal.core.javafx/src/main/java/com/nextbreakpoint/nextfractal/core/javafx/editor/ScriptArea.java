@@ -83,31 +83,31 @@ public class ScriptArea extends CodeArea {
 
     private void updateTextStyles(ParserResult result) {
         setStyleSpans(0, convertStyleSpans(result.highlighting()));
-        final List<ParserError> errors = result.errors();
-        if (!errors.isEmpty()) {
-            errors.sort(Comparator.comparing(ParserError::index));
-            for (ParserError error : errors) {
-                if (log.isLoggable(Level.FINE)) {
-                    log.fine(error.toString());
-                }
-                if (error.type() != ParserErrorType.RUNTIME) {
-                    final int lineBegin = (int) error.index();
-                    final int lineEnd = lineBegin + 1;
-                    try {
-                        if (lineBegin < getLength() && lineEnd <= getLength()) {
-                            final GenericStyleSpansBuilder<Collection<String>> builder = new GenericStyleSpansBuilder<>();
-                            builder.addSpan(List.of("error"), lineEnd - lineBegin);
-                            final GenericStyleSpans<Collection<String>> spans = builder.build();
-                            setStyleSpans(lineBegin, convertStyleSpans(spans));
-                        } else {
-                            if (log.isLoggable(Level.WARNING)) {
-                                log.log(Level.WARNING, "begin " + lineBegin + ", length " + (lineEnd - lineBegin));
-                            }
-                        }
-                    } catch (Exception e) {
+        final List<ParserError> errors = result.errors()
+                .stream()
+                .sorted(Comparator.comparing(ParserError::index))
+                .toList();
+        for (ParserError error : errors) {
+            if (log.isLoggable(Level.FINE)) {
+                log.fine(error.toString());
+            }
+            if (error.type() != ParserErrorType.RUNTIME) {
+                final int lineBegin = (int) error.index();
+                final int lineEnd = lineBegin + 1;
+                try {
+                    if (lineBegin < getLength() && lineEnd <= getLength()) {
+                        final GenericStyleSpansBuilder<Collection<String>> builder = new GenericStyleSpansBuilder<>();
+                        builder.addSpan(List.of("error"), lineEnd - lineBegin);
+                        final GenericStyleSpans<Collection<String>> spans = builder.build();
+                        setStyleSpans(lineBegin, convertStyleSpans(spans));
+                    } else {
                         if (log.isLoggable(Level.WARNING)) {
-                            log.log(Level.WARNING, "Something went wrong", e);
+                            log.log(Level.WARNING, "begin " + lineBegin + ", length " + (lineEnd - lineBegin));
                         }
+                    }
+                } catch (Exception e) {
+                    if (log.isLoggable(Level.WARNING)) {
+                        log.log(Level.WARNING, "Something went wrong", e);
                     }
                 }
             }

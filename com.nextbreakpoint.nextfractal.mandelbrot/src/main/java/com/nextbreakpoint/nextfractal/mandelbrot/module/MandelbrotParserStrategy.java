@@ -24,9 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
-import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
+import com.nextbreakpoint.nextfractal.core.common.ParserError;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
@@ -37,6 +36,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -44,6 +44,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.nextbreakpoint.nextfractal.core.common.ParserErrorType.JAVA_COMPILE;
 
 public class MandelbrotParserStrategy implements ParserStrategy {
     private static final Pattern HIGHLIGHTING_PATTERN = createHighlightingPattern();
@@ -59,12 +61,22 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser().parse(session.script()))
-                .map(this::processResult)
-                .map(result -> new ParserResult(session, result.errors(), computeHighlighting(session.script()), result))
-                .execute()
-                .orThrow(RuntimeException::new)
-                .get();
+        try {
+            final DSLParser parser = new DSLParser();
+            final DSLParserResultV2 result = parser.parse(session.script());
+            final DSLCompilerV2 compiler = new DSLCompilerV2(getPackageName(), getClassName());
+            compiler.compileOrbit(result).create();
+            compiler.compileColor(result).create();
+            return new ParserResult(session, result.errors(), computeHighlighting(session.script()), result);
+        } catch (DSLException e) {
+            final DSLParserResultV2 result = new DSLParserResultV2(null, session.script(), null, null, e.getErrors());
+            return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
+        } catch (Exception e) {
+            final List<ParserError> errors = new ArrayList<>();
+            errors.add(new ParserError(JAVA_COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final DSLParserResultV2 result = new DSLParserResultV2(null, session.script(), null, null, errors);
+            return new ParserResult(session, errors, computeHighlighting(session.script()), result);
+        }
     }
 
     private String getClassName() {
@@ -123,32 +135,5 @@ public class MandelbrotParserStrategy implements ParserStrategy {
             + "|(?<OPERATOR>" + OPERATOR_PATTERN + ")"
             + "|(?<PATHOP>" + PATHOP_PATTERN + ")"
         );
-    }
-
-    public DSLParserResultV2 processResult(DSLParserResultV2 parserResult) {
-        return Block.begin(DSLParserResultV2.class)
-                .andThen(this::compileOrbit)
-                .andThen(this::compileColor)
-                .end(parserResult)
-                .execute()
-                .observe()
-                .onFailure(e -> processCompilerErrors(parserResult, e))
-                .get()
-                .orThrow(RuntimeException::new)
-                .get();
-    }
-
-    private void compileOrbit(DSLParserResultV2 result) {
-        Command.of(() -> new DSLCompilerV2(getPackageName(), getClassName()).compileOrbit(result).create()).execute();
-    }
-
-    private void compileColor(DSLParserResultV2 result) {
-        Command.of(() -> new DSLCompilerV2(getPackageName(), getClassName()).compileColor(result).create()).execute();
-    }
-
-    private static void processCompilerErrors(DSLParserResultV2 result, Exception e) {
-        if (e instanceof DSLException) {
-            result.errors().addAll(((DSLException)e).getErrors());
-        }
     }
 }

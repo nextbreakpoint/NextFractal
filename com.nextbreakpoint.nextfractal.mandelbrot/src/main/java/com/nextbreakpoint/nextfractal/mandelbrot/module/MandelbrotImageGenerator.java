@@ -37,15 +37,19 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResultV2;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
 
+@Log
 public class MandelbrotImageGenerator implements ImageGenerator {
 	private boolean aborted;
 	private final boolean opaque;
@@ -97,8 +101,10 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			renderer.waitForTasks();
 			renderer.getPixels(pixels);
 			aborted = renderer.isInterrupted();
-		} catch (Exception e) {
-			//TODO display errors
+		} catch (DSLException e) {
+			log.log(Level.WARNING, e.getMessage(), e);
+		} catch (Throwable e) {
+			log.severe(e.getMessage());
 		}
 		return buffer;
 	}
