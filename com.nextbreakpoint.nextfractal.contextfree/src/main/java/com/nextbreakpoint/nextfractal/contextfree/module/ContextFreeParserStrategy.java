@@ -1,9 +1,8 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult.Type;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
@@ -38,16 +37,16 @@ public class ContextFreeParserStrategy implements ParserStrategy {
 
     private ParserResult createParserResult(Session session) {
         try {
-            final DSLParser parser = new DSLParser();
-            final DSLParserResult result = parser.parse(session.script());
-            return new ParserResult(session, result.getErrors(), computeHighlighting(session.script()), result);
+            final CFDGParser parser = new CFDGParser();
+            final CFDGParserResult result = parser.parse(session.script());
+            return new ParserResult(session, result.errors(), computeHighlighting(session.script()), result);
         } catch (ParserException e) {
-            final DSLParserResult result = new DSLParserResult(null, Type.INTERPRETER, session.script(), e.getErrors());
+            final CFDGParserResult result = new CFDGParserResult(null, session.script(), e.getErrors());
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {
             final List<ScriptError> errors = new ArrayList<>();
             errors.add(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
-            final DSLParserResult result = new DSLParserResult(null, Type.INTERPRETER, session.script(), errors);
+            final CFDGParserResult result = new CFDGParserResult(null, session.script(), errors);
             return new ParserResult(session, errors, computeHighlighting(session.script()), result);
         }
     }

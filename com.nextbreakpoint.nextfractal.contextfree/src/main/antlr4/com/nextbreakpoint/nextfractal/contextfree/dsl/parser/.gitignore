@@ -1,8 +1,8 @@
-/CFDG.tokens
-/CFDGBaseListener.java
-/CFDGLexer.java
-/CFDGLexer.tokens
-/CFDGListener.java
-/CFDGParser.java
-/CFDGBaseVisitor.java
-/CFDGVisitor.java
+/ContextFree.tokens
+/ContextFreeBaseListener.java
+/ContextFreeLexer.java
+/ContextFreeLexer.tokens
+/ContextFreeListener.java
+/ContextFreeParser.java
+/ContextFreeBaseVisitor.java
+/ContextFreeVisitor.java

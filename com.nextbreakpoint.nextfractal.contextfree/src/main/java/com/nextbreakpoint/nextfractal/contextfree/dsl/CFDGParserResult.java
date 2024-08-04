@@ -24,13 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
-public class DSLCompiler {
-	public DSLCompiler() {
-	}
-	
-	public CFDGInterpreter compile(DSLParserResult report) {
-		return new CFDGInterpreter(report.getCFDG());
-	}
-}
+import java.util.List;
+
+public record CFDGParserResult(CFDG cfdg, String source, List<ScriptError> errors) {}

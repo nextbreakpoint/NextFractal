@@ -1,4 +1,4 @@
-grammar CFDG;
+grammar ContextFree;
 
 options
 {

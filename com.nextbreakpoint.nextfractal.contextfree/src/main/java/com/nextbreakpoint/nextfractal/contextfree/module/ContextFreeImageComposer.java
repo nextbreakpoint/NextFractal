@@ -25,10 +25,10 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGCompiler;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -74,10 +74,10 @@ public class ContextFreeImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            DSLParser parser = new DSLParser();
-            DSLParserResult report = parser.parse(script);
-            DSLCompiler compiler = new DSLCompiler();
-            CFDGInterpreter interpreter = compiler.compile(report);
+            CFDGParser parser = new CFDGParser();
+            CFDGParserResult report = parser.parse(script);
+            CFDGCompiler compiler = new CFDGCompiler();
+            CFDGImage interpreter = compiler.compile(report);
             GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             renderer.setInterpreter(interpreter);

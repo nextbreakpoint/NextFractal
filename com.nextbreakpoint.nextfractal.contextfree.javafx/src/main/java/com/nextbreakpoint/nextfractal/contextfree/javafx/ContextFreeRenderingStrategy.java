@@ -1,9 +1,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
@@ -87,8 +87,8 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     @Override
     public List<ScriptError> updateCoordinators(Object result) {
         try {
-            DSLParserResult parserResult = (DSLParserResult) result;
-            hasError = !parserResult.getErrors().isEmpty();
+            CFDGParserResult parserResult = (CFDGParserResult) result;
+            hasError = !parserResult.errors().isEmpty();
             boolean[] changed = createCFDG(parserResult);
             boolean cfdgChanged = changed[0];
             if (cfdgChanged) {
@@ -100,7 +100,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
                 coordinator.abort();
                 coordinator.waitFor();
                 if (cfdgChanged && cfdg != null) {
-                    coordinator.setInterpreter(new CFDGInterpreter(cfdg));
+                    coordinator.setInterpreter(new CFDGImage(cfdg));
                     coordinator.setSeed(((ContextFreeMetadata)delegate.getMetadata()).getSeed());
                 }
                 coordinator.init();
@@ -137,16 +137,16 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         return new DefaultThreadFactory(name, true, priority);
     }
 
-    private boolean[] createCFDG(DSLParserResult report) throws ParserException {
-        if (!report.getErrors().isEmpty()) {
+    private boolean[] createCFDG(CFDGParserResult report) throws ParserException {
+        if (!report.errors().isEmpty()) {
             cfdgSource = null;
-            throw new ParserException("Failed to compile source", report.getErrors());
+            throw new ParserException("Failed to compile source", report.errors());
         }
         boolean[] changed = new boolean[] { false, false };
-        String newCFDG = report.getSource();
+        String newCFDG = report.source();
         changed[0] = !newCFDG.equals(cfdgSource);
         cfdgSource = newCFDG;
-        cfdg = report.getCFDG();
+        cfdg = report.cfdg();
         return changed;
     }
 

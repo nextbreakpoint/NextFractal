@@ -27,9 +27,9 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl;
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLexer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeLexer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ErrorStrategy;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.CFDGException;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
@@ -47,21 +47,21 @@ import java.util.logging.Level;
 import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 
 @Log
-public class DSLParser {
+public class CFDGParser {
 	private static final String INCLUDE_LOCATION = "include.location";
 
-	public DSLParserResult parse(String source) throws ParserException {
+	public CFDGParserResult parse(String source) throws ParserException {
 		List<ScriptError> errors = new ArrayList<>();
 		CFDG cfdg = parse(source, errors);
-		return new DSLParserResult(cfdg, DSLParserResult.Type.INTERPRETER, source, errors);
+		return new CFDGParserResult(cfdg, source, errors);
 	}
 
 	private CFDG parse(String source, List<ScriptError> errors) throws ParserException {
 		try {
 			CharStream is = CharStreams.fromReader(new StringReader(source));
-			CFDGLexer lexer = new CFDGLexer(is);
+			ContextFreeLexer lexer = new ContextFreeLexer(is);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			CFDGParser parser = new CFDGParser(tokens);
+			ContextFreeParser parser = new ContextFreeParser(tokens);
 			parser.setDriver(new CFDGDriver());
 			CFDGLogger logger = new CFDGLogger();
 			parser.getDriver().setLogger(logger);

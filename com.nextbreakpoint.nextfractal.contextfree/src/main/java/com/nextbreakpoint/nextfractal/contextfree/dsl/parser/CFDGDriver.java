@@ -740,7 +740,7 @@ public class CFDGDriver {
 	}
 
 	protected void parseStream() {
-		CFDGParser parser = new CFDGParser(new CommonTokenStream(new CFDGLexer(streamsToLoad.peek())));
+		ContextFreeParser parser = new ContextFreeParser(new CommonTokenStream(new ContextFreeLexer(streamsToLoad.peek())));
 		parser.setDriver(this);
 		parser.choose();
 	}

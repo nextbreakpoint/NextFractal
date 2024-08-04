@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.test;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
@@ -106,7 +106,7 @@ public class V3RenderTest extends AbstractBaseTest {
 		CFDG cfdg = parseSource(sourceName);
 
 		renderer.setOpaque(true);
-		renderer.setInterpreter(new CFDGInterpreter(cfdg));
+		renderer.setInterpreter(new CFDGImage(cfdg));
 		renderer.setSeed("ABCD");
 		renderer.init();
 		renderer.runTask();

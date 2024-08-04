@@ -25,10 +25,10 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGCompiler;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -65,10 +65,10 @@ public class ContextFreeImageGenerator implements ImageGenerator {
         Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			DSLParser parser = new DSLParser();
-			DSLParserResult report = parser.parse(script);
-			DSLCompiler compiler = new DSLCompiler();
-			CFDGInterpreter interpreter = compiler.compile(report);
+			CFDGParser parser = new CFDGParser();
+			CFDGParserResult report = parser.parse(script);
+			CFDGCompiler compiler = new CFDGCompiler();
+			CFDGImage interpreter = compiler.compile(report);
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 			renderer.setInterpreter(interpreter);
 			renderer.setSeed(metadata.getSeed());

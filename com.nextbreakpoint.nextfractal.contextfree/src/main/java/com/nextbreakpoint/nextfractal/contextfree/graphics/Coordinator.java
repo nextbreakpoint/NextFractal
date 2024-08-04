@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
@@ -121,7 +121,7 @@ public class Coordinator implements RendererDelegate {
 	/**
 	 * @param cfdgInterpreter
 	 */
-	public void setInterpreter(CFDGInterpreter cfdgInterpreter) {
+	public void setInterpreter(CFDGImage cfdgInterpreter) {
 		renderer.setInterpreter(cfdgInterpreter);
 	}
 

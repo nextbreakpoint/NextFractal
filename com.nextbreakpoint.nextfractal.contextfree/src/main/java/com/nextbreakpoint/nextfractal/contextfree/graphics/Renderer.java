@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
@@ -74,7 +74,7 @@ public class Renderer {
 	private final RenderRunnable renderTask = new RenderRunnable();
 	private ExecutorService executor;
 	private volatile Future<?> future;
-	private CFDGInterpreter cfdgInterpreter;
+	private CFDGImage cfdgInterpreter;
 	private CFDGRenderer cfdgRenderer;
 	private String cfdgSeed;
 	private boolean initialized;
@@ -190,7 +190,7 @@ public class Renderer {
 	/**
 	 * @param cfdgInterpreter
 	 */
-	public void setInterpreter(CFDGInterpreter cfdgInterpreter) {
+	public void setInterpreter(CFDGImage cfdgInterpreter) {
 		this.cfdgInterpreter = cfdgInterpreter;
 		cfdgChanged = true;
 	}

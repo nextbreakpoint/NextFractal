@@ -26,10 +26,10 @@ package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGInterpreter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParamsStrategy;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParserStrategy;
@@ -79,7 +79,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
 		CFDG cfdg = (CFDG)bitmap.getProperty("cfdg");
 		Session session = (Session)bitmap.getProperty("session");
-		coordinator.setInterpreter(new CFDGInterpreter(cfdg));
+		coordinator.setInterpreter(new CFDGImage(cfdg));
 		coordinator.setSeed(((ContextFreeMetadata)session.metadata()).getSeed());
 		coordinator.init();
 		coordinator.run();
@@ -88,10 +88,10 @@ public class ContextFreeUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
-		DSLParser compiler = new DSLParser();
-		DSLParserResult report = compiler.parse(session.script());
+		CFDGParser compiler = new CFDGParser();
+		CFDGParserResult report = compiler.parse(session.script());
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
-		bitmap.setProperty("cfdg", report.getCFDG());
+		bitmap.setProperty("cfdg", report.cfdg());
 		bitmap.setProperty("session", session);
 		return bitmap;
 	}

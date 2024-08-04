@@ -22,14 +22,17 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
+package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
-public class CFDGInterpreter {
+public class CFDGImage {
     private CFDG cfdg;
 
-    public CFDGInterpreter(CFDG cfdg) {
+    public CFDGImage(CFDG cfdg) {
         this.cfdg = cfdg;
     }
 
