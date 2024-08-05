@@ -22,21 +22,19 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
+package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.AdvancedDSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.SimpleDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedOrbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.JavaCompilerProvider;
-import lombok.extern.java.Log;
 
 import javax.tools.JavaCompiler;
 import java.util.Objects;
 
-@Log
 public class DSLCompiler {
 	private final String packageName;
 	private final String className;
@@ -58,18 +56,18 @@ public class DSLCompiler {
 	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLParserResult result) throws DSLCompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
-			return new SimpleDSLCompiler().compileOrbit(context, result);
+			return new CompilerResult<>(() -> new InterpretedOrbit(context, result.fractal().getOrbit()), null);
 		} else {
-			return new AdvancedDSLCompiler(packageName, className, javaCompiler).compileOrbit(context, result);
+			return new FractalCompiler(packageName, className, javaCompiler).compileOrbit(context, result);
 		}
 	}
 
 	private CompilerResult<Color> compileColor(DSLExpressionContext context, DSLParserResult result) throws DSLCompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
-			return new SimpleDSLCompiler().compileColor(context, result);
+			return new CompilerResult<>(() -> new InterpretedColor(context, result.fractal().getColor()), null);
 		} else {
-			return new AdvancedDSLCompiler(packageName, className, javaCompiler).compileColor(context, result);
+			return new FractalCompiler(packageName, className, javaCompiler).compileColor(context, result);
 		}
 	}
 }

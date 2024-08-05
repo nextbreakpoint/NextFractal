@@ -51,7 +51,6 @@ import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -105,8 +104,7 @@ public class MandelbrotUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
-        final DSLCompiler compiler = new DSLCompiler(getPackageName(), getClassName());
-		final DSLParser parser = new DSLParser(compiler);
+		final DSLParser parser = new DSLParser(getPackageName(), getClassName());
 		final DSLExpressionContext expressionContext = new DSLExpressionContext();
 		final DSLParserResult parserResult = parser.parse(expressionContext, session.script());
 		Orbit orbit = parserResult.orbitClassFactory().create();

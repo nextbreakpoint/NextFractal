@@ -24,8 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -38,12 +37,11 @@ public class DSLCompiler2Test extends BaseTest {
 	@Test
 	public void Compiler1() {
 		try {
-			final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
-			final DSLParser parser = new DSLParser(compiler);
+			final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
 			final DSLExpressionContext expressionContext = new DSLExpressionContext();
 			DSLParserResult result = parser.parse(expressionContext, getSource("/source2.m"));
 			assertThat(result).isNotNull();
-		} catch (DSLException e) {
+		} catch (DSLParserException e) {
 			printErrors(e.getErrors());
 			assertThat(e.getErrors()).hasSize(1);
 		} catch (Exception e) {

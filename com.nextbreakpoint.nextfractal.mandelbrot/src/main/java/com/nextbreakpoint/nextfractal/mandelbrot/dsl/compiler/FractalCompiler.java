@@ -36,7 +36,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Palette;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCompilerContext;
@@ -56,14 +55,14 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_EXPRESSION_OPTIMISATION_ENABLED;
 
 @Log
-public class AdvancedDSLCompiler {
+public class FractalCompiler {
 	private final String packageName;
-	private final String classNamePrefix;
+	private final String className;
 	private final CompilerAdapter compilerAdapter;
 
-	public AdvancedDSLCompiler(String packageName, String classNamePrefix, JavaCompiler javaCompiler) {
+	public FractalCompiler(String packageName, String className, JavaCompiler javaCompiler) {
 		this.packageName = Objects.requireNonNull(packageName);
-		this.classNamePrefix = Objects.requireNonNull(classNamePrefix);
+		this.className = Objects.requireNonNull(className);
 		this.compilerAdapter = new CompilerAdapter(javaCompiler);
 	}
 
@@ -78,7 +77,7 @@ public class AdvancedDSLCompiler {
 			if (log.isLoggable(Level.FINE)) {
 				log.fine(javaSource);
 			}
-			return new CompilerResult<>(compilerAdapter.compile(Orbit.class, javaSource, packageName, classNamePrefix + "Orbit"), javaSource);
+			return new CompilerResult<>(compilerAdapter.compile(Orbit.class, javaSource, packageName, className + "Orbit"), javaSource);
 		} catch (DSLCompilerException e) {
 			throw e;
 		} catch (ASTException e) {
@@ -107,7 +106,7 @@ public class AdvancedDSLCompiler {
 			if (log.isLoggable(Level.FINE)) {
 				log.fine(javaSource);
 			}
-			return new CompilerResult<>(compilerAdapter.compile(Color.class, javaSource, packageName, classNamePrefix + "Color"), javaSource);
+			return new CompilerResult<>(compilerAdapter.compile(Color.class, javaSource, packageName, className + "Color"), javaSource);
 		} catch (DSLCompilerException e) {
 			throw e;
 		} catch (ASTException e) {
@@ -156,7 +155,7 @@ public class AdvancedDSLCompiler {
 		context.append(";\n");
 		context.append("@SuppressWarnings(value=\"unused\")\n");
 		context.append("public class ");
-		context.append(classNamePrefix);
+		context.append(className);
 		context.append("Orbit extends Orbit {\n");
 		if (orbit != null) {
 			for (VariableDeclaration var : orbit.getOrbitVariables()) {
@@ -198,7 +197,7 @@ public class AdvancedDSLCompiler {
 		context.append(";\n");
 		context.append("@SuppressWarnings(value=\"unused\")\n");
 		context.append("public class ");
-		context.append(classNamePrefix);
+		context.append(className);
 		context.append("Color extends Color {\n");
 		if (color != null) {
 			for (VariableDeclaration var : color.getColorVariables()) {

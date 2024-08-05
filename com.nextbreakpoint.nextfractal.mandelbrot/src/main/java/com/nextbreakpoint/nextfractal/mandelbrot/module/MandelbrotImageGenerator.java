@@ -36,8 +36,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -73,8 +72,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
-			final DSLParser parser = new DSLParser(compiler);
+			final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
 			final DSLExpressionContext expressionContext = new DSLExpressionContext();
 			final DSLParserResult parserResult = parser.parse(expressionContext, script);
 			Orbit orbit = parserResult.orbitClassFactory().create();
@@ -103,7 +101,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			renderer.waitForTasks();
 			renderer.getPixels(pixels);
 			aborted = renderer.isInterrupted();
-		} catch (DSLException e) {
+		} catch (DSLParserException e) {
 			log.log(Level.WARNING, e.getMessage(), e);
 		} catch (Throwable e) {
 			log.severe(e.getMessage());

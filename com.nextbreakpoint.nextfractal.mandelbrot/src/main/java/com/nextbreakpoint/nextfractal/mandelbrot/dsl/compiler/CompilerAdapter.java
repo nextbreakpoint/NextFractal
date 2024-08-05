@@ -27,7 +27,6 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 import com.nextbreakpoint.nextfractal.core.common.IOUtils;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompilerException;
 import lombok.extern.java.Log;
 
 import javax.tools.Diagnostic;

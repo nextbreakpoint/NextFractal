@@ -22,9 +22,10 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
+package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -33,7 +34,7 @@ import java.util.Objects;
 
 @Getter
 @ToString
-public class DSLCompilerException extends DSLException {
+public class DSLCompilerException extends DSLParserException {
 	private final String source;
 
 	public DSLCompilerException(String message, String source, List<ScriptError> errors) {

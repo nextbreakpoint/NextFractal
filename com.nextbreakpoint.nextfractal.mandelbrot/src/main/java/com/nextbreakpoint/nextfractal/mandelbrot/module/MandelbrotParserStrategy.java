@@ -31,8 +31,7 @@ import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -63,15 +62,14 @@ public class MandelbrotParserStrategy implements ParserStrategy {
 
     private ParserResult createParserResult(Session session) {
         try {
-            final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
-            final DSLParser parser = new DSLParser(compiler);
+            final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
             final DSLExpressionContext expressionContext = new DSLExpressionContext();
             final DSLParserResult parserResult = parser.parse(expressionContext, session.script());
             //TODO is create required here?
             parserResult.colorClassFactory().create();
             parserResult.orbitClassFactory().create();
             return new ParserResult(session, List.of(), computeHighlighting(session.script()), parserResult);
-        } catch (DSLException e) {
+        } catch (DSLParserException e) {
             final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {

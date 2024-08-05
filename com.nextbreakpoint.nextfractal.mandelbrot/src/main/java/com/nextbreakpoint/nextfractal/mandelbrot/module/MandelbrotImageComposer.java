@@ -42,8 +42,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
@@ -90,8 +89,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
-            final DSLParser parser = new DSLParser(compiler);
+            final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
             final DSLExpressionContext expressionContext = new DSLExpressionContext();
             final DSLParserResult parserResult = parser.parse(expressionContext, script);
             final Orbit orbit = parserResult.orbitClassFactory().create();
@@ -144,7 +142,7 @@ public class MandelbrotImageComposer implements ImageComposer {
                 drawPoint(renderFactory, renderContext, tile.imageSize(), region, metadata);
             }
             aborted = renderer.isInterrupted();
-        } catch (DSLException e) {
+        } catch (DSLParserException e) {
             log.log(Level.WARNING, e.getMessage(), e);
         } catch (Throwable e) {
             log.severe(e.getMessage());

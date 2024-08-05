@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ErrorStrategy;
@@ -47,13 +48,13 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 
 @Log
 public class DSLParser {
-	private DSLCompiler compiler;
+	private final DSLCompiler compiler;
 
-    public DSLParser(DSLCompiler compiler) {
-        this.compiler = compiler;
+    public DSLParser(String packageName, String className) {
+        this.compiler = new DSLCompiler(packageName, className);
     }
 
-    public DSLParserResult parse(DSLExpressionContext expressionContext, String source) throws DSLException {
+    public DSLParserResult parse(DSLExpressionContext expressionContext, String source) throws DSLParserException {
 		final ASTFractal fractal = parse(source);
 		final String orbitScript = fractal.getOrbit().toString();
 		final String colorScript = fractal.getColor().toString();
