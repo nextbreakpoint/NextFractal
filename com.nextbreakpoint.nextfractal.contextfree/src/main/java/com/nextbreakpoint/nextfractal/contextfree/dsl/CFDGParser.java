@@ -51,6 +51,7 @@ public class CFDGParser {
 	private static final String INCLUDE_LOCATION = "include.location";
 
 	public CFDGParserResult parse(String source) throws ParserException {
+		//TODO move errors
 		List<ScriptError> errors = new ArrayList<>();
 		CFDG cfdg = parse(source, errors);
 		return new CFDGParserResult(cfdg, source, errors);

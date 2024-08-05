@@ -35,8 +35,8 @@ import java.util.Map;
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcAcos;
 
 public class DSLFunctionAcos extends DSLFunction {
-	public DSLFunctionAcos(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
-		super(token, arguments, context.newNumberIndex());
+	public DSLFunctionAcos(DSLToken token, DSLExpression[] arguments, int numberIndex) {
+		super(token, arguments, numberIndex);
 	}
 
 	@Override

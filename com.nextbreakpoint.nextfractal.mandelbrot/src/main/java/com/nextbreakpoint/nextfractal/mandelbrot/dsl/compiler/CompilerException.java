@@ -34,10 +34,10 @@ import java.util.Objects;
 
 @Getter
 @ToString
-public class DSLCompilerException extends DSLParserException {
+public class CompilerException extends DSLParserException {
 	private final String source;
 
-	public DSLCompilerException(String message, String source, List<ScriptError> errors) {
+	public CompilerException(String message, String source, List<ScriptError> errors) {
 		super(message, errors);
 		this.source = Objects.requireNonNull(source);
 	}

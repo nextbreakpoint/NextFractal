@@ -35,8 +35,8 @@ import java.util.Map;
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcRamp;
 
 public class DSLFunctionRamp extends DSLFunction {
-	public DSLFunctionRamp(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
-		super(token, arguments, context.newNumberIndex());
+	public DSLFunctionRamp(DSLToken token, DSLExpression[] arguments, int numberIndex) {
+		super(token, arguments, numberIndex);
 	}
 
 	@Override

@@ -35,8 +35,8 @@ import java.util.Map;
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcSqrt;
 
 public class DSLFunctionSqrt extends DSLFunction {
-	public DSLFunctionSqrt(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
-		super(token, arguments, context.newNumberIndex());
+	public DSLFunctionSqrt(DSLToken token, DSLExpression[] arguments, int numberIndex) {
+		super(token, arguments, numberIndex);
 	}
 
 	@Override

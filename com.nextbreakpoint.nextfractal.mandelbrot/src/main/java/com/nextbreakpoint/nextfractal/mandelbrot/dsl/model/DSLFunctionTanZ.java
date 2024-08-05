@@ -35,8 +35,8 @@ import java.util.Map;
 import static com.nextbreakpoint.nextfractal.mandelbrot.core.Expression.funcTan;
 
 public class DSLFunctionTanZ extends DSLFunction {
-	public DSLFunctionTanZ(DSLToken token, DSLExpressionContext context, DSLExpression[] arguments) {
-		super(token, arguments, context.newNumberIndex());
+	public DSLFunctionTanZ(DSLToken token, DSLExpression[] arguments, int numberIndex) {
+		super(token, arguments, numberIndex);
 	}
 
 	@Override

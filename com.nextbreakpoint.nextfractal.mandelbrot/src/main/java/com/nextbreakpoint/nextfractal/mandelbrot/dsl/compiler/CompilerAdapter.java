@@ -56,15 +56,15 @@ public class CompilerAdapter {
 		this.javaCompiler = Objects.requireNonNull(javaCompiler);
 	}
 
-	public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws DSLCompilerException {
+	public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws CompilerException {
 		try {
 			return new JavaClassFactory<>(compile(javaSource, packageName, className, clazz));
-		} catch (DSLCompilerException e) {
+		} catch (CompilerException e) {
 			throw e;
 		} catch (Throwable e) {
             final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
-			throw new DSLCompilerException("Can't compile class", javaSource, errors);
+			throw new CompilerException("Can't compile class", javaSource, errors);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class CompilerAdapter {
 					ScriptError error = new ScriptError(COMPILE, line, charPositionInLine, index, length, message);
 					log.log(Level.WARNING, error.toString());
 					errors.add(error);
-					throw new DSLCompilerException("Can't compile class", source, errors);
+					throw new CompilerException("Can't compile class", source, errors);
 				}
 			}
 		} finally {
@@ -132,7 +132,7 @@ public class CompilerAdapter {
 		}
 	}
 
-	private void defineClasses(JavaFileManager fileManager, JavaCompilerClassLoader loader, String packageName, String className) throws IOException {
+	private static void defineClasses(JavaFileManager fileManager, JavaCompilerClassLoader loader, String packageName, String className) throws IOException {
 		String name = packageName + "." + className;
 		JavaFileObject file = fileManager.getJavaFileForOutput(StandardLocation.locationFor(name), name, Kind.CLASS, null);
 		byte[] fileData = loadBytes(file);
@@ -140,7 +140,7 @@ public class CompilerAdapter {
 		loader.defineClassFromData(name, fileData);
 	}
 
-	private byte[] loadBytes(JavaFileObject file) throws IOException {
+	private static byte[] loadBytes(JavaFileObject file) throws IOException {
         try (InputStream is = file.openInputStream()) {
 			try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 				IOUtils.copyBytes(is, os);

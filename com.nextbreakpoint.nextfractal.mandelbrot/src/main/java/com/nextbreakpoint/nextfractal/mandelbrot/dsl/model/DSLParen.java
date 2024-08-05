@@ -11,7 +11,7 @@ public class DSLParen extends DSLExpression {
     private final DSLExpression exp;
 
     public DSLParen(DSLToken token, DSLExpression exp, int numberIndex) {
-        super(token, numberIndex);
+        super(token);
         this.exp = exp;
     }
 

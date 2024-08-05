@@ -31,12 +31,11 @@ import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -73,8 +72,7 @@ public class MandelbrotParserStrategy implements ParserStrategy {
             final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {
-            final List<ScriptError> errors = new ArrayList<>();
-            errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final List<ScriptError> errors = List.of(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
             final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
             return new ParserResult(session, errors, computeHighlighting(session.script()), result);
         }

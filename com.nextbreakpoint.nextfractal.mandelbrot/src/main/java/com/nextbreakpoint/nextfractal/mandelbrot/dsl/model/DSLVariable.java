@@ -35,8 +35,8 @@ public class DSLVariable extends DSLExpression {
 	private final String name;
 	private final boolean real;
 
-	public DSLVariable(DSLToken token, DSLExpressionContext context, String name, boolean real) {
-		super(token, context.newNumberIndex());
+	public DSLVariable(DSLToken token, String name, boolean real) {
+		super(token);
 		this.name = name;
 		this.real = real;
 	}

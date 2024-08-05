@@ -11,7 +11,6 @@ import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -39,13 +38,12 @@ public class ContextFreeParserStrategy implements ParserStrategy {
         try {
             final CFDGParser parser = new CFDGParser();
             final CFDGParserResult result = parser.parse(session.script());
-            return new ParserResult(session, result.errors(), computeHighlighting(session.script()), result);
+            return new ParserResult(session, List.of(), computeHighlighting(session.script()), result);
         } catch (ParserException e) {
             final CFDGParserResult result = new CFDGParserResult(null, session.script(), e.getErrors());
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {
-            final List<ScriptError> errors = new ArrayList<>();
-            errors.add(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
+            final List<ScriptError> errors = List.of(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
             final CFDGParserResult result = new CFDGParserResult(null, session.script(), errors);
             return new ParserResult(session, errors, computeHighlighting(session.script()), result);
         }

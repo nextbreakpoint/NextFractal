@@ -215,112 +215,112 @@ public class DefaultResolver implements ASTResolver {
             }
             case "mod" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionMod(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionMod(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionModZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionModZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "mod2" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionMod2(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionMod2(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionModZ2(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionModZ2(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "pha" -> {
-                return new DSLFunctionPhaZ(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionPhaZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "re" -> {
-                return new DSLFunctionReZ(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionReZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "im" -> {
-                return new DSLFunctionImZ(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionImZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "sin" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionSin(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionSin(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionSinZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionSinZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "cos" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionCos(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionCos(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionCosZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionCosZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "tan" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionTan(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionTan(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionTanZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionTanZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "asin" -> {
-                return new DSLFunctionAsin(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionAsin(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "acos" -> {
-                return new DSLFunctionAcos(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionAcos(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "atan" -> {
-                return new DSLFunctionAtan(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionAtan(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "abs" -> {
                 return new DSLFunctionAbs(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "ceil" -> {
-                return new DSLFunctionCeil(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionCeil(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "floor" -> {
-                return new DSLFunctionFloor(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionFloor(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "log" -> {
-                return new DSLFunctionLog(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionLog(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "square" -> {
-                return new DSLFunctionSquare(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionSquare(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "saw" -> {
-                return new DSLFunctionSaw(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionSaw(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "ramp" -> {
-                return new DSLFunctionRamp(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionRamp(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "min" -> {
-                return new DSLFunctionMin(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionMin(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "max" -> {
-                return new DSLFunctionMax(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionMax(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "atan2" -> {
-                return new DSLFunctionAtan2(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionAtan2(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "hypot" -> {
-                return new DSLFunctionHypot(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionHypot(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "pulse" -> {
-                return new DSLFunctionPulse(location, context, resolveArguments(function.getArguments()));
+                return new DSLFunctionPulse(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "pow" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionPow(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionPow(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionPowZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionPowZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "sqrt" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionSqrt(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionSqrt(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionSqrtZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionSqrtZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             case "exp" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionExp(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionExp(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 } else {
-                    return new DSLFunctionExpZ(location, context, resolveArguments(function.getArguments()));
+                    return new DSLFunctionExpZ(location, resolveArguments(function.getArguments()), context.newNumberIndex());
                 }
             }
             default -> {
@@ -388,7 +388,7 @@ public class DefaultResolver implements ASTResolver {
 
 	@Override
 	public DSLExpression resolve(ASTVariable variable) {
-		return new DSLVariable(variable.getLocation(), context, variable.getName(), variable.isReal());
+		return new DSLVariable(variable.getLocation(), variable.getName(), variable.isReal());
 	}
 
     @Override

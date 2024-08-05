@@ -28,9 +28,11 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 public abstract class DSLFunction extends DSLExpression {
 	protected final DSLExpression[] arguments;
+	protected final int numberIndex;
 
 	public DSLFunction(DSLToken token, DSLExpression[] arguments, int numberIndex) {
-		super(token, numberIndex);
+		super(token);
         this.arguments = arguments;
+		this.numberIndex = numberIndex;
 	}
 }

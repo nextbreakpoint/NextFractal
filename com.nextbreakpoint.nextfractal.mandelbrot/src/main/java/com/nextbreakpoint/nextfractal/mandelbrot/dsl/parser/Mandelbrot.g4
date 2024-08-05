@@ -121,7 +121,7 @@ endstatement
 statement
 	:
 	v=VARIABLE '=' e=expression ';'? {
-		builder.registerVariable($v.text, $e.result.isReal(), $v);
+		builder.registerVariable($v.text, $e.result != null ? $e.result.isReal() : true, $v);
 		builder.appendStatement(new ASTAssignStatement($v, $v.text, $e.result));
 	}
 	|

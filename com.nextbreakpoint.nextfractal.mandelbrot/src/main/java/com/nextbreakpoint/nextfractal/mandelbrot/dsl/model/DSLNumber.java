@@ -35,11 +35,13 @@ import java.util.Map;
 public class DSLNumber extends DSLExpression {
 	private final double r;
 	private final double i;
+	private final int numberIndex;
 
 	public DSLNumber(DSLToken token, double r, double i, int numberIndex) {
-		super(token, numberIndex);
+		super(token);
 		this.r = r;
 		this.i = i;
+		this.numberIndex = numberIndex;
 	}
 
 	@Override

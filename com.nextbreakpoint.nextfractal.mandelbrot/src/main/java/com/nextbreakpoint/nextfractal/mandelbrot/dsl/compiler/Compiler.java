@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
@@ -37,10 +38,14 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedColor;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.interpreter.InterpretedOrbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLColor;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCompilerContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbit;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.JavaCompilerProvider;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTException;
 import lombok.extern.java.Log;
 
@@ -55,72 +60,110 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_EXPRESSION_OPTIMISATION_ENABLED;
 
 @Log
-public class FractalCompiler {
+public class Compiler {
+	private final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 	private final String packageName;
 	private final String className;
-	private final CompilerAdapter compilerAdapter;
 
-	public FractalCompiler(String packageName, String className, JavaCompiler javaCompiler) {
+	public Compiler(String packageName, String className) {
 		this.packageName = Objects.requireNonNull(packageName);
 		this.className = Objects.requireNonNull(className);
-		this.compilerAdapter = new CompilerAdapter(javaCompiler);
 	}
 
-	public CompilerResult<Orbit> compileOrbit(DSLExpressionContext expressionContext, DSLParserResult report) throws DSLCompilerException {
-		try {
-			final StringBuilder builder = new StringBuilder();
-            if (report.fractal() != null) {
-                final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.ORBIT);
-				compileOrbit(context, report.fractal().getOrbit(), new HashMap<>());
-			}
-			final String javaSource = builder.toString();
-			if (log.isLoggable(Level.FINE)) {
-				log.fine(javaSource);
-			}
-			return new CompilerResult<>(compilerAdapter.compile(Orbit.class, javaSource, packageName, className + "Orbit"), javaSource);
-		} catch (DSLCompilerException e) {
-			throw e;
-		} catch (ASTException e) {
-			long line = e.getLocation().getLine();
-			long charPositionInLine = e.getLocation().getCharPositionInLine();
-			long index = e.getLocation().getStartIndex();
-			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-            final List<ScriptError> errors = new ArrayList<>();
-			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
-			throw new DSLCompilerException("Can't compile orbit", report.orbitDSL(), errors);
-		} catch (Throwable e) {
-            final List<ScriptError> errors = new ArrayList<>();
-			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
-			throw new DSLCompilerException("Can't compile orbit", report.orbitDSL(), errors);
+	public DSLParserResult compile(DSLExpressionContext context, DSLParserResult result) throws CompilerException {
+		CompilerResult<Orbit> orbitResult = compileOrbit(context, result);
+		CompilerResult<Color> colorResult = compileColor(context, result);
+		return result.toBuilder()
+				.withOrbitClassFactory(orbitResult.classFactory())
+				.withColorClassFactory(colorResult.classFactory())
+				.build();
+	}
+
+	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLParserResult result) throws CompilerException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
+		if (javaCompiler == null) {
+			return compileOrbit(context, result.fractal().getOrbit());
+		} else {
+			return compileOrbit(context, result.fractal(), result.orbitDSL());
 		}
 	}
 
-	public CompilerResult<Color> compileColor(DSLExpressionContext expressionContext, DSLParserResult report) throws DSLCompilerException {
+	private CompilerResult<Color> compileColor(DSLExpressionContext context, DSLParserResult result) throws CompilerException {
+		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
+		if (javaCompiler == null) {
+			return compileColor(context, result.fractal().getColor());
+		} else {
+			return compileColor(context, result.fractal(), result.colorDSL());
+		}
+	}
+
+	private static CompilerResult<Color> compileColor(DSLExpressionContext context, DSLColor color) {
+		return new CompilerResult<>(() -> new InterpretedColor(context, color), null);
+	}
+
+	private static CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLOrbit orbit) {
+		return new CompilerResult<>(() -> new InterpretedOrbit(context, orbit), null);
+	}
+
+	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext expressionContext, DSLFractal fractal, String source) throws CompilerException {
 		try {
 			final StringBuilder builder = new StringBuilder();
-            if (report.fractal() != null) {
-                final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.COLOR);
-				compileColor(context, report.fractal().getColor(), new HashMap<>());
+			if (fractal != null) {
+				final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.ORBIT);
+				compileOrbit(context, fractal.getOrbit(), new HashMap<>());
 			}
 			final String javaSource = builder.toString();
 			if (log.isLoggable(Level.FINE)) {
 				log.fine(javaSource);
 			}
-			return new CompilerResult<>(compilerAdapter.compile(Color.class, javaSource, packageName, className + "Color"), javaSource);
-		} catch (DSLCompilerException e) {
+			final CompilerAdapter compilerAdapter = new CompilerAdapter(javaCompiler);
+			final ClassFactory<Orbit> classFactory = compilerAdapter.compile(Orbit.class, javaSource, packageName, className + "Orbit");
+			return new CompilerResult<>(classFactory, javaSource);
+		} catch (CompilerException e) {
 			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-            final List<ScriptError> errors = new ArrayList<>();
+			final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
-			throw new DSLCompilerException("Can't compile color", report.colorDSL(), errors);
+			throw new CompilerException("Can't compile orbit", source, errors);
 		} catch (Throwable e) {
-            final List<ScriptError> errors = new ArrayList<>();
+			final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
-			throw new DSLCompilerException("Can't compile color", report.colorDSL(), errors);
+			throw new CompilerException("Can't compile orbit", source, errors);
+		}
+	}
+
+	private CompilerResult<Color> compileColor(DSLExpressionContext expressionContext, DSLFractal fractal, String source) throws CompilerException {
+		try {
+			final StringBuilder builder = new StringBuilder();
+			if (fractal != null) {
+				final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.COLOR);
+				compileColor(context, fractal.getColor(), new HashMap<>());
+			}
+			final String javaSource = builder.toString();
+			if (log.isLoggable(Level.FINE)) {
+				log.fine(javaSource);
+			}
+			final CompilerAdapter compilerAdapter = new CompilerAdapter(javaCompiler);
+			final ClassFactory<Color> classFactory = compilerAdapter.compile(Color.class, javaSource, packageName, className + "Color");
+			return new CompilerResult<>(classFactory, javaSource);
+		} catch (CompilerException e) {
+			throw e;
+		} catch (ASTException e) {
+			long line = e.getLocation().getLine();
+			long charPositionInLine = e.getLocation().getCharPositionInLine();
+			long index = e.getLocation().getStartIndex();
+			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
+			final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
+			throw new CompilerException("Can't compile color", source, errors);
+		} catch (Throwable e) {
+			final List<ScriptError> errors = new ArrayList<>();
+			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+			throw new CompilerException("Can't compile color", source, errors);
 		}
 	}
 

@@ -29,10 +29,12 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 public abstract class DSLOperator extends DSLExpression {
 	protected final DSLExpression exp1;
 	protected final DSLExpression exp2;
+	protected final int numberIndex;
 
 	public DSLOperator(DSLToken token, DSLExpression exp1, DSLExpression exp2, int numberIndex) {
-		super(token, numberIndex);
+		super(token);
         this.exp1 = exp1;
         this.exp2 = exp2;
-    }
+		this.numberIndex = numberIndex;
+	}
 }
