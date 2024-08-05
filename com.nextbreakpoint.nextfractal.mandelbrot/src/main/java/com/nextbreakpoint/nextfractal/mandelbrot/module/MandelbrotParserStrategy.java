@@ -35,6 +35,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,29 +63,23 @@ public class MandelbrotParserStrategy implements ParserStrategy {
 
     private ParserResult createParserResult(Session session) {
         try {
-            final DSLParser parser = new DSLParser();
-            final DSLParserResult result = parser.parse(session.script());
-            final DSLCompiler compiler = new DSLCompiler(getPackageName(), getClassName());
-            compiler.compileOrbit(result).create();
-            compiler.compileColor(result).create();
-            return new ParserResult(session, result.errors(), computeHighlighting(session.script()), result);
+            final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
+            final DSLParser parser = new DSLParser(compiler);
+            final DSLExpressionContext expressionContext = new DSLExpressionContext();
+            final DSLParserResult parserResult = parser.parse(expressionContext, session.script());
+            //TODO is create required here?
+            parserResult.colorClassFactory().create();
+            parserResult.orbitClassFactory().create();
+            return new ParserResult(session, List.of(), computeHighlighting(session.script()), parserResult);
         } catch (DSLException e) {
-            final DSLParserResult result = new DSLParserResult(null, session.script(), null, null, e.getErrors());
+            final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {
             final List<ScriptError> errors = new ArrayList<>();
             errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
-            final DSLParserResult result = new DSLParserResult(null, session.script(), null, null, errors);
+            final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
             return new ParserResult(session, errors, computeHighlighting(session.script()), result);
         }
-    }
-
-    private String getClassName() {
-        return "C" + System.nanoTime();
-    }
-
-    private String getPackageName() {
-        return DSLParser.class.getPackage().getName() + ".generated";
     }
 
     private GenericStyleSpans<Collection<String>> computeHighlighting(String text) {

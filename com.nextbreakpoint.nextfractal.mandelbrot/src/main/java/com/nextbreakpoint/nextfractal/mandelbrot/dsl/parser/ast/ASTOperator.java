@@ -60,8 +60,8 @@ public class ASTOperator extends ASTExpression {
 	}
 
 	@Override
-	public DSLExpression compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLExpression resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 
 	public boolean isReal() {

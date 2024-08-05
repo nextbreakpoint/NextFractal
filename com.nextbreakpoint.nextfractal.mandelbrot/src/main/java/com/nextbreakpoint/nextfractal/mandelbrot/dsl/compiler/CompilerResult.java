@@ -22,20 +22,8 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
+package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 
-import java.util.List;
-
-public record DSLCompilerResult(
-        DSLParserResult parserResult,
-        ClassFactory<Orbit> orbitClassFactory,
-        ClassFactory<Color> colorClassFactory,
-        String orbitJava,
-        String colorJava,
-        List<ScriptError> javaErrors
-) {}
+public record CompilerResult<T>(ClassFactory<T> classFactory, String source) {}

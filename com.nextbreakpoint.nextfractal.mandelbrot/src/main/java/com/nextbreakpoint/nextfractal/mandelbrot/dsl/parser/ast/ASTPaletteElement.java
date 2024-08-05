@@ -48,7 +48,7 @@ public class ASTPaletteElement extends ASTObject {
         return "beginColor = " + beginColor + ",endColor = " + endColor + ",steps = " + steps + ",exp = {" + exp + "}";
 	}
 
-    public DSLPaletteElement compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+    public DSLPaletteElement resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

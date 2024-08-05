@@ -45,9 +45,9 @@ public class InterpretedColor extends Color implements DSLInterpreterContext {
 	private final Map<String, Palette> palettes = new HashMap<>();
 	private final Map<String, Variable> variables = new HashMap<>();
 
-	public InterpretedColor(DSLColor color) {
-		this.color = color;
-		this.context = color.getExpressionContext();
+	public InterpretedColor(DSLExpressionContext context, DSLColor color) {
+        this.context = context;
+        this.color = color;
 		initializeNumbersStack();
 	}
 

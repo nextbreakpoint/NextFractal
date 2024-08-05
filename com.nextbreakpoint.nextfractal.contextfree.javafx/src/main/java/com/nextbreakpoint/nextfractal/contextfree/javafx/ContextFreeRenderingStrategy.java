@@ -7,6 +7,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -85,11 +86,10 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public List<ScriptError> updateCoordinators(Object result) {
+    public List<ScriptError> updateCoordinators(ParserResult result) {
         try {
-            CFDGParserResult parserResult = (CFDGParserResult) result;
-            hasError = !parserResult.errors().isEmpty();
-            boolean[] changed = createCFDG(parserResult);
+            hasError = !result.errors().isEmpty();
+            boolean[] changed = createCFDG(result);
             boolean cfdgChanged = changed[0];
             if (cfdgChanged) {
                 if (log.isLoggable(Level.FINE)) {
@@ -137,16 +137,17 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         return new DefaultThreadFactory(name, true, priority);
     }
 
-    private boolean[] createCFDG(CFDGParserResult report) throws ParserException {
-        if (!report.errors().isEmpty()) {
+    private boolean[] createCFDG(ParserResult result) throws ParserException {
+        if (!result.errors().isEmpty()) {
             cfdgSource = null;
-            throw new ParserException("Failed to compile source", report.errors());
+            throw new ParserException("Failed to compile source", result.errors());
         }
         boolean[] changed = new boolean[] { false, false };
-        String newCFDG = report.source();
+        CFDGParserResult cfdgResult = (CFDGParserResult) result.result();
+        String newCFDG = cfdgResult.source();
         changed[0] = !newCFDG.equals(cfdgSource);
         cfdgSource = newCFDG;
-        cfdg = report.cfdg();
+        cfdg = cfdgResult.cfdg();
         return changed;
     }
 

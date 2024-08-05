@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ErrorStrategy;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.MandelbrotLexer;
@@ -46,17 +47,29 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 
 @Log
 public class DSLParser {
-	public DSLParserResult parse(String source) throws DSLParserException {
-		final List<ScriptError> errors = new ArrayList<>();
-		final ASTFractal fractal = parse(source, errors);
+	private DSLCompiler compiler;
+
+    public DSLParser(DSLCompiler compiler) {
+        this.compiler = compiler;
+    }
+
+    public DSLParserResult parse(DSLExpressionContext expressionContext, String source) throws DSLException {
+		final ASTFractal fractal = parse(source);
 		final String orbitScript = fractal.getOrbit().toString();
 		final String colorScript = fractal.getColor().toString();
-		final DSLFractal compiledFractal = fractal.compile();
-		return new DSLParserResult(compiledFractal, source, orbitScript, colorScript, errors);
+        final DSLFractal resolvedFractal = fractal.resolve(expressionContext);
+		final DSLParserResult parserResult = DSLParserResult.builder()
+				.withFractal(resolvedFractal)
+				.withSource(source)
+				.withOrbitDSL(orbitScript)
+				.withColorDSL(colorScript)
+				.build();
+		return compiler.compile(expressionContext, parserResult);
 	}
 
-	private ASTFractal parse(String source, List<ScriptError> errors) throws DSLParserException {
+	private ASTFractal parse(String source) throws DSLParserException {
 		try {
+			final List<ScriptError> errors = new ArrayList<>();
 			CharStream is = CharStreams.fromReader(new StringReader(source));
 			MandelbrotLexer lexer = new MandelbrotLexer(is);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -75,22 +88,28 @@ public class DSLParser {
 				throw new DSLParserException("Can't parse color", errors);
 			}
 			return fractal;
+		} catch (DSLParserException e) {
+			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
 			long charPositionInLine = e.getLocation().getCharPositionInLine();
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-			String message = e.getMessage();
-			ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, message);
+            ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
 			log.log(Level.INFO, error.toString(), e);
-			errors.add(error);
-			throw new DSLParserException("Can't parse script", errors);
+            throw new DSLParserException("Can't parse script", List.of(error));
 		} catch (Exception e) {
-            String message = e.getMessage();
-			ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, message);
+            ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
 			log.log(Level.INFO, error.toString(), e);
-			errors.add(error);
-			throw new DSLParserException("Can't parse script", errors);
+            throw new DSLParserException("Can't parse script", List.of(error));
 		}
+	}
+
+	public static String getClassName() {
+		return "C" + System.nanoTime();
+	}
+
+	public static String getPackageName() {
+		return DSLParser.class.getPackage().getName() + ".generated";
 	}
 }

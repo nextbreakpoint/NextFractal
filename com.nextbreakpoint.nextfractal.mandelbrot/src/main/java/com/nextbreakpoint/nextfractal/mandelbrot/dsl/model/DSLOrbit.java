@@ -41,8 +41,6 @@ public class DSLOrbit extends DSLObject {
 	private final DSLOrbitEnd end;
 	private final Collection<VariableDeclaration> orbitVariables;
 	private final Collection<VariableDeclaration> stateVariables;
-	//TODO it should not be here
-	private final DSLExpressionContext expressionContext;
 	//TODO replace it with DSLRegion
     private final ComplexNumber[] region;
 	private final List<DSLTrap> traps;

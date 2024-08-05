@@ -36,5 +36,5 @@ public abstract class ASTExpression extends ASTObject {
 		return false;
 	}
 
-	public abstract DSLExpression compile(ASTCompiler compiler);
+	public abstract DSLExpression resolve(ASTResolver resolver);
 }

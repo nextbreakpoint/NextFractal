@@ -33,50 +33,50 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrapOp;
 
-public interface ASTCompiler {
-	DSLExpression compile(ASTNumber number);
+public interface ASTResolver {
+	DSLExpression resolve(ASTNumber number);
 
-	DSLExpression compile(ASTFunction function);
+	DSLExpression resolve(ASTFunction function);
 
-	DSLExpression compile(ASTOperator operator);
+	DSLExpression resolve(ASTOperator operator);
 
-	DSLExpression compile(ASTParen paren);
+	DSLExpression resolve(ASTParen paren);
 
-	DSLExpression compile(ASTVariable variable);
+	DSLExpression resolve(ASTVariable variable);
 
-	DSLExpression compile(ASTConditionalExpression conditional);
+	DSLExpression resolve(ASTConditionalExpression conditional);
 
-	DSLCondition compile(ASTConditionCompareOp condition);
+	DSLCondition resolve(ASTConditionCompareOp condition);
 
-	DSLCondition compile(ASTConditionLogicOp condition);
+	DSLCondition resolve(ASTConditionLogicOp condition);
 
-	DSLCondition compile(ASTConditionTrap condition);
+	DSLCondition resolve(ASTConditionTrap condition);
 
-	DSLCondition compile(ASTConditionJulia condition);
+	DSLCondition resolve(ASTConditionJulia condition);
 
-	DSLCondition compile(ASTConditionParen condition);
+	DSLCondition resolve(ASTConditionParen condition);
 
-	DSLCondition compile(ASTConditionNeg condition);
+	DSLCondition resolve(ASTConditionNeg condition);
 
-	DSLCondition compile(ASTRuleLogicOp operator);
+	DSLCondition resolve(ASTRuleLogicOp operator);
 
-	DSLCondition compile(ASTRuleCompareOp operator);
+	DSLCondition resolve(ASTRuleCompareOp operator);
 
-	DSLColorExpression compile(ASTColorPalette palette);
+	DSLColorExpression resolve(ASTColorPalette palette);
 
-	DSLColorExpression compile(ASTColorComponent component);
+	DSLColorExpression resolve(ASTColorComponent component);
 
-	DSLStatement compile(ASTConditionalStatement statement);
+	DSLStatement resolve(ASTConditionalStatement statement);
 
-	DSLStatement compile(ASTAssignStatement statement);
+	DSLStatement resolve(ASTAssignStatement statement);
 
-	DSLStatement compile(ASTStopStatement statement);
+	DSLStatement resolve(ASTStopStatement statement);
 
-	DSLTrap compile(ASTOrbitTrap orbitTrap);
+	DSLTrap resolve(ASTOrbitTrap orbitTrap);
 
-	DSLTrapOp compile(ASTOrbitTrapOp orbitTrapOp);
+	DSLTrapOp resolve(ASTOrbitTrapOp orbitTrapOp);
 
-	DSLPalette compile(ASTPalette palette);
+	DSLPalette resolve(ASTPalette palette);
 
-	DSLPaletteElement compile(ASTPaletteElement paletteElement);
+	DSLPaletteElement resolve(ASTPaletteElement paletteElement);
 }

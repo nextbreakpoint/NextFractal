@@ -46,6 +46,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Region;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
@@ -89,11 +90,12 @@ public class MandelbrotImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
-            DSLParser parser = new DSLParser();
-            DSLParserResult result = parser.parse(script);
-            Orbit orbit = compiler.compileOrbit(result).create();
-            Color color = compiler.compileColor(result).create();
+            final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
+            final DSLParser parser = new DSLParser(compiler);
+            final DSLExpressionContext expressionContext = new DSLExpressionContext();
+            final DSLParserResult parserResult = parser.parse(expressionContext, script);
+            final Orbit orbit = parserResult.orbitClassFactory().create();
+            final Color color = parserResult.colorClassFactory().create();
             GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             if (metadata.getOptions().isShowPreview() && !metadata.isJulia()) {

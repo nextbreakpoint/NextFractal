@@ -1,5 +1,6 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
+import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
@@ -13,7 +14,7 @@ public interface RenderingStrategy {
 
     void updateCoordinators(Session session, boolean continuous, boolean timeAnimation);
 
-    List<ScriptError> updateCoordinators(Object report);
+    List<ScriptError> updateCoordinators(ParserResult result);
 
     void disposeCoordinators();
 }

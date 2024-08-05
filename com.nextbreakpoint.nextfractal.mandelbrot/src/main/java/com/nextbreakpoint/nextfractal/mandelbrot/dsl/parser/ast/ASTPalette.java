@@ -64,7 +64,7 @@ public class ASTPalette extends ASTObject {
 		return builder.toString();
 	}
 
-	public DSLPalette compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLPalette resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

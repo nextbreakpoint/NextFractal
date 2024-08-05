@@ -33,7 +33,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLPalette;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLRule;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.SimpleASTCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.DefaultResolver;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
@@ -109,10 +109,9 @@ public class ASTColor extends ASTObject {
 		return builder.toString();
 	}
 
-	public DSLColor compile(ASTVariables variables) throws DSLParserException {
+	public DSLColor resolve(ASTVariables variables, DSLExpressionContext expressionContext) throws DSLParserException {
 		try {
-			final DSLExpressionContext context = new DSLExpressionContext();
-			final List<VariableDeclaration> colorVars = new ArrayList<>(variables.getColorVariables());
+            final List<VariableDeclaration> colorVars = new ArrayList<>(variables.getColorVariables());
 			final List<VariableDeclaration> stateVars = new ArrayList<>(variables.getStateVariables());
 			final Map<String, VariableDeclaration> vars = new HashMap<>();
 			for (VariableDeclaration var : variables.getStateVariables()) {
@@ -121,14 +120,14 @@ public class ASTColor extends ASTObject {
 			for (VariableDeclaration var : variables.getColorVariables()) {
 				vars.put(var.name(), var);
 			}
-			final SimpleASTCompiler compiler = new SimpleASTCompiler(context, new HashMap<>(vars));
+			final DefaultResolver resolver = new DefaultResolver(expressionContext, vars);
             final List<DSLRule> rules = new ArrayList<>();
 			if (getRules() != null) {
 				for (ASTRule astRule : getRules()) {
 					DSLRule rule = new DSLRule(
 							astRule.getLocation(),
-							astRule.getRuleExp().compile(compiler),
-							astRule.getColorExp().compile(compiler),
+							astRule.getRuleExp().resolve(resolver),
+							astRule.getColorExp().resolve(resolver),
 							astRule.getOpacity()
 					);
 					rules.add(rule);
@@ -137,25 +136,24 @@ public class ASTColor extends ASTObject {
 			final List<DSLPalette> palettes = new ArrayList<>();
 			if (getPalettes() != null) {
 				for (ASTPalette astPalette : getPalettes()) {
-					palettes.add(astPalette.compile(compiler));
+					palettes.add(astPalette.resolve(resolver));
 				}
 			}
 			final List<DSLStatement> initStatements = new ArrayList<>();
 			if (getInit() != null) {
 				for (ASTStatement statement : getInit().getStatements()) {
-					initStatements.add(statement.compile(compiler));
+					initStatements.add(statement.resolve(resolver));
 				}
 			}
 			final DSLColorInt colorInt = new DSLColorInt(getLocation(), initStatements);
 			return DSLColor.builder()
 					.withToken(getLocation())
-					.withColorVariables(colorVars)
-					.withStateVariables(stateVars)
-					.withExpressionContext(context)
 					.withBackgroundColor(getArgb().getComponents())
-					.withRules(rules)
 					.withPalettes(palettes)
 					.withInit(colorInt)
+					.withRules(rules)
+					.withColorVariables(colorVars)
+					.withStateVariables(stateVars)
 					.build();
 		} catch (ASTException e) {
             long line = e.getLocation().getLine();

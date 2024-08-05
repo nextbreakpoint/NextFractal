@@ -28,6 +28,7 @@ import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
+import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.Time;
@@ -38,14 +39,12 @@ import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
@@ -186,10 +185,9 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     @Override
-    public List<ScriptError> updateCoordinators(Object result) {
+    public List<ScriptError> updateCoordinators(ParserResult result) {
         try {
-            DSLParserResult parserResult = (DSLParserResult) result;
-            hasError = !parserResult.errors().isEmpty();
+            hasError = !result.errors().isEmpty();
             if (hasError) {
                 this.astOrbit = null;
                 this.astColor = null;
@@ -197,7 +195,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 this.colorFactory = null;
                 return List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, "Can't render image"));
             }
-            boolean[] changed = createOrbitAndColor(parserResult);
+            boolean[] changed = createOrbitAndColor(result);
             boolean orbitChanged = changed[0];
             boolean colorChanged = changed[1];
             if (orbitChanged) {
@@ -376,24 +374,24 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         return new DefaultThreadFactory(name, true, priority);
     }
 
-    private boolean[] createOrbitAndColor(DSLParserResult result) throws Exception {
+    private boolean[] createOrbitAndColor(ParserResult result) {
         try {
+            DSLParserResult compilerResult = (DSLParserResult) result.result();
             boolean[] changed = new boolean[]{false, false};
-            String newASTOrbit = result.orbitDSL();
+            String newASTOrbit = compilerResult.orbitDSL();
             changed[0] = !newASTOrbit.equals(astOrbit);
             astOrbit = newASTOrbit;
-            String newASTColor = result.colorDSL();
+            String newASTColor = compilerResult.colorDSL();
             changed[1] = !newASTColor.equals(astColor);
             astColor = newASTColor;
-            DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
-            this.orbitFactory = compiler.compileOrbit(result);
-            this.colorFactory = compiler.compileColor(result);
+            orbitFactory = compilerResult.orbitClassFactory();
+            colorFactory = compilerResult.colorClassFactory();
             return changed;
         } catch (Exception e) {
-            this.astOrbit = null;
-            this.astColor = null;
-            this.orbitFactory = null;
-            this.colorFactory = null;
+            astOrbit = null;
+            astColor = null;
+            orbitFactory = null;
+            colorFactory = null;
             throw e;
         }
     }

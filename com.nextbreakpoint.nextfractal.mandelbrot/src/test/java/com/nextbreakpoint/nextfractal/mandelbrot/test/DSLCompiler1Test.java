@@ -32,6 +32,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -46,18 +47,19 @@ public class DSLCompiler1Test extends BaseTest {
 	public void Compiler1() {
 		try {
 //			assertThat(Pattern.matches("([A-Z][a-z]*)-(\\d).(.jpg|.png)", "Andrea-10.png")).isTrue();
-			DSLParser parser = new DSLParser();
-			DSLParserResult result = parser.parse(getSource("/source1.m"));
-			assertThat(result.errors()).isEmpty();
+			final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
+			final DSLParser parser = new DSLParser(compiler);
+			final DSLExpressionContext expressionContext = new DSLExpressionContext();
+			final DSLParserResult result = parser.parse(expressionContext, getSource("/source1.m"));
 			assertThat(result.fractal()).isNotNull();
 			System.out.println(result.fractal());
 //			assertThat(result.orbitJavaSource()).isNotNull();
 //			System.out.println(result.orbitJavaSource());
 //			assertThat(result.colorJavaSource()).isNotNull();
 //			System.out.println(result.colorJavaSource());
-			DSLCompiler compiler = new DSLCompiler("test", "Compile");
-			Orbit orbit = compiler.compileOrbit(result).create();
-			Color color = compiler.compileColor(result).create();
+			final DSLParserResult parserResult = compiler.compile(expressionContext, result);
+			Orbit orbit = parserResult.orbitClassFactory().create();
+			Color color = parserResult.colorClassFactory().create();
 			assertThat(orbit).isNotNull();
 			assertThat(color).isNotNull();
 			Scope scope = new Scope();

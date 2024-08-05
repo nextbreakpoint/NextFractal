@@ -79,7 +79,7 @@ public class ASTColorComponent extends ASTColorExpression {
 	}
 
 	@Override
-	public DSLColorExpression compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLColorExpression resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

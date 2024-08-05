@@ -37,8 +37,6 @@ import java.util.Map;
 public class DSLColor extends DSLObject {
 	private final Collection<VariableDeclaration> colorVariables;
 	private final Collection<VariableDeclaration> stateVariables;
-	//TODO it should not be here
-	private final DSLExpressionContext expressionContext;
 	private float[] backgroundColor;
 	private boolean julia;
 	private List<DSLRule> rules;

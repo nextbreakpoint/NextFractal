@@ -24,42 +24,52 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.FastDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.CompilerResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.AdvancedDSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler.SimpleDSLCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.JavaCompilerProvider;
+import lombok.extern.java.Log;
 
 import javax.tools.JavaCompiler;
 import java.util.Objects;
 
+@Log
 public class DSLCompiler {
 	private final String packageName;
-	private final String classNamePrefix;
+	private final String className;
 
-	public DSLCompiler(String packageName, String classNamePrefix) {
+	public DSLCompiler(String packageName, String className) {
 		this.packageName = Objects.requireNonNull(packageName);
-		this.classNamePrefix = Objects.requireNonNull(classNamePrefix);
+		this.className = Objects.requireNonNull(className);
 	}
 
-	//TODO introduce DSLCompilerResult
-	public ClassFactory<Orbit> compileOrbit(DSLParserResult result) throws DSLCompilerException {
+	public DSLParserResult compile(DSLExpressionContext context, DSLParserResult result) throws DSLCompilerException {
+		CompilerResult<Orbit> orbitResult = compileOrbit(context, result);
+		CompilerResult<Color> colorResult = compileColor(context, result);
+		return result.toBuilder()
+				.withOrbitClassFactory(orbitResult.classFactory())
+				.withColorClassFactory(colorResult.classFactory())
+				.build();
+	}
+
+	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLParserResult result) throws DSLCompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
-			return new SimpleDSLCompiler().compileOrbit(result);
+			return new SimpleDSLCompiler().compileOrbit(context, result);
 		} else {
-			return new FastDSLCompiler(packageName, classNamePrefix, javaCompiler).compileOrbit(result);
+			return new AdvancedDSLCompiler(packageName, className, javaCompiler).compileOrbit(context, result);
 		}
 	}
 
-	//TODO introduce DSLCompilerResult
-	public ClassFactory<Color> compileColor(DSLParserResult result) throws DSLCompilerException {
+	private CompilerResult<Color> compileColor(DSLExpressionContext context, DSLParserResult result) throws DSLCompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
-			return new SimpleDSLCompiler().compileColor(result);
+			return new SimpleDSLCompiler().compileColor(context, result);
 		} else {
-			return new FastDSLCompiler(packageName, classNamePrefix, javaCompiler).compileColor(result);
+			return new AdvancedDSLCompiler(packageName, className, javaCompiler).compileColor(context, result);
 		}
 	}
 }

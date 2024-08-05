@@ -32,5 +32,5 @@ public abstract class ASTConditionExpression extends ASTObject {
 		super(location);
 	}
 
-	public abstract DSLCondition compile(ASTCompiler compiler);
+	public abstract DSLCondition resolve(ASTResolver resolver);
 }

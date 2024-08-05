@@ -71,7 +71,7 @@ public class ASTOrbitTrap extends ASTObject {
 		return builder.toString();
 	}
 
-	public DSLTrap compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLTrap resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

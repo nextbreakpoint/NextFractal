@@ -244,7 +244,7 @@ public class Viewer extends BorderPane {
 		startAnimationTimer();
 	}
 
-	private void handleReportChanged(Session session, Boolean continuous, ParserResult report) {
+	private void handleReportChanged(Session session, Boolean continuous, ParserResult result) {
 		if (factory == null || !this.session.pluginId().equals(session.pluginId())) {
 			// session is being used in the constructors of the strategy classes
 			this.session = session;
@@ -263,7 +263,7 @@ public class Viewer extends BorderPane {
 		}
 
 		if (renderingStrategy != null) {
-			final List<ScriptError> errorList = renderingStrategy.updateCoordinators(report.result());
+			final List<ScriptError> errorList = renderingStrategy.updateCoordinators(result);
 
 			errorProperty.setValue(!errorList.isEmpty());
 		}

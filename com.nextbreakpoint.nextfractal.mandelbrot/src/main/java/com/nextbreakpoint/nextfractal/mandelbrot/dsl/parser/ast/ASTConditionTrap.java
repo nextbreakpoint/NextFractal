@@ -46,7 +46,7 @@ public class ASTConditionTrap extends ASTConditionExpression {
         return name + "[" + exp + "," + contains + "]";
 	}
 
-	public DSLCondition compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLCondition resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

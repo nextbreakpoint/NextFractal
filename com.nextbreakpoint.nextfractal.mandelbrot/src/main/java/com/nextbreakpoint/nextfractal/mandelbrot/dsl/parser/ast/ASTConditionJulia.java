@@ -37,7 +37,7 @@ public class ASTConditionJulia extends ASTConditionExpression {
         return "type";
 	}
 
-	public DSLCondition compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLCondition resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

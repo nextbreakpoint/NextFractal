@@ -32,5 +32,5 @@ public abstract class ASTColorExpression extends ASTObject {
 		super(location);
 	}
 
-	public abstract DSLColorExpression compile(ASTCompiler compiler);
+	public abstract DSLColorExpression resolve(ASTResolver resolver);
 }

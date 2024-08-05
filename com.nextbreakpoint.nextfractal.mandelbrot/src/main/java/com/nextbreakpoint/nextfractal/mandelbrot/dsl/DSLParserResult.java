@@ -24,15 +24,18 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
+import lombok.Builder;
 
-import java.util.List;
-
+@Builder(setterPrefix = "with", toBuilder = true)
 public record DSLParserResult(
         DSLFractal fractal,
         String source,
         String orbitDSL,
         String colorDSL,
-        List<ScriptError> errors
+        ClassFactory<Orbit> orbitClassFactory,
+        ClassFactory<Color> colorClassFactory
 ) {}

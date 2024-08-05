@@ -25,7 +25,6 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
@@ -57,31 +56,29 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_EXPRESSION_OPTIMISATION_ENABLED;
 
 @Log
-public class FastDSLCompiler {
+public class AdvancedDSLCompiler {
 	private final String packageName;
 	private final String classNamePrefix;
 	private final CompilerAdapter compilerAdapter;
 
-	public FastDSLCompiler(String packageName, String classNamePrefix, JavaCompiler javaCompiler) {
+	public AdvancedDSLCompiler(String packageName, String classNamePrefix, JavaCompiler javaCompiler) {
 		this.packageName = Objects.requireNonNull(packageName);
 		this.classNamePrefix = Objects.requireNonNull(classNamePrefix);
 		this.compilerAdapter = new CompilerAdapter(javaCompiler);
 	}
 
-	public ClassFactory<Orbit> compileOrbit(DSLParserResult report) throws DSLCompilerException {
+	public CompilerResult<Orbit> compileOrbit(DSLExpressionContext expressionContext, DSLParserResult report) throws DSLCompilerException {
 		try {
 			final StringBuilder builder = new StringBuilder();
             if (report.fractal() != null) {
-				final DSLExpressionContext expressionContext = report.fractal().getOrbit().getExpressionContext();
-				final HashMap<String, VariableDeclaration> scope = new HashMap<>();
-				final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.ORBIT);
-				compileOrbit(context, report.fractal().getOrbit(), scope);
+                final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.ORBIT);
+				compileOrbit(context, report.fractal().getOrbit(), new HashMap<>());
 			}
 			final String javaSource = builder.toString();
 			if (log.isLoggable(Level.FINE)) {
 				log.fine(javaSource);
 			}
-			return compilerAdapter.compile(Orbit.class, javaSource, packageName, classNamePrefix + "Orbit");
+			return new CompilerResult<>(compilerAdapter.compile(Orbit.class, javaSource, packageName, classNamePrefix + "Orbit"), javaSource);
 		} catch (DSLCompilerException e) {
 			throw e;
 		} catch (ASTException e) {
@@ -99,20 +96,18 @@ public class FastDSLCompiler {
 		}
 	}
 
-	public ClassFactory<Color> compileColor(DSLParserResult report) throws DSLCompilerException {
+	public CompilerResult<Color> compileColor(DSLExpressionContext expressionContext, DSLParserResult report) throws DSLCompilerException {
 		try {
 			final StringBuilder builder = new StringBuilder();
             if (report.fractal() != null) {
-				final DSLExpressionContext expressionContext = report.fractal().getColor().getExpressionContext();
-				final HashMap<String, VariableDeclaration> scope = new HashMap<>();
-				final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.COLOR);
-				compileColor(context, report.fractal().getColor(), scope);
+                final DSLCompilerContext context = new DSLCompilerContext(expressionContext, builder, ClassType.COLOR);
+				compileColor(context, report.fractal().getColor(), new HashMap<>());
 			}
 			final String javaSource = builder.toString();
 			if (log.isLoggable(Level.FINE)) {
 				log.fine(javaSource);
 			}
-			return compilerAdapter.compile(Color.class, javaSource, packageName, classNamePrefix + "Color");
+			return new CompilerResult<>(compilerAdapter.compile(Color.class, javaSource, packageName, classNamePrefix + "Color"), javaSource);
 		} catch (DSLCompilerException e) {
 			throw e;
 		} catch (ASTException e) {

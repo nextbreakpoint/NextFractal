@@ -32,5 +32,5 @@ public abstract class ASTStatement extends ASTObject {
 		super(location);
 	}
 
-	public abstract DSLStatement compile(ASTCompiler compiler);
+	public abstract DSLStatement resolve(ASTResolver resolver);
 }

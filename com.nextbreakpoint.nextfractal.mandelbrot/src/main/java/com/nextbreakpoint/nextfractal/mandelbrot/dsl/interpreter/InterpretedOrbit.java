@@ -47,9 +47,9 @@ public class InterpretedOrbit extends Orbit implements DSLInterpreterContext {
 	private final Map<String, Trap> traps = new HashMap<>();
 	private final Map<String, Variable> variables = new HashMap<>();
 
-	public InterpretedOrbit(DSLOrbit orbit) {
-		this.orbit = orbit;
-		this.context = orbit.getExpressionContext();
+	public InterpretedOrbit(DSLExpressionContext context, DSLOrbit orbit) {
+        this.context = context;
+        this.orbit = orbit;
 		initializeNumbersStack();
 	}
 

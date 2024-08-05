@@ -42,7 +42,7 @@ public class ASTConditionNeg extends ASTConditionExpression {
         return "~" + exp;
 	}
 
-	public DSLCondition compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLCondition resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

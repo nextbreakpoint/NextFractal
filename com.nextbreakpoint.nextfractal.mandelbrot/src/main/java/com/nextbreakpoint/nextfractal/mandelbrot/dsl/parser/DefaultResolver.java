@@ -120,7 +120,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLVariable;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTAssignStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTColorComponent;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTColorPalette;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTResolver;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionCompareOp;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionExpression;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast.ASTConditionJulia;
@@ -152,22 +152,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleASTCompiler implements ASTCompiler {
+public class DefaultResolver implements ASTResolver {
 	private final Map<String, VariableDeclaration> variables;
 	private final DSLExpressionContext context;
 	
-	public SimpleASTCompiler(DSLExpressionContext context, Map<String, VariableDeclaration> variables) {
+	public DefaultResolver(DSLExpressionContext context, Map<String, VariableDeclaration> variables) {
 		this.context = context;
 		this.variables = variables;
 	}
 
 	@Override
-	public DSLExpression compile(ASTNumber number) {
+	public DSLExpression resolve(ASTNumber number) {
 		return new DSLNumber(number.getLocation(), number.r(), number.i(), context.newNumberIndex());
 	}
 
 	@Override
-	public DSLExpression compile(ASTFunction function) {
+	public DSLExpression resolve(ASTFunction function) {
 		final DSLToken location = function.getLocation();
         switch (function.getName()) {
             case "time" -> {
@@ -215,112 +215,112 @@ public class SimpleASTCompiler implements ASTCompiler {
             }
             case "mod" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionMod(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionMod(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionModZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionModZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "mod2" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionMod2(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionMod2(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionModZ2(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionModZ2(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "pha" -> {
-                return new DSLFunctionPhaZ(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionPhaZ(location, context, resolveArguments(function.getArguments()));
             }
             case "re" -> {
-                return new DSLFunctionReZ(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionReZ(location, context, resolveArguments(function.getArguments()));
             }
             case "im" -> {
-                return new DSLFunctionImZ(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionImZ(location, context, resolveArguments(function.getArguments()));
             }
             case "sin" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionSin(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionSin(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionSinZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionSinZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "cos" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionCos(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionCos(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionCosZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionCosZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "tan" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionTan(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionTan(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionTanZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionTanZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "asin" -> {
-                return new DSLFunctionAsin(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionAsin(location, context, resolveArguments(function.getArguments()));
             }
             case "acos" -> {
-                return new DSLFunctionAcos(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionAcos(location, context, resolveArguments(function.getArguments()));
             }
             case "atan" -> {
-                return new DSLFunctionAtan(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionAtan(location, context, resolveArguments(function.getArguments()));
             }
             case "abs" -> {
-                return new DSLFunctionAbs(location, compileArguments(function.getArguments()), context.newNumberIndex());
+                return new DSLFunctionAbs(location, resolveArguments(function.getArguments()), context.newNumberIndex());
             }
             case "ceil" -> {
-                return new DSLFunctionCeil(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionCeil(location, context, resolveArguments(function.getArguments()));
             }
             case "floor" -> {
-                return new DSLFunctionFloor(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionFloor(location, context, resolveArguments(function.getArguments()));
             }
             case "log" -> {
-                return new DSLFunctionLog(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionLog(location, context, resolveArguments(function.getArguments()));
             }
             case "square" -> {
-                return new DSLFunctionSquare(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionSquare(location, context, resolveArguments(function.getArguments()));
             }
             case "saw" -> {
-                return new DSLFunctionSaw(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionSaw(location, context, resolveArguments(function.getArguments()));
             }
             case "ramp" -> {
-                return new DSLFunctionRamp(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionRamp(location, context, resolveArguments(function.getArguments()));
             }
             case "min" -> {
-                return new DSLFunctionMin(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionMin(location, context, resolveArguments(function.getArguments()));
             }
             case "max" -> {
-                return new DSLFunctionMax(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionMax(location, context, resolveArguments(function.getArguments()));
             }
             case "atan2" -> {
-                return new DSLFunctionAtan2(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionAtan2(location, context, resolveArguments(function.getArguments()));
             }
             case "hypot" -> {
-                return new DSLFunctionHypot(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionHypot(location, context, resolveArguments(function.getArguments()));
             }
             case "pulse" -> {
-                return new DSLFunctionPulse(location, context, compileArguments(function.getArguments()));
+                return new DSLFunctionPulse(location, context, resolveArguments(function.getArguments()));
             }
             case "pow" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionPow(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionPow(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionPowZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionPowZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "sqrt" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionSqrt(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionSqrt(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionSqrtZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionSqrtZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             case "exp" -> {
                 if (function.getArguments()[0].isReal()) {
-                    return new DSLFunctionExp(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionExp(location, context, resolveArguments(function.getArguments()));
                 } else {
-                    return new DSLFunctionExpZ(location, context, compileArguments(function.getArguments()));
+                    return new DSLFunctionExpZ(location, context, resolveArguments(function.getArguments()));
                 }
             }
             default -> {
@@ -330,51 +330,51 @@ public class SimpleASTCompiler implements ASTCompiler {
 	}
 
 	@Override
-	public DSLExpression compile(ASTOperator operator) {
+	public DSLExpression resolve(ASTOperator operator) {
 		final ASTExpression exp1 = operator.getExp1();
 		final ASTExpression exp2 = operator.getExp2();
 		final DSLToken location = operator.getLocation();
 		if (exp2 == null) {
             return switch (operator.getOp()) {
-                case "-" -> new DSLOperatorNeg(location, exp1.compile(this), context.newNumberIndex());
-                case "+" -> new DSLOperatorPos(location, exp1.compile(this), context.newNumberIndex());
+                case "-" -> new DSLOperatorNeg(location, exp1.resolve(this), context.newNumberIndex());
+                case "+" -> new DSLOperatorPos(location, exp1.resolve(this), context.newNumberIndex());
                 default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
             };
 		} else {
 			if (exp1.isReal() && exp2.isReal()) {
                 return switch (operator.getOp()) {
-                    case "+" -> new DSLOperatorAdd(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "-" -> new DSLOperatorSub(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "*" -> new DSLOperatorMul(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "/" -> new DSLOperatorDiv(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "^" -> new DSLOperatorPow(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "<>" -> new DSLOperatorNumber(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
+                    case "+" -> new DSLOperatorAdd(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "-" -> new DSLOperatorSub(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "*" -> new DSLOperatorMul(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "/" -> new DSLOperatorDiv(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "^" -> new DSLOperatorPow(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "<>" -> new DSLOperatorNumber(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
                     default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
                 };
 			} else if (exp1.isReal()) {
                 return switch (operator.getOp()) {
-                    case "+" -> new DSLOperatorAddZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "-" -> new DSLOperatorSubZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "*" -> new DSLOperatorMulZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "/" -> new DSLOperatorDivZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "^" -> new DSLOperatorPowZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
+                    case "+" -> new DSLOperatorAddZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "-" -> new DSLOperatorSubZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "*" -> new DSLOperatorMulZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "/" -> new DSLOperatorDivZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "^" -> new DSLOperatorPowZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
                     default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
                 };
 			} else if (exp2.isReal()) {
                 return switch (operator.getOp()) {
-                    case "+" -> new DSLOperatorAddZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "-" -> new DSLOperatorSubZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "*" -> new DSLOperatorMulZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "/" -> new DSLOperatorDivZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "^" -> new DSLOperatorPowZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
+                    case "+" -> new DSLOperatorAddZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "-" -> new DSLOperatorSubZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "*" -> new DSLOperatorMulZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "/" -> new DSLOperatorDivZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "^" -> new DSLOperatorPowZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
                     default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
                 };
 			} else {
                 return switch (operator.getOp()) {
-                    case "+" -> new DSLOperatorAddZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "-" -> new DSLOperatorSubZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "*" -> new DSLOperatorMulZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
-                    case "/" -> new DSLOperatorDivZ(location, exp1.compile(this), exp2.compile(this), context.newNumberIndex());
+                    case "+" -> new DSLOperatorAddZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "-" -> new DSLOperatorSubZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "*" -> new DSLOperatorMulZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
+                    case "/" -> new DSLOperatorDivZ(location, exp1.resolve(this), exp2.resolve(this), context.newNumberIndex());
                     default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
                 };
 			}
@@ -382,29 +382,34 @@ public class SimpleASTCompiler implements ASTCompiler {
 	}
 
 	@Override
-	public DSLExpression compile(ASTParen paren) {
-		return new DSLParen(paren.getLocation(), paren.getExp().compile(this), context.newNumberIndex());
+	public DSLExpression resolve(ASTParen paren) {
+		return new DSLParen(paren.getLocation(), paren.getExp().resolve(this), context.newNumberIndex());
 	}
 
 	@Override
-	public DSLExpression compile(ASTVariable variable) {
+	public DSLExpression resolve(ASTVariable variable) {
 		return new DSLVariable(variable.getLocation(), context, variable.getName(), variable.isReal());
 	}
 
+    @Override
+    public DSLExpression resolve(ASTConditionalExpression conditional) {
+        return new DSLConditionalExpression(conditional.getLocation(), conditional.getConditionExp().resolve(this), conditional.getThenExp().resolve(this), conditional.getElseExp().resolve(this), context.newNumberIndex());
+    }
+
 	@Override
-	public DSLCondition compile(ASTConditionCompareOp condition) {
+	public DSLCondition resolve(ASTConditionCompareOp condition) {
 		final ASTExpression exp1 = condition.getExp1();
 		final ASTExpression exp2 = condition.getExp2();
 		final DSLToken location = condition.getLocation();
 		if (exp1.isReal() && exp2.isReal()) {
-			exp1.compile(this);
+			exp1.resolve(this);
             return switch (condition.getOp()) {
-                case ">" -> new DSLCompareOperatorGreater(location, compileOperands(exp1, exp2));
-                case "<" -> new DSLCompareOperatorLesser(location, compileOperands(exp1, exp2));
-                case ">=" -> new DSLCompareOperatorGreaterOrEquals(location, compileOperands(exp1, exp2));
-                case "<=" -> new DSLCompareOperatorLesserOrEquals(location, compileOperands(exp1, exp2));
-                case "=" -> new DSLCompareOperatorEquals(location, compileOperands(exp1, exp2));
-                case "<>" -> new DSLCompareOperatorNotEquals(location, compileOperands(exp1, exp2));
+                case ">" -> new DSLCompareOperatorGreater(location, resolveOperands(exp1, exp2));
+                case "<" -> new DSLCompareOperatorLesser(location, resolveOperands(exp1, exp2));
+                case ">=" -> new DSLCompareOperatorGreaterOrEquals(location, resolveOperands(exp1, exp2));
+                case "<=" -> new DSLCompareOperatorLesserOrEquals(location, resolveOperands(exp1, exp2));
+                case "=" -> new DSLCompareOperatorEquals(location, resolveOperands(exp1, exp2));
+                case "<>" -> new DSLCompareOperatorNotEquals(location, resolveOperands(exp1, exp2));
                 default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
             };
 		} else {
@@ -413,53 +418,53 @@ public class SimpleASTCompiler implements ASTCompiler {
 	}
 
 	@Override
-	public DSLCondition compile(ASTConditionLogicOp condition) {
+	public DSLCondition resolve(ASTConditionLogicOp condition) {
 		final ASTConditionExpression exp1 = condition.getExp1();
 		final ASTConditionExpression exp2 = condition.getExp2();
 		final DSLToken location = condition.getLocation();
 		return switch (condition.getOp()) {
-            case "&" -> new DSLLogicOperatorAnd(location, compileLogicOperands(exp1, exp2));
-            case "|" -> new DSLLogicOperatorOr(location, compileLogicOperands(exp1, exp2));
-            case "^" -> new DSLLogicOperatorXor(location, compileLogicOperands(exp1, exp2));
+            case "&" -> new DSLLogicOperatorAnd(location, resolveLogicOperands(exp1, exp2));
+            case "|" -> new DSLLogicOperatorOr(location, resolveLogicOperands(exp1, exp2));
+            case "^" -> new DSLLogicOperatorXor(location, resolveLogicOperands(exp1, exp2));
             default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
         };
 	}
 
 	@Override
-	public DSLCondition compile(ASTConditionTrap condition) {
+	public DSLCondition resolve(ASTConditionTrap condition) {
 		if (condition.isContains()) {
-			return new DSLTrapCondition(condition.getLocation(), condition.getName(), condition.getExp().compile(this));
+			return new DSLTrapCondition(condition.getLocation(), condition.getName(), condition.getExp().resolve(this));
 		} else {
-			return new DSLTrapConditionNeg(condition.getName(), condition.getExp().compile(this), condition.getLocation());
+			return new DSLTrapConditionNeg(condition.getName(), condition.getExp().resolve(this), condition.getLocation());
 		}
 	}
 
 	@Override
-	public DSLCondition compile(ASTRuleLogicOp operator) {
+	public DSLCondition resolve(ASTRuleLogicOp operator) {
 		final ASTRuleExpression exp1 = operator.getExp1();
 		final ASTRuleExpression exp2 = operator.getExp2();
 		final DSLToken location = operator.getLocation();
 		return switch (operator.getOp()) {
-            case "&" -> new DSLLogicOperatorAnd(location, compileLogicOperands(exp1, exp2));
-            case "|" -> new DSLLogicOperatorOr(location, compileLogicOperands(exp1, exp2));
-            case "^" -> new DSLLogicOperatorXor(location, compileLogicOperands(exp1, exp2));
+            case "&" -> new DSLLogicOperatorAnd(location, resolveLogicOperands(exp1, exp2));
+            case "|" -> new DSLLogicOperatorOr(location, resolveLogicOperands(exp1, exp2));
+            case "^" -> new DSLLogicOperatorXor(location, resolveLogicOperands(exp1, exp2));
             default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
         };
 	}
 
 	@Override
-	public DSLCondition compile(ASTRuleCompareOp operator) {
+	public DSLCondition resolve(ASTRuleCompareOp operator) {
 		final ASTExpression exp1 = operator.getExp1();
 		final ASTExpression exp2 = operator.getExp2();
 		final DSLToken location = operator.getLocation();
 		if (exp1.isReal() && exp2.isReal()) {
             return switch (operator.getOp()) {
-                case ">" -> new DSLCompareOperatorGreater(location, compileOperands(exp1, exp2));
-                case "<" -> new DSLCompareOperatorLesser(location, compileOperands(exp1, exp2));
-                case ">=" -> new DSLCompareOperatorGreaterOrEquals(location, compileOperands(exp1, exp2));
-                case "<=" -> new DSLCompareOperatorLesserOrEquals(location, compileOperands(exp1, exp2));
-                case "=" -> new DSLCompareOperatorEquals(location, compileOperands(exp1, exp2));
-                case "<>" -> new DSLCompareOperatorNotEquals(location, compileOperands(exp1, exp2));
+                case ">" -> new DSLCompareOperatorGreater(location, resolveOperands(exp1, exp2));
+                case "<" -> new DSLCompareOperatorLesser(location, resolveOperands(exp1, exp2));
+                case ">=" -> new DSLCompareOperatorGreaterOrEquals(location, resolveOperands(exp1, exp2));
+                case "<=" -> new DSLCompareOperatorLesserOrEquals(location, resolveOperands(exp1, exp2));
+                case "=" -> new DSLCompareOperatorEquals(location, resolveOperands(exp1, exp2));
+                case "<>" -> new DSLCompareOperatorNotEquals(location, resolveOperands(exp1, exp2));
                 default -> throw new ASTException("Unsupported operator: " + location.getText(), location);
             };
 		} else {
@@ -468,95 +473,95 @@ public class SimpleASTCompiler implements ASTCompiler {
 	}
 
 	@Override
-	public DSLColorExpression compile(ASTColorPalette palette) {
+	public DSLColorExpression resolve(ASTColorPalette palette) {
 		if (palette.getExp().isReal()) {
-			return new DSLColorExpressionPalette(palette.getLocation(), palette.getName(), palette.getExp().compile(this));
+			return new DSLColorExpressionPalette(palette.getLocation(), palette.getName(), palette.getExp().resolve(this));
 		} else {
 			throw new ASTException("Expression type not valid: " + palette.getLocation().getText(), palette.getLocation());
 		}
 	}
 
 	@Override
-	public DSLColorExpression compile(ASTColorComponent component) {
-		final DSLExpression exp1 = component.getExp1().compile(this);
+	public DSLColorExpression resolve(ASTColorComponent component) {
+		final DSLExpression exp1 = component.getExp1().resolve(this);
 		DSLExpression exp2 = null;
 		DSLExpression exp3 = null;
 		DSLExpression exp4 = null;
 		if (component.getExp2() != null) {
-			exp2 = component.getExp2().compile(this);
+			exp2 = component.getExp2().resolve(this);
 		}
 		if (component.getExp3() != null) {
-			exp3 = component.getExp3().compile(this);
+			exp3 = component.getExp3().resolve(this);
 		}
 		if (component.getExp4() != null) {
-			exp4 = component.getExp4().compile(this);
+			exp4 = component.getExp4().resolve(this);
 		}
 		return new DSLColorExpressionScalar(component.getLocation(), exp1, exp2, exp3, exp4);
 	}
 
 	@Override
-	public DSLStatement compile(ASTConditionalStatement statement) {
+	public DSLStatement resolve(ASTConditionalStatement statement) {
 		final List<DSLStatement> thenStatements = new ArrayList<>();
 		final List<DSLStatement> elseStatements = new ArrayList<>();
 		final HashMap<String, VariableDeclaration> newThenScope = new HashMap<>(variables);
-		final SimpleASTCompiler thenCompiler = new SimpleASTCompiler(context, newThenScope);
+		final DefaultResolver thenCompiler = new DefaultResolver(context, newThenScope);
 		for (ASTStatement innerStatement : statement.getThenStatementList().getStatements()) {
-			thenStatements.add(innerStatement.compile(thenCompiler));
+			thenStatements.add(innerStatement.resolve(thenCompiler));
 		}
 		if (statement.getElseStatementList() != null) {
 			final HashMap<String, VariableDeclaration> newElseScope = new HashMap<>(variables);
-			final SimpleASTCompiler elseCompiler = new SimpleASTCompiler(context, newElseScope);
+			final DefaultResolver elseCompiler = new DefaultResolver(context, newElseScope);
 			for (ASTStatement innerStatement : statement.getElseStatementList().getStatements()) {
-				elseStatements.add(innerStatement.compile(elseCompiler));
+				elseStatements.add(innerStatement.resolve(elseCompiler));
 			}
 		}
-		return new DSLConditionalStatement(statement.getLocation(), statement.getConditionExp().compile(this), thenStatements, elseStatements);
+		return new DSLConditionalStatement(statement.getLocation(), statement.getConditionExp().resolve(this), thenStatements, elseStatements);
 	}
 
 	@Override
-	public DSLStatement compile(ASTAssignStatement statement) {
+	public DSLStatement resolve(ASTAssignStatement statement) {
         final VariableDeclaration var = variables.get(statement.getName());
         if (var != null && var.real() && !statement.getExp().isReal()) {
             throw new ASTException("Can't assign expression", statement.getLocation());
         }
-		return new DSLAssignStatement(statement.getLocation(), statement.getName(), statement.getExp().compile(this), context.newNumberIndex());
+		return new DSLAssignStatement(statement.getLocation(), statement.getName(), statement.getExp().resolve(this), context.newNumberIndex());
 	}
 
 	@Override
-	public DSLStatement compile(ASTStopStatement statement) {
+	public DSLStatement resolve(ASTStopStatement statement) {
 		return new DSLStatementStop(statement.getLocation());
 	}
 
 	@Override
-	public DSLCondition compile(ASTConditionJulia condition) {
+	public DSLCondition resolve(ASTConditionJulia condition) {
 		return new DSLConditionJulia(condition.getLocation());
 	}
 
 	@Override
-	public DSLCondition compile(ASTConditionParen condition) {
-		return condition.getExp().compile(this);
+	public DSLCondition resolve(ASTConditionParen condition) {
+		return condition.getExp().resolve(this);
 	}
 
 	@Override
-	public DSLCondition compile(ASTConditionNeg condition) {
-		return new DSLConditionNeg(condition.getLocation(), condition.getExp().compile(this));
+	public DSLCondition resolve(ASTConditionNeg condition) {
+		return new DSLConditionNeg(condition.getLocation(), condition.getExp().resolve(this));
 	}
 
 	@Override
-	public DSLTrap compile(ASTOrbitTrap orbitTrap) {
+	public DSLTrap resolve(ASTOrbitTrap orbitTrap) {
 		final DSLTrap trap = new DSLTrap(orbitTrap.getLocation());
 		trap.setName(orbitTrap.getName());
 		trap.setCenter(new ComplexNumber(orbitTrap.getCenter().r(), orbitTrap.getCenter().i()));
 		final List<DSLTrapOp> operators = new ArrayList<>();
 		for (ASTOrbitTrapOp astTrapOp : orbitTrap.getOperators()) {
-			operators.add(astTrapOp.compile(this));
+			operators.add(astTrapOp.resolve(this));
 		}
 		trap.setOperators(operators);
 		return trap;
 	}
 
 	@Override
-	public DSLTrapOp compile(ASTOrbitTrapOp orbitTrapOp) {
+	public DSLTrapOp resolve(ASTOrbitTrapOp orbitTrapOp) {
 		ComplexNumber c1 = null;
 		ComplexNumber c2 = null;
 		ComplexNumber c3 = null;
@@ -587,50 +592,45 @@ public class SimpleASTCompiler implements ASTCompiler {
 	}
 
 	@Override
-	public DSLPalette compile(ASTPalette palette) {
+	public DSLPalette resolve(ASTPalette palette) {
 		final List<DSLPaletteElement> elements = new ArrayList<>();
 		for (ASTPaletteElement astElement : palette.getElements()) {
-			elements.add(astElement.compile(this));
+			elements.add(astElement.resolve(this));
 		}
         return new DSLPalette(palette.getLocation(), palette.getName(), elements);
 	}
 
 	@Override
-	public DSLPaletteElement compile(ASTPaletteElement paletteElement) {
-		return new DSLPaletteElement(paletteElement.getLocation(), paletteElement.getBeginColor().getComponents(), paletteElement.getEndColor().getComponents(), paletteElement.getSteps(), paletteElement.getExp() != null ? paletteElement.getExp().compile(this) : null);
+	public DSLPaletteElement resolve(ASTPaletteElement paletteElement) {
+		return new DSLPaletteElement(paletteElement.getLocation(), paletteElement.getBeginColor().getComponents(), paletteElement.getEndColor().getComponents(), paletteElement.getSteps(), paletteElement.getExp() != null ? paletteElement.getExp().resolve(this) : null);
 	}
 
-	private DSLExpression[] compileArguments(ASTExpression[] arguments) {
+	private DSLExpression[] resolveArguments(ASTExpression[] arguments) {
 		final DSLExpression[] args = new DSLExpression[arguments.length];
 		for (int i = 0; i < arguments.length; i++) {
-			args[i] = arguments[i].compile(this);
+			args[i] = arguments[i].resolve(this);
 		}
 		return args;
 	}
 
-	private DSLExpression[] compileOperands(ASTExpression exp1, ASTExpression exp2) {
+	private DSLExpression[] resolveOperands(ASTExpression exp1, ASTExpression exp2) {
 		final DSLExpression[] operands = new DSLExpression[2];
-		operands[0] = exp1.compile(this);
-		operands[1] = exp2.compile(this);
+		operands[0] = exp1.resolve(this);
+		operands[1] = exp2.resolve(this);
 		return operands;
 	}
 
-	private DSLCondition[] compileLogicOperands(ASTConditionExpression exp1, ASTConditionExpression exp2) {
+	private DSLCondition[] resolveLogicOperands(ASTConditionExpression exp1, ASTConditionExpression exp2) {
 		final DSLCondition[] operands = new DSLCondition[2];
-		operands[0] = exp1.compile(this);
-		operands[1] = exp2.compile(this);
+		operands[0] = exp1.resolve(this);
+		operands[1] = exp2.resolve(this);
 		return operands;
 	}
 
-	private DSLCondition[] compileLogicOperands(ASTRuleExpression exp1, ASTRuleExpression exp2) {
+	private DSLCondition[] resolveLogicOperands(ASTRuleExpression exp1, ASTRuleExpression exp2) {
 		final DSLCondition[] operands = new DSLCondition[2];
-		operands[0] = exp1.compile(this);
-		operands[1] = exp2.compile(this);
+		operands[0] = exp1.resolve(this);
+		operands[1] = exp2.resolve(this);
 		return operands;
-	}
-
-	@Override
-	public DSLExpression compile(ASTConditionalExpression conditional) {
-		return new DSLConditionalExpression(conditional.getLocation(), conditional.getConditionExp().compile(this), conditional.getThenExp().compile(this), conditional.getElseExp().compile(this), context.newNumberIndex());
 	}
 }

@@ -54,6 +54,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
@@ -104,12 +105,12 @@ public class MandelbrotUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
-		String script = session.script();
-		DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
-		DSLParser parser = new DSLParser();
-		DSLParserResult result = parser.parse(script);
-		Orbit orbit = compiler.compileOrbit(result).create();
-		Color color = compiler.compileColor(result).create();
+        final DSLCompiler compiler = new DSLCompiler(getPackageName(), getClassName());
+		final DSLParser parser = new DSLParser(compiler);
+		final DSLExpressionContext expressionContext = new DSLExpressionContext();
+		final DSLParserResult parserResult = parser.parse(expressionContext, session.script());
+		Orbit orbit = parserResult.orbitClassFactory().create();
+		Color color = parserResult.colorClassFactory().create();
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("orbit", orbit);
 		bitmap.setProperty("color", color);
@@ -220,5 +221,13 @@ public class MandelbrotUIFactory implements UIFactory {
 		public void drawImage(GraphicsContext gc, int x, int y) {
 			coordinator.drawImage(gc, x, y);
 		}
+	}
+
+	private String getClassName() {
+		return "C" + System.nanoTime();
+	}
+
+	private String getPackageName() {
+		return DSLParser.class.getPackage().getName() + ".generated";
 	}
 }

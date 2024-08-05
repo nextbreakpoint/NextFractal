@@ -26,8 +26,8 @@ package com.nextbreakpoint.nextfractal.contextfree.test;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLexer;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeLexer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -44,7 +44,7 @@ import java.io.InputStreamReader;
 public abstract class AbstractBaseTest {
 	protected CFDG parseSource(String resourceName) throws IOException {
 		CharStream is = CharStreams.fromReader(new InputStreamReader(getResourceAsStream(resourceName)));
-		CFDGParser parser = new CFDGParser(new CommonTokenStream(new CFDGLexer(is)));
+		ContextFreeParser parser = new ContextFreeParser(new CommonTokenStream(new ContextFreeLexer(is)));
 		parser.setDriver(new CFDGDriver());
 		parser.getDriver().setCurrentPath(System.getProperty("cfdg.root", "src/test/resources"));
 		ParseTreeWalker walker = new ParseTreeWalker();

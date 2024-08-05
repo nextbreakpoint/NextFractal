@@ -45,7 +45,7 @@ public class ASTAssignStatement extends ASTStatement {
 	}
 
 	@Override
-	public DSLStatement compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLStatement resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

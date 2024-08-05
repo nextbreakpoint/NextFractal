@@ -40,6 +40,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
 import lombok.extern.java.Log;
@@ -72,11 +73,12 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			DSLCompiler compiler = new DSLCompiler(DSLParser.class.getPackage().getName() + ".generated", "C" + System.nanoTime());
-			DSLParser parser = new DSLParser();
-			DSLParserResult result = parser.parse(script);
-			Orbit orbit = compiler.compileOrbit(result).create();
-			Color color = compiler.compileColor(result).create();
+			final DSLCompiler compiler = new DSLCompiler(DSLParser.getPackageName(), DSLParser.getClassName());
+			final DSLParser parser = new DSLParser(compiler);
+			final DSLExpressionContext expressionContext = new DSLExpressionContext();
+			final DSLParserResult parserResult = parser.parse(expressionContext, script);
+			Orbit orbit = parserResult.orbitClassFactory().create();
+			Color color = parserResult.colorClassFactory().create();
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 			renderer.setOpaque(opaque);
 			Double4D translation = metadata.getTranslation();

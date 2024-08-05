@@ -52,7 +52,7 @@ public class ASTConditionLogicOp extends ASTConditionExpression {
 		return builder.toString();
 	}
 
-	public DSLCondition compile(ASTCompiler compiler) {
-		return compiler.compile(this);
+	public DSLCondition resolve(ASTResolver resolver) {
+		return resolver.resolve(this);
 	}
 }

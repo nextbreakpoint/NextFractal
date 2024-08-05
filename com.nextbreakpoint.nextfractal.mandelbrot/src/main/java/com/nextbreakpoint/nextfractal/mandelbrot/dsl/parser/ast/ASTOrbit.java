@@ -35,7 +35,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbitEnd;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLOrbitLoop;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLStatement;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLTrap;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.SimpleASTCompiler;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.DefaultResolver;
 import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.Token;
@@ -127,10 +127,9 @@ public class ASTOrbit extends ASTObject {
 		return builder.toString();
 	}
 
-	public DSLOrbit compile(ASTVariables variables) throws DSLParserException {
+	public DSLOrbit resolve(ASTVariables variables, DSLExpressionContext expressionContext) throws DSLParserException {
 		try {
-			final DSLExpressionContext context = new DSLExpressionContext();
-			final List<VariableDeclaration> orbitVars = new ArrayList<>(variables.getOrbitVariables());
+            final List<VariableDeclaration> orbitVars = new ArrayList<>(variables.getOrbitVariables());
 			final List<VariableDeclaration> stateVars = new ArrayList<>(variables.getStateVariables());
 			final Map<String, VariableDeclaration> vars = new HashMap<>();
 			for (VariableDeclaration var : variables.getStateVariables()) {
@@ -139,21 +138,21 @@ public class ASTOrbit extends ASTObject {
 			for (VariableDeclaration var : variables.getOrbitVariables()) {
 				vars.put(var.name(), var);
 			}
-			final SimpleASTCompiler compiler = new SimpleASTCompiler(context, new HashMap<>(vars));
+			final DefaultResolver resolver = new DefaultResolver(expressionContext, vars);
 			final List<DSLStatement> beginStatements = new ArrayList<>();
 			if (getBegin() != null) {
 				for (ASTStatement astStatement : getBegin().getStatements()) {
-					beginStatements.add(astStatement.compile(compiler));
+					beginStatements.add(astStatement.resolve(resolver));
 				}
 			}
 			final DSLOrbitBegin orbitBegin = new DSLOrbitBegin(getLocation(), beginStatements);
 			final List<DSLStatement> loopStatements = new ArrayList<>();
 			for (ASTStatement astStatement1 : getLoop().getStatements()) {
-				loopStatements.add(astStatement1.compile(compiler));
+				loopStatements.add(astStatement1.resolve(resolver));
 			}
 			final DSLOrbitLoop orbitLoop = new DSLOrbitLoop(
 					getLoop().getLocation(),
-					getLoop().getExpression().compile(compiler),
+					getLoop().getExpression().resolve(resolver),
 					getLoop().getBegin(),
 					getLoop().getEnd(),
 					loopStatements,
@@ -162,14 +161,14 @@ public class ASTOrbit extends ASTObject {
 			final List<DSLStatement> endStatements = new ArrayList<>();
 			if (getEnd() != null) {
 				for (ASTStatement astStatement : getEnd().getStatements()) {
-					endStatements.add(astStatement.compile(compiler));
+					endStatements.add(astStatement.resolve(resolver));
 				}
 			}
 			final DSLOrbitEnd orbitEnd = new DSLOrbitEnd(getLocation(), endStatements);
 			final List<DSLTrap> traps = new ArrayList<>();
 			if (getTraps() != null) {
 				for (ASTOrbitTrap astTrap : getTraps()) {
-					traps.add(astTrap.compile(compiler));
+					traps.add(astTrap.resolve(resolver));
 				}
 			}
 			final double ar = getRegion().getA().r();
@@ -179,13 +178,12 @@ public class ASTOrbit extends ASTObject {
 			return DSLOrbit.builder()
 					.withToken(getLocation())
 					.withRegion(getRegion(ar, ai, br, bi))
+					.withTraps(traps)
 					.withBegin(orbitBegin)
 					.withLoop(orbitLoop)
 					.withEnd(orbitEnd)
-					.withTraps(traps)
 					.withOrbitVariables(orbitVars)
 					.withStateVariables(stateVars)
-					.withExpressionContext(context)
 					.build();
 		} catch (ASTException e) {
             long line = e.getLocation().getLine();
