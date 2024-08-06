@@ -26,7 +26,6 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLFractal;
 import lombok.Getter;
@@ -61,7 +60,7 @@ public class ASTFractal extends ASTObject {
 		if (variable == null) {
 			registerOrbitVariable(varName, real, true, location);
 		} else if (variable.real() != real) {
-			throw new ASTException("Variable already defined with different type: " + location.getText(), new DSLToken(location, toString()));
+			throw new ASTException("Variable already defined with different type: " + location.getText(), getLocation());
 		}
 		if (stateVars.getVariable(varName) == null) {
 			variable = orbitVars.peek().getVariable(varName);
@@ -92,7 +91,7 @@ public class ASTFractal extends ASTObject {
 	public VariableDeclaration getOrbitVariable(String name, Token location) {
 		VariableDeclaration var = orbitVars.peek().getVariable(name);
 		if (var == null) {
-			throw new ASTException("Variable not defined: " + location.getText(), new DSLToken(location, toString()));
+			throw new ASTException("Variable not defined: " + location.getText(), getLocation());
 		}
 		return var;
 	}
@@ -102,7 +101,7 @@ public class ASTFractal extends ASTObject {
 		if (var == null) {
 			var = orbitVars.peek().getVariable(name);
 			if (var == null) {
-				throw new ASTException("Variable not defined: " + location.getText(), new DSLToken(location, toString()));
+				throw new ASTException("Variable not defined: " + location.getText(), getLocation());
 			}
 		}
 		return var;

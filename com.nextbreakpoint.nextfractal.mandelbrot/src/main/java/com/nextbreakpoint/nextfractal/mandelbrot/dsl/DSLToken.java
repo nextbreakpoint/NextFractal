@@ -1,34 +1,27 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import org.antlr.v4.runtime.Token;
+import lombok.Getter;
 
 public class DSLToken {
-    private final Token token;
     private final String code;
+    @Getter
+    private final int line;
+    @Getter
+    private final int charPositionInLine;
+    @Getter
+    private final int startIndex;
+    @Getter
+    private final int stopIndex;
+    @Getter
+    private final String text;
 
-    public DSLToken(Token token, String code) {
-        this.token = token;
+    public DSLToken(String code, int line, int charPositionInLine, int startIndex, int stopIndex, String text) {
+        this.line = line;
+        this.charPositionInLine = charPositionInLine;
+        this.startIndex = startIndex;
+        this.stopIndex = stopIndex;
+        this.text = text;
         this.code = code;
-    }
-
-    public String getText() {
-        return token.getText();
-    }
-
-    public int getLine() {
-        return token.getLine();
-    }
-
-    public int getCharPositionInLine() {
-        return token.getCharPositionInLine();
-    }
-
-    public int getStartIndex() {
-        return token.getStartIndex();
-    }
-
-    public int getStopIndex() {
-        return token.getStopIndex();
     }
 
     @Override

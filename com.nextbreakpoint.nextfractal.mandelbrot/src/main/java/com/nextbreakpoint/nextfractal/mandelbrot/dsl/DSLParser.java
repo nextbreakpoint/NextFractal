@@ -74,13 +74,13 @@ public class DSLParser {
 	private ASTFractal parse(String source) throws DSLParserException {
 		try {
 			final List<ScriptError> errors = new ArrayList<>();
-			CharStream is = CharStreams.fromReader(new StringReader(source));
-			MandelbrotLexer lexer = new MandelbrotLexer(is);
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			MandelbrotParser parser = new MandelbrotParser(tokens);
+			final CharStream is = CharStreams.fromReader(new StringReader(source));
+			final MandelbrotLexer lexer = new MandelbrotLexer(is);
+			final CommonTokenStream tokens = new CommonTokenStream(lexer);
+			final MandelbrotParser parser = new MandelbrotParser(tokens);
 			parser.setErrorHandler(new ErrorStrategy(errors));
 			parser.fractal();
-			ASTBuilder builder = parser.getBuilder();
+			final ASTBuilder builder = parser.getBuilder();
 			final ASTFractal fractal = builder.getFractal();
 			if (!errors.isEmpty()) {
 				throw new DSLParserException("Script syntax error", errors);
@@ -99,15 +99,15 @@ public class DSLParser {
 			log.log(Level.INFO, "Can't parse script", e);
 			throw e;
 		} catch (ASTException e) {
-			long line = e.getLocation().getLine();
-			long charPositionInLine = e.getLocation().getCharPositionInLine();
-			long index = e.getLocation().getStartIndex();
-			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-            ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
+			final long line = e.getLocation().getLine();
+			final long charPositionInLine = e.getLocation().getCharPositionInLine();
+			final long index = e.getLocation().getStartIndex();
+			final long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
+			final ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
 			log.log(Level.INFO, "Can't parse script", e);
             throw new DSLParserException("Can't parse script", List.of(error));
 		} catch (Exception e) {
-            ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
+			final ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
 			log.log(Level.INFO, "Can't parse script", e);
             throw new DSLParserException("Can't parse script", List.of(error));
 		}

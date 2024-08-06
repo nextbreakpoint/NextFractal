@@ -37,6 +37,6 @@ public abstract class ASTObject {
 	}
 
 	public DSLToken getLocation() {
-		return new DSLToken(token, toString());
+		return new DSLToken(toString(), token.getLine(), token.getCharPositionInLine(), token.getStartIndex(), token.getStopIndex(), token.getText());
 	}
 }
