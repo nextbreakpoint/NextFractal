@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTCompiledPath;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
@@ -606,7 +607,7 @@ public class CFDGRenderer {
 			rule = cfdg.findRule(shape.getShapeType(), 0.0);
 		}
 		if (rule.getRuleBody().getRepType() != expectedType.getType()) {
-			throw new CFDGException("Subpath is not of the expected type (path ops/commands)", rule.getLocation());
+			throw new CFDGException("Subpath is not of the expected type (path ops/commands)", rule.getToken());
 		}
 		boolean saveOpsOnly = opsOnly;
 		opsOnly = opsOnly || (expectedType == RepElemType.op);
@@ -619,11 +620,11 @@ public class CFDGRenderer {
 			if (canvas != null && info != null) {
 				double[] color = shape.getWorldState().color().getRGBA();
 				AffineTransform tr = shape.getWorldState().getTransform();
-				canvas.path(color, tr, info);
+				canvas.path(color, tr, info.getPathStorage().getGeneralPath(), info.getFlags(), info.getStrokeWidth(), info.getMiterLimit());
 			}
 		} else {
 			if (info != null) {
-				pathBounds.update(shape.getWorldState().getTransform(), scale, info);
+				pathBounds.update(shape.getWorldState().getTransform(), info.getPathStorage().getGeneralPath(), scale, info.getFlags(), info.getStrokeWidth());
 				currentArea = Math.abs((pathBounds.getMaxX() - pathBounds.getMinX()) * (pathBounds.getMaxY() - pathBounds.getMinY()));
 			}
 		}

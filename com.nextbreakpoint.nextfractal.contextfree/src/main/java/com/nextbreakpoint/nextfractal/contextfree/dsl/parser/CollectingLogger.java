@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.contextfree.graphics.RendererErrors;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
@@ -32,17 +31,19 @@ import org.antlr.v4.runtime.Token;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
+
 @Getter
-public class CFDGLogger extends Logger {
+public class CollectingLogger extends Logger {
     private final List<ScriptError> errors = new ArrayList<>();
 
     @Override
     public void error(String message, Token location) {
         super.error(message, location);
         if (location != null) {
-            errors.add(RendererErrors.makeError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
+            errors.add(makeError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
         } else {
-            errors.add(RendererErrors.makeError(0, 0, 0, 0, message));
+            errors.add(makeError(0, 0, 0, 0, message));
         }
     }
 
@@ -50,9 +51,13 @@ public class CFDGLogger extends Logger {
     public void fail(String message, Token location) {
         super.fail(message, location);
         if (location != null) {
-            errors.add(RendererErrors.makeError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
+            errors.add(makeError(location.getLine(), location.getCharPositionInLine(), location.getStartIndex(), location.getStopIndex() - location.getStartIndex(), message));
         } else {
-            errors.add(RendererErrors.makeError(0, 0, 0, 0, message));
+            errors.add(makeError(0, 0, 0, 0, message));
         }
+    }
+
+    private static ScriptError makeError(long line, long charPositionInLine, long index, long length, String message) {
+        return new ScriptError(PARSE, line, charPositionInLine, index, length, message);
     }
 }

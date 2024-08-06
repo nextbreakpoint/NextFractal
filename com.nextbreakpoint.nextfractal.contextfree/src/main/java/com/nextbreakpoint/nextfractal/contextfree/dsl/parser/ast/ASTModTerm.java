@@ -101,7 +101,7 @@ public class ASTModTerm extends ASTExpression {
 
     @Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-        driver.error("Improper evaluation of an adjustment expression", location);
+        driver.error("Improper evaluation of an adjustment expression", getToken());
         return -1;
 	}
 
@@ -114,13 +114,13 @@ public class ASTModTerm extends ASTExpression {
 			if (modType != ModType.modification && arguments.type == ExpType.Numeric) {
 				argcount = arguments.evaluate(modArgs, 6, renderer);
 			} else if (modType == ModType.modification && arguments.type != ExpType.Mod) {
-                driver.error("Adjustments require numeric arguments", location);
+                driver.error("Adjustments require numeric arguments", getToken());
                 return;
 			}
 		}
 
 		if (argcount != argumentsCount) {
-            driver.error("Error evaluating arguments", location);
+            driver.error("Error evaluating arguments", getToken());
             return;
 		}
 		
@@ -257,9 +257,9 @@ public class ASTModTerm extends ASTExpression {
 				 if (argcount != 2) {
 				 	 for (int i = 0; i < argcount; i++) {
 						 if ((result.colorAssignment() & mask) != 0 || (!hue && color[colorComp] != 0.0)) {
-							 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+							 if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 							 if (!shapeDest) {
-								 renderer.colorConflict(getLocation());
+								 renderer.colorConflict(getToken());
 							 }
 						 }
 						 if (shapeDest) {
@@ -273,9 +273,9 @@ public class ASTModTerm extends ASTExpression {
 					 }
 				 } else {
 					 if ((result.colorAssignment() & mask) != 0 || (color[colorComp] != 0.0) || (!hue && target[targetComp] != 0.0)) {
-						 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+						 if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 						 if (!shapeDest) {
-							 renderer.colorConflict(getLocation());
+							 renderer.colorConflict(getToken());
 						 }
 					 }
 					 if (shapeDest) {
@@ -298,9 +298,9 @@ public class ASTModTerm extends ASTExpression {
 			}
 			case hueTarg: {
 				 if ((result.colorAssignment() & mask) != 0 || (color[colorComp] != 0.0)) {
-					 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+					 if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 					 if (!shapeDest) {
-						 renderer.colorConflict(getLocation());
+						 renderer.colorConflict(getToken());
 					 }
 				 }
 				 if (shapeDest) {
@@ -316,9 +316,9 @@ public class ASTModTerm extends ASTExpression {
 			case targSat: {
 				targetComp += modType.getType() - ModType.targHue.getType();
 				if (target[targetComp] != 0.0) {
-					 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+					 if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 					 if (!shapeDest) {
-						 renderer.colorConflict(getLocation());
+						 renderer.colorConflict(getToken());
 					 }
 				}
 				 if (shapeDest) {
@@ -332,7 +332,7 @@ public class ASTModTerm extends ASTExpression {
 				 target[0] += modArgs[0];
 				break;
 			case stroke: {
-				driver.error("Can't provide a stroke width in this context", location);
+				driver.error("Can't provide a stroke width in this context", getToken());
 				break;
 			}
 			case x1:
@@ -341,22 +341,22 @@ public class ASTModTerm extends ASTExpression {
 			case y2:
 			case xrad:
 			case yrad: {
-				driver.error("Can't provide a path operation term in this context", location);
+				driver.error("Can't provide a path operation term in this context", getToken());
 				break;
 			}
 			case param: {
-				driver.error("Can't provide a parameter in this context", location);
+				driver.error("Can't provide a parameter in this context", getToken());
 				break;
 			}
 			case unknown: {
-				driver.error("Unrecognized adjustment type", location);
+				driver.error("Unrecognized adjustment type", getToken());
 				break;
 			}
 			case modification: {
 				if (renderer == null) {
 					if (arguments != null && arguments instanceof ASTModification mod) {
                         if ((mod.getModClass().getType() & (ModClass.HueClass.getType() | ModClass.HueTargetClass.getType() | ModClass.BrightClass.getType() | ModClass.BrightTargetClass.getType() | ModClass.SatClass.getType() | ModClass.SatTargetClass.getType() | ModClass.AlphaClass.getType() | ModClass.AlphaTargetClass.getType())) != 0) {
-							throw new CFDGDeferUntilRuntimeException(location);
+							throw new CFDGDeferUntilRuntimeException(getToken());
 						}
 					}
 				}
@@ -397,7 +397,7 @@ public class ASTModTerm extends ASTExpression {
 
 		if (arguments == null) {
 			if (modType != ModType.param) {
-                driver.error("Illegal expression in shape adjustment", location);
+                driver.error("Illegal expression in shape adjustment", getToken());
 			}
 			return null;
 		}
@@ -457,7 +457,7 @@ public class ASTModTerm extends ASTExpression {
                             case transform:
                                 maxCount = 6;
                                 if (argumentsCount != 1 && argumentsCount != 2 && argumentsCount != 4 && argumentsCount != 6) {
-                                    driver.error("transform adjustment takes 1, 2, 4, or 6 parameters", location);
+                                    driver.error("transform adjustment takes 1, 2, 4, or 6 parameters", getToken());
                                 }
                                 break;
                             case param:
@@ -470,20 +470,20 @@ public class ASTModTerm extends ASTExpression {
                         }
 
                         if (argumentsCount < minCount) {
-                            driver.error("Not enough adjustment parameters", location);
+                            driver.error("Not enough adjustment parameters", getToken());
                         }
                         if (argumentsCount > maxCount) {
-                            driver.error("Too many adjustment parameters", location);
+                            driver.error("Too many adjustment parameters", getToken());
                         }
                     }
                     case Mod -> {
                         if (modType != ModType.transform) {
-                            driver.error("Can't accept a transform expression here", location);
+                            driver.error("Can't accept a transform expression here", getToken());
                         } else {
                             modType = ModType.modification;
                         }
                     }
-                    default -> driver.error("Illegal expression in shape adjustment", location);
+                    default -> driver.error("Illegal expression in shape adjustment", getToken());
                 }
             }
 			case Simplify -> {

@@ -159,7 +159,7 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 				cachedPath = renderer.getCurrentPath();
 				cachedPath.setCached(true);
 				cachedPath.setParameters(parent.getParameters());
-				renderer.setCurrentPath(new ASTCompiledPath(driver, getLocation()));
+				renderer.setCurrentPath(new ASTCompiledPath(driver, getToken()));
 			} else {
 				renderer.getCurrentPath().setPathStorage(new PathStorage());
 				renderer.getCurrentPath().getCommandInfo().clear();

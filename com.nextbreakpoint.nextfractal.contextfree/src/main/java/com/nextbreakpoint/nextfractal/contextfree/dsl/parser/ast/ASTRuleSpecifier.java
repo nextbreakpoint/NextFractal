@@ -124,7 +124,7 @@ public class ASTRuleSpecifier extends ASTExpression {
 	}
 
 	public ASTRuleSpecifier(CFDGDriver driver, ASTRuleSpecifier spec) {
-		super(driver, spec.constant, false, spec.type, spec.location);
+		super(driver, spec.constant, false, spec.type, spec.getToken());
 		this.driver = driver;
 		this.argSize = spec.argSize;
 		this.entropy = spec.entropy;
@@ -188,7 +188,7 @@ public class ASTRuleSpecifier extends ASTExpression {
 
 	@Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-		driver.error("Improper evaluation of a rule specifier", location);
+		driver.error("Improper evaluation of a rule specifier", getToken());
 		return -1;
 	}
 
@@ -228,7 +228,7 @@ public class ASTRuleSpecifier extends ASTExpression {
 					constant = true;
 					locality = Locality.PureLocal;
 				} else {
-					driver.error("Error processing shape variable.", location);
+					driver.error("Error processing shape variable.", getToken());
 				}
 			}
 		}
@@ -243,7 +243,7 @@ public class ASTRuleSpecifier extends ASTExpression {
                 switch (argSource) {
                     case ShapeArgs -> {
                         if (arguments.getType() == ExpType.Rule) {
-                            driver.error("Expression does not return a shape", location);
+                            driver.error("Expression does not return a shape", getToken());
                         }
                         constant = true;
                         locality = arguments.getLocality();
@@ -261,19 +261,19 @@ public class ASTRuleSpecifier extends ASTExpression {
                         boolean isGlobal = false;
                         ASTParameter bound = driver.findExpression(shapeType, isGlobal);
                         if (bound.getType() != ExpType.Rule) {
-                            driver.error("Shape name does not bind to a rule variable", location);
-                            driver.error("this is what it binds to", bound.getLocation());
+                            driver.error("Shape name does not bind to a rule variable", getToken());
+                            driver.error("this is what it binds to", bound.getToken());
                         }
                         if (bound.getStackIndex() == -1) {
                             if (bound.getDefinition() == null || bound.getDefinition().getExp() == null) {
-                                driver.error("Error processing shape variable", location);
+                                driver.error("Error processing shape variable", getToken());
                                 return null;
                             }
                             if (bound.getDefinition().getExp() instanceof ASTRuleSpecifier r) {
                                 grab(r);
                                 locality = Locality.PureLocal;
                             } else {
-                                driver.error("Error processing shape variable", location);
+                                driver.error("Error processing shape variable", getToken());
                             }
                         } else {
                             // controllare
@@ -282,7 +282,7 @@ public class ASTRuleSpecifier extends ASTExpression {
                             locality = bound.getLocality();
                         }
                         if (arguments != null && arguments.getType() != ExpType.None) {
-                            driver.error("Can't bind parameters twice", arguments.getLocation());
+                            driver.error("Can't bind parameters twice", arguments.getToken());
                         }
                         return null;
                     }
@@ -308,12 +308,12 @@ public class ASTRuleSpecifier extends ASTExpression {
                         if (func[0] != null) {
                             if (func[0].getExpType() == ExpType.Rule) {
                                 argSource = ArgSource.ShapeArgs;
-                                arguments = new ASTUserFunction(driver, shapeType, arguments, func[0], location);
+                                arguments = new ASTUserFunction(driver, shapeType, arguments, func[0], getToken());
                                 arguments = arguments.compile(ph);
                                 constant = false;
                                 locality = arguments.getLocality();
                             } else {
-                                driver.error("Function does not return a shape", arguments.getLocation());
+                                driver.error("Function does not return a shape", arguments.getToken());
                             }
                             if (arguments != null) {
                                 StringBuilder ent = new StringBuilder();
@@ -343,19 +343,19 @@ public class ASTRuleSpecifier extends ASTExpression {
                                     param = paramIt.next();
                                     parent = parentIt.next();
                                     if (param != parent) {
-                                        driver.error("Parameter reuse only allowed when type signature is identical", location);
-                                        driver.error("target shape parameter type", param.getLocation());
-                                        driver.error("does not equal source shape parameter type", parent.getLocation());
+                                        driver.error("Parameter reuse only allowed when type signature is identical", getToken());
+                                        driver.error("target shape parameter type", param.getToken());
+                                        driver.error("does not equal source shape parameter type", parent.getToken());
                                         break;
                                     }
                                 }
                                 if (!paramIt.hasNext() && parentIt.hasNext()) {
-                                    driver.error("Source shape has more parameters than target shape.", location);
-                                    driver.error("extra source parameters start here", parent.getLocation());
+                                    driver.error("Source shape has more parameters than target shape.", getToken());
+                                    driver.error("extra source parameters start here", parent.getToken());
                                 }
                                 if (paramIt.hasNext() && !parentIt.hasNext()) {
-                                    driver.error("Target shape has more parameters than source shape.", location);
-                                    driver.error("extra target parameters start here", param.getLocation());
+                                    driver.error("Target shape has more parameters than source shape.", getToken());
+                                    driver.error("extra target parameters start here", param.getToken());
                                 }
                             }
                             constant = true;

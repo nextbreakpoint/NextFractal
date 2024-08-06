@@ -216,7 +216,7 @@ public class ASTFunction extends ASTExpression {
             case Infinity -> result[0] = a[0] < 0.0 ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
             case Factorial -> {
                 if (a[0] < 0.0 || a[0] > 18.0 || a[0] != Math.floor(a[0])) {
-                    driver.fail("Illegal argument for factorial", location);
+                    driver.fail("Illegal argument for factorial", getToken());
                 }
                 result[0] = 1.0;
                 for (double v = 1.0; v <= a[0]; v += 1.0) {
@@ -244,101 +244,101 @@ public class ASTFunction extends ASTExpression {
             case Floor -> result[0] = Math.floor(a[0]);
             case Ceiling -> result[0] = Math.ceil(a[0]);
             case Ftime -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 result[0] = renderer.getCurrentTime();
             }
             case Frame -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 result[0] = renderer.getCurrentFrame();
             }
             case RandStatic -> result[0] = random * Math.abs(a[1] - a[0]) + Math.min(a[0], a[1]);
             case Rand -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getDouble() * Math.abs(a[1] - a[0]) + Math.min(a[0], a[1]);
             }
             case Rand2 -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = (renderer.getCurrentSeed().getDouble() * 2.0 - 1.0) * a[1] + a[0];
             }
             case RandExponential -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getExponential(a[0]);
             }
             case RandGamma -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getGamma(a[0], a[1]);
             }
             case RandWeibull -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getWeibull(a[0], a[1]);
             }
             case RandExtremeValue -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getExtremeValue(a[0], a[1]);
             }
             case RandNormal -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getNormal(a[0], a[1]);
             }
             case RandLogNormal -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getLogNormal(a[0], a[1]);
             }
             case RandChiSquared -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getChiSquared(a[0]);
             }
             case RandCauchy -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getCauchy(a[0], a[1]);
             }
             case RandFisherF -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getFisherF(a[0], a[1]);
             }
             case RandStudentT -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getStudentT(a[0]);
             }
             case RandInt -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getDouble() * Math.abs(a[1] - a[0]) + Math.min(a[0], a[1]));
             }
             case RandIntBernoulli -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getBernoulli(a[0]) ? 1.0 : 0.0;
             }
             case RandIntBinomial -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getBinomial((long) a[0], a[1]));
             }
             case RandIntNegBinomial -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getNegativeBinomial((long) a[0], a[1]));
             }
             case RandIntPoisson -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getPoisson(a[0]));
             }
             case RandIntGeometric -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getGeometric(a[0]));
             }
@@ -353,12 +353,12 @@ public class ASTFunction extends ASTExpression {
 	private static double minMax(ASTExpression e, CFDGRenderer renderer, boolean isMin) {
 		double[] res = new double[] { 0.0 };
 		if (e.getChild(0).evaluate(res, 1, renderer) != 1) {
-			renderer.getDriver().fail("Error computing min/max here", e.getChild(0).getLocation());
+			renderer.getDriver().fail("Error computing min/max here", e.getChild(0).getToken());
 		}
 		for (int i = 1; i < e.size(); ++i) {
 			double[] val = new double[] { 0.0 };
 			if (e.getChild(i).evaluate(val, 1, renderer) != 1) {
-				renderer.getDriver().fail("Error computing min/max here", e.getChild(i).getLocation());
+				renderer.getDriver().fail("Error computing min/max here", e.getChild(i).getToken());
 			}
 			boolean leftMin = res[0] < val[0];
 			res[0] = ((isMin && leftMin) || (!isMin && !leftMin)) ? res[0] : val[0];
@@ -380,7 +380,7 @@ public class ASTFunction extends ASTExpression {
 
 	@Override
 	public ASTExpression compile(CompilePhase ph) {
-		final Token location = getLocation();
+		final Token location = getToken();
 		arguments = compile(arguments, ph);
         switch (ph) {
             case TypeCheck -> {

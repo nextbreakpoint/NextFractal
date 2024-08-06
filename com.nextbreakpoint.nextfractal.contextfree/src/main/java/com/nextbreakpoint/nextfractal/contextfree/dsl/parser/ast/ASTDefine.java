@@ -115,13 +115,13 @@ public class ASTDefine extends ASTReplacement {
                 }
                 if (defineType == DefineType.Function) {
                     if (t != getExpType()) {
-                        driver.error("Mismatch between declared and defined type of user function", location);
+                        driver.error("Mismatch between declared and defined type of user function", getToken());
                     }
                     if (getExpType() == ExpType.Numeric && t == ExpType.Numeric && sz != tupleSize) {
-                        driver.error("Mismatch between declared and defined vector length of user function", location);
+                        driver.error("Mismatch between declared and defined vector length of user function", getToken());
                     }
                     if (isNatural() && (exp == null || exp.isNatural())) {
-                        driver.error("Mismatch between declared natural and defined not-natural type of user function", location);
+                        driver.error("Mismatch between declared natural and defined not-natural type of user function", getToken());
                     }
                 } else {
                     if (getShapeSpecifier().getShapeType() >= 0) {
@@ -130,11 +130,11 @@ public class ASTDefine extends ASTReplacement {
                         List<ASTParameter>[] shapeParams = new List[1];
                         driver.getTypeInfo(getShapeSpecifier().getShapeType(), func, shapeParams);
                         if (func[0] != null) {
-                            driver.error("Variable name is also the name of a function", location);
-                            driver.error("function definition is here", func[0].getLocation());
+                            driver.error("Variable name is also the name of a function", getToken());
+                            driver.error("function definition is here", func[0].getToken());
                         }
                         if (shapeParams[0] != null) {
-                            driver.error("Variable name is also the name of a shape", location);
+                            driver.error("Variable name is also the name of a shape", getToken());
                         }
                     }
 
@@ -142,13 +142,13 @@ public class ASTDefine extends ASTReplacement {
                     expType = t;
                     //TODO controllare
                     if (t.getType() != (t.getType() & (-t.getType())) || t.getType() == 0) {
-                        driver.error("Expression can only have one type", location);
+                        driver.error("Expression can only have one type", getToken());
                     }
                     if (defineType == DefineType.Stack && (exp != null ? exp.isConstant() : getChildChange().getModExp().isEmpty())) {
                         defineType = DefineType.Const;
                     }
                     natural = exp != null && exp.isNatural() && expType == ExpType.Numeric;
-                    ASTParameter param = driver.getContainerStack().peek().addDefParameter(getShapeSpecifier().getShapeType(), this, getLocation());
+                    ASTParameter param = driver.getContainerStack().peek().addDefParameter(getShapeSpecifier().getShapeType(), this, getToken());
                     if (param.isParameter() || param.getDefinition() == null) {
                         param.setStackIndex(driver.getLocalStackDepth());
                         driver.getContainerStack().peek().setStackCount(driver.getContainerStack().peek().getStackCount() + param.getTupleSize());
@@ -170,7 +170,7 @@ public class ASTDefine extends ASTReplacement {
 			return;
 		}
 		if (renderer.getStackSize() + tupleSize > renderer.getMaxStackSize()) {
-			driver.error("Maximum stack depth exceeded", location);
+			driver.error("Maximum stack depth exceeded", getToken());
 		}
 
 		renderer.setStackSize(renderer.getStackSize() + tupleSize);

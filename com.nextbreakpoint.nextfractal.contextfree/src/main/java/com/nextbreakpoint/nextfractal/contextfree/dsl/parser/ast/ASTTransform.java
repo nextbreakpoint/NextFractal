@@ -61,14 +61,14 @@ public class ASTTransform extends ASTReplacement {
 			ret = expHolder.compile(ph);
 		}
 		if (ret != null) {
-			driver.error("Error analyzing transform list", location);
+			driver.error("Error analyzing transform list", getToken());
 		}
 		body.compile(ph, null, null);
 
         switch (ph) {
             case TypeCheck -> {
                 if (clone && !ASTParameter.Impure) {
-                    driver.error("Shape cloning only permitted in impure mode", location);
+                    driver.error("Shape cloning only permitted in impure mode", getToken());
                 }
             }
             case Simplify -> {

@@ -24,6 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+
 public class FinishedShape extends Shape implements Comparable<FinishedShape> {
 	private final Bounds bounds;
 

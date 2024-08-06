@@ -27,7 +27,8 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSimpleImage;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CollectingLogger;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeLexer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ErrorStrategy;
@@ -50,44 +51,39 @@ public class CFDGParser {
 	private static final String INCLUDE_LOCATION = "include.location";
 
 	public CFDGParserResult parse(String source) throws CFDGParserException {
-		//TODO move errors
-		List<ScriptError> errors = new ArrayList<>();
-		CFDG cfdg = parse(source, errors);
-		return new CFDGParserResult(new CFDGImage(cfdg), source, errors);
-	}
-
-	private CFDG parse(String source, List<ScriptError> errors) throws CFDGParserException {
 		try {
-			CharStream is = CharStreams.fromReader(new StringReader(source));
-			ContextFreeLexer lexer = new ContextFreeLexer(is);
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			ContextFreeParser parser = new ContextFreeParser(tokens);
+			final List<ScriptError> errors = new ArrayList<>();
+			final CharStream is = CharStreams.fromReader(new StringReader(source));
+			final ContextFreeLexer lexer = new ContextFreeLexer(is);
+			final CommonTokenStream tokens = new CommonTokenStream(lexer);
+			final ContextFreeParser parser = new ContextFreeParser(tokens);
+			final CollectingLogger logger = new CollectingLogger();
 			parser.setDriver(new CFDGDriver());
-			CFDGLogger logger = new CFDGLogger();
 			parser.getDriver().setLogger(logger);
-			parser.setErrorHandler(new ErrorStrategy(errors));
 			parser.getDriver().setCurrentPath(getIncludeDir());
+			parser.setErrorHandler(new ErrorStrategy(errors));
 			parser.choose();
 			errors.addAll(logger.getErrors());
 			final CFDG cfdg = parser.getDriver().getCFDG();
-			if (cfdg == null || !errors.isEmpty()) {
-				throw new CFDGParserException("Can't parse source", errors);
+			if (!errors.isEmpty()) {
+				throw new CFDGParserException("Script syntax error", errors);
 			}
-			return cfdg;
+			if (cfdg == null) {
+				throw new CFDGParserException("CFDG not defined", errors);
+			}
+			return new CFDGParserResult(new CFDGSimpleImage(cfdg), source);
 		} catch (CFDGException e) {
-            long line = e.getLocation().getLine();
-			long charPositionInLine = e.getLocation().getCharPositionInLine();
-			long index = e.getLocation().getStartIndex();
-			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
-            ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
-			log.log(Level.FINE, error.toString(), e);
-			errors.add(error);
-			throw new CFDGParserException("Can't parse source", errors);
+			final long line = e.getLocation().getLine();
+			final long charPositionInLine = e.getLocation().getCharPositionInLine();
+			final long index = e.getLocation().getStartIndex();
+			final long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
+			final ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
+			log.log(Level.FINE, "Can't parse script", e);
+            throw new CFDGParserException("Can't parse script", List.of(error));
 		} catch (Exception e) {
-            ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
-			log.log(Level.FINE, error.toString(), e);
-			errors.add(error);
-			throw new CFDGParserException("Can't parse source", errors);
+            final ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
+            log.log(Level.FINE, "Can't parse script", e);
+			throw new CFDGParserException("Can't parse script", List.of(error));
 		}
 	}
 
@@ -99,7 +95,7 @@ public class CFDGParser {
 		defaultBrowserDir = defaultBrowserDir.replace("[current.path]", currentDir);
 		defaultBrowserDir = defaultBrowserDir.replace("[user.home]", userHome);
 		defaultBrowserDir = defaultBrowserDir.replace("[user.dir]", userDir);
-		log.info("includeDir = " + defaultBrowserDir);
+		log.info("CFDG include directory: " + defaultBrowserDir);
 		return defaultBrowserDir;
 	}
 }

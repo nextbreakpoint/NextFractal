@@ -24,11 +24,13 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
 import lombok.extern.java.Log;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -80,11 +82,11 @@ public class TiledCanvas implements CFCanvas {
     }
 
     @Override
-    public void path(double[] color, AffineTransform transform, CommandInfo info) {
+    public void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit) {
         for (Point2D.Double tile : tileList) {
             AffineTransform t = AffineTransform.getTranslateInstance(tile.x, tile.y);
             t.concatenate(transform);
-            canvas.path(color, t, info);
+            canvas.path(color, t, path, flags, strokeWidth, miterLimit);
         }
     }
 

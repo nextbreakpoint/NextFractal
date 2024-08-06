@@ -34,7 +34,7 @@ import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 
-public class ASTParameter {
+public class ASTParameter extends ASTObject {
 	public static boolean Impure = false;
 
 	private final CFDGDriver driver;
@@ -60,36 +60,34 @@ public class ASTParameter {
     private int tupleSize = -1;
 	@Getter
     private ASTDefine definition;
-	@Setter
-    @Getter
-    protected Token location;
 
 	public ASTParameter(CFDGDriver driver, Token location) {
+		super(location);
 		this.driver = driver;
-		this.location = location;
 	}
 
 	public ASTParameter(CFDGDriver driver, String type, int nameIndex, Token location) {
+		super(location);
 		this.driver = driver;
-		this.location = location;
 		init(type, nameIndex);
 	}
 
 	public ASTParameter(CFDGDriver driver, int nameIndex, ASTDefine definition, Token location) {
+		super(location);
 		this.driver = driver;
-		this.location = location;
 		init(nameIndex, definition);
 	}
 
 	public ASTParameter(CFDGDriver driver, int nameIndex, boolean natural, boolean local, Token location) {
+		super(location);
 		this.driver = driver;
 		this.loopIndex = true;
 		this.natural = natural;
 		this.nameIndex = nameIndex;
-		this.location = location;
 	}
 
 	public ASTParameter(ASTParameter param) {
+		super(param.getToken());
 		this.driver = param.driver;
 		this.parameter = param.parameter;
 		this.loopIndex = param.loopIndex;
@@ -98,14 +96,13 @@ public class ASTParameter {
 		this.natural = param.natural;
 		this.locality = param.locality;
 		this.tupleSize = param.tupleSize;
-		this.location = param.location;
 	}
 
     public void init(String type, int nameIndex) {
 		locality = Locality.PureNonLocal;
 		int[] tupleSizeVal = new int[1];
 		boolean[] isNaturalVal = new boolean[1];
-		this.type = ASTUtils.decodeType(driver, type, tupleSizeVal, isNaturalVal, location);
+		this.type = ASTUtils.decodeType(driver, type, tupleSizeVal, isNaturalVal, getToken());
 		tupleSize = tupleSizeVal[0];
 		natural = isNaturalVal[0];
 		this.nameIndex = nameIndex;
@@ -122,7 +119,7 @@ public class ASTParameter {
 				tupleSize = 1;
 			}
 			if (tupleSize < 1 || tupleSize > 1000000000) {
-				driver.error("Illegal vector size (<1 or >99)", location);
+				driver.error("Illegal vector size (<1 or >99)", getToken());
 			}
 		}
 		this.nameIndex = nameIndex;
@@ -156,7 +153,7 @@ public class ASTParameter {
 			return 0;
 		}
 		if (types == null || types.isEmpty()) {
-			driver.error("Arguments are not expected", args.getLocation());
+			driver.error("Arguments are not expected", args.getToken());
 			return -1;
 		}
 		if (args == null) {
@@ -177,35 +174,35 @@ public class ASTParameter {
 				continue;
 			}
 			if (count > expect) {
-				driver.error("Not enough arguments", args.getLocation());
+				driver.error("Not enough arguments", args.getToken());
 				return -1;
 			}
 			ASTExpression arg = args.getChild(count - 1);
 			if (param.getType() != arg.getType()) {
-				driver.error("Incorrect argument type", arg.getLocation());
-				driver.error("This is the expected type", param.getLocation());
+				driver.error("Incorrect argument type", arg.getToken());
+				driver.error("This is the expected type", param.getToken());
 				return -1;
 			}
 			if (param.isNatural() && !arg.isNatural() && !Impure) {
-				driver.error("This expression does not satisfy the natural number requirement", arg.getLocation());
+				driver.error("This expression does not satisfy the natural number requirement", arg.getToken());
 			}
 			if (param.getType() == ExpType.Numeric && param.getTupleSize() != arg.evaluate(null, 0)) {
 				if (param.getTupleSize() == 1) {
-					driver.error("This argument should be scalar", arg.getLocation());
+					driver.error("This argument should be scalar", arg.getToken());
 				} else {
-					driver.error("This argument should be a vector", arg.getLocation());
-					driver.error("This is the expected type", param.getLocation());
+					driver.error("This argument should be a vector", arg.getToken());
+					driver.error("This is the expected type", param.getToken());
 				}
 				return -1;
 			}
 			if (arg.getLocality() != Locality.PureLocal && arg.getLocality() != Locality.PureNonLocal && param.getType() == ExpType.Numeric && !param.isNatural() && !Impure && checkNumber) {
-				driver.error("This expression does not satisfy the number parameter requirement", arg.getLocation());
+				driver.error("This expression does not satisfy the number parameter requirement", arg.getToken());
 				return -1;
 			}
 		}
 
 		if (count < expect) {
-			driver.error("Too many arguments", args.getChild(count).getLocation());
+			driver.error("Too many arguments", args.getChild(count).getToken());
 			return -1;
 		}
 
@@ -219,13 +216,13 @@ public class ASTParameter {
                 boolean natural = this.natural;
                 int valCount = definition.getExp().evaluate(data, tupleSize);
                 if (valCount != tupleSize) {
-                    driver.error("Unexpected compile error", getLocation());
+                    driver.error("Unexpected compile error", getToken());
                 }
-                ASTReal top = new ASTReal(driver, data[0], definition.getExp().getLocation());
+                ASTReal top = new ASTReal(driver, data[0], definition.getExp().getToken());
                 top.setText(entropy);
                 ASTExpression list = top;
                 for (int i = 1; i < valCount; i++) {
-                    ASTReal next = new ASTReal(driver, data[i], getLocation());
+                    ASTReal next = new ASTReal(driver, data[i], getToken());
                     list = list.append(next);
                 }
                 list.setNatural(natural);
@@ -235,21 +232,21 @@ public class ASTParameter {
             case Mod -> {
                 ASTModification ret;
                 if (definition.getExp() instanceof ASTModification) {
-                    ret = new ASTModification(definition.driver, (ASTModification) definition.getExp(), getLocation());
+                    ret = new ASTModification(definition.driver, (ASTModification) definition.getExp(), getToken());
                 } else {
-                    ret = new ASTModification(definition.driver, definition.getChildChange(), getLocation());
+                    ret = new ASTModification(definition.driver, definition.getChildChange(), getToken());
                 }
                 ret.setLocality(locality);
                 return ret;
             }
             case Rule -> {
                 if (definition.getExp() instanceof ASTRuleSpecifier r) {
-                    ASTRuleSpecifier ret = new ASTRuleSpecifier(definition.driver, r.getShapeType(), entropy, null, null, getLocation());
+                    ASTRuleSpecifier ret = new ASTRuleSpecifier(definition.driver, r.getShapeType(), entropy, null, null, getToken());
                     ret.grab(r);
                     ret.setLocality(locality);
                     return ret;
                 } else {
-                    driver.error("Internal error computing bound rule specifier", getLocation());
+                    driver.error("Internal error computing bound rule specifier", getToken());
                 }
             }
             default -> {

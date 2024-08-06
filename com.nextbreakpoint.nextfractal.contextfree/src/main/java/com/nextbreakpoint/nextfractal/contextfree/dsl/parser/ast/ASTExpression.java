@@ -35,7 +35,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
-public class ASTExpression {
+public class ASTExpression extends ASTObject {
 	protected final CFDGDriver driver;
 	@Getter
     @Setter
@@ -49,9 +49,6 @@ public class ASTExpression {
 	@Setter
     @Getter
     protected ExpType type;
-	@Setter
-    @Getter
-    protected Token location;
 
 	public ASTExpression(CFDGDriver driver, Token location) {
 		this(driver, false, false, Locality.UnknownLocal, ExpType.None, location);
@@ -70,12 +67,12 @@ public class ASTExpression {
 	}
 
 	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Locality locality, ExpType type, Token location) {
+		super(location);
 		this.driver = driver;
 		this.constant = constant;
 		this.natural = natural;
 		this.locality = locality;
 		this.type = type;
-		this.location = location;
 	}
 
     public ASTExpression simplify() {
@@ -111,7 +108,7 @@ public class ASTExpression {
 	
 	public ASTExpression getChild(int i) {
 		if (i > 0) {
-			driver.error("Expression list bounds exceeded", location);
+			driver.error("Expression list bounds exceeded", getToken());
 		}
 		return this;
 	}
@@ -125,7 +122,7 @@ public class ASTExpression {
 	}
 
 	public ASTExpression append(ASTExpression sib) {
-		return sib != null ? new ASTCons(driver, location, this, sib) : this;
+		return sib != null ? new ASTCons(driver, getToken(), this, sib) : this;
 	}
 
 	public int getTupleSize() {

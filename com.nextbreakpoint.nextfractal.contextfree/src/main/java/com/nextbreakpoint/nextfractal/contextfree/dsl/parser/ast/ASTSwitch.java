@@ -61,7 +61,7 @@ public class ASTSwitch extends ASTReplacement {
         switch (ph) {
             case TypeCheck -> {
                 if (switchExp.getType() != ExpType.Numeric || switchExp.evaluate(null, 0) != 1) {
-                    driver.error("Switch selector must be a numeric scalar", location);
+                    driver.error("Switch selector must be a numeric scalar", getToken());
                 }
             }
             case Simplify -> {
@@ -78,7 +78,7 @@ public class ASTSwitch extends ASTReplacement {
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
 		double[] caveValue = new double[1];
 		if (switchExp.evaluate(caveValue, 1, renderer) != 1) {
-			driver.error("Error evaluating switch selector", location);
+			driver.error("Error evaluating switch selector", getToken());
 			return;
 		}
 		

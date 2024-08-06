@@ -81,7 +81,7 @@ public class ASTPathCommand extends ASTReplacement {
     @Override
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
 		if (renderer.isOpsOnly()) {
-			driver.error("Path commands not allowed at this point", location);
+			driver.error("Path commands not allowed at this point", getToken());
 		}
 
 		Shape child = new Shape(parent);
@@ -90,7 +90,7 @@ public class ASTPathCommand extends ASTReplacement {
 
 		double[] value = new double[] { width };
 		if (parameters != null && parameters.evaluate(value, 1, renderer) != 1) {
-			driver.error("Error computing stroke width", location);
+			driver.error("Error computing stroke width", getToken());
 		}
 		width = value[0];
 
@@ -98,13 +98,13 @@ public class ASTPathCommand extends ASTReplacement {
 
 		if (renderer.getCurrentPath().isCached()) {
 			if (renderer.getCurrentCommand().current() == null) {
-				driver.error("Not enough path commands in cache", location);
+				driver.error("Not enough path commands in cache", getToken());
 			}
 			info = renderer.getCurrentCommand().current();
 			renderer.getCurrentCommand().next();
 		} else {
 			if (renderer.getCurrentPath().getPathStorage().getTotalVertices() == 0) {
-				driver.error("Path commands must be preceeded by at least one path operation", location);
+				driver.error("Path commands must be preceeded by at least one path operation", getToken());
 			}
 
 			renderer.setWantCommand(false);
@@ -141,9 +141,9 @@ public class ASTPathCommand extends ASTReplacement {
                 flags = flagValue[0];
                 if (w != null) {
                     if (parameters != null) {
-                        driver.error("Can't have a stroke adjustment in a v3 path command", w.getLocation());
+                        driver.error("Can't have a stroke adjustment in a v3 path command", w.getToken());
                     } else if (w.size() != 1 || w.getType() != ExpType.Numeric || w.evaluate(null, 0) != 1) {
-                        driver.error("Stroke adjustment is ill-formed", w.getLocation());
+                        driver.error("Stroke adjustment is ill-formed", w.getToken());
                     }
                     parameters = w;
                     w = null;
@@ -172,7 +172,7 @@ public class ASTPathCommand extends ASTReplacement {
                                 flags = pcmdParams.getFirst();
                                 break;
                             default:
-                                driver.error("Bad expression type in path command parameters", location);
+                                driver.error("Bad expression type in path command parameters", getToken());
                                 break;
                         }
                         break;
@@ -181,19 +181,19 @@ public class ASTPathCommand extends ASTReplacement {
                         return;
                     }
                     default: {
-                        driver.error("Path commands can have zero, one, or two parameters", location);
+                        driver.error("Path commands can have zero, one, or two parameters", getToken());
                         return;
                     }
                 }
 
                 if (stroke != null) {
                     if ((this.flags & CF_FILL.getMask()) != 0) {
-                        driver.warning("Stroke width only useful for STROKE commands", stroke.getLocation());
+                        driver.warning("Stroke width only useful for STROKE commands", stroke.getToken());
                     }
                     double[] value = new double[1];
                     value[0] = strokeWidth;
                     if (stroke.getType() != ExpType.Numeric || stroke.evaluate(null, 0) != 1) {
-                        driver.error("Stroke width expression must be numeric scalar", stroke.getLocation());
+                        driver.error("Stroke width expression must be numeric scalar", stroke.getToken());
                     } else if (!stroke.isConstant() || stroke.evaluate(value, 1) != 1) {
                         parameters = stroke;
                     }
@@ -202,7 +202,7 @@ public class ASTPathCommand extends ASTReplacement {
 
                 if (flags != null) {
                     if (flags.getType() != ExpType.Flag) {
-                        driver.error("Unexpected argument in path command", flags.getLocation());
+                        driver.error("Unexpected argument in path command", flags.getToken());
                         return;
                     }
                     flags = simplify(flags);
@@ -217,10 +217,10 @@ public class ASTPathCommand extends ASTReplacement {
                         }
                         this.flags |= f;
                         if ((this.flags & CF_FILL.getMask()) != 0 && (this.flags & (CF_JOIN_PRESENT.getMask() | CF_CAP_PRESENT.getMask())) != 0) {
-                            driver.warning("Stroke flags only useful for STROKE commands", flags.getLocation());
+                            driver.warning("Stroke flags only useful for STROKE commands", flags.getToken());
                         }
                     } else {
-                        driver.error("Flag expressions must be constant", flags.getLocation());
+                        driver.error("Flag expressions must be constant", flags.getToken());
                     }
                 }
 

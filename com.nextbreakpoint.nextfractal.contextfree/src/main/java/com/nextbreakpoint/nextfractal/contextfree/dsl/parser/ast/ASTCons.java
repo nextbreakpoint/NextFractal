@@ -142,14 +142,14 @@ public class ASTCons extends ASTExpression {
 	@Override
 	public ASTExpression getChild(int i) {
 		if (i >= children.size()) {
-			driver.error("Expression list bounds exceeded", getLocation());
+			driver.error("Expression list bounds exceeded", getToken());
 		}
 		return children.get(i);
 	}
 
 	public void setChild(int i, ASTExpression exp) {
 		if (i >= children.size()) {
-			driver.error("Expression list bounds exceeded", getLocation());
+			driver.error("Expression list bounds exceeded", getToken());
 		}
 		children.set(i, exp);
 	}

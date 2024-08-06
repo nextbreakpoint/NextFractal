@@ -24,9 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGHandle;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CollectingLogger;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
@@ -78,7 +78,7 @@ public class Renderer {
 	protected List<ScriptError> errors = new ArrayList<>();
 	private Future<?> future;
 	private CFDGImage cfdgImage;
-	private CFDGRenderer cfdgRenderer;
+	private CFDGHandle cfdgHandle;
 	private String cfdgSeed;
 	private final RenderRunnable renderTask = new RenderRunnable();
 	private final ExecutorService executor;
@@ -103,8 +103,8 @@ public class Renderer {
 
     public void abortTasks() {
 		interrupted = true;
-		if (cfdgRenderer != null) {
-			cfdgRenderer.setRequestStop(interrupted);
+		if (cfdgHandle != null) {
+			cfdgHandle.stop();
 		}
 //		if (future != null) {
 //			future.cancel(true);
@@ -119,8 +119,8 @@ public class Renderer {
 			}
 		} catch (Exception e) {
 			interrupted = true;
-			if (cfdgRenderer != null) {
-				cfdgRenderer.setRequestStop(interrupted);
+			if (cfdgHandle != null) {
+				cfdgHandle.stop();
 			}
 //			e.printStackTrace();
 		}
@@ -234,7 +234,7 @@ public class Renderer {
 		Graphics2D g2d = null;
 		try {
 			if (cfdgChanged) {
-				cfdgRenderer = null;
+				cfdgHandle = null;
 				cfdgChanged = false;
 			}
 			progress = 0;
@@ -249,15 +249,11 @@ public class Renderer {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			if (cfdgImage != null) {
-				CFDGLogger logger = new CFDGLogger();
-				if (cfdgRenderer == null) {
-					cfdgRenderer = cfdgImage.create(tile.imageSize(), cfdgSeed, logger);
-				}
-				cfdgRenderer.setRenderListener(() -> didChanged(progress, pixels));
-//					RendererFactory factory = new Java2DRendererFactory();
-//					renderer.run(new RendererCanvas(factory, g2d, width, height), false);
-				cfdgRenderer.run(new SimpleCanvas(g2d, buffer.getTile()),true);
-				errors.addAll(logger.getErrors());
+				final SimpleCanvas canvas = new SimpleCanvas(g2d, buffer.getTile());
+				cfdgImage.setListener(() -> didChanged(progress, pixels));
+				cfdgHandle = cfdgImage.render(canvas, cfdgSeed, true);
+				//TODO what errors are being collected?
+				errors.addAll(cfdgHandle.errors());
 			}
 			if (!isInterrupted()) {
 				progress = 1f;

@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
@@ -88,7 +89,7 @@ public class SimpleCanvas implements CFCanvas {
         g2d.setTransform(oldTransform);
     }
 
-    public void path(double[] color, AffineTransform transform, CommandInfo info) {
+    public void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit) {
         try {
             g2d.setColor(new Color((float) color[0], (float) color[1], (float) color[2], (float) color[3]));
         } catch (IllegalArgumentException e) {
@@ -99,35 +100,33 @@ public class SimpleCanvas implements CFCanvas {
 
         AffineTransform t = new AffineTransform(normTransform);
 
-        GeneralPath path = info.getPathStorage().getGeneralPath();
-
         java.awt.Shape shape = path;
 
-        if ((info.getFlags() & (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) == (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) {
+        if ((flags & (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) == (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) {
             path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
         } else {
             path.setWindingRule(GeneralPath.WIND_NON_ZERO);
         }
 
-        if ((info.getFlags() & FlagType.CF_FILL.getMask()) != 0) {
+        if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             t.concatenate(transform);
         } else {
-            final int cap = mapToCap(info.getFlags());
-            final int join = mapToJoin(info.getFlags());
-            if ((info.getFlags() & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
+            final int cap = mapToCap(flags);
+            final int join = mapToJoin(flags);
+            if ((flags & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
                 double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
-                g2d.setStroke(new BasicStroke((float)(info.getStrokeWidth() * scale), cap, join, (float)info.getMiterLimit()));
+                g2d.setStroke(new BasicStroke((float) (strokeWidth * scale), cap, join, (float) miterLimit));
                 t.concatenate(transform);
             } else {
                 double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
-                g2d.setStroke(new BasicStroke((float)(info.getStrokeWidth() * scale), cap, join, (float)info.getMiterLimit()));
+                g2d.setStroke(new BasicStroke((float) (strokeWidth * scale), cap, join, (float) miterLimit));
                 shape = path.createTransformedShape(transform);
             }
         }
 
         g2d.setTransform(t);
 
-        if ((info.getFlags() & FlagType.CF_FILL.getMask()) != 0) {
+        if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             g2d.fill(shape);
         } else {
             g2d.draw(shape);

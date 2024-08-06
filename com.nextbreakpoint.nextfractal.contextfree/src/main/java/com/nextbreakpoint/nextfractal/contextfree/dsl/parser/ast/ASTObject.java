@@ -22,6 +22,21 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.dsl;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-public record CFDGParserResult(CFDGImage image, String source) {}
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGToken;
+import lombok.Getter;
+import org.antlr.v4.runtime.Token;
+
+@Getter
+public abstract class ASTObject {
+	private final Token token;
+
+	public ASTObject(Token token) {
+		this.token = token;
+	}
+
+	public CFDGToken getLocation() {
+		return new CFDGToken(toString(), token.getLine(), token.getCharPositionInLine(), token.getStartIndex(), token.getStopIndex(), token.getText());
+	}
+}

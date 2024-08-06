@@ -64,7 +64,7 @@ public class ASTUserFunction extends ASTExpression {
     @Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
 		if (type != ExpType.Numeric) {
-			driver.error("Function does not evaluate to a number", location);
+			driver.error("Function does not evaluate to a number", getToken());
 			return -1;
 		}
 		if (result != null && length < definition.getTupleSize()) {
@@ -73,13 +73,13 @@ public class ASTUserFunction extends ASTExpression {
 		if (result == null) {
 			return definition.getTupleSize();
 		}
-		if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+		if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 		if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
-			throw new CFDGException("Stopping", location);
+			throw new CFDGException("Stopping", getToken());
 		}
 		setupStack(renderer);
 		if (definition.getExp().evaluate(result, length, renderer) != definition.getTupleSize()) {
-			driver.error("Error evaluating function", location);
+			driver.error("Error evaluating function", getToken());
 		};
 		cleanupStack(renderer);
 		return definition.getTupleSize();
@@ -88,12 +88,12 @@ public class ASTUserFunction extends ASTExpression {
 	@Override
 	public void evaluate(Modification result, boolean shapeDest, CFDGRenderer renderer) {
 		if (type != ExpType.Mod) {
-			driver.error("Function does not evaluate to an adjustment", location);
+			driver.error("Function does not evaluate to an adjustment", getToken());
 			return;
 		}
-		if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+		if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 		if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
-			throw new CFDGException("Stopping", location);
+			throw new CFDGException("Stopping", getToken());
 		}
 		setupStack(renderer);
 		definition.getExp().evaluate(result, shapeDest, renderer);
@@ -134,11 +134,11 @@ public class ASTUserFunction extends ASTExpression {
                 List<ASTParameter>[] p = new List[1];
                 String name = driver.getTypeInfo(nameIndex, def, p);
                 if (def[0] != null && p[0] != null) {
-                    driver.error("Name matches both a function and a shape", location);
+                    driver.error("Name matches both a function and a shape", getToken());
                     return null;
                 }
                 if (def[0] == null && p[0] == null) {
-                    driver.error("Name does not match shape name or function name", location);
+                    driver.error("Name does not match shape name or function name", getToken());
                     return null;
                 }
                 if (def[0] != null) {
@@ -154,7 +154,7 @@ public class ASTUserFunction extends ASTExpression {
                     }
                     return null;
                 }
-                ASTRuleSpecifier r = new ASTRuleSpecifier(driver, nameIndex, name, arguments, null, location);
+                ASTRuleSpecifier r = new ASTRuleSpecifier(driver, nameIndex, name, arguments, null, getToken());
                 r.compile(ph);
                 return r;
             }
@@ -170,12 +170,12 @@ public class ASTUserFunction extends ASTExpression {
 	@Override
 	public CFStackRule evalArgs(CFDGRenderer renderer, CFStackRule parent) {
 		if (type != ExpType.Rule) {
-			driver.error("Function does not evaluate to a shape", location);
+			driver.error("Function does not evaluate to a shape", getToken());
 			return null;
 		}
-		if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
+		if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
 		if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
-			throw new CFDGException("Stopping", location);
+			throw new CFDGException("Stopping", getToken());
 		}
 		//TODO controllare
 		setupStack(renderer);
@@ -189,7 +189,7 @@ public class ASTUserFunction extends ASTExpression {
 		oldSize = renderer.getStackSize();
 		if (definition.getStackCount() > 0) {
 			if (oldSize + definition.getStackCount() > renderer.getMaxStackSize()) {
-				driver.error("Maximum stack getMaxStackSize exceeded", location);
+				driver.error("Maximum stack getMaxStackSize exceeded", getToken());
 			}
 			renderer.setStackSize(oldSize + definition.getStackCount());
 			renderer.setStackItem(oldSize, new CFStackNumber(renderer.getStack(), 0));

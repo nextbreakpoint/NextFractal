@@ -25,9 +25,11 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.antlr.v4.runtime.Token;
 
 @Getter
+@ToString
 public class CFDGException extends RuntimeException {
 	private final Token location;
 

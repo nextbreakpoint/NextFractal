@@ -340,7 +340,7 @@ public class CFDG {
 		ASTExpression exp = hasParameter(CFG.Symmetry);
 		List<ASTModification> left = ASTUtils.getTransforms(driver, exp, syms, renderer, isTiled(null, null), tileMod.getTransform());
 		if (!left.isEmpty()) {
-			driver.fail("At least one term was invalid", exp.getLocation());
+			driver.fail("At least one term was invalid", exp.getToken());
 		}
 	}
 
@@ -350,7 +350,7 @@ public class CFDG {
 			return false;
 		}
 		if (!exp.isConstant() && renderer != null) {
-			driver.fail("This expression must be constant", exp.getLocation());
+			driver.fail("This expression must be constant", exp.getToken());
 			return false;
 		} else {
 			exp.evaluate(value, 1, renderer);
@@ -364,7 +364,7 @@ public class CFDG {
 			return false;
 		}
 		if (!exp.isConstant() && renderer != null) {
-			driver.fail("This expression must be constant", exp.getLocation());
+			driver.fail("This expression must be constant", exp.getToken());
 			return false;
 		} else {
 			exp.evaluate(value, true, renderer);
@@ -402,7 +402,7 @@ public class CFDG {
 			if (rule.getWeightType() == WeightType.PercentWeight) {
 				percentweightsums[rule.getNameIndex()] += rule.getWeight();
 				if (percentweightsums[rule.getNameIndex()] > 1.0001) {
-					driver.fail("Percentages exceed 100%", rule.getLocation());
+					driver.fail("Percentages exceed 100%", rule.getToken());
 				}
 			} else {
 				weightsums[rule.getNameIndex()] += rule.getWeight();
@@ -419,12 +419,12 @@ public class CFDG {
 				} else {
 					weight *= 1.0 - percentweightsums[rule.getNameIndex()];
 					if (percentweightsums[rule.getNameIndex()] > 0.9999) {
-						driver.warning("Percentages sum to 100%, this rule has no weight", rule.getLocation());
+						driver.warning("Percentages sum to 100%, this rule has no weight", rule.getToken());
 					}
 				}
 			}
 			if (weightTypes[rule.getNameIndex()] == WeightType.PercentWeight.getType() && Math.abs(percentweightsums[rule.getNameIndex()] - 1.0) > 0.0001) {
-				driver.warning("Percentages do not sum to 100%", rule.getLocation());
+				driver.warning("Percentages do not sum to 100%", rule.getToken());
 			}
 			if (!Double.isFinite(weight)) {
 				weight = 0;
@@ -587,7 +587,7 @@ public class CFDG {
         return functions.get(index);
     }
 
-	public CFDGRenderer renderer(int width, int height, double minSize, int variation, double border) {
+	public CFDGRenderer createRenderer(int width, int height, double minSize, int variation, double border) {
 		try {
 			ASTExpression startExp = paramExp.get(CFG.StartShape);
 
@@ -597,10 +597,10 @@ public class CFDG {
 			}
 
 			if (startExp instanceof ASTStartSpecifier specStart) {
-                initShape = new ASTReplacement(driver, specStart, specStart.getModification(), RepElemType.empty, startExp.getLocation());
+                initShape = new ASTReplacement(driver, specStart, specStart.getModification(), RepElemType.empty, startExp.getToken());
 				initShape.getChildChange().addEntropy(initShape.getShapeSpecifier().getEntropy());
 			} else {
-				driver.fail("Type error in startshape", startExp.getLocation());
+				driver.fail("Type error in startshape", startExp.getToken());
 				return null;
 			}
 

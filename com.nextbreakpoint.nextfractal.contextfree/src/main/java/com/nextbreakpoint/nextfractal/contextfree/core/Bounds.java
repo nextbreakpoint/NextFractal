@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
+package com.nextbreakpoint.nextfractal.contextfree.core;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import lombok.Getter;
@@ -30,6 +30,7 @@ import lombok.Setter;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -65,31 +66,31 @@ public class Bounds {
         this.maxY = maxY;
     }
 
-    public Bounds(AffineTransform transform, java.awt.Shape path, double scale, CommandInfo info) {
-        if (!boundingRect(transform, path, scale, info)) {
+    public Bounds(AffineTransform transform, java.awt.Shape path, double scale, long flags, double strokeWidth) {
+        if (!boundingRect(transform, path, scale, flags, strokeWidth)) {
             invalidate();
         }
     }
 
-    private boolean boundingRect(AffineTransform transform, java.awt.Shape path, double scale, CommandInfo info) {
+    private boolean boundingRect(AffineTransform transform, java.awt.Shape path, double scale, long flags, double strokeWidth) {
         double accuracy = scale * 0.1;
 
         Rectangle2D bounds = getRectangle2D(transform, path, accuracy);
 
-        if ((info.getFlags() & FlagType.CF_FILL.getMask()) != 0) {
+        if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             minX = bounds.getMinX();
             minY = bounds.getMinY();
             maxX = bounds.getMaxX();
             maxY = bounds.getMaxY();
-        } else if ((info.getFlags() & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
+        } else if ((flags & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
             double pathScale = Math.sqrt(Math.abs(transform.getDeterminant()));
-            double v = info.getStrokeWidth() * pathScale / 2;
+            double v = strokeWidth * pathScale / 2;
             minX = bounds.getMinX() - v;
             minY = bounds.getMinY() - v;
             maxX = bounds.getMaxX() + v;
             maxY = bounds.getMaxY() + v;
         } else {
-            double v = info.getStrokeWidth() / 2;
+            double v = strokeWidth / 2;
             minX = bounds.getMinX() - v;
             minY = bounds.getMinY() - v;
             maxX = bounds.getMaxX() + v;
@@ -261,8 +262,8 @@ public class Bounds {
         return scale;
     }
 
-    public void update(AffineTransform transform, double scale, CommandInfo info) {
-        merge(new Bounds(transform, info.getPathStorage().getGeneralPath(), scale, info));
+    public void update(AffineTransform transform, GeneralPath path, double scale, long flags, double strokeWidth) {
+        merge(new Bounds(transform, path, scale, flags, strokeWidth));
     }
 
     public void merge(Bounds bounds) {

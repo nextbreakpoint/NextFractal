@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 
 import java.util.stream.IntStream;
 

@@ -98,14 +98,14 @@ public class ASTUtils {
             ASTExpression cit = e.getChild(i);
             switch (cit.getType()) {
                 case Flag -> {
-                    processSymmSpec(driver, syms, transform, tiled, symmSpec, cit.getLocation());
+                    processSymmSpec(driver, syms, transform, tiled, symmSpec, cit.getToken());
                     int sz = cit.evaluate(null, 0);
                     if (sz < 1) {
-                        driver.fail("Could not evaluate this", cit.getLocation());
+                        driver.fail("Could not evaluate this", cit.getToken());
                     } else {
                         double[] values = new double[sz];
                         if (cit.evaluate(values, values.length) != sz) {
-                            driver.fail("Could not evaluate this", cit.getLocation());
+                            driver.fail("Could not evaluate this", cit.getToken());
                         } else {
                             for (double value : values) {
                                 symmSpec.add(value);
@@ -115,15 +115,15 @@ public class ASTUtils {
                 }
                 case Numeric -> {
                     if (symmSpec.isEmpty()) {
-                        driver.fail("Symmetry flag expected here", cit.getLocation());
+                        driver.fail("Symmetry flag expected here", cit.getToken());
                     }
                     int sz = cit.evaluate(null, 0);
                     if (sz < 1) {
-                        driver.fail("Could not evaluate this", cit.getLocation());
+                        driver.fail("Could not evaluate this", cit.getToken());
                     } else {
                         double[] values = new double[sz];
                         if (cit.evaluate(values, values.length) != sz) {
-                            driver.fail("Could not evaluate this", cit.getLocation());
+                            driver.fail("Could not evaluate this", cit.getToken());
                         } else {
                             for (double value : values) {
                                 symmSpec.add(value);
@@ -132,7 +132,7 @@ public class ASTUtils {
                     }
                 }
                 case Mod -> {
-                    processSymmSpec(driver, syms, transform, tiled, symmSpec, cit.getLocation());
+                    processSymmSpec(driver, syms, transform, tiled, symmSpec, cit.getToken());
                     if (cit instanceof ASTModification m) {
                         if (m.getModClass() != null && m.getModClass().getType() == (ModClass.GeomClass.getType() | ModClass.PathOpClass.getType()) && (renderer != null || m.isConstant())) {
                             Modification mod = new Modification();
@@ -142,14 +142,14 @@ public class ASTUtils {
                             result.add(m);
                         }
                     } else {
-                        driver.fail("Wrong type", cit.getLocation());
+                        driver.fail("Wrong type", cit.getToken());
                     }
                 }
-                default -> driver.fail("Wrong type", cit.getLocation());
+                default -> driver.fail("Wrong type", cit.getToken());
             }
         }
 
-        processSymmSpec(driver, syms, transform, tiled, symmSpec, e.getLocation());
+        processSymmSpec(driver, syms, transform, tiled, symmSpec, e.getToken());
 
         return result;
     }
@@ -861,13 +861,13 @@ public class ASTUtils {
     }
 
     public static ASTExpression makeResult(CFDGDriver driver, double result, int lenght, ASTExpression from) {
-        ASTReal r = new ASTReal(driver, result, from.getLocation());
+        ASTReal r = new ASTReal(driver, result, from.getToken());
         r.setType(from.getType());
         r.setNatural(from.isNatural());
         if (lenght > 1) {
-            ASTCons l = new ASTCons(driver, from.getLocation(), r);
+            ASTCons l = new ASTCons(driver, from.getToken(), r);
             for (int i = 1; i< lenght; i++) {
-                r = new ASTReal(driver, result, from.getLocation());
+                r = new ASTReal(driver, result, from.getToken());
                 r.setType(from.getType());
                 r.setNatural(from.isNatural());
                 l.append(r);
@@ -886,7 +886,7 @@ public class ASTUtils {
                 case param -> flags[0] |= term.getArgumentsCount();
                 case stroke -> {
                     if (ret != null) {
-                        driver.error("Only one stroke width term is allowed", term.getLocation());
+                        driver.error("Only one stroke width term is allowed", term.getToken());
                     }
                     ret = term.getArguments();
                     term.setArguments(null);
@@ -910,10 +910,10 @@ public class ASTUtils {
                     double[] value = new double[dest.getType().getTupleSize()];
                     int num = arg.evaluate(value, dest.getType().getTupleSize(), renderer);
                     if (!ASTParameter.Impure && dest.getType().isNatural() && !renderer.isNatual(value[0])) {
-                        renderer.getDriver().error("Expression does not evaluate to a legal natural number", arg.getLocation());
+                        renderer.getDriver().error("Expression does not evaluate to a legal natural number", arg.getToken());
                     }
                     if (num != dest.getType().getTupleSize()) {
-                        renderer.getDriver().error("Expression does not evaluate to the correct size", arg.getLocation());
+                        renderer.getDriver().error("Expression does not evaluate to the correct size", arg.getToken());
                     }
                     for (int j = 0; j < dest.getType().getTupleSize(); j++) {
                         dest.setItem(j, new CFStackNumber(renderer.getStack(), value[j]));

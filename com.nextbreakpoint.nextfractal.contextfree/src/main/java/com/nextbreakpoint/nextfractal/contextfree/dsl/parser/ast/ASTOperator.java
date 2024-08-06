@@ -83,7 +83,7 @@ public class ASTOperator extends ASTExpression {
 		}
 
 		if (type != ExpType.Numeric) {
-            driver.error("Non-numeric expression in a numeric context", location);
+            driver.error("Non-numeric expression in a numeric context", getToken());
             return -1;
 		}
 
@@ -126,7 +126,7 @@ public class ASTOperator extends ASTExpression {
 		}
 
 		if (rightnum != 1) {
-            driver.error("illegal operand", location);
+            driver.error("illegal operand", getToken());
             return -1;
 		}
 
@@ -245,12 +245,12 @@ public class ASTOperator extends ASTExpression {
                         case 'P':
                             tupleSize = ls;
                             if (rs != 0) {
-                                driver.error("Unitary operators must have only one operand", location);
+                                driver.error("Unitary operators must have only one operand", getToken());
                             }
                             break;
                         case '!':
                             if (rs != 0 || ls != 1) {
-                                driver.error("Unitary operators must have only one scalar operand", location);
+                                driver.error("Unitary operators must have only one scalar operand", getToken());
                             }
                             break;
                         case '+':
@@ -262,15 +262,15 @@ public class ASTOperator extends ASTExpression {
                         case '=':
                         case 'n':
                             if (ls != rs) {
-                                driver.error("Operands must have the same length", location);
+                                driver.error("Operands must have the same length", getToken());
                             }
                             if (ls < 1 || rs < 1) {
-                                driver.error("Binary operators must have two operands", location);
+                                driver.error("Binary operators must have two operands", getToken());
                             }
                             break;
                         default:
                             if (ls != 1 || rs != 1) {
-                                driver.error("Binary operators must have two scalar operands", location);
+                                driver.error("Binary operators must have two scalar operands", getToken());
                             }
                             break;
                     }
@@ -280,15 +280,15 @@ public class ASTOperator extends ASTExpression {
                 }
                 if (op == '+') {
                     if (type == ExpType.Flag || type != ExpType.Numeric) {
-                        driver.error("Operands must be numeric or flags", location);
+                        driver.error("Operands must be numeric or flags", getToken());
                     }
                 } else {
                     if (type != ExpType.Numeric) {
-                        driver.error("Operand(s) must be numeric", location);
+                        driver.error("Operand(s) must be numeric", getToken());
                     }
                 }
                 if (op == '_' && !isNatural() && !ASTParameter.Impure) {
-                    driver.error("Proper subtraction operands must be natural", location);
+                    driver.error("Proper subtraction operands must be natural", getToken());
                 }
             }
             case Simplify -> {

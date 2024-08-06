@@ -60,7 +60,7 @@ public class ASTSelect extends ASTExpression {
     @Override
 	public CFStackRule evalArgs(CFDGRenderer renderer, CFStackRule parent) {
 		if (type != ExpType.Rule) {
-			driver.error("Evaluation of a non-shape select() in a shape context", location);
+			driver.error("Evaluation of a non-shape select() in a shape context", getToken());
 		}
 		return arguments.get(getIndex(renderer)).evalArgs(renderer, parent);
 	}
@@ -68,7 +68,7 @@ public class ASTSelect extends ASTExpression {
 	@Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
 		if (type != ExpType.Numeric) {
-			driver.error("Evaluation of a non-shape select() in a numeric context", location);
+			driver.error("Evaluation of a non-shape select() in a numeric context", getToken());
 			return -1;
 		}
 
@@ -81,7 +81,7 @@ public class ASTSelect extends ASTExpression {
 	@Override
 	public void evaluate(Modification modification, boolean shapeDest, CFDGRenderer renderer) {
 		if (type != ExpType.Mod) {
-			driver.error("Evaluation of a non-adjustment select() in an adjustment context", location);
+			driver.error("Evaluation of a non-adjustment select() in an adjustment context", getToken());
 			return;
 		}
 
@@ -125,12 +125,12 @@ public class ASTSelect extends ASTExpression {
                 arguments.removeFirst();
 
                 if (selector.getType() != ExpType.Numeric || selector.evaluate(null, 0) != 1) {
-                    driver.error("if()/select() selector must be a numeric scalar", selector.getLocation());
+                    driver.error("if()/select() selector must be a numeric scalar", selector.getToken());
                     return null;
                 }
 
                 if (arguments.size() < 2) {
-                    driver.error("if()/select() selector must have at least two arguments", selector.getLocation());
+                    driver.error("if()/select() selector must have at least two arguments", selector.getToken());
                     return null;
                 }
 
@@ -140,9 +140,9 @@ public class ASTSelect extends ASTExpression {
                 for (int i = 1; i < arguments.size(); i++) {
                     ASTExpression argument = arguments.get(i);
                     if (type != argument.getType()) {
-                        driver.error("select()/if() choices must be of same type", argument.getLocation());
+                        driver.error("select()/if() choices must be of same type", argument.getToken());
                     } else if (type == ExpType.Numeric && tupleSize != -1 && argument.evaluate(null, 0) != tupleSize) {
-                        driver.error("select()/if() choices must be of same length", argument.getLocation());
+                        driver.error("select()/if() choices must be of same length", argument.getToken());
                         tupleSize = -1;
                     }
                     natural = natural && argument.isNatural();

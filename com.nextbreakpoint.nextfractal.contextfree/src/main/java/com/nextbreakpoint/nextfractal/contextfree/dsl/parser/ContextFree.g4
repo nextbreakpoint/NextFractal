@@ -467,7 +467,7 @@ parameter_spec returns [ASTExpression result]
         }
         |
         t='(' BECOMES ')' { 
-        	$result = new ASTExpression(driver, false, false, ExpType.ReuseType, $t);
+        	$result = new ASTExpression(driver, false, false, ExpType.Reuse, $t);
         }
         | '(' ')' { 
         	$result = null; 
@@ -1013,12 +1013,12 @@ exp returns [ASTExpression result]
         (
         RANGE r=exp {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand", pair, driver.getSeed(), $result.getLocation());
+        	$result = new ASTFunction(driver, "rand", pair, driver.getSeed(), $result.getToken());
         }
         |
         PLUSMINUS r=exp {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand+/-", pair, driver.getSeed(), $result.getLocation());
+        	$result = new ASTFunction(driver, "rand+/-", pair, driver.getSeed(), $result.getToken());
         }
         )?
         ;
@@ -1077,73 +1077,73 @@ exp3 returns [ASTExpression result]
         )
         (
         '+' r=exp3 {
-        	$result = new ASTOperator(driver, '+', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '+', $result, $r.result, $result.getToken());
         }
         |
         '-' r=exp3 {
-        	$result = new ASTOperator(driver, '-', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '-', $result, $r.result, $result.getToken());
         }
         |
         '_' r=exp3 {
-        	$result = new ASTOperator(driver, '_', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '_', $result, $r.result, $result.getToken());
         }
         |
         '*' r=exp3 {
-        	$result = new ASTOperator(driver, '*', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '*', $result, $r.result, $result.getToken());
         }
         |
         '/' r=exp3 {
-        	$result = new ASTOperator(driver, '/', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '/', $result, $r.result, $result.getToken());
         }
         |
         '^' r=exp3 {
-        	$result = new ASTOperator(driver, '^', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '^', $result, $r.result, $result.getToken());
         }
         |
         LT r=exp3 {
-        	$result = new ASTOperator(driver, '<', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '<', $result, $r.result, $result.getToken());
         }
         |
         GT r=exp3 {
-        	$result = new ASTOperator(driver, '>', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '>', $result, $r.result, $result.getToken());
         }
         |
         LE r=exp3 {
-        	$result = new ASTOperator(driver, 'L', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, 'L', $result, $r.result, $result.getToken());
         }
         |
         GE r=exp3 {
-        	$result = new ASTOperator(driver, 'G', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, 'G', $result, $r.result, $result.getToken());
         }
         |
         EQ r=exp3 {
-        	$result = new ASTOperator(driver, '=', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '=', $result, $r.result, $result.getToken());
         }
         |
         NEQ r=exp3 {
-        	$result = new ASTOperator(driver, 'n', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, 'n', $result, $r.result, $result.getToken());
         }
         |
         AND r=exp3 {
-        	$result = new ASTOperator(driver, '&', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '&', $result, $r.result, $result.getToken());
         }
         |
         OR r=exp3 {
-        	$result = new ASTOperator(driver, '|', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, '|', $result, $r.result, $result.getToken());
         }
         |
         XOR r=exp3 {
-        	$result = new ASTOperator(driver, 'X', $result, $r.result, $result.getLocation());
+        	$result = new ASTOperator(driver, 'X', $result, $r.result, $result.getToken());
         }
         |
         RANGE r=exp3 {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand", pair, driver.getSeed(), $result.getLocation());
+        	$result = new ASTFunction(driver, "rand", pair, driver.getSeed(), $result.getToken());
         }
         |
         PLUSMINUS r=exp3 {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand+/-", pair, driver.getSeed(), $result.getLocation());
+        	$result = new ASTFunction(driver, "rand+/-", pair, driver.getSeed(), $result.getToken());
         }
         )?
         ;
@@ -1168,7 +1168,7 @@ expfunc returns [ASTExpression result]
         |
         f=USER_STRING '(' BECOMES ')' { 
         	String func = $f.getText();
-        	ASTExpression args = new ASTExpression(driver, false, false, ExpType.ReuseType, $f);
+        	ASTExpression args = new ASTExpression(driver, false, false, ExpType.Reuse, $f);
         	$result = driver.makeArray(func, args, $f);
         }
         |
@@ -1201,7 +1201,7 @@ global_definition returns [ASTDefine result]
             ASTExpression exp = $e.result;
             if (var != null) {
                 switch (var.getDefineType()) {
-                    case StackDefine:
+                    case Stack:
                         if (exp instanceof ASTModification) {
                         	ASTModification mod = (ASTModification)exp;
                             var.getChildChange().grab(mod); // emptied ASTmod gets deleted
@@ -1209,10 +1209,10 @@ global_definition returns [ASTDefine result]
                             var.setExp(exp);
                         }
                         break;
-                    case LetDefine:
+                    case Let:
                         assert(false);
                         break;
-                    case FunctionDefine:
+                    case Function:
                         driver.popRepContainer(null);
                         driver.getParamDecls().getParameters().clear();
                         driver.getParamDecls().setStackCount(0);
@@ -1234,7 +1234,7 @@ function_definition_header returns [ASTDefine result]
         	String name = $f.getText();
             $result = driver.makeDefinition(name, true, $SHAPE);
             if ($result != null) {
-                $result.setExpType(ExpType.RuleType);
+                $result.setExpType(ExpType.Rule);
                 $result.setTupleSize(1);
             }
         }
@@ -1243,7 +1243,7 @@ function_definition_header returns [ASTDefine result]
         	String name = $f.getText();
             $result = driver.makeDefinition(name, true, $f);
             if ($result != null) {
-                $result.setExpType(ExpType.NumericType);
+                $result.setExpType(ExpType.Numeric);
                 $result.setTupleSize(1);
             }
         }
@@ -1281,7 +1281,7 @@ global_definition_header returns [ASTDefine result]
 		:
         fd=function_definition_header {
             if ($fd.result != null) {
-                assert($fd.result.getDefineType() == DefineType.FunctionDefine);
+                assert($fd.result.getDefineType() == DefineType.Function);
                 driver.pushRepContainer(driver.getParamDecls());
             } else {
                 // An error occurred

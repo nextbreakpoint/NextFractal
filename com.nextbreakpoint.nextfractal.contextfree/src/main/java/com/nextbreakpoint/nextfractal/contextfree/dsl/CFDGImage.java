@@ -24,21 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFCanvas;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CollectingLogger;
 
-public class CFDGImage {
-    private final CFDG cfdg;
+public interface CFDGImage {
+    void setListener(CFDGListener listener);
 
-    public CFDGImage(CFDG cfdg) {
-        this.cfdg = cfdg;
-    }
-
-    public CFDGRenderer create(Size imageSize, String seed, CFDGLogger logger) {
-        cfdg.getDriver().setLogger(logger);
-        cfdg.rulesLoaded();
-        return cfdg.renderer(imageSize.width(), imageSize.height(), 1, seed.hashCode(), 0.1);
-    }
+    CFDGHandle render(CFCanvas canvas, String seed, boolean partialDraw);
 }

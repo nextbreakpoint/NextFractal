@@ -73,7 +73,7 @@ public class V3ShapeTest extends AbstractBaseTest {
 		when(canvas.getHeight()).thenReturn(200);
 		CFDG cfdg = parseSource(RESOURCE_NAME);
 		cfdg.rulesLoaded();
-		CFDGRenderer renderer = cfdg.renderer(200, 200, 1, 0, 0.1);
+		CFDGRenderer renderer = cfdg.createRenderer(200, 200, 1, 0, 0.1);
 		assertThat(renderer).isNotNull();
 		double scale = renderer.run(canvas, false);
 		assertThat(scale).isEqualTo(198.4);
@@ -86,7 +86,7 @@ public class V3ShapeTest extends AbstractBaseTest {
 		when(canvas.getHeight()).thenReturn(200);
 		CFDG cfdg = parseSource(RESOURCE_NAME);
 		cfdg.rulesLoaded();
-		CFDGRenderer renderer = cfdg.renderer(200, 200, 1, 0, 0.1);
+		CFDGRenderer renderer = cfdg.createRenderer(200, 200, 1, 0, 0.1);
 		assertThat(renderer).isNotNull();
 		renderer.run(canvas, false);
 		AffineTransform transform = new AffineTransform();

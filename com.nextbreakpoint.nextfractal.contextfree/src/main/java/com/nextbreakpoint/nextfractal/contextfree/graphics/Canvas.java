@@ -24,9 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Bounds;
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFCanvas;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CommandInfo;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.PrimShape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
@@ -86,7 +85,7 @@ public class Canvas implements CFCanvas {
         context.restore();
     }
 
-    public void path(double[] color, java.awt.geom.AffineTransform transform, CommandInfo info) {
+    public void path(double[] color, java.awt.geom.AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit) {
         context.save();
 
         AffineTransform affine = factory.createAffineTransform();
@@ -94,37 +93,35 @@ public class Canvas implements CFCanvas {
 
         Shape shape;
 
-        GeneralPath path = info.getPathStorage().getGeneralPath();
-
-        if ((info.getFlags() & (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) == (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) {
+        if ((flags & (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) == (FlagType.CF_EVEN_ODD.getMask() | FlagType.CF_FILL.getMask())) {
             path.setWindingRule(GraphicsContext.EVEN_ODD);
         } else {
             path.setWindingRule(GraphicsContext.NON_ZERO);
         }
 
-        if ((info.getFlags() & FlagType.CF_FILL.getMask()) != 0) {
+        if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             shape = path;
             double[] matrix = new double[6];
             transform.getMatrix(matrix);
             AffineTransform newAffine = factory.createAffineTransform(matrix);
             affine.append(newAffine);
-        } else if ((info.getFlags() & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
+        } else if ((flags & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
             double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
-            context.setStrokeLine((float)(info.getStrokeWidth() * scale), mapToCap(info.getFlags()), mapToJoin(info.getFlags()), (float)info.getMiterLimit());
+            context.setStrokeLine((float) (strokeWidth * scale), mapToCap(flags), mapToJoin(flags), (float) miterLimit);
             shape = path;
             double[] matrix = new double[6];
             transform.getMatrix(matrix);
             AffineTransform newAffine = factory.createAffineTransform(matrix);
             affine.append(newAffine);
         } else {
-            context.setStrokeLine((float)info.getStrokeWidth(), mapToCap(info.getFlags()), mapToJoin(info.getFlags()), (float)info.getMiterLimit());
+            context.setStrokeLine((float) strokeWidth, mapToCap(flags), mapToJoin(flags), (float) miterLimit);
             shape = path.createTransformedShape(transform);
         }
 
         affine.setAffineTransform(context);
 
         Color c = factory.createColor((float) color[0], (float) color[1], (float) color[2], (float) color[3]);
-        if ((info.getFlags() & FlagType.CF_FILL.getMask()) != 0) {
+        if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             context.setFill(c);
             fill(shape, path.getWindingRule());
         } else {

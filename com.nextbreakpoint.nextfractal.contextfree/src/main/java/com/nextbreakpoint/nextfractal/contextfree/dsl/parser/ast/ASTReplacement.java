@@ -37,7 +37,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
-public class ASTReplacement {
+public class ASTReplacement extends ASTObject {
 	@Getter
     private final ASTRuleSpecifier shapeSpecifier;
 	@Getter
@@ -48,16 +48,14 @@ public class ASTReplacement {
 	@Setter
     @Getter
     private PathOp pathOp;
-	@Getter
-    protected Token location;
 	protected CFDGDriver driver;
 
 	public ASTReplacement(CFDGDriver driver, ASTRuleSpecifier shapeSpecifier, ASTModification childChange, RepElemType repType, Token location) {
+		super(location);
 		this.driver = driver;
 		this.repType = repType;
 		this.shapeSpecifier = shapeSpecifier;
 		this.pathOp = PathOp.UNKNOWN;
-		this.location = location;
 		this.childChange = childChange;
 		if (this.childChange == null) {
 			this.childChange = new ASTModification(driver, location);
@@ -81,7 +79,7 @@ public class ASTReplacement {
 	}
 
 	public ASTReplacement(ASTReplacement replacement) {
-		this(replacement.driver, replacement.getShapeSpecifier(), replacement.getChildChange(), replacement.getRepType(), replacement.getLocation());
+		this(replacement.driver, replacement.getShapeSpecifier(), replacement.getChildChange(), replacement.getRepType(), replacement.getToken());
 		this.pathOp = replacement.getPathOp();
 	}
 
@@ -122,7 +120,7 @@ public class ASTReplacement {
 				renderer.processSubpath(child, tr || repType == RepElemType.op, repType);
 				break;
             default:
-				driver.fail("Subpaths must be all path operation or all path command", location);
+				driver.fail("Subpaths must be all path operation or all path command", getToken());
 		}
 	}
 
@@ -139,14 +137,14 @@ public class ASTReplacement {
                     // This is a subpath
                     if (shapeSpecifier.getArgSource() == ArgSource.ShapeArgs || shapeSpecifier.getArgSource() == ArgSource.StackArgs || PrimShape.isPrimShape(shapeSpecifier.getShapeType())) {
                         if (repType != RepElemType.op) {
-                            driver.error("Error in subpath specification", location);
+                            driver.error("Error in subpath specification", getToken());
                         }
                     } else {
                         ASTRule rule = driver.getRule(shapeSpecifier.getShapeType());
                         if (rule == null || rule.isPath()) {
-                            driver.error("Subpath can only refer to a path", location);
+                            driver.error("Subpath can only refer to a path", getToken());
                         } else if (rule.getRuleBody().getRepType() != repType.getType()) {
-                            driver.error("Subpath type mismatch error", location);
+                            driver.error("Subpath type mismatch error", getToken());
                         }
                     }
                 }

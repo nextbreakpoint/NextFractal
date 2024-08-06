@@ -24,7 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 
 public interface CFCanvas {
     int getWidth();
@@ -33,7 +36,7 @@ public interface CFCanvas {
 
     void primitive(int shapeType, double[] color, AffineTransform transform);
 
-    void path(double[] color, AffineTransform transform, CommandInfo info);
+    void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit);
 
     void start(boolean first, double[] backgroundColor, int currWidth, int currHeight);
 

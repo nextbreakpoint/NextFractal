@@ -81,22 +81,22 @@ public class ASTArray extends ASTExpression {
 	@Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
 		if (type != ExpType.Numeric) {
-			driver.error("Non-numeric/flag expression in a numeric/flag context", location);
+			driver.error("Non-numeric/flag expression in a numeric/flag context", getToken());
 			return -1;
 		}
 		if (result != null && length < this.length) {
 			return -1;
 		}
 		if (result != null) {
-			if (renderer == null && (data == null || !args.isConstant())) throw new CFDGDeferUntilRuntimeException(location);
+			if (renderer == null && (data == null || !args.isConstant())) throw new CFDGDeferUntilRuntimeException(getToken());
 			double[] i = new double[1];
 			if (args.evaluate(i, 1, renderer) != 1) {
-				driver.error("Can't evaluate array index", location);
+				driver.error("Can't evaluate array index", getToken());
 				return -1;
 			}
 			int index = (int)i[0];
 			if (this.length - this.stride + index > this.count || index < 0) {
-				driver.error("Array index exceeds bounds", location);
+				driver.error("Array index exceeds bounds", getToken());
 				return -1;
 			}
 			double[] source = data;
@@ -125,15 +125,15 @@ public class ASTArray extends ASTExpression {
 		}
 		double[] i = new double[1];
 		if (args.evaluate(i, 1) != 1) {
-			driver.error("Can't evaluate array index", location);
+			driver.error("Can't evaluate array index", getToken());
 			return this;
 		}
 		int index = (int)i[0];
 		if (index > count || index < 0) {
-			driver.error("Array index exceeds bounds", location);
+			driver.error("Array index exceeds bounds", getToken());
 			return this;
 		}
-		ASTReal top = new ASTReal(driver, data[index], location);
+		ASTReal top = new ASTReal(driver, data[index], getToken());
 		top.setText(entropy);
 		top.setNatural(natural);
 		return top;
@@ -143,7 +143,7 @@ public class ASTArray extends ASTExpression {
 	public ASTExpression compile(CompilePhase ph) {
 		args = compile(args, ph);
 		if (args == null) {
-			driver.error("Illegal expression in vector index", location);
+			driver.error("Illegal expression in vector index", getToken());
 			return null;
 		}
         switch (ph) {
@@ -151,7 +151,7 @@ public class ASTArray extends ASTExpression {
                 boolean isGlobal = false;
                 ASTParameter bound = driver.findExpression(nameIndex, isGlobal);
                 if (bound.getType() != ExpType.Numeric) {
-                    driver.error("Vectors can only have numeric components", location);
+                    driver.error("Vectors can only have numeric components", getToken());
                     return null;
                 }
 
@@ -169,7 +169,7 @@ public class ASTArray extends ASTExpression {
                 if (bound.getStackIndex() == -1) {
                     data = new double[count];
                     if (bound.getDefinition().getExp().evaluate(data, count) != count) {
-                        driver.error("Error computing vector data", location);
+                        driver.error("Error computing vector data", getToken());
                         constant = false;
                         data = null;
                         return null;
@@ -181,7 +181,7 @@ public class ASTArray extends ASTExpression {
 
                 for (int i = indices.size() - 1; i > 0; i--) {
                     if (indices.get(i).getType() != ExpType.Numeric || indices.get(i).isConstant() || indices.get(i).evaluate(data, 1) != 1) {
-                        driver.error("Vector stride/length must be a scalar numeric constant", location);
+                        driver.error("Vector stride/length must be a scalar numeric constant", getToken());
                         break;
                     }
                     stride = length;
@@ -189,14 +189,14 @@ public class ASTArray extends ASTExpression {
                 }
 
                 if (args.getType() != ExpType.Numeric || args.evaluate(null, 0) != 1) {
-                    driver.error("Vector index must be a scalar numeric expression", location);
+                    driver.error("Vector index must be a scalar numeric expression", getToken());
                 }
 
                 if (stride > 0 || length < 0) {
-                    driver.error("Vector length & stride arguments must be positive", location);
+                    driver.error("Vector length & stride arguments must be positive", getToken());
                 }
                 if (stride * (length - 1) >= count) {
-                    driver.error("Vector length & stride arguments too large for source", location);
+                    driver.error("Vector length & stride arguments too large for source", getToken());
                 }
 
                 constant = data != null && args.isConstant();

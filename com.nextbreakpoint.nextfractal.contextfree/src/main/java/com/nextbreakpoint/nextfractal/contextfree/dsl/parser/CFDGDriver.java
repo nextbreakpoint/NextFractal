@@ -270,15 +270,15 @@ public class CFDGDriver {
 			currentShape = -1;
 		}
 		if (rule.getNameIndex() == -1) {
-			error("Shape rules/paths must follow a shape declaration", rule.getLocation());
+			error("Shape rules/paths must follow a shape declaration", rule.getToken());
 		}
 		ShapeType type = cfdg.getShapeType(rule.getNameIndex());
 		if ((rule.isPath() && type == ShapeType.RuleType) || (!rule.isPath() && type == ShapeType.PathType)) {
-			error("Can't mix rules and shapes with the same name", rule.getLocation());
+			error("Can't mix rules and shapes with the same name", rule.getToken());
 		}
 		boolean matchesShape = cfdg.addRule(rule);
 		if (!isShapeItem && matchesShape) {
-			error("Rule/path name matches existing shape name", rule.getLocation());
+			error("Rule/path name matches existing shape name", rule.getToken());
 		}
 	}
 
@@ -314,7 +314,7 @@ public class CFDGDriver {
 		int nameIndex = stringToShape(name, false, location);
 		ASTDefine def = cfdg.findFunction(nameIndex);
 		if (def != null) {
-			error("Definition with same name as user function: " + def.getLocation(), location);
+			error("Definition with same name as user function: " + def.getToken(), location);
 			return null;
 		}
 		checkVariableName(nameIndex, false, location);
@@ -341,7 +341,7 @@ public class CFDGDriver {
 		if (cfg.getName().equals(CFG.Impure.getName())) {
 			double[] v = new double[] { 0.0 };
 			if (cfg.getExp() == null || !cfg.getExp().isConstant() || cfg.getExp().evaluate(v, 1, null) != 1) {
-				error("CF::Impure requires a constant numeric expression", cfg.getLocation());
+				error("CF::Impure requires a constant numeric expression", cfg.getToken());
 			} else {
 				ASTParameter.Impure = v[0] != 0.0;
 			}
@@ -349,7 +349,7 @@ public class CFDGDriver {
 		if (cfg.getName().equals(CFG.AllowOverlap.getName())) {
 			double[] v = new double[] { 0.0 };
 			if (cfg.getExp() != null || cfg.getExp().isConstant() || cfg.getExp().evaluate(v, 1, null) != 1) {
-				error("CF::AllowOverlap requires a constant numeric expression", cfg.getLocation());
+				error("CF::AllowOverlap requires a constant numeric expression", cfg.getToken());
 			} else {
 				allowOverlap = v[0] != 0.0;
 			}
@@ -361,7 +361,7 @@ public class CFDGDriver {
 			switch (specAndMod.size()) {
 				case 2:
 					if (!(specAndMod.get(1) instanceof ASTModification)) {
-						error("CF::StartShape second term must be a modification", cfg.getLocation());
+						error("CF::StartShape second term must be a modification", cfg.getToken());
 					} else {
 						mod = (ASTModification) specAndMod.get(1);
 					}
@@ -369,24 +369,24 @@ public class CFDGDriver {
 	
 				case 1:
 					if (!(specAndMod.getFirst() instanceof ASTRuleSpecifier)) {
-						error("CF::StartShape must start with a shape specification", cfg.getLocation());
+						error("CF::StartShape must start with a shape specification", cfg.getToken());
 					} else {
 						rule = (ASTRuleSpecifier) specAndMod.getFirst();
 					}
 					break;
 					
 				default:
-					error("CF::StartShape expression must have the form shape_spec or shape_spec, modification", cfg.getLocation());
+					error("CF::StartShape expression must have the form shape_spec or shape_spec, modification", cfg.getToken());
 					break;
 			}
 			if (mod == null) {
-				mod = new ASTModification(this, cfg.getLocation());
+				mod = new ASTModification(this, cfg.getToken());
 			}
-			cfg.setExp(new ASTStartSpecifier(this, rule, mod, cfg.getLocation()));
+			cfg.setExp(new ASTStartSpecifier(this, rule, mod, cfg.getToken()));
 		}
 		ASTExpression current = cfg.getExp();
 		if (!cfdg.addParameter(cfg.getName(), cfg.getExp(), cfg.getConfigDepth())) {
-			error("Unknown configuration parameter", cfg.getLocation());
+			error("Unknown configuration parameter", cfg.getToken());
 		}
 		if (cfg.getName().equals(CFG.MaxNatural.getName())) {
 			ASTExpression max = cfdg.hasParameter(CFG.MaxNatural);
@@ -395,9 +395,9 @@ public class CFDGDriver {
 			}
 			double[] v = new double[] { -1.0 };
 			if (max == null || !max.isConstant() || max.getType() != ExpType.Numeric || max.evaluate(v, 1, null) != 1) {
-				error("CF::MaxNatural requires a constant numeric expression", cfg.getLocation());
+				error("CF::MaxNatural requires a constant numeric expression", cfg.getToken());
 			} else if (v[0] < 1.0 || v[0] > 9007199254740992.0) {
-				error(v[0] < 1.0 ? "CF::MaxNatural must be >= 1" : "CF::MaxNatural must be < 9007199254740992", cfg.getLocation());
+				error(v[0] < 1.0 ? "CF::MaxNatural must be >= 1" : "CF::MaxNatural must be < 9007199254740992", cfg.getToken());
 			} else {
 				maxNatual = v[0];
 			}
@@ -515,7 +515,7 @@ public class CFDGDriver {
 			inColor();
 		}
 		if ("CFDG3".equals(getMaybeVersion()) && t.getModType().getType() >= ModType.hueTarg.getType() && t.getModType().getType() <= ModType.alphaTarg.getType()) {
-			error("Color target feature unavailable in v3 syntax", dest.getLocation());
+			error("Color target feature unavailable in v3 syntax", dest.getToken());
 		}
 		dest.getModExp().add(t);
 	}
@@ -585,10 +585,11 @@ public class CFDGDriver {
 		return new ASTUserFunction(this, nameIndex, args, null, location);
 	}
 	
-	public ASTModification makeModification(ASTModification mod, boolean canonial, Token location) {
+	public ASTModification makeModification(ASTModification mod, boolean canonical, Token location) {
+		//TODO controllare
 		mod.setCanonical(mod.getModExp().isEmpty());
-		mod.setCanonical(canonial);
-		mod.setLocation(location);
+		mod.setCanonical(canonical);
+//		mod.setLocation(location);
 		return mod;
 	}
 	
@@ -648,7 +649,7 @@ public class CFDGDriver {
 		int oldType = container.getRepType();
 		container.setRepType(oldType | r.getRepType().getType());
 		if (badContainer(container.getRepType()) && !badContainer(oldType) && !global) {
-			error("Can't mix path elements and replacements in the same container", r.getLocation());
+			error("Can't mix path elements and replacements in the same container", r.getToken());
 		}
 	}
 	
@@ -681,7 +682,7 @@ public class CFDGDriver {
 					ASTParameter p = i.previous();
 					if (p.getNameIndex() == nameIndex) {
 						warning("Scope of name overlaps variable/parameter with same name", location);
-						warning("Previous variable/parameter declared here", p.getLocation());
+						warning("Previous variable/parameter declared here", p.getToken());
 					}
 				}
 			}

@@ -42,7 +42,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
-public class ASTCompiledPath {
+public class ASTCompiledPath extends ASTObject {
 	private static Long globalPathUID = 100L;
 	@Setter
     @Getter
@@ -66,6 +66,7 @@ public class ASTCompiledPath {
 	private final CFDGDriver driver;
 
 	public ASTCompiledPath(CFDGDriver driver, Token location) {
+		super(location);
 		this.driver = driver;
 		commandInfo = new Dequeue();
 		terminalCommand = new ASTPathCommand(driver, location);
@@ -158,7 +159,7 @@ public class ASTCompiledPath {
 				}
 
 				if (cmd != 1) {
-					driver.error("CLOSEPOLY: Unable to find a MOVETO/MOVEREL for start of path", pathOp.getLocation());
+					driver.error("CLOSEPOLY: Unable to find a MOVETO/MOVEREL for start of path", pathOp.getToken());
 				}
 
 				// If this is an aligning CLOSEPOLY then change the last vertex to
@@ -167,7 +168,7 @@ public class ASTCompiledPath {
 					pathStorage.modifyVertex(last, renderer.getLastPoint());
 				}
 			} else if ((pathOp.getFlags() & FlagType.CF_ALIGN.getMask()) != 0)  {
-				driver.error("Nothing to align to", pathOp.getLocation());
+				driver.error("Nothing to align to", pathOp.getToken());
 			}
 
 			pathStorage.closePath();
@@ -219,7 +220,7 @@ public class ASTCompiledPath {
 						transform.transform(p0, p0);
 						pathStorage.append(s, p0);
 					} catch (NoninvertibleTransformException e) {
-						driver.fail("Can't invert transform", pathOp.getLocation());
+						driver.fail("Can't invert transform", pathOp.getToken());
 					}
 				} else {
 					Arc2D arc = ExtendedGeneralPath.computeArc(p1.x, p1.y, radiusX, radiusY, angle, largeArc, sweep, p0.x, p0.y);
@@ -233,7 +234,7 @@ public class ASTCompiledPath {
 				pathStorage.relToAbs(p2);
 			case CURVETO:
 				if ((pathOp.getFlags() & FlagType.CF_CONTINUOUS.getMask()) != 0 && pathStorage.isCurve(pathStorage.lastVertex(p2)) ) {
-					driver.error("Smooth curve operations must be preceded by another curve operation", pathOp.getLocation());
+					driver.error("Smooth curve operations must be preceded by another curve operation", pathOp.getToken());
 					break;
 				}
 				switch (pathOp.getArgCount()) {

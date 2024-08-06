@@ -116,7 +116,7 @@ public class ASTModification extends ASTExpression {
 	}
 
 	public ASTModification(ASTModification mod) {
-		super(mod.driver, true, false, ExpType.Mod, mod.getLocation());
+		super(mod.driver, true, false, ExpType.Mod, mod.getToken());
 		this.driver = mod.driver;
 		this.modClass = mod.modClass;
 		this.entropyIndex = mod.entropyIndex;
@@ -180,7 +180,7 @@ public class ASTModification extends ASTExpression {
 
 	@Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-		driver.error("Improper evaluation of an adjustment expression", location);
+		driver.error("Improper evaluation of an adjustment expression", getToken());
 		return -1;
 	}
 
@@ -190,7 +190,7 @@ public class ASTModification extends ASTExpression {
 			result.concat(modData);
 		} else {
 			if (result.merge(modData)) {
-				if (renderer != null) renderer.colorConflict(getLocation());
+				if (renderer != null) renderer.colorConflict(getToken());
 			}
 		}
 		for (ASTModTerm term : modExp) {
@@ -253,12 +253,12 @@ public class ASTModification extends ASTExpression {
                         case sizexyz: {
                             double[] d = new double[3];
                             if (term.getArguments().isConstant() && term.getArguments().evaluate(d, 3) == 3) {
-                                term.setArguments(new ASTCons(driver, location, new ASTReal(driver, d[0], location), new ASTReal(driver, d[1], location)));
+                                term.setArguments(new ASTCons(driver, getToken(), new ASTReal(driver, d[0], getToken()), new ASTReal(driver, d[1], getToken())));
                                 term.setModType(term.getModType() == ModType.xyz ? ModType.x : ModType.size);
                                 term.setArgumentsCount(2);
 
                                 ModType ztype = term.getModType() == ModType.size ? ModType.zsize : ModType.z;
-                                ASTModTerm zmod = new ASTModTerm(driver, ztype, new ASTReal(driver, d[2], location), location);
+                                ASTModTerm zmod = new ASTModTerm(driver, ztype, new ASTReal(driver, d[2], getToken()), getToken());
                                 zmod.setArgumentsCount(1);
 
                                 // Check if xy part is the identity transform and only save it if it is not
@@ -292,7 +292,7 @@ public class ASTModification extends ASTExpression {
                                 term.setArgumentsCount(2);
 
                                 ModType ztype = term.getModType() == ModType.size ? ModType.zsize : ModType.z;
-                                ASTModTerm zmod = new ASTModTerm(driver, ztype, new ASTReal(driver, d[2], location), location);
+                                ASTModTerm zmod = new ASTModTerm(driver, ztype, new ASTReal(driver, d[2], getToken()), getToken());
                                 zmod.setArgumentsCount(1);
 
                                 if (term.getModType() == ModType.size && xyargs.isConstant() && xyargs.evaluate(d, 2) == 2 && d[0] == 1.0 && d[1] == 1.0) {
@@ -354,10 +354,10 @@ public class ASTModification extends ASTExpression {
 			}
 			boolean keepThisOne = (mc.getType() & nonConstant) != 0;
 			if (driver.isInPathContainer() && (mc.getType() & ModClass.ZClass.getType()) != 0) {
-				driver.error("Z changes are not supported within paths", term.getLocation());
+				driver.error("Z changes are not supported within paths", term.getToken());
 			}
 			if (driver.isInPathContainer() && (mc.getType() & ModClass.TimeClass.getType()) != 0) {
-				driver.error("Time changes are not supported within paths", term.getLocation());
+				driver.error("Time changes are not supported within paths", term.getToken());
 			}
 			try {
 				if (!keepThisOne) {
