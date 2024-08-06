@@ -24,20 +24,19 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum RepElemType {
 	rule(8), replacement(4), mixed(3), command(2), op(1), empty(0); 
 	
-	private int type;
+	private final int type;
 	
-	private RepElemType(int type) {
+	RepElemType(int type) {
 		this.type = type;
 	}
 
-	public int getType() {
-		return type;
-	}
-
-	public static RepElemType fromType(int type) {
+    public static RepElemType fromType(int type) {
 		for (RepElemType value : RepElemType.values()) {
 			if (value.getType() == type) {
 				return value;

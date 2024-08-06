@@ -42,9 +42,6 @@ public class ContextFreeFactory implements CoreFactory {
 	public static final String PLUGIN_ID = "ContextFree";
 	public static final String GRAMMAR = "ContextFree";
 
-	/**
-	 * @see CoreFactory#getId()
-	 */
 	public String getId() {
 		return PLUGIN_ID;
 	}
@@ -53,9 +50,6 @@ public class ContextFreeFactory implements CoreFactory {
 		return GRAMMAR;
 	}
 
-	/**
-	 * @see CoreFactory#createSession()
-	 */
 	@Override
 	public Session createSession() {
 		return new ContextFreeSession();
@@ -66,9 +60,6 @@ public class ContextFreeFactory implements CoreFactory {
 		return new ContextFreeSession(script, (ContextFreeMetadata) metadata);
 	}
 
-	/**
-	 * @see CoreFactory#createImageGenerator(java.util.concurrent.ThreadFactory, GraphicsFactory, Tile, boolean)
-	 */
 	@Override
 	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		return new ContextFreeImageGenerator(threadFactory, renderFactory, tile, opaque);

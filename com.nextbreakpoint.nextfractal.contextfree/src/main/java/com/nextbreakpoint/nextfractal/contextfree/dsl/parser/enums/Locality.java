@@ -24,20 +24,19 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
-public enum Locality {
-	UnknownLocal(0), ImpureNonlocal(1), PureNonlocal(3), PureLocal(7);
-	
-	private int type;
+import lombok.Getter;
 
-	private Locality(int type) {
+@Getter
+public enum Locality {
+	UnknownLocal(0), ImpureNonLocal(1), PureNonLocal(3), PureLocal(7);
+	
+	private final int type;
+
+	Locality(int type) {
 		this.type = type;
 	}
 
-	public int getType() {
-		return type;
-	}
-
-	public static Locality fromType(int type) {
+    public static Locality fromType(int type) {
 		for (Locality value : Locality.values()) {
 			if (value.getType() == type) {
 				return value;

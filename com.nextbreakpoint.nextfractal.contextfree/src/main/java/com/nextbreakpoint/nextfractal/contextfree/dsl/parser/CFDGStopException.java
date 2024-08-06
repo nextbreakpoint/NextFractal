@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.module;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-public class ComposerCanvas {
+public class CFDGStopException extends RuntimeException {
 }

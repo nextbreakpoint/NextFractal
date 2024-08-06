@@ -24,16 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum WeightType {
 	NoWeight(1), PercentWeight(2), ExplicitWeight(4);
 	
-	private int type;
+	private final int type;
 
-	private WeightType(int type) {
+	WeightType(int type) {
 		this.type = type;
-	}
-
-	public int getType() {
-		return type;
 	}
 }

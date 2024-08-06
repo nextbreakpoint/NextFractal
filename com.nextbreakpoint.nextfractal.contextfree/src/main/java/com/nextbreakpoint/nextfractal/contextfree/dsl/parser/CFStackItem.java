@@ -24,13 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.AST;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTUtils;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public abstract class CFStackItem {
     protected CFStack stack;
 
@@ -39,11 +41,7 @@ public abstract class CFStackItem {
     }
 
     public void evalArgs(CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential) {
-        AST.evalArgs(renderer, null, iterator(parameters), arguments, sequential);
-    }
-
-    public CFStack getStack() {
-        return stack;
+        ASTUtils.evalArgs(renderer, null, iterator(parameters), arguments, sequential);
     }
 
     public abstract ExpType getType();

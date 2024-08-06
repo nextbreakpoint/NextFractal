@@ -24,6 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,17 +67,17 @@ public enum ModType {
 	yrad(33, "", "ry"),
 	modification(34, "\u0088\u0090\u0054\u00C5\u00D3\u0020", "");
 
-	private int type;
-	private String entropy;
-	private Set<String> names;
+	private final Set<String> names;
+	@Getter
+    private final int type;
+	@Getter
+    private final String entropy;
 
-	private ModType(int type, String entropy, String... namesArray) {
+	ModType(int type, String entropy, String... namesArray) {
 		this.type = type;
 		this.entropy = entropy;
 		names = new HashSet<>();
-		for (String name : namesArray) {
-			names.add(name);
-		}
+        Collections.addAll(names, namesArray);
 	}
 
 	public static ModType fromType(int type) {
@@ -93,13 +96,5 @@ public enum ModType {
 			}
 		}
 		return unknown;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public String getEntropy() {
-		return entropy;
 	}
 }

@@ -57,4 +57,9 @@ public class ContextFreeMetadata implements Metadata {
 	public Time time() {
 		return time;
 	}
+
+	@Override
+	public String toString() {
+		return "[seed=" + seed + ", time=" + time  + "]";
+	}
 }

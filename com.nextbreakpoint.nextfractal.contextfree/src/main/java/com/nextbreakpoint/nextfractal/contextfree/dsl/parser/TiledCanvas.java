@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
+import lombok.extern.java.Log;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -35,15 +36,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+@Log
 public class TiledCanvas implements CFCanvas {
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CFDG.class.getName());
-
-    private List<Point2D.Double> tileList;
-    private AffineTransform transform;
+    private final List<Point2D.Double> tileList;
+    private final AffineTransform transform;
     private AffineTransform transformInvert;
     private AffineTransform transformOffset;
-    private FriezeType frieze;
-    private CFCanvas canvas;
+    private final FriezeType frieze;
+    private final CFCanvas canvas;
     private int width;
     private int height;
 
@@ -116,7 +116,7 @@ public class TiledCanvas implements CFCanvas {
             try {
                 transformInvert.invert();
             } catch (NoninvertibleTransformException e) {
-                logger.log(Level.WARNING, "Can't invert transform", e);
+                log.log(Level.WARNING, "Can't invert transform", e);
             }
         }
     }
@@ -166,7 +166,7 @@ public class TiledCanvas implements CFCanvas {
         for (int ring = 1; ; ring++) {
             boolean hit = false;
             for (int pos = -ring; pos < ring; pos++) {
-                List<Point2D.Double> points = Arrays.asList(new Point2D.Double(pos, -ring), new Point2D.Double(ring, pos), new Point2D.Double(-pos, ring), new Point2D.Double(-ring, -pos));
+                List<Point2D.Double> points = List.of(new Point2D.Double(pos, -ring), new Point2D.Double(ring, pos), new Point2D.Double(-pos, ring), new Point2D.Double(-ring, -pos));
                 for (Point2D.Double point : points) {
                     // Find where this tile is on the canvas
                     Point2D.Double d = new Point2D.Double(point.x - centx, point.y - centy);
@@ -230,7 +230,7 @@ public class TiledCanvas implements CFCanvas {
         for (int ring = 1; ; ring++) {
             boolean hit = false;
             for (int pos = -ring; pos < ring; pos++) {
-                List<Point2D.Double> points = Arrays.asList(new Point2D.Double(pos, -ring), new Point2D.Double(ring, pos), new Point2D.Double(-pos, ring), new Point2D.Double(-ring, -pos));
+                List<Point2D.Double> points = List.of(new Point2D.Double(pos, -ring), new Point2D.Double(ring, pos), new Point2D.Double(-pos, ring), new Point2D.Double(-ring, -pos));
                 for (Point2D.Double point : points) {
                     // Find where this tile is on the canvas
                     Point2D.Double d = new Point2D.Double(point.x, point.y);

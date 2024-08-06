@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransform1D;
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDeferUntilRuntimeException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.HSBColor;
@@ -36,7 +37,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ModClass;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ModType;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.DeferUntilRuntimeException;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.AffineTransform;
@@ -44,12 +46,10 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Setter
+@Getter
 public class ASTModTerm extends ASTExpression {
-	private int argCount;
-	private ModType modType;
-	private ASTExpression args;
-
-	private static Map<String, Long> paramMap = new HashMap<>();
+	private static final Map<String, Long> paramMap = new HashMap<>();
 
 	static {
 		paramMap.put("evenodd", FlagType.CF_EVEN_ODD.getMask());
@@ -65,61 +65,41 @@ public class ASTModTerm extends ASTExpression {
 		paramMap.put("align", FlagType.CF_ALIGN.getMask());
 	}
 
+	private int argumentsCount;
+	private ModType modType;
+	private ASTExpression arguments;
+
 	public ASTModTerm(CFDGDriver driver, ModType modType, String paramStrings, Token location) {
-		super(driver, true, false, ExpType.ModType, location);
+		super(driver, true, false, ExpType.Mod, location);
 		this.modType = modType;
-		this.args = null;
-		this.argCount = 0;
+		this.arguments = null;
+		this.argumentsCount = 0;
 
 		//TODO controllare
 
 		for (String paramString : paramStrings.split(" ")) {
 			Long count = paramMap.get(paramString);
 			if (count != null) {
-				argCount |= count;
+				argumentsCount |= count;
 			}
 		}
 	}
 
-	public ASTModTerm(CFDGDriver driver, ModType modType, ASTExpression args, Token location) {
-		super(driver, args.isConstant(), false, ExpType.ModType, location);
+	public ASTModTerm(CFDGDriver driver, ModType modType, ASTExpression arguments, Token location) {
+		super(driver, arguments.isConstant(), false, ExpType.Mod, location);
 		this.modType = modType;
-		this.args = args;
-		this.argCount = 0;
+		this.arguments = arguments;
+		this.argumentsCount = 0;
 	}
 
 	public ASTModTerm(CFDGDriver driver, ModType modType, Token location) {
-		super(driver, true, false, ExpType.ModType, location);
+		super(driver, true, false, ExpType.Mod, location);
 		this.modType = modType;
-		this.args = null;
-		this.argCount = 0;
+		this.arguments = null;
+		this.argumentsCount = 0;
 	}
 
-	public ModType getModType() {
-		return modType;
-	}
-
-	public void setModType(ModType modType) {
-		this.modType = modType;
-	}
-	
-	public ASTExpression getArguments() {
-		return args;
-	}
-
-	public void setArguments(ASTExpression arguments) {
-		this.args = arguments;
-	}
-	
-	public int getArgumentsCount() {
-		return argCount;
-	}
-
-	public void setArgumentsCount(int argCount) {
-		this.argCount = argCount;
-	}
-
-	@Override
+    @Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
         driver.error("Improper evaluation of an adjustment expression", location);
         return -1;
@@ -130,16 +110,16 @@ public class ASTModTerm extends ASTExpression {
 		double[] modArgs = new double[6];
 		int argcount = 0;
 
-		if (args != null) {
-			if (modType != ModType.modification && args.type == ExpType.NumericType) {
-				argcount = args.evaluate(modArgs, 6, renderer);
-			} else if (modType == ModType.modification && args.type != ExpType.ModType) {
+		if (arguments != null) {
+			if (modType != ModType.modification && arguments.type == ExpType.Numeric) {
+				argcount = arguments.evaluate(modArgs, 6, renderer);
+			} else if (modType == ModType.modification && arguments.type != ExpType.Mod) {
                 driver.error("Adjustments require numeric arguments", location);
                 return;
 			}
 		}
 
-		if (argcount != argCount) {
+		if (argcount != argumentsCount) {
             driver.error("Error evaluating arguments", location);
             return;
 		}
@@ -277,7 +257,7 @@ public class ASTModTerm extends ASTExpression {
 				 if (argcount != 2) {
 				 	 for (int i = 0; i < argcount; i++) {
 						 if ((result.colorAssignment() & mask) != 0 || (!hue && color[colorComp] != 0.0)) {
-							 if (renderer == null) throw new DeferUntilRuntimeException(location);
+							 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 							 if (!shapeDest) {
 								 renderer.colorConflict(getLocation());
 							 }
@@ -293,7 +273,7 @@ public class ASTModTerm extends ASTExpression {
 					 }
 				 } else {
 					 if ((result.colorAssignment() & mask) != 0 || (color[colorComp] != 0.0) || (!hue && target[targetComp] != 0.0)) {
-						 if (renderer == null) throw new DeferUntilRuntimeException(location);
+						 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 						 if (!shapeDest) {
 							 renderer.colorConflict(getLocation());
 						 }
@@ -318,7 +298,7 @@ public class ASTModTerm extends ASTExpression {
 			}
 			case hueTarg: {
 				 if ((result.colorAssignment() & mask) != 0 || (color[colorComp] != 0.0)) {
-					 if (renderer == null) throw new DeferUntilRuntimeException(location);
+					 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 					 if (!shapeDest) {
 						 renderer.colorConflict(getLocation());
 					 }
@@ -336,7 +316,7 @@ public class ASTModTerm extends ASTExpression {
 			case targSat: {
 				targetComp += modType.getType() - ModType.targHue.getType();
 				if (target[targetComp] != 0.0) {
-					 if (renderer == null) throw new DeferUntilRuntimeException(location);
+					 if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 					 if (!shapeDest) {
 						 renderer.colorConflict(getLocation());
 					 }
@@ -374,14 +354,16 @@ public class ASTModTerm extends ASTExpression {
 			}
 			case modification: {
 				if (renderer == null) {
-					if (args != null && getArguments() instanceof ASTModification) {
-						ASTModification mod = (ASTModification)getArguments();
-						if (mod == null || (mod.getModClass().getType() & (ModClass.HueClass.getType() | ModClass.HueTargetClass.getType() | ModClass.BrightClass.getType() | ModClass.BrightTargetClass.getType() | ModClass.SatClass.getType() | ModClass.SatTargetClass.getType() | ModClass.AlphaClass.getType() | ModClass.AlphaTargetClass.getType())) != 0) {
-							throw new DeferUntilRuntimeException(location);
+					if (arguments != null && arguments instanceof ASTModification mod) {
+                        if ((mod.getModClass().getType() & (ModClass.HueClass.getType() | ModClass.HueTargetClass.getType() | ModClass.BrightClass.getType() | ModClass.BrightTargetClass.getType() | ModClass.SatClass.getType() | ModClass.SatTargetClass.getType() | ModClass.AlphaClass.getType() | ModClass.AlphaTargetClass.getType())) != 0) {
+							throw new CFDGDeferUntilRuntimeException(location);
 						}
 					}
 				}
-				getArguments().evaluate(result, shapeDest, renderer);
+				//TODO what if args is null?
+				if (arguments != null) {
+					arguments.evaluate(result, shapeDest, renderer);
+				}
 				break;
 			}
 			default:
@@ -397,127 +379,119 @@ public class ASTModTerm extends ASTExpression {
 
 	@Override
 	public void entropy(StringBuilder e) {
-		if (args != null) {
-			args.entropy(e);
+		if (arguments != null) {
+			arguments.entropy(e);
 		}
 		e.append(modType.getEntropy());
 	}
 
 	@Override
 	public ASTExpression simplify() {
-		args = simplify(args);
+		arguments = simplify(arguments);
 		return this;
 	}
 
 	@Override
 	public ASTExpression compile(CompilePhase ph) {
-		args = compile(args, ph);
+		arguments = compile(arguments, ph);
 
-		if (args == null) {
+		if (arguments == null) {
 			if (modType != ModType.param) {
                 driver.error("Illegal expression in shape adjustment", location);
 			}
 			return null;
 		}
-		
-		switch (ph) {
-			case TypeCheck: {
-				isConstant = args.isConstant();
-				locality = args.getLocality();
-				switch (args.getType()) {
-					case NumericType: {
-						argCount = args.evaluate(null, 0);
-						int minCount = 1;
-						int maxCount = 1;
 
-						if (argCount == 3 && modType == ModType.x) {
-							modType = ModType.xyz;
-						}
-						if (argCount == 3 && modType == ModType.size) {
-							modType = ModType.sizexyz;
-						}
+        switch (ph) {
+            case TypeCheck -> {
+                constant = arguments.isConstant();
+                locality = arguments.getLocality();
+                switch (arguments.getType()) {
+                    case Numeric -> {
+                        argumentsCount = arguments.evaluate(null, 0);
+                        int minCount = 1;
+                        int maxCount = 1;
 
-						switch (modType) {
-							case hue:
-								maxCount = 4;
-								break;
-							case x:
-							case size:
-							case sat:
-							case bright:
-							case alpha:
-								maxCount = 2;
-								break;
-							case y:
-							case z:
-							case timescale:
-							case zsize:
-							case rotate:
-							case flip:
-							case hueTarg:
-							case satTarg:
-							case brightTarg:
-							case alphaTarg:
-							case targHue:
-							case targSat:
-							case targBright:
-							case targAlpha:
-							case stroke:
-								break;
-							case xyz:
-							case sizexyz:
-								minCount = maxCount = 3;
-								break;
-							case time:
-							case skew:
-								minCount = maxCount = 2;
-								break;
-							case transform:
-								maxCount = 6;
-								if (argCount != 1 && argCount != 2 && argCount != 4 && argCount != 6) {
-									driver.error("transform adjustment takes 1, 2, 4, or 6 parameters", location);
-								}
-								break;
-							case param:
-								minCount = maxCount = 0;
-								break;
-							case modification:
-								break;
-							default:
-								break;
-						}
+                        if (argumentsCount == 3 && modType == ModType.x) {
+                            modType = ModType.xyz;
+                        }
+                        if (argumentsCount == 3 && modType == ModType.size) {
+                            modType = ModType.sizexyz;
+                        }
 
-						if (argCount < minCount) {
-							driver.error("Not enough adjustment parameters", location);
-						}
-						if (argCount > maxCount) {
-							driver.error("Too many adjustment parameters", location);
-						}
-						break;
-					}
+                        switch (modType) {
+                            case hue:
+                                maxCount = 4;
+                                break;
+                            case x:
+                            case size:
+                            case sat:
+                            case bright:
+                            case alpha:
+                                maxCount = 2;
+                                break;
+                            case y:
+                            case z:
+                            case timescale:
+                            case zsize:
+                            case rotate:
+                            case flip:
+                            case hueTarg:
+                            case satTarg:
+                            case brightTarg:
+                            case alphaTarg:
+                            case targHue:
+                            case targSat:
+                            case targBright:
+                            case targAlpha:
+                            case stroke:
+                                break;
+                            case xyz:
+                            case sizexyz:
+                                minCount = maxCount = 3;
+                                break;
+                            case time:
+                            case skew:
+                                minCount = maxCount = 2;
+                                break;
+                            case transform:
+                                maxCount = 6;
+                                if (argumentsCount != 1 && argumentsCount != 2 && argumentsCount != 4 && argumentsCount != 6) {
+                                    driver.error("transform adjustment takes 1, 2, 4, or 6 parameters", location);
+                                }
+                                break;
+                            case param:
+                                minCount = maxCount = 0;
+                                break;
+                            case modification:
+                                break;
+                            default:
+                                break;
+                        }
 
-					case ModType: {
-						if (modType != ModType.transform) {
-							driver.error("Can't accept a transform expression here", location);
-						} else {
-							modType = ModType.modification;
-						}
-						break;
-					}
-
-					default:
-						driver.error("Illegal expression in shape adjustment", location);
-						break;
-				}
-				break;
+                        if (argumentsCount < minCount) {
+                            driver.error("Not enough adjustment parameters", location);
+                        }
+                        if (argumentsCount > maxCount) {
+                            driver.error("Too many adjustment parameters", location);
+                        }
+                    }
+                    case Mod -> {
+                        if (modType != ModType.transform) {
+                            driver.error("Can't accept a transform expression here", location);
+                        } else {
+                            modType = ModType.modification;
+                        }
+                    }
+                    default -> driver.error("Illegal expression in shape adjustment", location);
+                }
+            }
+			case Simplify -> {
+				// do nothing
 			}
-
-			case Simplify:
-				break;
-
-			default:
-				break;
-		}
+            default -> {
+            }
+        }
 		return null;
 	}
 }

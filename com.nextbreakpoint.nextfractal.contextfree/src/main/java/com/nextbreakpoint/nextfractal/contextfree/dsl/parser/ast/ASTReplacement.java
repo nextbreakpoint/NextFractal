@@ -33,20 +33,29 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ArgSource;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 public class ASTReplacement {
-	private ASTRuleSpecifier shapeSpec;
-	private ASTModification childChange;
-	private RepElemType repType;
-	private PathOp pathOp;
-	protected Token location;
+	@Getter
+    private final ASTRuleSpecifier shapeSpecifier;
+	@Getter
+    private ASTModification childChange;
+	@Setter
+    @Getter
+    private RepElemType repType;
+	@Setter
+    @Getter
+    private PathOp pathOp;
+	@Getter
+    protected Token location;
 	protected CFDGDriver driver;
 
-	public ASTReplacement(CFDGDriver driver, ASTRuleSpecifier shapeSpec, ASTModification childChange, RepElemType repType, Token location) {
+	public ASTReplacement(CFDGDriver driver, ASTRuleSpecifier shapeSpecifier, ASTModification childChange, RepElemType repType, Token location) {
 		this.driver = driver;
 		this.repType = repType;
-		this.shapeSpec = shapeSpec;
+		this.shapeSpecifier = shapeSpecifier;
 		this.pathOp = PathOp.UNKNOWN;
 		this.location = location;
 		this.childChange = childChange;
@@ -76,43 +85,15 @@ public class ASTReplacement {
 		this.pathOp = replacement.getPathOp();
 	}
 
-	public Token getLocation() {
-		return location;
-	}
-
-	public ASTRuleSpecifier getShapeSpecifier() {
-		return shapeSpec;
-	}
-
-	public ASTModification getChildChange() {
-		return childChange;
-	}
-
-	public RepElemType getRepType() {
-		return repType;
-	}
-	
-	public void setRepType(RepElemType repType) {
-		this.repType = repType;
-	}
-	
-	public PathOp getPathOp() {
-		return pathOp;
-	}
-
-	public void setPathOp(PathOp pathOp) {
-		this.pathOp = pathOp;
-	}
-
-	public void replace(Shape s, CFDGRenderer renderer) {
-		if (shapeSpec.getArgSource() == ArgSource.NoArgs) {
-			s.setShapeType(shapeSpec.getShapeType());
+    public void replace(Shape s, CFDGRenderer renderer) {
+		if (shapeSpecifier.getArgSource() == ArgSource.NoArgs) {
+			s.setShapeType(shapeSpecifier.getShapeType());
 			s.setParameters(null);
 		} else {
-			s.setParameters(shapeSpec.evalArgs(renderer, s.getParameters()));
+			s.setParameters(shapeSpecifier.evalArgs(renderer, s.getParameters()));
 			CFStackRule stackRule = s.getParameters();
-			if (shapeSpec.getArgSource() == ArgSource.SimpleParentArgs) {
-				s.setShapeType(shapeSpec.getShapeType());
+			if (shapeSpecifier.getArgSource() == ArgSource.SimpleParentArgs) {
+				s.setShapeType(shapeSpecifier.getShapeType());
 			} else {
 				s.setShapeType(stackRule.getRuleName());
 			}
@@ -140,47 +121,45 @@ public class ASTReplacement {
 				replace(child, renderer);
 				renderer.processSubpath(child, tr || repType == RepElemType.op, repType);
 				break;
-			default:
+            default:
 				driver.fail("Subpaths must be all path operation or all path command", location);
 		}
 	}
 
 	public void compile(CompilePhase ph) {
-		ASTExpression r = shapeSpec.compile(ph);
+		ASTExpression r = shapeSpecifier.compile(ph);
 		assert(r == null);
 		r = childChange.compile(ph);
 		assert(r == null);
 
-		switch (ph) {
-			case TypeCheck: 
-				childChange.addEntropy(shapeSpec.getEntropy());
-				if (getClass() == ASTReplacement.class && driver.isInPathContainer()) {
-					// This is a subpath
-					if (shapeSpec.getArgSource() == ArgSource.ShapeArgs || shapeSpec.getArgSource() == ArgSource.StackArgs || PrimShape.isPrimShape(shapeSpec.getShapeType())) {
-						if (repType != RepElemType.op) {
-							driver.error("Error in subpath specification", location);
-						}
-					} else {
-						ASTRule rule = driver.getRule(shapeSpec.getShapeType());
-						if (rule == null || rule.isPath()) {
-							driver.error("Subpath can only refer to a path", location);
-						} else if (rule.getRuleBody().getRepType() != repType.getType()) {
-							driver.error("Subpath type mismatch error", location);
-						}
-					}
-				}
-				break;
-	
-			case Simplify: 
-				r = shapeSpec.simplify();
-				assert(r == shapeSpec);
-				r = childChange.simplify();
-				assert(r == childChange);
-				break;
-	
-			default:
-				break;
-		}
+        switch (ph) {
+            case TypeCheck -> {
+                childChange.addEntropy(shapeSpecifier.getEntropy());
+                if (getClass() == ASTReplacement.class && driver.isInPathContainer()) {
+                    // This is a subpath
+                    if (shapeSpecifier.getArgSource() == ArgSource.ShapeArgs || shapeSpecifier.getArgSource() == ArgSource.StackArgs || PrimShape.isPrimShape(shapeSpecifier.getShapeType())) {
+                        if (repType != RepElemType.op) {
+                            driver.error("Error in subpath specification", location);
+                        }
+                    } else {
+                        ASTRule rule = driver.getRule(shapeSpecifier.getShapeType());
+                        if (rule == null || rule.isPath()) {
+                            driver.error("Subpath can only refer to a path", location);
+                        } else if (rule.getRuleBody().getRepType() != repType.getType()) {
+                            driver.error("Subpath type mismatch error", location);
+                        }
+                    }
+                }
+            }
+            case Simplify -> {
+                r = shapeSpecifier.simplify();
+                assert (r == shapeSpecifier);
+                r = childChange.simplify();
+                assert (r == childChange);
+            }
+            default -> {
+            }
+        }
 	}
 
 	protected ASTExpression compile(ASTExpression exp, CompilePhase ph) {

@@ -25,13 +25,18 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
 public class CFStack {
-	private CFStackItem[] stackItems;
-	private int stackSize;
-	private int stackTop;
+	private final CFStackItem[] stackItems;
+	@Setter
+    private int stackSize;
+	@Setter
+    private int stackTop;
 
 	public CFStack(CFStackItem[] stackItems) {
 		this.stackItems = stackItems;
@@ -39,23 +44,7 @@ public class CFStack {
 		this.stackTop = 0;
 	}
 
-	public int getStackSize() {
-		return stackSize;
-	}
-
-	public void setStackSize(int stackSize) {
-		this.stackSize = stackSize;
-	}
-
-	public int getStackTop() {
-		return stackTop;
-	}
-
-	public void setStackTop(int stackTop) {
-		this.stackTop = stackTop;
-	}
-
-	public int getMaxStackSize() {
+    public int getMaxStackSize() {
 		return stackItems.length;
 	}
 
@@ -67,11 +56,7 @@ public class CFStack {
 		stackItems[index < 0 ? stackTop + index : index] = item;
 	}
 
-	public CFStackItem[] getStackItems() {
-		return stackItems;
-	}
-
-	public void addStackItem(CFStackItem stackType) {
+    public void addStackItem(CFStackItem stackType) {
 		//TODO rivedere
 		setStackItem(stackSize, stackType);
 		setStackTop(stackSize + 1);

@@ -1,7 +1,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
@@ -39,7 +39,7 @@ public class ContextFreeParserStrategy implements ParserStrategy {
             final CFDGParser parser = new CFDGParser();
             final CFDGParserResult result = parser.parse(session.script());
             return new ParserResult(session, List.of(), computeHighlighting(session.script()), result);
-        } catch (ParserException e) {
+        } catch (CFDGParserException e) {
             final CFDGParserResult result = new CFDGParserResult(null, session.script(), e.getErrors());
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
         } catch (Exception e) {

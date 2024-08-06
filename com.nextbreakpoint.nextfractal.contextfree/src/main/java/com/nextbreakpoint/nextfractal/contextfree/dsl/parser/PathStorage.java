@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PathStorage implements Cloneable {
+	private final List<Vertex> vertices = new ArrayList<>();
 	private GeneralPath currentPath = new GeneralPath();
-	private List<Vertex> vertices = new ArrayList<>();
 
 	public void startNewPath() {
 		currentPath = new GeneralPath();
@@ -65,7 +65,7 @@ public class PathStorage implements Cloneable {
 //	}
 
 	public void relToAbs(Point2D.Double point) {
-		if (vertices.size() > 0) {
+		if (!vertices.isEmpty()) {
 			Point2D.Double p = new Point2D.Double();
 			if (isVertex(lastVertex(p))) {
 				point.setLocation(point.x + p.x, point.y + p.y);
@@ -88,10 +88,10 @@ public class PathStorage implements Cloneable {
 	}
 
 	public int lastVertex(Point2D.Double point) {
-		if (vertices.size() < 1) {
+		if (vertices.isEmpty()) {
 			return 0;
 		}
-		Vertex vertex = vertices.get(vertices.size() - 1);
+		Vertex vertex = vertices.getLast();
 		point.setLocation(vertex.point.x, vertex.point.y);
 		return vertex.command;
 	}
@@ -175,10 +175,10 @@ public class PathStorage implements Cloneable {
 	}
 
 	public int lastCommnand() {
-		if (vertices.size() == 0) {
+		if (vertices.isEmpty()) {
 			return 0;
 		}
-		return vertices.get(vertices.size() - 1).command;
+		return vertices.getLast().command;
 	}
 
 	public Object clone() {
@@ -187,7 +187,7 @@ public class PathStorage implements Cloneable {
 		return storage;
 	}
 
-	private class Vertex {
+	private static class Vertex {
 		Point2D.Double point;
 		int command;
 

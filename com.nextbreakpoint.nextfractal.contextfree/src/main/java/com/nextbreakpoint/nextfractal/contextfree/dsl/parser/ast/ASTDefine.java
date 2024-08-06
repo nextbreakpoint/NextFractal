@@ -34,107 +34,39 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.DefineType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class ASTDefine extends ASTReplacement {
+	private final List<ASTParameter> parameters = new ArrayList<>();
+	private final String name;
+	private int configDepth;
 	private DefineType defineType;
+	private ExpType expType;
 	private ASTExpression exp;
 	private int tupleSize;
-	private ExpType expType;
-	private boolean isNatural;
-	private List<ASTParameter> parameters = new ArrayList<ASTParameter>();
 	private int stackCount;
-	private String name;
-	private int configDepth;
+    private boolean natural;
 
 	public ASTDefine(CFDGDriver driver, String name, Token location) {
 		super(driver, new ASTModification(driver, location), RepElemType.empty, location);
-		this.defineType = DefineType.StackDefine;
-		this.expType = ExpType.NoType;
-		this.isNatural = false;
-		this.stackCount = 0;
 		this.name = name;
 		this.configDepth = -1;
+		this.defineType = DefineType.Stack;
+		this.expType = ExpType.None;
+		this.stackCount = 0;
+		this.natural = false;
 		int[] i = new int[1];
 		getChildChange().getModData().getRand64Seed().xorString(name, i);
 	}
 
-	public DefineType getDefineType() {
-		return defineType;
-	}
-
-	public void setDefineType(DefineType defineType) {
-		this.defineType = defineType;
-	}
-
-	public ExpType getExpType() {
-		return expType;
-	}
-
-	public void setExpType(ExpType expType) {
-		this.expType = expType;
-	}
-
-	public ASTExpression getExp() {
-		return exp;
-	}
-
-	public void setExp(ASTExpression exp) {
-		this.exp = exp;
-	}
-
-	public int getTupleSize() {
-		return tupleSize;
-	}
-
-	public void setTupleSize(int tupleSize) {
-		this.tupleSize = tupleSize;
-	}
-
-	public boolean isNatural() {
-		return isNatural;
-	}
-
-	public void setIsNatural(boolean isNatural) {
-		this.isNatural = isNatural;
-	}
-
-	public List<ASTParameter> getParameters() {
-		return parameters;
-	}
-
-	public void setParameters(List<ASTParameter> parameters) {
-		this.parameters = parameters;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public int getConfigDepth() {
-		return configDepth;
-	}
-
-	public void setConfigDepth(int configDepth) {
-		this.configDepth = configDepth;
-	}
-
-	public int getStackCount() {
-		return stackCount;
-	}
-
-	public void setStackCount(int stackCount) {
-		this.stackCount = stackCount;
-	}
-
-	public void incStackCount(int value) {
+    public void incStackCount(int value) {
 		stackCount += value;
 	}
 	
@@ -144,7 +76,7 @@ public class ASTDefine extends ASTReplacement {
 	
 	@Override
 	public void compile(CompilePhase ph) {
-		if (defineType == DefineType.FunctionDefine || defineType == DefineType.LetDefine) {
+		if (defineType == DefineType.Function || defineType == DefineType.Let) {
 			ASTRepContainer tempCont = new ASTRepContainer(driver);
 			tempCont.setParameters(parameters);
 			tempCont.setStackCount(stackCount);
@@ -162,81 +94,79 @@ public class ASTDefine extends ASTReplacement {
 				exp = simplify(exp);
 			}
 		}
-		
-		switch (ph) {
-			case TypeCheck: {
-				if (defineType == DefineType.ConfigDefine) {
-					driver.makeConfig(this);
-					return;
-				}
 
-				getChildChange().setEntropyIndex(0);
-				getChildChange().addEntropy(name);
+        switch (ph) {
+            case TypeCheck -> {
+                if (defineType == DefineType.Config) {
+                    driver.makeConfig(this);
+                    return;
+                }
 
-				ExpType t = exp != null ? exp.getType() : ExpType.ModType;
-				int sz = 1;
-				if (t == ExpType.NumericType) {
-					sz = exp.evaluate(null, 0);
-				}
-				if (t == ExpType.ModType) {
-					sz = 6;
-				}
-				if (defineType == DefineType.FunctionDefine) {
-					if (t != getExpType()) {
-						driver.error("Mismatch between declared and defined type of user function", location);
-					}
-					if (getExpType() == ExpType.NumericType && t == ExpType.NumericType && sz != tupleSize) {
-						driver.error("Mismatch between declared and defined vector length of user function", location);
-					}
-					if (isNatural() && (exp == null || exp.isNatural())) {
-						driver.error("Mismatch between declared natural and defined not-natural type of user function", location);
-					}
-				} else {
-					if (getShapeSpecifier().getShapeType() >= 0) {
-						ASTDefine[] func = new ASTDefine[1];
-						@SuppressWarnings("unchecked")
-						List<ASTParameter>[] shapeParams = new List[1];
-						driver.getTypeInfo(getShapeSpecifier().getShapeType(), func, shapeParams);
-						if (func[0] != null) {
-							driver.error("Variable name is also the name of a function", location);
-							driver.error("function definition is here", func[0].getLocation());
-						}
-						if (shapeParams[0] != null) {
-							driver.error("Variable name is also the name of a shape", location);
-						}
-					}
+                getChildChange().setEntropyIndex(0);
+                getChildChange().addEntropy(name);
 
-					tupleSize = sz;
-					expType = t;
-					//TODO controllare
-					if (t.getType() != (t.getType() & (-t.getType())) || t.getType() == 0) {
-						driver.error("Expression can only have one type", location);
-					}
-					if (defineType == DefineType.StackDefine && (exp != null ? exp.isConstant() : getChildChange().getModExp().isEmpty())) {
-						defineType = DefineType.ConstDefine;
-					}
-					isNatural = exp != null && exp.isNatural() && expType == ExpType.NumericType;
-					ASTParameter param = driver.getContainerStack().peek().addDefParameter(getShapeSpecifier().getShapeType(), this, getLocation());
-					if (param.isParameter() || param.getDefinition() == null) {
-						param.setStackIndex(driver.getLocalStackDepth());
-						driver.getContainerStack().peek().setStackCount(driver.getContainerStack().peek().getStackCount() + param.getTupleSize());
-						driver.setLocalStackDepth(driver.getLocalStackDepth() + param.getTupleSize());
-					}
-				}
-				break;
-			}
+                ExpType t = exp != null ? exp.getType() : ExpType.Mod;
+                int sz = 1;
+                if (t == ExpType.Numeric) {
+                    sz = exp.evaluate(null, 0);
+                }
+                if (t == ExpType.Mod) {
+                    sz = 6;
+                }
+                if (defineType == DefineType.Function) {
+                    if (t != getExpType()) {
+                        driver.error("Mismatch between declared and defined type of user function", location);
+                    }
+                    if (getExpType() == ExpType.Numeric && t == ExpType.Numeric && sz != tupleSize) {
+                        driver.error("Mismatch between declared and defined vector length of user function", location);
+                    }
+                    if (isNatural() && (exp == null || exp.isNatural())) {
+                        driver.error("Mismatch between declared natural and defined not-natural type of user function", location);
+                    }
+                } else {
+                    if (getShapeSpecifier().getShapeType() >= 0) {
+                        ASTDefine[] func = new ASTDefine[1];
+                        @SuppressWarnings("unchecked")
+                        List<ASTParameter>[] shapeParams = new List[1];
+                        driver.getTypeInfo(getShapeSpecifier().getShapeType(), func, shapeParams);
+                        if (func[0] != null) {
+                            driver.error("Variable name is also the name of a function", location);
+                            driver.error("function definition is here", func[0].getLocation());
+                        }
+                        if (shapeParams[0] != null) {
+                            driver.error("Variable name is also the name of a shape", location);
+                        }
+                    }
 
-			case Simplify:
-				break;
-	
-			default:
-				break;
-		}
+                    tupleSize = sz;
+                    expType = t;
+                    //TODO controllare
+                    if (t.getType() != (t.getType() & (-t.getType())) || t.getType() == 0) {
+                        driver.error("Expression can only have one type", location);
+                    }
+                    if (defineType == DefineType.Stack && (exp != null ? exp.isConstant() : getChildChange().getModExp().isEmpty())) {
+                        defineType = DefineType.Const;
+                    }
+                    natural = exp != null && exp.isNatural() && expType == ExpType.Numeric;
+                    ASTParameter param = driver.getContainerStack().peek().addDefParameter(getShapeSpecifier().getShapeType(), this, getLocation());
+                    if (param.isParameter() || param.getDefinition() == null) {
+                        param.setStackIndex(driver.getLocalStackDepth());
+                        driver.getContainerStack().peek().setStackCount(driver.getContainerStack().peek().getStackCount() + param.getTupleSize());
+                        driver.setLocalStackDepth(driver.getLocalStackDepth() + param.getTupleSize());
+                    }
+                }
+            }
+            case Simplify -> {
+                // do nothing
+            }
+            default -> {
+            }
+        }
 	}
 
 	@Override
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
-		if (defineType != DefineType.StackDefine) {
+		if (defineType != DefineType.Stack) {
 			return;
 		}
 		if (renderer.getStackSize() + tupleSize > renderer.getMaxStackSize()) {
@@ -246,34 +176,24 @@ public class ASTDefine extends ASTReplacement {
 		renderer.setStackSize(renderer.getStackSize() + tupleSize);
 		renderer.getCurrentSeed().add(getChildChange().getModData().getRand64Seed());
 
-		switch (expType) {
-			case NumericType:
-				double[] result = new double[1];
-				if (exp.evaluate(result, tupleSize, renderer) != tupleSize) {
-					driver.error("Error evaluating parameters (too many or not enough)", null);
-				}
-				renderer.setStackItem(renderer.getStackSize() - 1, new CFStackNumber(renderer.getStack(), result[0]));
-				break;
-	
-			case ModType:
-				Modification[] mod = new Modification[1];
-				getChildChange().setVal(mod, renderer);
-				renderer.setStackItem(renderer.getStackSize() - 1, new CFStackModification(renderer.getStack(), mod[0]));
-				break;
-	
-			case RuleType:
-				renderer.setStackItem(renderer.getStackSize() - 1, exp.evalArgs(renderer, parent.getParameters()));
-				break;
-	
-			default:
-				driver.error("Unimplemented parameter type", null);
-				break;
-		}
+        switch (expType) {
+            case Numeric -> {
+                double[] result = new double[1];
+                if (exp.evaluate(result, tupleSize, renderer) != tupleSize) {
+                    driver.error("Error evaluating parameters (too many or not enough)", null);
+                }
+                renderer.setStackItem(renderer.getStackSize() - 1, new CFStackNumber(renderer.getStack(), result[0]));
+            }
+            case Mod -> {
+                Modification[] mod = new Modification[1];
+                getChildChange().setVal(mod, renderer);
+                renderer.setStackItem(renderer.getStackSize() - 1, new CFStackModification(renderer.getStack(), mod[0]));
+            }
+            case Rule ->
+                    renderer.setStackItem(renderer.getStackSize() - 1, exp.evalArgs(renderer, parent.getParameters()));
+            default -> driver.error("Unimplemented parameter type", null);
+        }
 
 		renderer.setLogicalStackTop(renderer.getStackSize());
-	}
-
-	public CFDGDriver getDriver() {
-		return driver;
 	}
 }

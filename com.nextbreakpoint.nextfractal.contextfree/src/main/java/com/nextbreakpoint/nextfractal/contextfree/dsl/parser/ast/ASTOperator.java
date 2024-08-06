@@ -29,10 +29,12 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTOperator extends ASTExpression {
-	private char op;
+	private final char op;
 	private int tupleSize;
 	private ASTExpression left;
 	private ASTExpression right;
@@ -61,23 +63,7 @@ public class ASTOperator extends ASTExpression {
 		this(driver, op, left, null, location);
 	}
 
-	public char getOp() {
-		return op;
-	}
-
-	public int getTupleSize() {
-		return tupleSize;
-	}
-
-	public ASTExpression getLeft() {
-		return left;
-	}
-
-	public ASTExpression getRight() {
-		return right;
-	}
-
-	@Override
+    @Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
 		double[] l = new double[] { 0.0 };
 		double[] r = new double[] { 0.0 };
@@ -85,7 +71,7 @@ public class ASTOperator extends ASTExpression {
 		if (result != null && length < 1)
 			return -1;
 
-		if (type == ExpType.FlagType && op == '+') {
+		if (type == ExpType.Flag && op == '+') {
 			if (left.evaluate(result != null ? l : null, 1, renderer) != 1)
 				return -1;
 			if (right == null || right.evaluate(result != null ? r : null, 1, renderer) != 1)
@@ -96,7 +82,7 @@ public class ASTOperator extends ASTExpression {
 			return 1;
 		}
 
-		if (type != ExpType.NumericType) {
+		if (type != ExpType.Numeric) {
             driver.error("Non-numeric expression in a numeric context", location);
             return -1;
 		}
@@ -145,66 +131,38 @@ public class ASTOperator extends ASTExpression {
 		}
 
 		if (result != null) {
-			switch (op) {
-			case '+':
-				result[0] = l[0] + r[0];
-				break;
-			case '-':
-				result[0] = l[0] - r[0];
-				break;
-			case '_':
-				result[0] = l[0] - r[0] > 0.0 ? l[0] - r[0] : 0.0;
-				break;
-			case '*':
-				result[0] = l[0] * r[0];
-				break;
-			case '/':
-				result[0] = l[0] / r[0];
-				break;
-			case '<':
-				result[0] = (l[0] < r[0]) ? 1.0 : 0.0;
-				break;
-			case 'L':
-				result[0] = (l[0] <= r[0]) ? 1.0 : 0.0;
-				break;
-			case '>':
-				result[0] = (l[0] > r[0]) ? 1.0 : 0.0;
-				break;
-			case 'G':
-				result[0] = (l[0] >= r[0]) ? 1.0 : 0.0;
-				break;
-			case '=':
-				result[0] = (l[0] == r[0]) ? 1.0 : 0.0;
-				break;
-			case 'n':
-				result[0] = (l[0] != r[0]) ? 1.0 : 0.0;
-				break;
-			case '&':
-				result[0] = r[0];
-				break;
-			case '|':
-				result[0] = r[0];
-				break;
-			case 'X':
-				result[0] = (l[0] != 0 && r[0] == 0 || l[0] == 0 && r[0] != 0) ? 1.0 : 0.0;
-				break;
-			case '^':
-				result[0] = Math.pow(l[0], r[0]);
-				if (isNatural && result[0] < 9007199254740992.0) {
-					long pow = 1;
-					long il = (long)l[0];
-					long ir = (long)r[0];
-					while (ir != 0) {
-						if ((ir & 1) != 0) pow *= il;
-						il *= il;
-						ir >>= 1;
-					}
-					result[0] = pow;
-				}
-				break;
-			default:
-				return -1;
-			}
+            switch (op) {
+                case '+' -> result[0] = l[0] + r[0];
+                case '-' -> result[0] = l[0] - r[0];
+                case '_' -> result[0] = Math.max(l[0] - r[0], 0.0);
+                case '*' -> result[0] = l[0] * r[0];
+                case '/' -> result[0] = l[0] / r[0];
+                case '<' -> result[0] = (l[0] < r[0]) ? 1.0 : 0.0;
+                case 'L' -> result[0] = (l[0] <= r[0]) ? 1.0 : 0.0;
+                case '>' -> result[0] = (l[0] > r[0]) ? 1.0 : 0.0;
+                case 'G' -> result[0] = (l[0] >= r[0]) ? 1.0 : 0.0;
+                case '=' -> result[0] = (l[0] == r[0]) ? 1.0 : 0.0;
+                case 'n' -> result[0] = (l[0] != r[0]) ? 1.0 : 0.0;
+                case '&', '|' -> result[0] = r[0];
+                case 'X' -> result[0] = (l[0] != 0 && r[0] == 0 || l[0] == 0 && r[0] != 0) ? 1.0 : 0.0;
+                case '^' -> {
+                    result[0] = Math.pow(l[0], r[0]);
+                    if (natural && result[0] < 9007199254740992.0) {
+                        long pow = 1;
+                        long il = (long) l[0];
+                        long ir = (long) r[0];
+                        while (ir != 0) {
+                            if ((ir & 1) != 0) pow *= il;
+                            il *= il;
+                            ir >>= 1;
+                        }
+                        result[0] = pow;
+                    }
+                }
+                default -> {
+                    return -1;
+                }
+            }
 		} else {
 			if ("+-*/^_<>LG=n&|X".indexOf(op) == -1)
 				return -1;
@@ -223,64 +181,28 @@ public class ASTOperator extends ASTExpression {
 			right.entropy(e);
 		}
 
-		switch (op) {
-			case '*':
-				e.append("\u002E\u0032\u00D9\u002C\u0041\u00FE");
-				break;
-			case '/':
-				e.append("\u006B\u0015\u0023\u0041\u009E\u00EB");
-				break;
-			case '+':
-				e.append("\u00D7\u00B1\u00B0\u0039\u0033\u00C8");
-				break;
-			case '-':
-				e.append("\u005D\u00E7\u00F0\u0094\u00C4\u0013");
-				break;
-			case '^':
-				e.append("\u0002\u003C\u0068\u0036\u00C5\u00A0");
-				break;
-			case 'N':
-				e.append("\u0055\u0089\u0051\u0046\u00DB\u0084");
-				break;
-			case 'P':
-				e.append("\u008E\u00AC\u0029\u004B\u000E\u00DC");
-				break;
-			case '!':
-				e.append("\u0019\u003A\u003E\u0053\u0014\u00EA");
-				break;
-			case '<':
-				e.append("\u00BE\u00DB\u00C4\u00A6\u004E\u00AD");
-				break;
-			case '>':
-				e.append("\u00C7\u00D9\u0057\u0032\u00D6\u0087");
-				break;
-			case 'L':
-				e.append("\u00E3\u0056\u007E\u0044\u0057\u0080");
-				break;
-			case 'G':
-				e.append("\u00B1\u002D\u002A\u00CC\u002C\u0040");
-				break;
-			case '=':
-				e.append("\u0078\u0048\u00C2\u0095\u00A9\u00E2");
-				break;
-			case 'n':
-				e.append("\u0036\u00CC\u0001\u003B\u002F\u00AD");
-				break;
-			case '&':
-				e.append("\u0028\u009B\u00FB\u007F\u00DB\u009C");
-				break;
-			case '|':
-				e.append("\u002E\u0040\u001B\u0044\u0015\u007C");
-				break;
-			case 'X':
-				e.append("\u00A7\u002B\u0092\u00FA\u00FC\u00F9");
-				break;
-			case '_':
-				e.append("\u0060\u002F\u0010\u00AD\u0010\u00FF");
-				break;
-			default:
-				break;
-		}
+        switch (op) {
+            case '*' -> e.append("\u002E\u0032\u00D9\u002C\u0041\u00FE");
+            case '/' -> e.append("\u006B\u0015\u0023\u0041\u009E\u00EB");
+            case '+' -> e.append("\u00D7\u00B1\u00B0\u0039\u0033\u00C8");
+            case '-' -> e.append("\u005D\u00E7\u00F0\u0094\u00C4\u0013");
+            case '^' -> e.append("\u0002\u003C\u0068\u0036\u00C5\u00A0");
+            case 'N' -> e.append("\u0055\u0089\u0051\u0046\u00DB\u0084");
+            case 'P' -> e.append("\u008E\u00AC\u0029\u004B\u000E\u00DC");
+            case '!' -> e.append("\u0019\u003A\u003E\u0053\u0014\u00EA");
+            case '<' -> e.append("\u00BE\u00DB\u00C4\u00A6\u004E\u00AD");
+            case '>' -> e.append("\u00C7\u00D9\u0057\u0032\u00D6\u0087");
+            case 'L' -> e.append("\u00E3\u0056\u007E\u0044\u0057\u0080");
+            case 'G' -> e.append("\u00B1\u002D\u002A\u00CC\u002C\u0040");
+            case '=' -> e.append("\u0078\u0048\u00C2\u0095\u00A9\u00E2");
+            case 'n' -> e.append("\u0036\u00CC\u0001\u003B\u002F\u00AD");
+            case '&' -> e.append("\u0028\u009B\u00FB\u007F\u00DB\u009C");
+            case '|' -> e.append("\u002E\u0040\u001B\u0044\u0015\u007C");
+            case 'X' -> e.append("\u00A7\u002B\u0092\u00FA\u00FC\u00F9");
+            case '_' -> e.append("\u0060\u002F\u0010\u00AD\u0010\u00FF");
+            default -> {
+            }
+        }
 	}
 
 	@Override
@@ -289,14 +211,13 @@ public class ASTOperator extends ASTExpression {
 
 		right = right.simplify(right);
 
-		if (isConstant && (type == ExpType.NumericType || type == ExpType.FlagType)) {
+		if (constant && (type == ExpType.Numeric || type == ExpType.Flag)) {
 			double[] result = new double[1];
 			if (evaluate(result, 1, null) != 1) {
 				return null;
 			}
 
-			ASTExpression r = AST.makeResult(driver, result[0], tupleSize, this);
-			return r;
+            return ASTUtils.makeResult(driver, result[0], tupleSize, this);
 		}
 
 		return this;
@@ -308,76 +229,74 @@ public class ASTOperator extends ASTExpression {
 
 		right = compile(right, ph);
 
-		switch (ph) {
-			case TypeCheck: {
-				isConstant = left.isConstant() && (right == null || right.isConstant());
-				locality = right != null ? AST.combineLocality(left.getLocality(), right.getLocality()) : left.getLocality();
-				if (locality == Locality.PureNonlocal) {
-					locality = Locality.ImpureNonlocal;
-				}
-				type = right != null ? ExpType.fromType(left.getType().getType() | right.getType().getType()) : left.getType();
-				if (type == ExpType.NumericType) {
-					int ls = left != null ? left.evaluate(null, 0) : 0;
-					int rs = right != null ? right.evaluate(null, 0) : 0;
-					switch (op) {
-						case 'N':
-						case 'P':
-							tupleSize = ls;
-							if (rs != 0) {
-								driver.error("Unitary operators must have only one operand", location);
-							}
-							break;
-						case '!':
-							if (rs != 0 || ls != 1) {
-								driver.error("Unitary operators must have only one scalar operand", location);
-							}
-							break;
-						case '+':
-						case '-':
-						case '_':
-						case '/':
-						case '*':
-							tupleSize = ls;
-						case '=':
-						case 'n':
-							if (ls != rs) {
-								driver.error("Operands must have the same length", location);
-							}
-							if (ls < 1 || rs < 1) {
-								driver.error("Binary operators must have two operands", location);
-							}
-							break;
-						default:
-							if (ls != 1 || rs != 1) {
-								driver.error("Binary operators must have two scalar operands", location);
-							}
-							break;
-					}
-				}
-				if ("+_*<>LG=n&|X^!".indexOf(String.valueOf(op)) != -1) {
-					isNatural = left.isNatural() && (right == null || right.isNatural());
-				}
-				if (op == '+') {
-					if (type == ExpType.FlagType && type != ExpType.NumericType) {
-						driver.error("Operands must be numeric or flags", location);
-					}
-				} else {
-					if (type != ExpType.NumericType) {
-						driver.error("Operand(s) must be numeric", location);
-					}
-				}
-				if (op == '_' && !isNatural() && !ASTParameter.Impure) {
-					driver.error("Proper subtraction operands must be natural", location);
-				}
-				break;
-			}
-
-			case Simplify: 
-				break;
-	
-			default:
-				break;
-		}
+        switch (ph) {
+            case TypeCheck -> {
+                constant = left.isConstant() && (right == null || right.isConstant());
+                locality = right != null ? ASTUtils.combineLocality(left.getLocality(), right.getLocality()) : left.getLocality();
+                if (locality == Locality.PureNonLocal) {
+                    locality = Locality.ImpureNonLocal;
+                }
+                type = right != null ? ExpType.fromType(left.getType().getType() | right.getType().getType()) : left.getType();
+                if (type == ExpType.Numeric) {
+                    int ls = left != null ? left.evaluate(null, 0) : 0;
+                    int rs = right != null ? right.evaluate(null, 0) : 0;
+                    switch (op) {
+                        case 'N':
+                        case 'P':
+                            tupleSize = ls;
+                            if (rs != 0) {
+                                driver.error("Unitary operators must have only one operand", location);
+                            }
+                            break;
+                        case '!':
+                            if (rs != 0 || ls != 1) {
+                                driver.error("Unitary operators must have only one scalar operand", location);
+                            }
+                            break;
+                        case '+':
+                        case '-':
+                        case '_':
+                        case '/':
+                        case '*':
+                            tupleSize = ls;
+                        case '=':
+                        case 'n':
+                            if (ls != rs) {
+                                driver.error("Operands must have the same length", location);
+                            }
+                            if (ls < 1 || rs < 1) {
+                                driver.error("Binary operators must have two operands", location);
+                            }
+                            break;
+                        default:
+                            if (ls != 1 || rs != 1) {
+                                driver.error("Binary operators must have two scalar operands", location);
+                            }
+                            break;
+                    }
+                }
+                if ("+_*<>LG=n&|X^!".contains(String.valueOf(op))) {
+                    natural = (left != null && left.isNatural()) && (right == null || right.isNatural());
+                }
+                if (op == '+') {
+                    if (type == ExpType.Flag || type != ExpType.Numeric) {
+                        driver.error("Operands must be numeric or flags", location);
+                    }
+                } else {
+                    if (type != ExpType.Numeric) {
+                        driver.error("Operand(s) must be numeric", location);
+                    }
+                }
+                if (op == '_' && !isNatural() && !ASTParameter.Impure) {
+                    driver.error("Proper subtraction operands must be natural", location);
+                }
+            }
+            case Simplify -> {
+                // do nothing
+            }
+            default -> {
+            }
+        }
 		return null;
 	}
 }

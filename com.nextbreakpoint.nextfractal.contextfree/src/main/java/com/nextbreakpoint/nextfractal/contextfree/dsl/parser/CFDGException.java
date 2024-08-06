@@ -22,8 +22,17 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-public class StopException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
+import lombok.Getter;
+import org.antlr.v4.runtime.Token;
+
+@Getter
+public class CFDGException extends RuntimeException {
+	private final Token location;
+
+	public CFDGException(String message, Token location) {
+		super(message);
+		this.location = location;
+	}
 }

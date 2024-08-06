@@ -24,16 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PrimShapeType {
 	circleType(0), squareType(1), triangleType(2), fillType(3);
 	
-	private int type;
+	private final int type;
 
-	private PrimShapeType(int type) {
+	PrimShapeType(int type) {
 		this.type = type;
-	}
-
-	public int getType() {
-		return type;
 	}
 }

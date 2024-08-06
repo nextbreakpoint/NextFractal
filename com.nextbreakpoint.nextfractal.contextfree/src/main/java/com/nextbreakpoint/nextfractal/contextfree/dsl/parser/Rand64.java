@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.core;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import java.util.Random;
 import java.util.function.UnaryOperator;
@@ -30,10 +30,10 @@ import java.util.function.UnaryOperator;
 import static org.apache.commons.math3.special.Gamma.logGamma;
 
 public class Rand64 implements Cloneable {
-	private static long RAND64_SEED  = 0x3DF41234;
-	private static long RAND64_MULT = 2685821657736338717L;
+	private static final long RAND64_SEED  = 0x3DF41234;
+	private static final long RAND64_MULT = 2685821657736338717L;
 
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     private long seed;
 
@@ -403,8 +403,6 @@ public class Rand64 implements Cloneable {
 	}
 
 	public class LogNormalRand extends Rand<Double> {
-		private final double m;
-		private final double s;
 		private final NormalRand normal;
 
 		public LogNormalRand() {
@@ -412,8 +410,6 @@ public class Rand64 implements Cloneable {
 		}
 
 		public LogNormalRand(double m, double s) {
-			this.m = m;
-			this.s = s;
 			normal = new NormalRand(m, s);
 		}
 
@@ -737,7 +733,6 @@ public class Rand64 implements Cloneable {
 		public Long generate() {
 			long x = 0;
 			if (mean < 10) {
-				x = 0;
 				for (double p = getDouble(); p > l; ++x) {
 					p *= getDouble();
 				}
@@ -820,7 +815,7 @@ public class Rand64 implements Cloneable {
 				double d = (xmax - xmin) / count;
 				double d2 = d / 2;
 				for (int k = 0; k < count; ++k) {
-					p[k] = fw.apply(xmin + k * d + d2).doubleValue();
+					p[k] = fw.apply(xmin + k * d + d2);
 				}
 			}
 			init();

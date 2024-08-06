@@ -70,8 +70,8 @@ public class HSBColor implements Cloneable {
 		values[3] = rgb[3];
 	}
 
-	private static double myfmin(double x, double y) { return x < y ? x : y; }
-	private static double myfmax(double x, double y) { return x > y ? x : y; }
+	private static double myfmin(double x, double y) { return Math.min(x, y); }
+	private static double myfmax(double x, double y) { return Math.max(x, y); }
 
 	public double[] mymodf(double x, double[] v) {
 		int intVal = (int)x;

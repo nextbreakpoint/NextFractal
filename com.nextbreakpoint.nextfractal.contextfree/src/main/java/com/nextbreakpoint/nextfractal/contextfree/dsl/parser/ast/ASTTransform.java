@@ -24,22 +24,27 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTTransform extends ASTReplacement {
-	private ASTRepContainer body;
-	private ASTExpression expHolder;
-	private boolean clone;
+	private final ASTRepContainer body;
+	@Setter
+    private ASTExpression expHolder;
+	@Setter
+    private boolean clone;
 	
 	public ASTTransform(CFDGDriver driver, ASTExpression exp, Token location) {
 		super(driver, null, RepElemType.empty, location);
@@ -47,28 +52,8 @@ public class ASTTransform extends ASTReplacement {
 		this.expHolder = exp;
 		this.clone = false;
 	}
-	
-	public ASTRepContainer getBody() {
-		return body;
-	}
-	
-	public boolean isClone() {
-		return clone;
-	}
 
-	public void setClone(boolean clone) {
-		this.clone = clone;
-	}
-
-	public ASTExpression getExpHolder() {
-		return expHolder;
-	}
-
-	public void setExpHolder(ASTExpression expHolder) {
-		this.expHolder = expHolder;
-	}
-
-	@Override
+    @Override
 	public void compile(CompilePhase ph) {
 		super.compile(ph);
 		ASTExpression ret = null;
@@ -79,31 +64,28 @@ public class ASTTransform extends ASTReplacement {
 			driver.error("Error analyzing transform list", location);
 		}
 		body.compile(ph, null, null);
-		
-		switch (ph) {
-			case TypeCheck: 
-				if (clone && !ASTParameter.Impure) {
-					driver.error("Shape cloning only permitted in impure mode", location);
-				}
-				break;
-	
-			case Simplify:
-				if (expHolder != null) {
-					expHolder = expHolder.simplify();
-				}
-				break;
-	
-			default:
-				break;
-		}
+
+        switch (ph) {
+            case TypeCheck -> {
+                if (clone && !ASTParameter.Impure) {
+                    driver.error("Shape cloning only permitted in impure mode", location);
+                }
+            }
+            case Simplify -> {
+                if (expHolder != null) {
+                    expHolder = expHolder.simplify();
+                }
+            }
+            default -> {
+            }
+        }
 	}
 
 	@Override
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
 		AffineTransform dummy = new AffineTransform();
-		@SuppressWarnings("unchecked")
 		List<AffineTransform> transforms = new ArrayList<>();
-		List<ASTModification> mods = AST.getTransforms(driver, expHolder, transforms, renderer, false, dummy);
+		List<ASTModification> mods = ASTUtils.getTransforms(driver, expHolder, transforms, renderer, false, dummy);
 		Rand64 cloneSeed = renderer.getCurrentSeed();
 		Shape transChild = (Shape)parent.clone();
 		boolean opsOnly = body.getRepType() == RepElemType.op.getType();
@@ -113,18 +95,18 @@ public class ASTTransform extends ASTReplacement {
 		int modsLength = mods.size();
 		int totalLength = modsLength + transforms.size();
 		for (int i = 0; i < totalLength; i++) {
-			Shape child = transChild;
-			if (i < modsLength) {
-				mods.get(i).evaluate(child.getWorldState(), true, renderer);
+			//TODO revedere
+            if (i < modsLength) {
+				mods.get(i).evaluate(transChild.getWorldState(), true, renderer);
 			} else {
-				child.getWorldState().getTransform().concatenate(transforms.get(i - modsLength));
+				transChild.getWorldState().getTransform().concatenate(transforms.get(i - modsLength));
 			}
 			int size = renderer.getStackSize();
 			for (ASTReplacement rep : body.getBody()) {
 				if (clone) {
 					renderer.setCurrentSeed(cloneSeed);
 				}
-				rep.traverse(child, tr || opsOnly, renderer);
+				rep.traverse(transChild, tr || opsOnly, renderer);
 			}
 			renderer.unwindStack(size, body.getParameters());
 		}

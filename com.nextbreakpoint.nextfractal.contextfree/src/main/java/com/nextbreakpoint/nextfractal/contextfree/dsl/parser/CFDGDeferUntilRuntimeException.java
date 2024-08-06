@@ -22,21 +22,16 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.core;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import java.awt.Shape;
+import lombok.Getter;
+import org.antlr.v4.runtime.Token;
 
-/**
- * The <code>ExtendedShape</code> class represents a geometric
- * path constructed fromType straight lines, quadratic and cubic (Bezier)
- * curves and elliptical arcs.
- * @author <a href="mailto:deweese@apache.org">Thomas DeWeese</a>
- * @version $Id$
- */
-public interface ExtendedShape extends Shape {
-    /**
-     * Get an extended Path iterator that may return SEG_ARCTO commands
-     */
-    ExtendedPathIterator getExtendedPathIterator();
+@Getter
+public class CFDGDeferUntilRuntimeException extends RuntimeException {
+	private final Token location;
 
+	public CFDGDeferUntilRuntimeException(Token location) {
+		this.location = location;
+	}
 }

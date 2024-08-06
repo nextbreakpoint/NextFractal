@@ -24,13 +24,17 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.AST;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTUtils;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Setter
+@Getter
 public class CFStackRule extends CFStackItem implements Cloneable {
     private int ruleName;
     private int paramCount;
@@ -53,7 +57,7 @@ public class CFStackRule extends CFStackItem implements Cloneable {
 
     @Override
     public ExpType getType() {
-        return ExpType.RuleType;
+        return ExpType.Rule;
     }
 
     @Override
@@ -61,25 +65,9 @@ public class CFStackRule extends CFStackItem implements Cloneable {
         return 1;
     }
 
-    public int getRuleName() {
-        return ruleName;
-    }
-
-    public void setRuleName(int ruleName) {
-        this.ruleName = ruleName;
-    }
-
-    public int getParamCount() {
-        return paramCount;
-    }
-
-    public void setParamCount(int paramCount) {
-        this.paramCount = paramCount;
-    }
-
     @Override
     public void evalArgs(CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential) {
-        AST.evalArgs(renderer, (CFStackRule)stack.getStackItem(stack.getStackTop()), iterator(), arguments, false);
+        ASTUtils.evalArgs(renderer, (CFStackRule)stack.getStackItem(stack.getStackTop()), iterator(), arguments, false);
     }
 
     @Override
@@ -94,16 +82,11 @@ public class CFStackRule extends CFStackItem implements Cloneable {
         int destIndex = destOffset;
         for (int srcIndex = 0; srcIndex < paramCount; srcIndex++) {
             switch (stack.getStackItem(srcIndex).getType()) {
-                case NumericType:
-                case FlagType:
-                case ModType:
-                    System.arraycopy(stack.getStackItems(), srcIndex, dest, destIndex, stack.getStackItem(srcIndex).getTupleSize());
-                    break;
-                case RuleType:
-                    dest[destIndex] = stack.getStackItem(srcIndex);
-                    break;
-                default:
-                    break;
+                case Numeric, Flag, Mod ->
+                        System.arraycopy(stack.getStackItems(), srcIndex, dest, destIndex, stack.getStackItem(srcIndex).getTupleSize());
+                case Rule -> dest[destIndex] = stack.getStackItem(srcIndex);
+                default -> {
+                }
             }
             destIndex += stack.getStackItem(srcIndex).getTupleSize();
         }

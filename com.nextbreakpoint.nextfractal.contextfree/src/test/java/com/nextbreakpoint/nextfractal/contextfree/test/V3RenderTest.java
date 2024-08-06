@@ -28,6 +28,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
@@ -98,7 +100,7 @@ public class V3RenderTest extends AbstractBaseTest {
 		BufferedImage actualImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
 
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Generator", true, Thread.MIN_PRIORITY);
-		Java2DGraphicsFactory rendererFactory = new Java2DGraphicsFactory();
+		GraphicsFactory rendererFactory = GraphicsUtils.findGraphicsFactory("Java2D");
 
 		Tile tile = new Tile(new Size(200, 200), new Size(200, 200), new Point(0, 0), new Size(0, 0));
 		Renderer renderer = new Renderer(threadFactory, rendererFactory, tile);

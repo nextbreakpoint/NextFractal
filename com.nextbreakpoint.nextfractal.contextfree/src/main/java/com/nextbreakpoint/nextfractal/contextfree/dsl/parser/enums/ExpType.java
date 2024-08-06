@@ -24,25 +24,24 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
-public enum ExpType {
-	NoType(0), NumericType(1), ModType(2), RuleType(4), FlagType(8), ReuseType(16);
-	
-	private int type;
+import lombok.Getter;
 
-	private ExpType(int type) {
+@Getter
+public enum ExpType {
+	None(0), Numeric(1), Mod(2), Rule(4), Flag(8), Reuse(16);
+	
+	private final int type;
+
+	ExpType(int type) {
 		this.type = type;
 	}
 
-	public int getType() {
-		return type;
-	}
-
-	public static ExpType fromType(int type) {
+    public static ExpType fromType(int type) {
 		for (ExpType value : ExpType.values()) {
 			if (value.getType() == type) {
 				return value;
 			}
 		}
-		return NoType;
+		return None;
 	}
 }

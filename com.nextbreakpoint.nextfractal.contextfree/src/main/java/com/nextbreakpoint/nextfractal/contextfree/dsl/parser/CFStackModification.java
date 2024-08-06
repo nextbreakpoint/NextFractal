@@ -25,22 +25,20 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import lombok.Getter;
 
+@Getter
 public class CFStackModification extends CFStackItem {
-    private Modification modification;
+    private final Modification modification;
 
     public CFStackModification(CFStack stack, Modification modification) {
         super(stack);
         this.modification = modification;
     }
 
-    public Modification getModification() {
-        return modification;
-    }
-
     @Override
     public ExpType getType() {
-        return ExpType.ModType;
+        return ExpType.Mod;
     }
 
     @Override

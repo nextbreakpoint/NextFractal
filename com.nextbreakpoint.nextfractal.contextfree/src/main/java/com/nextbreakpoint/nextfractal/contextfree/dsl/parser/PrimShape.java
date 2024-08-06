@@ -24,6 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import lombok.Getter;
+
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -33,8 +35,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PrimShape extends PathStorage {
-	private static List<String> shapeNames = new ArrayList<>();
-	private static Map<Integer, PrimShape> shapeMap = new HashMap<>();
+	@Getter
+    private static final List<String> shapeNames = new ArrayList<>();
+	@Getter
+    private static final Map<Integer, PrimShape> shapeMap = new HashMap<>();
 
 	static {
 		shapeNames.add("CIRCLE");
@@ -90,7 +94,8 @@ public class PrimShape extends PathStorage {
 		shapeMap.put(2, triangle);
 	}
 
-	private GeneralPath path;
+	@Getter
+    private final GeneralPath path;
 
 	public PrimShape(GeneralPath path) {
 		this.path = path;
@@ -98,17 +103,5 @@ public class PrimShape extends PathStorage {
 
 	public static boolean isPrimShape(int shapeType) {
 		return shapeType < 4;
-	}
-
-	public static Map<Integer, PrimShape> getShapeMap() {
-		return shapeMap;
-	}
-
-	public static List<String> getShapeNames() {
-		return shapeNames;
-	}
-
-	public GeneralPath getPath() {
-		return path;
 	}
 }

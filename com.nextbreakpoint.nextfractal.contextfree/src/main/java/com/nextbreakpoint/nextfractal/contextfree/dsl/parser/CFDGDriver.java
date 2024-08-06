@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTArray;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTCons;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;
@@ -57,6 +56,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Param;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -71,28 +72,43 @@ import java.util.Map;
 import java.util.Stack;
 
 public class CFDGDriver {
-	private CFDG cfdg = new CFDG(this);
-	private Stack<ASTRepContainer> containerStack = new Stack<>();
-	private ASTRepContainer paramDecls = new ASTRepContainer(this);
-	private Map<String, Long> flagNames = new HashMap<>();
-	private List<CFStackRule> longLivedParams = new ArrayList<>();
-	private Stack<String> fileNames = new Stack<>();
-	private Stack<String> filesToLoad = new Stack<>();
-	private Stack<CharStream> streamsToLoad = new Stack<>();
-	private Stack<Boolean> includeNamespace = new Stack<>();
-	private Stack<ASTSwitch> switchStack = new Stack<>();
-	private Logger logger = new Logger();
+	private final CFDG cfdg = new CFDG(this);
+	@Getter
+    private final Stack<ASTRepContainer> containerStack = new Stack<>();
+	@Getter
+    private final ASTRepContainer paramDecls = new ASTRepContainer(this);
+	private final Map<String, Long> flagNames = new HashMap<>();
+	private final List<CFStackRule> longLivedParams = new ArrayList<>();
+	private final Stack<String> fileNames = new Stack<>();
+	private final Stack<String> filesToLoad = new Stack<>();
+	private final Stack<CharStream> streamsToLoad = new Stack<>();
+	private final Stack<Boolean> includeNamespace = new Stack<>();
+	@Getter
+    private final Stack<ASTSwitch> switchStack = new Stack<>();
+	@Getter
+    private final Rand64 seed = new Rand64();
+	@Setter
+    @Getter
+    private Logger logger = new Logger();
 	private String currentNameSpace = "";
-	private String currentPath;
+	@Setter
+    @Getter
+    private String currentPath;
 	private String filePath;
-	private String maybeVersion;
+	@Setter
+    @Getter
+    private String maybeVersion;
 	private int currentShape;
 	private int includeDepth;
-	private int localStackDepth;
+	@Setter
+    @Getter
+    private int localStackDepth;
 	private boolean allowOverlap;
-	private boolean inPathContainer;
-	private Rand64 seed = new Rand64();
-	private boolean errorOccured;
+	@Setter
+    @Getter
+    private boolean inPathContainer;
+	@Getter
+    private boolean errorOccurred;
 	private double maxNatual = 1000.0;
 	private int pathCount = -1;
 
@@ -139,23 +155,7 @@ public class CFDGDriver {
 		flagNames.put("CF::p6m",         FlagType.CF_P6M.getMask());
 	}
 
-	public String getCurrentPath() {
-		return currentPath;
-	}
-
-	public void setCurrentPath(String currentPath) {
-		this.currentPath = currentPath;
-	}
-
-	public Logger getLogger() {
-		return logger;
-	}
-
-	public void setLogger(Logger logger) {
-		this.logger = logger;
-	}
-
-	public void warning(String message, Token location) {
+    public void warning(String message, Token location) {
 		logger.warning(message, location);
 	}
 
@@ -177,7 +177,7 @@ public class CFDGDriver {
 
 	public int stringToShape(String name, boolean colonsAllowed, Token location) {
 		checkName(name, colonsAllowed, location);
-		if (currentNameSpace.length() == 0) {
+		if (currentNameSpace.isEmpty()) {
 			return cfdg.encodeShapeName(name);
 		}
 		int index = Collections.binarySearch(PrimShape.getShapeNames(), name);
@@ -254,7 +254,7 @@ public class CFDGDriver {
 		}
 		String err = cfdg.setShapeParams(currentShape, paramDecls, paramDecls.getStackCount(), isPath);
 		if (err != null) {
-			errorOccured = true;
+			errorOccurred = true;
 			error("Can't set shape params: " + err, location);
 		}
 		localStackDepth -= paramDecls.getStackCount();
@@ -286,7 +286,7 @@ public class CFDGDriver {
 		int nameIndex = stringToShape(name, false, location);
 		checkVariableName(nameIndex, true, location);
 		paramDecls.addParameter(type, nameIndex, location);
-		ASTParameter param = paramDecls.getParameters().get(paramDecls.getParameters().size() - 1);
+		ASTParameter param = paramDecls.getParameters().getLast();
 		param.setStackIndex(localStackDepth);
 		paramDecls.setStackCount(paramDecls.getStackCount() + param.getTupleSize());
 		localStackDepth += param.getTupleSize();
@@ -304,7 +304,7 @@ public class CFDGDriver {
 			}
 			ASTDefine def = new ASTDefine(this, name, location);
 			def.setConfigDepth(includeDepth);
-			def.setDefineType(DefineType.ConfigDefine);
+			def.setDefineType(DefineType.Config);
 			return def;
 		}
 		if (FuncType.byName(name) != FuncType.NotAFunction) {
@@ -322,12 +322,12 @@ public class CFDGDriver {
 		def.getShapeSpecifier().setShapeType(nameIndex);
 		if (isFunction) {
 			for (ASTParameter param : paramDecls.getParameters()) {
-				param.setLocality(Locality.PureNonlocal);
+				param.setLocality(Locality.PureNonLocal);
 			}
 			def.getParameters().clear();
 			def.getParameters().addAll(paramDecls.getParameters());
 			def.setStackCount(paramDecls.getStackCount());
-			def.setDefineType(DefineType.FunctionDefine);
+			def.setDefineType(DefineType.Function);
 			localStackDepth -= paramDecls.getStackCount();
 			paramDecls.setStackCount(0);
 			cfdg.declareFunction(nameIndex, def);
@@ -368,10 +368,10 @@ public class CFDGDriver {
 					break;
 	
 				case 1:
-					if (!(specAndMod.get(0) instanceof ASTRuleSpecifier)) {
+					if (!(specAndMod.getFirst() instanceof ASTRuleSpecifier)) {
 						error("CF::StartShape must start with a shape specification", cfg.getLocation());
 					} else {
-						rule = (ASTRuleSpecifier) specAndMod.get(0);
+						rule = (ASTRuleSpecifier) specAndMod.getFirst();
 					}
 					break;
 					
@@ -394,7 +394,7 @@ public class CFDGDriver {
 				return;
 			}
 			double[] v = new double[] { -1.0 };
-			if (max == null || !max.isConstant() || max.getType() != ExpType.NumericType || max.evaluate(v, 1, null) != 1) {
+			if (max == null || !max.isConstant() || max.getType() != ExpType.Numeric || max.evaluate(v, 1, null) != 1) {
 				error("CF::MaxNatural requires a constant numeric expression", cfg.getLocation());
 			} else if (v[0] < 1.0 || v[0] > 9007199254740992.0) {
 				error(v[0] < 1.0 ? "CF::MaxNatural must be >= 1" : "CF::MaxNatural must be < 9007199254740992", cfg.getLocation());
@@ -418,7 +418,7 @@ public class CFDGDriver {
 		Long flagItem = flagNames.get(name);
 		if (flagItem != null) {
 			ASTReal flag = new ASTReal(this, flagItem, location);
-			flag.setType(ExpType.FlagType);
+			flag.setType(ExpType.Flag);
 			return flag;
 		}
 		if (name.startsWith("CF::")) {
@@ -457,7 +457,7 @@ public class CFDGDriver {
 		ASTDefine def = new ASTDefine(this, "let", location);
 		def.getShapeSpecifier().setShapeType(nameIndex);
 		def.setExp(exp);
-		def.setDefineType(DefineType.LetDefine);
+		def.setDefineType(DefineType.Let);
 		return new ASTLet(this, vars, def, location);
 	}
 
@@ -478,11 +478,12 @@ public class CFDGDriver {
 		}
 		int nameIndex = stringToShape(name, true, location);
 		boolean isGlobal = false;
+		//TODO fix isGlobal
 		ASTParameter bound = findExpression(nameIndex, isGlobal);
-		if (bound != null && args != null && args.getType() == ExpType.ReuseType && !makeStart && isGlobal && nameIndex == currentShape) {
+		if (bound != null && args != null && args.getType() == ExpType.Reuse && !makeStart && isGlobal && nameIndex == currentShape) {
 			error("Shape name binds to global variable and current shape, using current shape", location);
 		}
-		if (bound != null && bound.isParameter() && bound.getType() == ExpType.RuleType) {
+		if (bound != null && bound.isParameter() && bound.getType() == ExpType.Rule) {
 			return new ASTRuleSpecifier(this, nameIndex, name, location);
 		}
 		ASTRuleSpecifier ret = null;
@@ -492,11 +493,11 @@ public class CFDGDriver {
 		} else {
 			ret = new ASTRuleSpecifier(this, nameIndex, name, args, cfdg.getShapeParams(currentShape), location);
 		}
-		if (ret.getArguments() != null && ret.getArguments().getType() == ExpType.ReuseType) {
+		if (ret.getArguments() != null && ret.getArguments().getType() == ExpType.Reuse) {
 			if (makeStart) {
 				error("Startshape can't  reuse parameters", location);
 			} else if (nameIndex == currentShape)  {
-				ret.setArgSouce(ArgSource.SimpleParentArgs);
+				ret.setArgSource(ArgSource.SimpleParentArgs);
 				ret.setTypeSignature(ret.getTypeSignature());
 			}
 		}
@@ -578,14 +579,14 @@ public class CFDGDriver {
 		if (t != FuncType.NotAFunction) {
 			return new ASTFunction(this, name, args, seed, location);
 		}
-		if (args != null && args.getType() == ExpType.ReuseType) {
+		if (args != null && args.getType() == ExpType.Reuse) {
 			return makeRuleSpec(name, args, null, false, location);
 		}
 		return new ASTUserFunction(this, nameIndex, args, null, location);
 	}
 	
 	public ASTModification makeModification(ASTModification mod, boolean canonial, Token location) {
-		mod.setIsConstant(mod.getModExp().isEmpty());
+		mod.setCanonical(mod.getModExp().isEmpty());
 		mod.setCanonical(canonial);
 		mod.setLocation(location);
 		return mod;
@@ -652,10 +653,10 @@ public class CFDGDriver {
 	}
 	
 	public ASTParameter findExpression(int nameIndex, boolean isGlobal) {
-		if (containerStack.size() > 0) {
+		if (!containerStack.isEmpty()) {
 			for (ListIterator<ASTRepContainer> i = containerStack.listIterator(containerStack.size()); i.hasPrevious();) {
 				ASTRepContainer repCont = i.previous();
-				if (repCont.getParameters().size() > 0) {
+				if (!repCont.getParameters().isEmpty()) {
 					for (ListIterator<ASTParameter> p = repCont.getParameters().listIterator(repCont.getParameters().size()); p.hasPrevious();) {
 						ASTParameter param = p.previous();
 						if (param.getNameIndex() == nameIndex) {
@@ -673,9 +674,9 @@ public class CFDGDriver {
 		if (allowOverlap && !param) {
 			return;
 		}
-		if (containerStack.size() > 0) {
+		if (!containerStack.isEmpty()) {
 			ASTRepContainer repCont = param ? paramDecls : containerStack.lastElement();
-			if (repCont.getParameters().size() > 0) {
+			if (!repCont.getParameters().isEmpty()) {
 				for (ListIterator<ASTParameter> i = repCont.getParameters().listIterator(repCont.getParameters().size()); i.hasPrevious(); ) {
 					ASTParameter p = i.previous();
 					if (p.getNameIndex() == nameIndex) {
@@ -720,7 +721,7 @@ public class CFDGDriver {
 		if (end == -1) {
 			currentNameSpace = "";
 		} else {
-			currentNameSpace.substring(0, end + 1);
+			currentNameSpace = currentNameSpace.substring(0, end + 1);
 		}
 	}
 
@@ -729,7 +730,7 @@ public class CFDGDriver {
 			error("CF namespace is reserved", location);
 			return;
 		}
-		if (n.length() == 0) {
+		if (n.isEmpty()) {
 			error("zero-length namespace", location);
 			return;
 		}
@@ -757,47 +758,11 @@ public class CFDGDriver {
 		longLivedParams.add(p);
 	}
 
-	public String getMaybeVersion() {
-		return maybeVersion;
-	}
-
-	public void setMaybeVersion(String maybeVersion) {
-		this.maybeVersion = maybeVersion;
-	}
-
-	public CFDG getCFDG() {
+    public CFDG getCFDG() {
 		return cfdg;
 	}
 
-	public boolean errorOccured() {
-		return errorOccured;
-	}
-
-	public boolean isInPathContainer() {
-		return this.inPathContainer ;
-	}
-
-	public void setInPathContainer(boolean inPathContainer) {
-		this.inPathContainer = inPathContainer;
-	}
-
-	public Rand64 getSeed() {
-		return seed;
-	}
-
-	public ASTRepContainer getParamDecls() {
-		return paramDecls;
-	}
-
-	public Stack<ASTSwitch> getSwitchStack() {
-		return switchStack;
-	}
-
-	public Stack<ASTRepContainer> getContainerStack() {
-		return containerStack;
-	}
-
-	public void incSwitchStack() {
+    public void incSwitchStack() {
 		localStackDepth--;
 	}
 
@@ -805,15 +770,7 @@ public class CFDGDriver {
 		localStackDepth++;
 	}
 
-	public int getLocalStackDepth() {
-		return localStackDepth;
-	}
-
-	public void setLocalStackDepth(int localStackDepth) {
-		this.localStackDepth = localStackDepth;
-	}
-
-	public ASTRepContainer getCFDGContent() {
+    public ASTRepContainer getCFDGContent() {
 		return cfdg.getContents();
 	}
 }

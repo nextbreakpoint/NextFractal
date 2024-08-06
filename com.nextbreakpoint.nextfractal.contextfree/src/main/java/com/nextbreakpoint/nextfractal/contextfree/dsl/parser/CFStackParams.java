@@ -26,24 +26,22 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class CFStackParams extends CFStackItem {
-    private List<ASTParameter> params;
+    private final List<ASTParameter> params;
 
     public CFStackParams(CFStack stack, List<ASTParameter> params) {
         super(stack);
         this.params = params;
     }
 
-    public List<ASTParameter> getParams() {
-        return params;
-    }
-
     @Override
     public ExpType getType() {
-        return ExpType.RuleType;
+        return ExpType.Rule;
     }
 
     @Override

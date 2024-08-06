@@ -24,6 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum FlagType {
 	CF_NONE(0L),
 	CF_MITER_JOIN(1L),
@@ -67,17 +70,13 @@ public enum FlagType {
 	CF_P6(21L << 15),
 	CF_P6M(22L << 15);
 	
-	private long mask;
+	private final long mask;
 
-	private FlagType(long mask) {
+	FlagType(long mask) {
 		this.mask = mask;
 	}
 
-	public long getMask() {
-		return mask;
-	}
-
-	public static FlagType fromMask(long mask) {
+    public static FlagType fromMask(long mask) {
 		for (FlagType value : FlagType.values()) {
 			if (value.getMask() == mask) {
 				return value;
@@ -89,7 +88,7 @@ public enum FlagType {
 	public static FlagType byName(String name) {
 		String normalizedName = name.replace(":","_").toUpperCase();
 		for (FlagType value : FlagType.values()) {
-			if (value.name() == normalizedName) {
+			if (value.name().equals(normalizedName)) {
 				return value;
 			}
 		}

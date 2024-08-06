@@ -26,78 +26,40 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransform1D;
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
-import com.nextbreakpoint.nextfractal.contextfree.core.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.AssignmentType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.geom.AffineTransform;
 
+@Setter
 public class Modification implements Cloneable {
-	private Rand64 rand64Seed = new Rand64();
-	private AffineTransform transform = new AffineTransform();
-	private AffineTransform1D transformZ = new AffineTransform1D();
-	private AffineTransformTime transformTime = new AffineTransformTime();
+	@Getter
+    private Rand64 rand64Seed = new Rand64();
+	@Getter
+    private AffineTransform transform = new AffineTransform();
+	@Getter
+    private AffineTransform1D transformZ = new AffineTransform1D();
+	@Getter
+    private AffineTransformTime transformTime = new AffineTransformTime();
 	private HSBColor color = new HSBColor(0, 0, 0, 0);
 	private HSBColor colorTarget = new HSBColor(0, 0, 0, 0);
 	private int colorAssignment;
 
-	public Rand64 getRand64Seed() {
-		return rand64Seed;
-	}
-
-	public void setRand64Seed(Rand64 rand64Seed) {
-		this.rand64Seed = rand64Seed;
-	}
-
-	public AffineTransform getTransform() {
-		return transform;
-	}
-
-	public void setTransform(AffineTransform transform) {
-		this.transform = transform;
-	}
-
-	public AffineTransform1D getTransformZ() {
-		return transformZ;
-	}
-
-	public void setTransformZ(AffineTransform1D transformZ) {
-		this.transformZ = transformZ;
-	}
-
-	public AffineTransformTime getTransformTime() {
-		return transformTime;
-	}
-
-	public void setTransformTime(AffineTransformTime transformTime) {
-		this.transformTime = transformTime;
-	}
-
-	public HSBColor color() {
+    public HSBColor color() {
 		return color;
 	}
 
-	public void setColor(HSBColor color) {
-		this.color = color;
-	}
-
-	public HSBColor colorTarget() {
+    public HSBColor colorTarget() {
 		return colorTarget;
 	}
 
-	public void setColorTarget(HSBColor colorTarget) {
-		this.colorTarget = colorTarget;
-	}
-
-	public int colorAssignment() {
+    public int colorAssignment() {
 		return colorAssignment;
 	}
 
-	public void setColorAssignment(int colorAssignment) {
-		this.colorAssignment = colorAssignment;
-	}
-
-	public double getZ() {
-		return transformZ.tz();
+    public double getZ() {
+		return transformZ.getTz();
 	}
 
 	public double area() {

@@ -31,14 +31,16 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class ASTSwitch extends ASTReplacement {
-	private Map<Integer, ASTRepContainer> caseStatements = new HashMap<>();
-	private ASTRepContainer elseBody;
+	private final Map<Integer, ASTRepContainer> caseStatements = new HashMap<>();
+	private final ASTRepContainer elseBody;
 	private ASTExpression switchExp;
 	
 	public ASTSwitch(CFDGDriver driver, ASTExpression switchExp, Token location) {
@@ -47,19 +49,7 @@ public class ASTSwitch extends ASTReplacement {
 		this.switchExp = switchExp;
 	}
 
-	public ASTRepContainer getElseBody() {
-		return elseBody;
-	}
-
-	public ASTExpression getSwitchExp() {
-		return switchExp;
-	}
-
-	public Map<Integer, ASTRepContainer> getCaseStatements() {
-		return caseStatements;
-	}
-
-	@Override
+    @Override
 	public void compile(CompilePhase ph) {
 		super.compile(ph);
 		switchExp = compile(switchExp, ph);
@@ -67,23 +57,21 @@ public class ASTSwitch extends ASTReplacement {
 			caseVal.compile(ph, null, null);
 		}
 		elseBody.compile(ph, null, null);
-		
-		switch (ph) {
-			case TypeCheck:
-				if (switchExp.getType() != ExpType.NumericType || switchExp.evaluate(null, 0) != 1) {
-					driver.error("Switch selector must be a numeric scalar", location);
-				}
-				break;
-	
-			case Simplify:
-				if (switchExp != null) {
-					switchExp = switchExp.simplify();
-				}
-				break;
-	
-			default:
-				break;
-		}
+
+        switch (ph) {
+            case TypeCheck -> {
+                if (switchExp.getType() != ExpType.Numeric || switchExp.evaluate(null, 0) != 1) {
+                    driver.error("Switch selector must be a numeric scalar", location);
+                }
+            }
+            case Simplify -> {
+                if (switchExp != null) {
+                    switchExp = switchExp.simplify();
+                }
+            }
+            default -> {
+            }
+        }
 	}
 
 	@Override

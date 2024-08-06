@@ -30,12 +30,15 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 public class ASTIf extends ASTReplacement {
 	private ASTExpression condition;
-	private ASTRepContainer thenBody;
-	private ASTRepContainer elseBody;
+	@Getter
+    private final ASTRepContainer thenBody;
+	@Getter
+    private final ASTRepContainer elseBody;
 	
 	public ASTIf(CFDGDriver driver, ASTExpression condition, Token location) {
 		super(driver, null, RepElemType.empty, location);
@@ -43,36 +46,24 @@ public class ASTIf extends ASTReplacement {
 		elseBody = new ASTRepContainer(driver);
 		this.condition = condition;
 	}
-	
-	public ASTRepContainer getThenBody() {
-		return thenBody;
-	}
-	
-	public ASTRepContainer getElseBody() {
-		return elseBody;
-	}
 
-	@Override
+    @Override
 	public void compile(CompilePhase ph) {
 		super.compile(ph);
 		condition = compile(condition, ph);
 		thenBody.compile(ph, null, null);
 		elseBody.compile(ph, null, null);
-		
-		switch (ph) {
-			case TypeCheck:
-				if (condition.getType() != ExpType.NumericType || condition.evaluate(null, 0) != 1) {
-					driver.error("If condition must be a numeric scalar", condition.getLocation());
-				}
-				break;
-	
-			case Simplify:
-				condition = simplify(condition);
-				break;
-	
-			default:
-				break;
-		}
+
+        switch (ph) {
+            case TypeCheck -> {
+                if (condition.getType() != ExpType.Numeric || condition.evaluate(null, 0) != 1) {
+                    driver.error("If condition must be a numeric scalar", condition.getLocation());
+                }
+            }
+            case Simplify -> condition = simplify(condition);
+            default -> {
+            }
+        }
 	}
 
 	@Override

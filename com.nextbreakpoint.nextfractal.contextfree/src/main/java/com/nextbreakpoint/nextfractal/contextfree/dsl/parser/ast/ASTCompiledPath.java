@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.ExtendedGeneralPath;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackRule;
@@ -33,7 +32,10 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.PathStorage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
+import org.apache.batik.ext.awt.geom.ExtendedGeneralPath;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
@@ -42,14 +44,26 @@ import java.awt.geom.Point2D;
 
 public class ASTCompiledPath {
 	private static Long globalPathUID = 100L;
-	private PathStorage pathStorage = new PathStorage();
-	private Dequeue commandInfo;
-	private ASTPathCommand terminalCommand;
-	private boolean cached;
-	private boolean useTerminal;
-	private CFStackRule parameters;
-	private Long pathUID;
-	private CFDGDriver driver;
+	@Setter
+    @Getter
+    private PathStorage pathStorage = new PathStorage();
+	@Getter
+    private final Dequeue commandInfo;
+	@Getter
+    private final ASTPathCommand terminalCommand;
+	@Setter
+    @Getter
+    private boolean cached;
+	@Getter
+    @Setter
+    private boolean useTerminal;
+	@Setter
+    @Getter
+    private CFStackRule parameters;
+	@Setter
+    @Getter
+    private Long pathUID;
+	private final CFDGDriver driver;
 
 	public ASTCompiledPath(CFDGDriver driver, Token location) {
 		this.driver = driver;
@@ -61,47 +75,7 @@ public class ASTCompiledPath {
 		pathUID = nextPathUID();
 	}
 
-	public Dequeue getCommandInfo() {
-		return commandInfo;
-	}
-
-	public ASTPathCommand getTerminalCommand() {
-		return terminalCommand;
-	}
-
-	public CFStackRule getParameters() {
-		return parameters;
-	}
-
-	public void setParameters(CFStackRule parameters) {
-		this.parameters = parameters;
-	}
-
-	public boolean isCached() {
-		return cached;
-	}
-
-	public void setCached(boolean cached) {
-		this.cached = cached;
-	}
-
-	public boolean useTerminal() {
-		return useTerminal;
-	}
-
-	public void setUseTerminal(boolean useTerminal) {
-		this.useTerminal = useTerminal;
-	}
-
-	public Long getPathUID() {
-		return pathUID;
-	}
-
-	public void setPathUID(Long pathUID) {
-		this.pathUID = pathUID;
-	}
-
-	public static Long nextPathUID() {
+    public static Long nextPathUID() {
 		return globalPathUID = globalPathUID + 1;
 	}
 
@@ -211,7 +185,7 @@ public class ASTCompiledPath {
 		switch (pathOp.getPathOp()) {
 			case MOVEREL:
 				pathStorage.relToAbs(p0);
-			case MOVETO:
+            case MOVETO:
 				pathStorage.moveTo(p0);
 				renderer.setWantMoveTo(false);
 				break;
@@ -238,9 +212,6 @@ public class ASTCompiledPath {
 						inverseTr.transform(p1, p1);
 
 						Arc2D arc = ExtendedGeneralPath.computeArc(p1.x, p1.y, radiusX, radiusY, angle, largeArc, sweep, p0.x, p0.y);
-						if (arc == null) {
-							driver.fail("Can't create arc", pathOp.getLocation());
-						}
 						AffineTransform t = AffineTransform.getRotateInstance(Math.toRadians(angle), arc.getCenterX(), arc.getCenterY());
 						t.concatenate(transform);
 						java.awt.Shape s = t.createTransformedShape(arc);
@@ -281,18 +252,11 @@ public class ASTCompiledPath {
 						break;
 				}
 				break;
-			default:
+            case UNKNOWN, CLOSEPOLY:
+            default:
 				break;
 		}
 
 		pathStorage.lastVertex(renderer.getLastPoint());
-	}
-
-	public PathStorage getPathStorage() {
-		return pathStorage;
-	}
-
-	public void setPathStorage(PathStorage pathStorage) {
-		this.pathStorage = pathStorage;
 	}
 }

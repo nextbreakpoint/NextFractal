@@ -30,25 +30,37 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ASTRepContainer {
-	private PathOp pathOp;
-	private int repType;
-	private List<ASTReplacement> body = new ArrayList<>();
-	private List<ASTParameter> parameters = new ArrayList<>();
-	private boolean isGlobal;
-	private int stackCount;
-	private CFDGDriver driver;
+	private final CFDGDriver driver;
+	@Getter
+    private final List<ASTReplacement> body = new ArrayList<>();
+	@Getter
+    private final boolean global;
+	@Setter
+    @Getter
+    private List<ASTParameter> parameters = new ArrayList<>();
+	@Setter
+    @Getter
+    private PathOp pathOp;
+	@Setter
+    @Getter
+    private int repType;
+	@Getter
+    @Setter
+    private int stackCount;
 
 	public ASTRepContainer(CFDGDriver driver) {
 		this.driver = driver;
 		pathOp = PathOp.UNKNOWN;
 		repType = RepElemType.empty.getType();
-		isGlobal = false;
+		global = false;
 		stackCount = 0;
 	}
 	
@@ -56,95 +68,62 @@ public class ASTRepContainer {
 		driver = repCont.driver;
 		pathOp = repCont.pathOp;
 		repType = repCont.repType;
-		isGlobal = repCont.isGlobal;
+		global = repCont.global;
 		stackCount = repCont.stackCount;
 	}
-	
-	public void setStackCount(int stackCount) {
-		this.stackCount = stackCount;
-	}
 
-	public PathOp getPathOp() {
-		return pathOp;
-	}
-
-	public void setPathOp(PathOp pathOp) {
-		this.pathOp = pathOp;
-	}
-	
-	public int getRepType() {
-		return repType;
-	}
-
-	public void setRepType(int repType) {
-		this.repType = repType;
-	}
-	
-	public List<ASTReplacement> getBody() {
-		return body;
-	}
-
-	public List<ASTParameter> getParameters() {
-		return parameters;
-	}
-
-	public void setParameters(List<ASTParameter> parameters) {
-		this.parameters = parameters;
-	}	
-
-	public boolean isGlobal() {
-		return isGlobal;
-	}
-
-	public int getStackCount() {
-		return stackCount;
-	}
-
-	public void addParameter(String type, int nameIndex, Token nameLocation) {
+    public void addParameter(String type, int nameIndex, Token nameLocation) {
 		parameters.add(new ASTParameter(driver, type, nameIndex, nameLocation));
-		ASTParameter param = parameters.get(parameters.size() - 1);
-		param.setIsParameter(true);
+		ASTParameter param = parameters.getLast();
+		param.setParameter(true);
 		param.checkParam();
 	}
 
 	public ASTParameter addDefParameter(int nameIndex, ASTDefine def, Token nameLocation) {
 		parameters.add(new ASTParameter(driver, nameIndex, def, nameLocation));
-		ASTParameter param = parameters.get(parameters.size() - 1);
+		ASTParameter param = parameters.getLast();
 		param.checkParam();
 		return param;
 	}
 
 	public void addLoopParameter(int nameIndex, boolean natural, boolean local, Token nameLocation) {
 		parameters.add(new ASTParameter(driver, nameIndex, natural, local, nameLocation));
-		ASTParameter param = parameters.get(parameters.size() - 1);
+		ASTParameter param = parameters.getLast();
 		param.checkParam();
 		stackCount += param.getTupleSize();
 	}
 
 	public void compile(CompilePhase ph, ASTLoop loop, ASTDefine def) {
-		if (ph == CompilePhase.TypeCheck) {
-			stackCount = 0;
-			for (int i = 0; i < parameters.size(); i++) {
-				if (parameters.get(i).isParameter() || parameters.get(i).isLoopIndex()) {
-					stackCount += parameters.get(i).getTupleSize();
-				} else {
-					parameters = parameters.subList(0, i);
-					break;
-				}
+        switch (ph) {
+            case TypeCheck -> {
+                stackCount = 0;
+                for (int i = 0; i < parameters.size(); i++) {
+                    if (parameters.get(i).isParameter() || parameters.get(i).isLoopIndex()) {
+                        stackCount += parameters.get(i).getTupleSize();
+                    } else {
+                        parameters = parameters.subList(0, i);
+                        break;
+                    }
+                }
+
+                driver.pushRepContainer(this);
+                if (loop != null) {
+                    loop.compileLoopMod();
+                }
+                for (ASTReplacement rep : body) {
+                    rep.compile(ph);
+                }
+                if (def != null) {
+                    def.compile(ph);
+                }
+                driver.popRepContainer(null);
+            }
+			case Simplify -> {
+				// do nothing
 			}
-			
-			driver.pushRepContainer(this);
-			if (loop != null) {
-				loop.compileLoopMod();
+			default -> {
 			}
-			for (ASTReplacement rep : body) {
-				rep.compile(ph);
-			}
-			if (def != null) {
-				def.compile(ph);
-			}
-			driver.popRepContainer(null);
-		}
+        }
 	}
 	
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer, boolean getParams) {

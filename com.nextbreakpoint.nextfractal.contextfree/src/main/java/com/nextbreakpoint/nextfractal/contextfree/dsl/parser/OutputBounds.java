@@ -25,20 +25,19 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.StopException;
 
 import java.util.stream.IntStream;
 
 public class OutputBounds {
-    private AffineTransformTime timeBounds;
-    private double frameScale;
+    private final AffineTransformTime timeBounds;
+    private final CFDGRenderer renderer;
+    private final Integer[] frameCounts;
+    private final double frameScale;
     private Bounds[] frameBounds;
-    private Integer[] frameCounts;
     private double scale;
-    private int width;
-    private int height;
-    private int frames;
-    private CFDGRenderer renderer;
+    private final int width;
+    private final int height;
+    private final int frames;
 
     public OutputBounds(int frames, AffineTransformTime timeBounds, int width, int height, CFDGRenderer renderer) {
         this.frames = frames;
@@ -57,7 +56,7 @@ public class OutputBounds {
 
     public void apply(FinishedShape shape) {
         if (renderer.isRequestStop() || renderer.isRequestFinishUp()) {
-            throw new StopException();
+            throw new CFDGStopException();
         }
 
         if (scale == 0.0) {

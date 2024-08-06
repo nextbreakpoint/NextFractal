@@ -33,22 +33,25 @@ import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.Color;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import lombok.Getter;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
-import static com.nextbreakpoint.nextfractal.contextfree.core.ExtendedPathIterator.SEG_CLOSE;
-import static com.nextbreakpoint.nextfractal.contextfree.core.ExtendedPathIterator.SEG_CUBICTO;
-import static com.nextbreakpoint.nextfractal.contextfree.core.ExtendedPathIterator.SEG_LINETO;
-import static com.nextbreakpoint.nextfractal.contextfree.core.ExtendedPathIterator.SEG_MOVETO;
-import static com.nextbreakpoint.nextfractal.contextfree.core.ExtendedPathIterator.SEG_QUADTO;
+import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_CLOSE;
+import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_CUBICTO;
+import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_LINETO;
+import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_MOVETO;
+import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_QUADTO;
 
 public class Canvas implements CFCanvas {
-    private GraphicsContext context;
-    private GraphicsFactory factory;
-    private int width;
-    private int height;
+    private final GraphicsContext context;
+    private final GraphicsFactory factory;
+    @Getter
+    private final int width;
+    @Getter
+    private final int height;
     private AffineTransform normTransform;
 
     public Canvas(GraphicsFactory factory, Object context, int width, int height) {
@@ -56,14 +59,6 @@ public class Canvas implements CFCanvas {
         this.factory = factory;
         this.width = width;
         this.height = height;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public void primitive(int shapeType, double[] color, java.awt.geom.AffineTransform transform) {
@@ -223,7 +218,7 @@ public class Canvas implements CFCanvas {
     public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
         normTransform = factory.createTranslateAffineTransform(0, getHeight());
         normTransform.append(factory.createScaleAffineTransform(1, -1));
-        normTransform.append(factory.createTranslateAffineTransform(-(currWidth - getWidth()) / 2, -(currHeight - getHeight()) / 2));
+        normTransform.append(factory.createTranslateAffineTransform(-(currWidth - getWidth()) / 2f, -(currHeight - getHeight()) / 2f));
     }
 
     public void end() {

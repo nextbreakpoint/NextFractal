@@ -24,16 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Param {
 	Color(1), Alpha(2), Time(4), FrameTime(8);
 	
-	private int type;
+	private final int type;
 
-	private Param(int type) {
+	Param(int type) {
 		this.type = type;
-	}
-
-	public int getType() {
-		return type;
 	}
 }

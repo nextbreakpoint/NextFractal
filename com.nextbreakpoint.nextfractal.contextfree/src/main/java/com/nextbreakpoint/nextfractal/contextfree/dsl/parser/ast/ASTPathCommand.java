@@ -32,9 +32,11 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType.CF_CAP_MASK;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType.CF_CAP_PRESENT;
@@ -43,11 +45,15 @@ import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagTy
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType.CF_JOIN_PRESENT;
 
 public class ASTPathCommand extends ASTReplacement {
-	private double miterLimit;
-	private double strokeWidth;
-	private ASTExpression parameters;
-	private CommandInfo commandInfo;
-	private long flags;
+	private final CommandInfo commandInfo;
+	@Getter
+    private final double miterLimit;
+	@Getter
+    private ASTExpression parameters;
+	@Getter
+    private double strokeWidth;
+	@Getter
+    private long flags;
 
 	public ASTPathCommand(CFDGDriver driver, Token location) {
 		super(driver, null, RepElemType.command, location);
@@ -72,23 +78,7 @@ public class ASTPathCommand extends ASTReplacement {
 		}
 	}
 
-	public double getMiterLimit() {
-		return miterLimit;
-	}
-
-	public double getStrokeWidth() {
-		return strokeWidth;
-	}
-
-	public ASTExpression getParameters() {
-		return parameters;
-	}
-
-	public long getFlags() {
-		return flags;
-	}
-
-	@Override
+    @Override
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
 		if (renderer.isOpsOnly()) {
 			driver.error("Path commands not allowed at this point", location);
@@ -104,7 +94,7 @@ public class ASTPathCommand extends ASTReplacement {
 		}
 		width = value[0];
 
-		CommandInfo info = null;
+		CommandInfo info;
 
 		if (renderer.getCurrentPath().isCached()) {
 			if (renderer.getCurrentCommand().current() == null) {
@@ -124,7 +114,7 @@ public class ASTPathCommand extends ASTReplacement {
 
 			commandInfo.tryInit(renderer.getIndex(), renderer.getCurrentPath(), width, this);
 
-			if (commandInfo.getPathUID() == renderer.getCurrentPath().getPathUID() && commandInfo.getIndex() == renderer.getIndex()) {
+			if (Objects.equals(commandInfo.getPathUID(), renderer.getCurrentPath().getPathUID()) && commandInfo.getIndex() == renderer.getIndex()) {
 				renderer.getCurrentPath().getCommandInfo().pushBack(commandInfo);
 			} else {
 				renderer.getCurrentPath().getCommandInfo().pushBack(new CommandInfo(renderer.getIndex(), renderer.getCurrentPath(), width, this));
@@ -143,107 +133,101 @@ public class ASTPathCommand extends ASTReplacement {
 		super.compile(ph);
 		parameters = compile(parameters, ph);
 
-		switch (ph) {
-			case TypeCheck: {
-				getChildChange().addEntropy((flags & CF_FILL.getMask()) != 0 ? "FILL" : "STROKE");
-				long[] flagValue = new long[] { flags };
-				ASTExpression w = AST.getFlagsAndStroke(driver, getChildChange().getModExp(), flagValue);
-				flags = flagValue[0];
-				if (w != null) {
-					if (parameters != null) {
-						driver.error("Can't have a stroke adjustment in a v3 path command", w.getLocation());
-					} else if (w.size() != 1 || w.getType() != ExpType.NumericType || w.evaluate(null, 0) != 1) {
-						driver.error("Stroke adjustment is ill-formed", w.getLocation());
-					}
-					parameters = w;
-					w = null;
-				}
+        switch (ph) {
+            case TypeCheck -> {
+                getChildChange().addEntropy((flags & CF_FILL.getMask()) != 0 ? "FILL" : "STROKE");
+                long[] flagValue = new long[]{flags};
+                ASTExpression w = ASTUtils.getFlagsAndStroke(driver, getChildChange().getModExp(), flagValue);
+                flags = flagValue[0];
+                if (w != null) {
+                    if (parameters != null) {
+                        driver.error("Can't have a stroke adjustment in a v3 path command", w.getLocation());
+                    } else if (w.size() != 1 || w.getType() != ExpType.Numeric || w.evaluate(null, 0) != 1) {
+                        driver.error("Stroke adjustment is ill-formed", w.getLocation());
+                    }
+                    parameters = w;
+                    w = null;
+                }
 
-				if (parameters == null) {
-					return;
-				}
+                if (parameters == null) {
+                    return;
+                }
 
-				ASTExpression stroke = null;
-				ASTExpression flags = null;
-				List<ASTExpression> pcmdParams = AST.extract(parameters);
-				parameters = null;
-				switch (pcmdParams.size()) {
-					case 2: {
-						stroke = pcmdParams.get(0);
-						flags = pcmdParams.get(1);
-						break;
-					}
-					case 1: {
-						switch (pcmdParams.get(0).getType()) {
-							case NumericType:
-								stroke = pcmdParams.get(0);
-								break;
-							case FlagType:
-								flags = pcmdParams.get(0);
-								break;
-							default:
-								driver.error("Bad expression type in path command parameters", location);
-								break;
-						}
-						break;
-					}
-					case 0: {
-						return;
-					}
-					default: {
-						driver.error("Path commands can have zero, one, or two parameters", location);
-						return;
-					}
-				}
+                ASTExpression stroke = null;
+                ASTExpression flags = null;
+                List<ASTExpression> pcmdParams = ASTUtils.extract(parameters);
+                parameters = null;
+                switch (pcmdParams.size()) {
+                    case 2: {
+                        stroke = pcmdParams.get(0);
+                        flags = pcmdParams.get(1);
+                        break;
+                    }
+                    case 1: {
+                        switch (pcmdParams.getFirst().getType()) {
+                            case Numeric:
+                                stroke = pcmdParams.getFirst();
+                                break;
+                            case Flag:
+                                flags = pcmdParams.getFirst();
+                                break;
+                            default:
+                                driver.error("Bad expression type in path command parameters", location);
+                                break;
+                        }
+                        break;
+                    }
+                    case 0: {
+                        return;
+                    }
+                    default: {
+                        driver.error("Path commands can have zero, one, or two parameters", location);
+                        return;
+                    }
+                }
 
-				if (stroke != null) {
-					if ((this.flags & CF_FILL.getMask()) != 0) {
-						driver.warning("Stroke width only useful for STROKE commands", stroke.getLocation());
-					}
-					double[] value = new double[1];
-					value[0] = strokeWidth;
-					if (stroke.getType() != ExpType.NumericType || stroke.evaluate(null, 0) != 1) {
-						driver.error("Stroke width expression must be numeric scalar", stroke.getLocation());
-					} else if (!stroke.isConstant() || stroke.evaluate(value, 1) != 1) {
-						parameters = stroke;
-					}
-					strokeWidth = value[0];
-				}
+                if (stroke != null) {
+                    if ((this.flags & CF_FILL.getMask()) != 0) {
+                        driver.warning("Stroke width only useful for STROKE commands", stroke.getLocation());
+                    }
+                    double[] value = new double[1];
+                    value[0] = strokeWidth;
+                    if (stroke.getType() != ExpType.Numeric || stroke.evaluate(null, 0) != 1) {
+                        driver.error("Stroke width expression must be numeric scalar", stroke.getLocation());
+                    } else if (!stroke.isConstant() || stroke.evaluate(value, 1) != 1) {
+                        parameters = stroke;
+                    }
+                    strokeWidth = value[0];
+                }
 
-				if (flags != null) {
-					if (flags.getType() != ExpType.FlagType) {
-						driver.error("Unexpected argument in path command", flags.getLocation());
-						return;
-					}
-					flags = simplify(flags);
+                if (flags != null) {
+                    if (flags.getType() != ExpType.Flag) {
+                        driver.error("Unexpected argument in path command", flags.getLocation());
+                        return;
+                    }
+                    flags = simplify(flags);
 
-					if (flags instanceof ASTReal) {
-						int f = (int)((ASTReal)flags).getValue();
-						if ((f & CF_JOIN_PRESENT.getMask()) != 0) {
-							this.flags &= ~CF_JOIN_MASK.getMask();
-						}
-						if ((f & CF_CAP_PRESENT.getMask()) != 0) {
-							this.flags &= ~CF_CAP_MASK.getMask();
-						}
-						this.flags |= f;
-						if ((this.flags & CF_FILL.getMask()) != 0 && (this.flags & (CF_JOIN_PRESENT.getMask() | CF_CAP_PRESENT.getMask())) != 0) {
-							driver.warning("Stroke flags only useful for STROKE commands", flags.getLocation());
-						}
-					} else {
-						driver.error("Flag expressions must be constant", flags.getLocation());
-					}
-				}
+                    if (flags instanceof ASTReal) {
+                        int f = (int) ((ASTReal) flags).getValue();
+                        if ((f & CF_JOIN_PRESENT.getMask()) != 0) {
+                            this.flags &= ~CF_JOIN_MASK.getMask();
+                        }
+                        if ((f & CF_CAP_PRESENT.getMask()) != 0) {
+                            this.flags &= ~CF_CAP_MASK.getMask();
+                        }
+                        this.flags |= f;
+                        if ((this.flags & CF_FILL.getMask()) != 0 && (this.flags & (CF_JOIN_PRESENT.getMask() | CF_CAP_PRESENT.getMask())) != 0) {
+                            driver.warning("Stroke flags only useful for STROKE commands", flags.getLocation());
+                        }
+                    } else {
+                        driver.error("Flag expressions must be constant", flags.getLocation());
+                    }
+                }
 
-				break;
-			}
-
-			case Simplify: {
-				parameters = simplify(parameters);
-				break;
-			}
-
-			default:
-				break;
-		}
+            }
+            case Simplify -> parameters = simplify(parameters);
+            default -> {
+            }
+        }
 	}
 }

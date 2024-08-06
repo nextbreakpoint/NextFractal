@@ -34,23 +34,33 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PrimShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.WeightType;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.PathIterator;
 
 public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
-	private ASTRepContainer ruleBody;
 	private ASTCompiledPath cachedPath;
-	private double weight;
-	private boolean isPath;
-	private int nameIndex;
-	private WeightType weightType;
+	@Getter
+    private final ASTRepContainer ruleBody;
+	@Getter
+    private final WeightType weightType;
+	@Setter
+    @Getter
+    private double weight;
+	@Setter
+    @Getter
+    private boolean path;
+	@Setter
+    @Getter
+    private int nameIndex;
 
 	public ASTRule(CFDGDriver driver, int nameIndex, float weight, boolean percent, Token location) {
 		super(driver, null, RepElemType.rule, location);
 		ruleBody = new ASTRepContainer(driver);
 		this.nameIndex = nameIndex;
-		this.isPath = false;
+		this.path = false;
 		this.weight = weight <= 0.0 ? 1.0f : weight;
 		this.weightType = percent ? WeightType.PercentWeight : WeightType.ExplicitWeight;
 		this.cachedPath = null;
@@ -63,7 +73,7 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 		super(driver, null, RepElemType.rule, location);
 		ruleBody = new ASTRepContainer(driver);
 		this.nameIndex = nameIndex;
-		this.isPath = false;
+		this.path = false;
 		this.weight = 1.0f;
 		this.weightType = WeightType.NoWeight;
 		this.cachedPath = null;
@@ -105,46 +115,14 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 		return cmd >= PathIterator.SEG_MOVETO && cmd < PathIterator.SEG_CLOSE;
 	}
 
-	public ASTRepContainer getRuleBody() {
-		return ruleBody;
-	}
-
-	public double getWeight() {
-		return weight;
-	}
-
-	public void setWeight(double weight) {
-		this.weight = weight;
-	}
-
-	public WeightType getWeightType() {
-		return weightType;
-	}
-
-	public boolean isPath() {
-		return isPath;
-	}
-
-	public void setPath(boolean isPath) {
-		this.isPath = isPath;
-	}
-
-	public int getNameIndex() {
-		return nameIndex;
-	}
-
-	public void setNameIndex(int nameIndex) {
-		this.nameIndex = nameIndex;
-	}
-
-	public void resetCachedPath() {
+    public void resetCachedPath() {
 		this.cachedPath = null;
 	}
 
 	@Override
 	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
 		renderer.setCurrentSeed(parent.getWorldState().getRand64Seed());
-		if (isPath) {
+		if (path) {
 			renderer.processPrimShape(parent, this);
 		} else {
 			ruleBody.traverse(parent, tr, renderer, true);
@@ -169,7 +147,7 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 		if (!renderer.getCurrentPath().isCached()) {
 			renderer.getCurrentPath().finish(true, renderer);
 		}
-		if (renderer.getCurrentPath().useTerminal()) {
+		if (renderer.getCurrentPath().isUseTerminal()) {
 			renderer.getCurrentPath().getTerminalCommand().traverse(parent, false, renderer);
 		}
 		
@@ -194,7 +172,7 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 
 	@Override
 	public void compile(CompilePhase ph) {
-		driver.setInPathContainer(isPath);
+		driver.setInPathContainer(path);
 		super.compile(ph);
 		ruleBody.compile(ph, null, null);
 	}

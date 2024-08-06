@@ -22,26 +22,22 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.core;
+package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import lombok.Getter;
 import lombok.ToString;
 
-import java.io.Serial;
+import java.util.Collections;
 import java.util.List;
 
+@Getter
 @ToString
-public class ParserException extends Exception {
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class CFDGParserException extends Exception {
 	private final List<ScriptError> errors;
 
-	public ParserException(String message, List<ScriptError> errors) {
+	public CFDGParserException(String message, List<ScriptError> errors) {
 		super(message);
-		this.errors = errors;
-	}
-	
-	public List<ScriptError> getErrors() {
-		return errors;
+		this.errors = Collections.unmodifiableList(errors);
 	}
 }

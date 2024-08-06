@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 public class CFDGImage {
-    private CFDG cfdg;
+    private final CFDG cfdg;
 
     public CFDGImage(CFDG cfdg) {
         this.cfdg = cfdg;

@@ -28,21 +28,25 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTReal extends ASTExpression {
-	private double value;
-	private String text;
+	private final double value;
+	@Setter
+    private String text;
 
 	public ASTReal(CFDGDriver driver, double value, Token location) {
-		super(driver, true, false, ExpType.NumericType, location);
+		super(driver, true, false, ExpType.Numeric, location);
 		this.value = value;
-		isNatural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
+		natural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
 		locality = Locality.PureLocal;
 	}
 
 	public ASTReal(CFDGDriver driver, String text, boolean negative, Token location) {
-		super(driver, true, false, ExpType.NumericType, location);
+		super(driver, true, false, ExpType.Numeric, location);
 		if (negative) {
 			this.text = "-" + text;
 			this.value = Double.parseDouble(text);
@@ -50,23 +54,11 @@ public class ASTReal extends ASTExpression {
 			this.text = text;
 			this.value = Double.parseDouble(text);
 		}
-		isNatural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
+		natural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
 		locality = Locality.PureLocal;
 	}
 
-	public double getValue() {
-		return value;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
-	
-	@Override
+    @Override
 	public void entropy(StringBuilder e) {
 		e.append(text);
 	}

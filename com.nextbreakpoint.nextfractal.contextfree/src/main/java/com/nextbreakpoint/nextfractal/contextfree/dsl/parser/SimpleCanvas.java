@@ -28,17 +28,20 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import lombok.extern.java.Log;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.util.logging.Level;
 
+@Log
 public class SimpleCanvas implements CFCanvas {
-    private Graphics2D g2d;
-    private Tile tile;
-    private Size size;
+    private final Graphics2D g2d;
+    private final Tile tile;
+    private final Size size;
     private AffineTransform normTransform;
 
     public SimpleCanvas(Graphics2D g2d, Tile tile) {
@@ -63,7 +66,7 @@ public class SimpleCanvas implements CFCanvas {
         try {
             g2d.setColor(new Color((float) color[0], (float) color[1], (float) color[2], (float) color[3]));
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "Can't set color", e);
         }
 
         AffineTransform oldTransform = g2d.getTransform();
@@ -89,7 +92,7 @@ public class SimpleCanvas implements CFCanvas {
         try {
             g2d.setColor(new Color((float) color[0], (float) color[1], (float) color[2], (float) color[3]));
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "Can't set color", e);
         }
 
         AffineTransform oldTransform = g2d.getTransform();
@@ -108,14 +111,18 @@ public class SimpleCanvas implements CFCanvas {
 
         if ((info.getFlags() & FlagType.CF_FILL.getMask()) != 0) {
             t.concatenate(transform);
-        } else if ((info.getFlags() & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
-            double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
-            g2d.setStroke(new BasicStroke((float)(info.getStrokeWidth() * scale), mapToCap(info.getFlags()), mapToJoin(info.getFlags()), (float)info.getMiterLimit()));
-            t.concatenate(transform);
         } else {
-            double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
-            g2d.setStroke(new BasicStroke((float)(info.getStrokeWidth() * scale), mapToCap(info.getFlags()), mapToJoin(info.getFlags()), (float)info.getMiterLimit()));
-            shape = path.createTransformedShape(transform);
+            final int cap = mapToCap(info.getFlags());
+            final int join = mapToJoin(info.getFlags());
+            if ((info.getFlags() & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
+                double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
+                g2d.setStroke(new BasicStroke((float)(info.getStrokeWidth() * scale), cap, join, (float)info.getMiterLimit()));
+                t.concatenate(transform);
+            } else {
+                double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
+                g2d.setStroke(new BasicStroke((float)(info.getStrokeWidth() * scale), cap, join, (float)info.getMiterLimit()));
+                shape = path.createTransformedShape(transform);
+            }
         }
 
         g2d.setTransform(t);

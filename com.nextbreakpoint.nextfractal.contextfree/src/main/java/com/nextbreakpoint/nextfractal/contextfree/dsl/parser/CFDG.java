@@ -25,7 +25,6 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.AST;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTModTerm;
@@ -35,6 +34,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTRepContainer
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTReplacement;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTRule;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTStartSpecifier;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTUtils;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CFG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
@@ -44,6 +44,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Param;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.WeightType;
+import lombok.Getter;
+import lombok.extern.java.Log;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -55,62 +57,53 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.logging.Level;
 
+@Log
 public class CFDG {
-	private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CFDG.class.getName());
-	private double[] backgroundColor = new double[] { 1, 1, 1, 1 };
-	private Shape initialShape;
-	private ASTRule needle;
+	private final ASTRule needle;
+	@Getter
+    private final CFDGDriver driver;
+	private final ASTRepContainer cfdgContents;
+	private final List<ShapeElement> shapeTypes = new ArrayList<>();
+	private final Stack<ASTRule> rules = new Stack<>();
+	private final Map<Integer, ASTDefine> functions = new HashMap<>();
+	private final Map<CFG, Integer> paramDepth = new HashMap<>();
+	private final Map<CFG, ASTExpression> paramExp = new HashMap<>();
+	@Getter
+    private double[] backgroundColor = new double[] { 1, 1, 1, 1 };
 	private ASTReplacement initShape;
-	private ASTRepContainer cfdgContents;
-	private List<ShapeElement> shapeTypes = new ArrayList<ShapeElement>();
-	private Stack<ASTRule> rules = new Stack<ASTRule>();
-	private Map<Integer, ASTDefine> functions = new HashMap<Integer, ASTDefine>();
-	private Map<CFG, Integer> paramDepth = new HashMap<CFG, Integer>();
-	private Map<CFG, ASTExpression> paramExp = new HashMap<CFG, ASTExpression>();
 	private Modification tileMod = new Modification();
 	private Modification sizeMod = new Modification();
 	private Modification timeMod = new Modification();
-	private Point2D tileOffset = new Point2D.Double(0, 0);
+	private final Point2D tileOffset = new Point2D.Double(0, 0);
 	private int parameters;
 	private int stackSize;
 	private boolean usesAlpha;
 	private boolean usesColor;
 	private boolean usesTime;
 	private boolean usesFrameTime;
-	private boolean uses16bitColor;
-	private CFDGDriver driver;
 
 	public CFDG(CFDGDriver cfdgDriver) {
 		this.driver = cfdgDriver;
 		cfdgContents = new ASTRepContainer(cfdgDriver);
 		needle = new ASTRule(cfdgDriver, -1, null);
-		PrimShape.getShapeNames().forEach(s -> encodeShapeName(s));
+		PrimShape.getShapeNames().forEach(this::encodeShapeName);
 	}
 
-	public CFDGDriver getDriver() {
-		return driver;
-	}
-
-	public Shape getInitialShape(CFDGRenderer renderer) {
+    public Shape getInitialShape(CFDGRenderer renderer) {
 		Shape shape = new Shape();
 		shape.worldState.setColor(new HSBColor(0,0,0,1));
 		shape.worldState.setColorTarget(new HSBColor(0,0,0,1));
 		shape.worldState.getTransformTime().setEnd(1);
 		initShape.replace(shape, renderer);
 		shape.worldState.getTransform().translate(tileOffset.getX(), tileOffset.getY());
-		initialShape = shape;
-		return initialShape;
+		return shape;
 	}
 
 	public ASTRepContainer getContents() {
 		return cfdgContents;
 	}
 
-	public double[] getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	public void initBackgroundColor(CFDGRenderer renderer) {
+    public void initBackgroundColor(CFDGRenderer renderer) {
 		Modification white = new Modification();
 		white.setColor(new HSBColor(0.0, 0.0, 1.0, 1.0));
 		if (hasParameter(CFG.Background, white, renderer)) {
@@ -204,7 +197,7 @@ public class CFDG {
 //	}
 
 	public boolean isTiled(AffineTransform transform, double[] point) {
-		if (!hasParameter(CFG.Tile, ExpType.ModType)) {
+		if (!hasParameter(CFG.Tile, ExpType.Mod)) {
 			return false;
 		}
 
@@ -236,7 +229,7 @@ public class CFDG {
 				driver.fail("Tile must be aligned with the X or Y axis", null);
 			}
 
-			if (Math.abs(u.x - o.x) < 0.0 || Math.abs(v.y - o.y) < 0.0) {
+			if ((u.x - o.x) < 0.0 || (v.y - o.y) < 0.0) {
 				driver.fail("Tile must be in the positive X/Y quadrant", null);
 			}
 
@@ -248,7 +241,7 @@ public class CFDG {
 	}
 
 	public FriezeType isFrieze(AffineTransform transform, double[] point) {
-		if (!hasParameter(CFG.Tile, ExpType.ModType)) {
+		if (!hasParameter(CFG.Tile, ExpType.Mod)) {
 			return FriezeType.NoFrieze;
 		}
 
@@ -272,19 +265,31 @@ public class CFDG {
 			double v_x = 0.0;
 			double v_y = 1.0;
 
-			Point2D o = new Point2D.Double(o_x, o_y);
-			Point2D u = new Point2D.Double(u_x, u_y);
-			Point2D v = new Point2D.Double(v_x, v_y);
-
-			tileMod.getTransform().transform(o, o);
-			tileMod.getTransform().transform(u, u);
-			tileMod.getTransform().transform(v, v);
+			//TODO controllare
+//			Point2D.Double o = new Point2D.Double(o_x, o_y);
+//			Point2D.Double u = new Point2D.Double(u_x, u_y);
+//			Point2D.Double v = new Point2D.Double(v_x, v_y);
+//
+//			tileMod.getTransform().transform(o, o);
+//			tileMod.getTransform().transform(u, u);
+//			tileMod.getTransform().transform(v, v);
+//
+//			if (Math.abs(u.y - o.y) >= 0.0001 && Math.abs(v.x - o.x) >= 0.0001) {
+//				driver.fail("Frieze must be aligned with the X or Y axis", null);
+//			}
+//
+//			if ((u.x - o.x) < 0.0 || (v.y - o.y) < 0.0) {
+//				driver.fail("Frieze must be in the positive X/Y quadrant", null);
+//			}
+//
+//			point[0] = u.x - o.x;
+//			point[1] = v.y - o.y;
 
 			if (Math.abs(u_y - o_y) >= 0.0001 || Math.abs(v_x - o_x) >= 0.0001) {
 				driver.fail("Frieze must be aligned with the X and Y axis", null);
 			}
 
-			if (Math.abs(u_x - o_x) < 0.0 || Math.abs(v_y - o_y) < 0.0) {
+			if ((u_x - o_x) < 0.0 || (v_y - o_y) < 0.0) {
 				driver.fail("Frieze must be in the positive X/Y quadrant", null);
 			}
 
@@ -296,7 +301,7 @@ public class CFDG {
 	}
 
 	public boolean isSized(double[] point) {
-		if (!hasParameter(CFG.Size, ExpType.ModType)) {
+		if (!hasParameter(CFG.Size, ExpType.Mod)) {
 			return false;
 		}
 
@@ -313,7 +318,7 @@ public class CFDG {
 	}
 
 	public boolean isTimed(AffineTransformTime transform) {
-		if (!hasParameter(CFG.Time, ExpType.ModType)) {
+		if (!hasParameter(CFG.Time, ExpType.Mod)) {
 			return false;
 		}
 
@@ -333,7 +338,7 @@ public class CFDG {
 	public void getSymmetry(List<AffineTransform> syms, CFDGRenderer renderer) {
 		syms.clear();
 		ASTExpression exp = hasParameter(CFG.Symmetry);
-		List<ASTModification> left = AST.getTransforms(driver, exp, syms, renderer, isTiled(null, null), tileMod.getTransform());
+		List<ASTModification> left = ASTUtils.getTransforms(driver, exp, syms, renderer, isTiled(null, null), tileMod.getTransform());
 		if (!left.isEmpty()) {
 			driver.fail("At least one term was invalid", exp.getLocation());
 		}
@@ -341,7 +346,7 @@ public class CFDG {
 
 	public boolean hasParameter(CFG p, double[] value, CFDGRenderer renderer) {
 		ASTExpression exp = hasParameter(p);
-		if (exp == null || exp.getType() != ExpType.NumericType) {
+		if (exp == null || exp.getType() != ExpType.Numeric) {
 			return false;
 		}
 		if (!exp.isConstant() && renderer != null) {
@@ -355,7 +360,7 @@ public class CFDG {
 
 	public boolean hasParameter(CFG p, Modification value, CFDGRenderer renderer) {
 		ASTExpression exp = hasParameter(p);
-		if (exp == null || exp.getType() != ExpType.ModType) {
+		if (exp == null || exp.getType() != ExpType.Mod) {
 			return false;
 		}
 		if (!exp.isConstant() && renderer != null) {
@@ -369,11 +374,8 @@ public class CFDG {
 
 	public boolean hasParameter(CFG p, ExpType type) {
 		ASTExpression exp = hasParameter(p);
-		if (exp == null || exp.getType() != type) {
-			return false;
-		}
-		return true;
-	}
+        return exp != null && exp.getType() == type;
+    }
 
 	public ASTExpression hasParameter(CFG p) {
 		return paramExp.get(p);
@@ -381,9 +383,6 @@ public class CFDG {
 
 	public boolean addParameter(String name, ASTExpression exp, int depth) {
 		CFG p = CFG.byName(name);
-		if (p == null) {
-			return false;
-		}
 		Integer oldDepth = paramDepth.get(p);
 		if (oldDepth == null || depth < oldDepth) {
 			paramDepth.put(p, depth);
@@ -444,12 +443,12 @@ public class CFDG {
 
 		cfdgContents.compile(CompilePhase.TypeCheck, null, null);
 
-		if (!driver.errorOccured()) {
+		if (!driver.isErrorOccurred()) {
 			cfdgContents.compile(CompilePhase.Simplify, null, null);
 		}
 
 		double[] value = new double[1];
-		uses16bitColor = hasParameter(CFG.ColorDepth, value, null) && Math.floor(value[0]) == 16;
+		boolean uses16bitColor = hasParameter(CFG.ColorDepth, value, null) && Math.floor(value[0]) == 16;
 
 		if (hasParameter(CFG.Color, value, null)) {
 			usesColor = value[0] != 0;
@@ -460,13 +459,13 @@ public class CFDG {
 		}
 
 		ASTExpression e = hasParameter(CFG.Background);
-		if (e != null && e instanceof ASTModification) {
-			ASTModification m = (ASTModification) e;
-			usesAlpha = m.getModData().color().alpha() != 1.0;
+		if (e instanceof ASTModification m) {
+            usesAlpha = m.getModData().color().alpha() != 1.0;
 			for (ASTModTerm term : m.getModExp()) {
-				if (term.getModType() == ModType.alpha || term.getModType() == ModType.alphaTarg) {
-					usesAlpha = true;
-				}
+                if (term.getModType() == ModType.alpha || term.getModType() == ModType.alphaTarg) {
+                    usesAlpha = true;
+                    break;
+                }
 			}
 		}
 	}
@@ -542,7 +541,7 @@ public class CFDG {
 		}
 		type.getParameters().clear();
 		type.getParameters().addAll(p.getParameters());
-		type.setIsShape(true);
+		type.setShape(true);
 		type.setArgSize(argSize);
 		type.setShapeType(isPath ? ShapeType.PathType : ShapeType.NewShape);
 		return null;
@@ -585,12 +584,8 @@ public class CFDG {
 	}
 
 	public ASTDefine findFunction(int index) {
-		ASTDefine def = functions.get(index);
-		if (def != null) {
-			return def;
-		}
-		return null;
-	}
+        return functions.get(index);
+    }
 
 	public CFDGRenderer renderer(int width, int height, double minSize, int variation, double border) {
 		try {
@@ -601,9 +596,8 @@ public class CFDG {
 				return null;
 			}
 
-			if (startExp instanceof ASTStartSpecifier) {
-				ASTStartSpecifier specStart = (ASTStartSpecifier)startExp;
-				initShape = new ASTReplacement(driver, specStart, specStart.getModification(), RepElemType.empty, startExp.getLocation());
+			if (startExp instanceof ASTStartSpecifier specStart) {
+                initShape = new ASTReplacement(driver, specStart, specStart.getModification(), RepElemType.empty, startExp.getLocation());
 				initShape.getChildChange().addEntropy(initShape.getShapeSpecifier().getEntropy());
 			} else {
 				driver.fail("Type error in startshape", startExp.getLocation());
@@ -648,7 +642,7 @@ public class CFDG {
 
 			return renderer;
 		} catch (Exception e) {
-			logger.log(Level.WARNING, "Can't create CFDG renderer", e);
+			log.log(Level.WARNING, "Can't create CFDG renderer", e);
 		}
 
 		return null;

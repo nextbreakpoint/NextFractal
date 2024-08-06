@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +33,9 @@ import java.util.List;
 public class CFStackIterator {
     private int stackPos;
     private int paramPos;
-    private CFStack stack;
-    private List<ASTParameter> params;
+    @Getter
+    private final CFStack stack;
+    private final List<ASTParameter> params;
 
     public CFStackIterator(CFStack stack, List<ASTParameter> parameters) {
         this.stack = stack;
@@ -76,9 +78,5 @@ public class CFStackIterator {
         stackPos += next.getTupleSize();
         paramPos += 1;
         return this;
-    }
-
-    public CFStack getStack() {
-        return stack;
     }
 }

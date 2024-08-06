@@ -26,24 +26,27 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTCompiledPath;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTPathCommand;
+import lombok.Getter;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType.CF_BUTT_CAP;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType.CF_FILL;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType.CF_MITER_JOIN;
 
+@Getter
 public class CommandInfo {
-    private static AtomicLong lastPathUID = new AtomicLong(0);
+    //public static final CommandInfo DEFAULT_COMMAND_INFO = new CommandInfo(0, null);
+    private static final AtomicLong lastPathUID = new AtomicLong(0);
+    public static final Long DEFAULT_PATH_UID = Long.MAX_VALUE;
+
     private Long pathUID;
     private int index;
     private long flags;
     private double miterLimit;
     private double strokeWidth;
     private PathStorage pathStorage;
-
-//    public static final CommandInfo DEFAULT_COMMAND_INFO = new CommandInfo(0, null);
-    public static final Long DEFAULT_PATH_UID = Long.MAX_VALUE;
 
     public CommandInfo() {
         index = 0;
@@ -80,32 +83,8 @@ public class CommandInfo {
         this.pathStorage = pathStorage;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public long getFlags() {
-        return flags;
-    }
-
-    public double getMiterLimit() {
-        return miterLimit;
-    }
-
-    public double getStrokeWidth() {
-        return strokeWidth;
-    }
-
-    public Long getPathUID() {
-        return pathUID;
-    }
-
-    public PathStorage getPathStorage() {
-        return pathStorage;
-    }
-
     private void init(int index, ASTCompiledPath path, double width, ASTPathCommand pathCommand) {
-        if (pathUID != path.getPathUID() || this.index != index) {
+        if (!Objects.equals(pathUID, path.getPathUID()) || this.index != index) {
             if (pathCommand != null) {
                 flags = pathCommand.getFlags();
                 miterLimit = pathCommand.getMiterLimit();

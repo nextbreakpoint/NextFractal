@@ -25,22 +25,20 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import lombok.Getter;
 
+@Getter
 public class CFStackNumber extends CFStackItem {
-    private double number;
+    private final double number;
 
     public CFStackNumber(CFStack stack, double number) {
         super(stack);
         this.number = number;
     }
 
-    public double getNumber() {
-        return number;
-    }
-
     @Override
     public ExpType getType() {
-        return ExpType.NumericType;
+        return ExpType.Numeric;
     }
 
     @Override

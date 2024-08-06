@@ -26,8 +26,10 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
+@Getter
 public class ASTStartSpecifier extends ASTRuleSpecifier {
 	private ASTModification modification;
 	
@@ -51,11 +53,7 @@ public class ASTStartSpecifier extends ASTRuleSpecifier {
 		this.modification = mod;
 	}
 
-	public ASTModification getModification() {
-		return modification;
-	}
-
-	@Override
+    @Override
 	public void entropy(StringBuilder e) {
 		e.append(getEntropy());
 		if (modification != null) {

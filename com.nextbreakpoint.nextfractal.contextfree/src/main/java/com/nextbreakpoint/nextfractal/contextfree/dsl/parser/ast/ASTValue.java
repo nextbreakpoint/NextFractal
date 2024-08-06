@@ -24,25 +24,20 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
+import lombok.Getter;
+
+@Getter
 public class ASTValue {
-	private float value;
-	private boolean percentage;
+	private final float value;
+	private final boolean percentage;
 
 	public ASTValue(String value) {
-		if (value.indexOf("%") != -1) {
+		if (value.contains("%")) {
 			this.value = Float.parseFloat(value.substring(0, value.indexOf("%")));
 			this.percentage = true;
 		} else {
 			this.value = Float.parseFloat(value);
 			this.percentage = false;
 		}
-	}
-
-	public float getValue() {
-		return value;
-	}
-
-	public boolean isPercentage() {
-		return percentage;
 	}
 }

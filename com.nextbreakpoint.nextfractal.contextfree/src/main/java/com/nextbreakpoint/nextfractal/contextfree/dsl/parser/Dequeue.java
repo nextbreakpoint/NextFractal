@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Dequeue {
-    private List<CommandInfo> commands = new ArrayList<>();
+    private final List<CommandInfo> commands = new ArrayList<>();
 
     public void pushBack(CommandInfo commandInfo) {
         //TODO rivedere
@@ -36,7 +36,7 @@ public class Dequeue {
     }
 
     public CommandInfo back() {
-        return commands.get(commands.size() - 1);
+        return commands.getLast();
     }
 
     public CommandIterator iterator() {

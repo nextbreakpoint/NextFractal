@@ -26,13 +26,15 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.graphics.RendererErrors;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class CFDGLogger extends Logger {
-    private List<ScriptError> errors = new ArrayList<>();
+    private final List<ScriptError> errors = new ArrayList<>();
 
     @Override
     public void error(String message, Token location) {
@@ -52,9 +54,5 @@ public class CFDGLogger extends Logger {
         } else {
             errors.add(RendererErrors.makeError(0, 0, 0, 0, message));
         }
-    }
-
-    public List<ScriptError> getErrors() {
-        return errors;
     }
 }

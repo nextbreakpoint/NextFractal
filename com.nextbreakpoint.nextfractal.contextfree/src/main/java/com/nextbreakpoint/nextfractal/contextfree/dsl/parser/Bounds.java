@@ -25,6 +25,8 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -36,6 +38,8 @@ import static java.awt.geom.PathIterator.SEG_CLOSE;
 import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
 
+@Setter
+@Getter
 public class Bounds {
     private double minX;
     private double minY;
@@ -137,38 +141,6 @@ public class Bounds {
         }
 
         return new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY);
-    }
-
-    public double getMinX() {
-        return minX;
-    }
-
-    public void setMinX(double minX) {
-        this.minX = minX;
-    }
-
-    public double getMinY() {
-        return minY;
-    }
-
-    public void setMinY(double minY) {
-        this.minY = minY;
-    }
-
-    public double getMaxX() {
-        return maxX;
-    }
-
-    public void setMaxX(double maxX) {
-        this.maxX = maxX;
-    }
-
-    public double getMaxY() {
-        return maxY;
-    }
-
-    public void setMaxY(double maxY) {
-        this.maxY = maxY;
     }
 
     public void invalidate() {

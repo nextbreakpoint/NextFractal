@@ -41,15 +41,8 @@ public class Coordinator implements RendererDelegate {
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
 	private volatile boolean pixelsChanged;
-	private volatile float progress;
 	private Renderer renderer;
 	
-	/**
-	 * @param threadFactory
-	 * @param renderFactory
-	 * @param tile
-	 * @param hints
-	 */
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
@@ -58,117 +51,61 @@ public class Coordinator implements RendererDelegate {
 		renderer.setRendererDelegate(this);
 	}
 
-	/**
-	 * 
-	 */
 	public final void dispose() {
 		free();
 	}
 	
-	/**
-	 * 
-	 */
 	public void abort() {
 		renderer.abortTasks();
 	}
 	
-	/**
-	 * 
-	 */
 	public void waitFor() {
 		renderer.waitForTasks();
 	}
-	
-	/**
-	 * 
-	 */
+
 	public void run() {
 		renderer.runTask();
 	}
 
-	/**
-	 * @see com.nextbreakpoint.nextfractal.contextfree.graphics.RendererDelegate#updateImageInBackground(float)
-	 */
 	@Override
 	public void updateImageInBackground(float progress) {
-		this.progress = progress;
 		this.pixelsChanged = true;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isPixelsChanged() {
 		boolean result = pixelsChanged;
 		pixelsChanged = false;
 		return result;
 	}
 
-	/**
-	 * @return
-	 */
-	public float getProgress() {
-		return progress;
-	}
-
-	/**
-	 * @return
-	 */
 	public Size getSize() {
 		return renderer.getSize();
 	}
 
-	/**
-	 * @param cfdgInterpreter
-	 */
 	public void setInterpreter(CFDGImage cfdgInterpreter) {
 		renderer.setInterpreter(cfdgInterpreter);
 	}
 
-	/**
-	 * @param cfdgSeed
-	 */
 	public void setSeed(String cfdgSeed) {
 		renderer.setSeed(cfdgSeed);
 	}
 
-	/**
-	 * 
-	 */
 	public void init() {
 		renderer.init();
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isTileSupported() {
 		return true;
 	}
 
-	/**
-	 * @param gc
-	 * @param x
-	 * @param y
-	 */
 	public void drawImage(final GraphicsContext gc, final int x, final int y) {
 		renderer.drawImage(gc, x, y);
 	}
 
-//	/**
-//	 * @param gc
-//	 * @param x
-//	 * @param y
-//	 * @param w
-//	 * @param h
-//	 */
 //	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		renderer.drawImage(gc, x, y, w, h);
 //	}
 
-	/**
-	 * 
-	 */
 	protected void free() {
 		if (renderer != null) {
 			renderer.dispose();
@@ -176,24 +113,14 @@ public class Coordinator implements RendererDelegate {
 		}
 	}
 
-	/**
-	 * @param tile 
-	 * @return
-	 */
 	protected Renderer createRenderer(Tile tile) {
 		return new Renderer(threadFactory, renderFactory, tile);
 	}
 
-	/**
-	 * @param pixels
-	 */
 	public void getPixels(int[] pixels) {
 		renderer.getPixels(pixels);
 	}
 
-	/**
-	 * @return
-	 */
 	public List<ScriptError> getErrors() {
 		return renderer.getErrors();
 	}

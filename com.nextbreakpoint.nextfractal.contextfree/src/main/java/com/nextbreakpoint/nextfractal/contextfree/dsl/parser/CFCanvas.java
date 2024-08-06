@@ -27,19 +27,19 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 import java.awt.geom.AffineTransform;
 
 public interface CFCanvas {
-    public int getWidth();
+    int getWidth();
 
-    public int getHeight();
+    int getHeight();
 
-    public void primitive(int shapeType, double[] color, AffineTransform transform);
+    void primitive(int shapeType, double[] color, AffineTransform transform);
 
-    public void path(double[] color, AffineTransform transform, CommandInfo info);
+    void path(double[] color, AffineTransform transform, CommandInfo info);
 
-    public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight);
+    void start(boolean first, double[] backgroundColor, int currWidth, int currHeight);
 
-    public void end();
+    void end();
 
-    public void tileTransform(Bounds bounds);
+    void tileTransform(Bounds bounds);
 
-    public void clear(double[] backgroundColor);
+    void clear(double[] backgroundColor);
 }

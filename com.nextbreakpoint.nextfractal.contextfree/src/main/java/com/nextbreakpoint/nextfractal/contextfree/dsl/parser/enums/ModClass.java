@@ -24,6 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ModClass {
     InvalidClass(-1), 
     NotAClass(0), 
@@ -42,17 +45,13 @@ public enum ModClass {
     ParamClass(4096), 
     PathOpClass(8192);
     
-	private int type;
+	private final int type;
 	
-	private ModClass(int type) {
+	ModClass(int type) {
 		this.type = type;
 	}
 
-	public int getType() {
-		return type;
-	}
-
-	public static ModClass fromType(int type) {
+    public static ModClass fromType(int type) {
 		for (ModClass value : ModClass.values()) {
 			if (value.getType() == type) {
 				return value;

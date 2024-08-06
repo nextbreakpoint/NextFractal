@@ -24,16 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum DefineType {
-	StackDefine(0), ConstDefine(1), ConfigDefine(2), FunctionDefine(4), LetDefine(8);
+	Stack(0), Const(1), Config(2), Function(4), Let(8);
 	
-	private int type;
+	private final int type;
 
-	private DefineType(int type) {
+	DefineType(int type) {
 		this.type = type;
-	}
-
-	public int getType() {
-		return type;
 	}
 }

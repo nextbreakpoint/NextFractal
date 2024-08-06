@@ -31,82 +31,54 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Modification;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 public class ASTExpression {
-	protected CFDGDriver driver;
-	protected boolean isConstant;
-	protected boolean isNatural;
-	protected Locality locality;
-	protected ExpType type;
-	protected Token location;
+	protected final CFDGDriver driver;
+	@Getter
+    @Setter
+    protected boolean constant;
+	@Getter
+    @Setter
+    protected boolean natural;
+	@Setter
+    @Getter
+    protected Locality locality;
+	@Setter
+    @Getter
+    protected ExpType type;
+	@Setter
+    @Getter
+    protected Token location;
 
 	public ASTExpression(CFDGDriver driver, Token location) {
-		this(driver, false, false, Locality.UnknownLocal, ExpType.NoType, location);
+		this(driver, false, false, Locality.UnknownLocal, ExpType.None, location);
 	}
 
-	public ASTExpression(CFDGDriver driver, boolean isConstant, boolean isNatural, Token location) {
-		this(driver, isConstant, isNatural, Locality.UnknownLocal, ExpType.NoType, location);
+	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Token location) {
+		this(driver, constant, natural, Locality.UnknownLocal, ExpType.None, location);
 	}
 	
-	public ASTExpression(CFDGDriver driver, boolean isConstant, boolean isNatural, ExpType type, Token location) {
-		this(driver, isConstant, isNatural, Locality.UnknownLocal, type, location);
+	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, ExpType type, Token location) {
+		this(driver, constant, natural, Locality.UnknownLocal, type, location);
 	}
 
-	public ASTExpression(CFDGDriver driver, boolean isConstant, boolean isNatural, Locality locality, Token location) {
-		this(driver, isConstant, isNatural, locality, ExpType.NoType, location);
+	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Locality locality, Token location) {
+		this(driver, constant, natural, locality, ExpType.None, location);
 	}
 
-	public ASTExpression(CFDGDriver driver, boolean isConstant, boolean isNatural, Locality locality, ExpType type, Token location) {
+	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Locality locality, ExpType type, Token location) {
 		this.driver = driver;
-		this.isConstant = isConstant;
-		this.isNatural = isNatural;
+		this.constant = constant;
+		this.natural = natural;
 		this.locality = locality;
 		this.type = type;
 		this.location = location;
 	}
 
-	public boolean isConstant() {
-		return isConstant;
-	}
-
-	public void setIsConstant(boolean isConstant) {
-		this.isConstant = isConstant;
-	}
-
-	public boolean isNatural() {
-		return isNatural;
-	}
-
-	public void setIsNatural(boolean isNatural) {
-		this.isNatural = isNatural;
-	}
-	
-	public Locality getLocality() {
-		return locality;
-	}
-
-	public void setLocality(Locality locality) {
-		this.locality = locality;
-	}
-
-	public ExpType getType() {
-		return type;
-	}
-
-	public void setType(ExpType type) {
-		this.type = type;
-	}
-
-	public Token getLocation() {
-		return location;
-	}
-
-	public void setLocation(Token location) {
-		this.location = location;
-	}
-
-	public ASTExpression simplify() {
+    public ASTExpression simplify() {
 		return this;
 	}
 

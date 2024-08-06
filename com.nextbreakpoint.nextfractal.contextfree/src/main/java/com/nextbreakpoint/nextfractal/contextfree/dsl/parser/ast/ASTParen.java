@@ -42,7 +42,7 @@ public class ASTParen extends ASTExpression {
 
 	@Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-        if (type != ExpType.NumericType) {
+        if (type != ExpType.Numeric) {
 			driver.error("Non-numeric/flag expression in a numeric/flag context", location);
 			return -1;
         }
@@ -51,7 +51,7 @@ public class ASTParen extends ASTExpression {
 
 	@Override
 	public void evaluate(Modification result, boolean shapeDest, CFDGRenderer renderer) {
-        if (type != ExpType.ModType) {
+        if (type != ExpType.Mod) {
 			driver.error("Expression does not evaluate to an adjustment", location);
 			return;
         }
@@ -76,28 +76,26 @@ public class ASTParen extends ASTExpression {
 		if (expression == null) return null;
 
 		expression = compile(expression, ph);
-		
-		switch (ph) {
-			case TypeCheck: {
-				isConstant = expression.isConstant();
-				isNatural = expression.isNatural();
-				locality = expression.getLocality();
-				type = expression.getType();
-				break;
+
+        switch (ph) {
+            case TypeCheck -> {
+                constant = expression.isConstant();
+                natural = expression.isNatural();
+                locality = expression.getLocality();
+                type = expression.getType();
+            }
+			case Simplify -> {
+				// do nothing
 			}
-
-			case Simplify: 
-				break;
-
-			default:
-				break;
-		}
+            default -> {
+            }
+        }
 		return null;
 	}
 
 	@Override
 	public CFStackRule evalArgs(CFDGRenderer renderer, CFStackRule parent) {
-		if (type != ExpType.RuleType) {
+		if (type != ExpType.Rule) {
 			driver.error("Evaluation of a non-shape expression in a shape context", location);
 			return null;
 		}

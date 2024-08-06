@@ -27,7 +27,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 import java.util.List;
 
 public class CommandIterator {
-    private List<CommandInfo> commands;
+    private final List<CommandInfo> commands;
     private int current;
 
     public CommandIterator(List<CommandInfo> commands) {

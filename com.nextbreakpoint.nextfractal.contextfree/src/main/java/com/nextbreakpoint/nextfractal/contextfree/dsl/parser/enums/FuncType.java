@@ -24,6 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
 public enum FuncType {
 	IllegalArguments(-2, "", ""), 
 	NotAFunction(-1, "", ""),
@@ -93,11 +95,13 @@ public enum FuncType {
 	RandIntDiscrete(125, "randint::discrete", "\u0017\u0069\u008D\u0061\u00FF\u002A"),
 	RandIntGeometric(126, "randint::geometric", "\u00D5\u0010\u002E\u00A5\u0003\u00B4");
 
-	private int type;
-	private String name;
-	private String entropy;
+	@Getter
+    private final int type;
+	private final String name;
+	@Getter
+    private final String entropy;
 
-	private FuncType(int type, String name, String entropy) {
+	FuncType(int type, String name, String entropy) {
 		this.type = type;
 		this.name = name;
 		this.entropy = entropy;
@@ -110,13 +114,5 @@ public enum FuncType {
 			}
 		}
 		return NotAFunction;
-	}
-
-	public String getEntropy() {
-		return entropy;
-	}
-
-	public int getType() {
-		return type;
 	}
 }

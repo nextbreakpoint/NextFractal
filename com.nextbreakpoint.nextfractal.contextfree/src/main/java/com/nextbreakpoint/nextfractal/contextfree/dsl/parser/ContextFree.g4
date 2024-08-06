@@ -8,7 +8,6 @@ options
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import java.util.Map;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.*;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.*;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.*;
 }
@@ -851,7 +850,7 @@ caseHeader returns [Integer result]
                 	}
                 }
             }
-            catch (DeferUntilRuntimeException e) {
+            catch (CFDGDeferUntilRuntimeException e) {
                 driver.error("Case expression is not constant", $CASE);
             }
             $result = 0;
@@ -1255,10 +1254,10 @@ function_definition_header returns [ASTDefine result]
             $result = driver.makeDefinition(name, true, $t);
             if ($result != null) {
             	int[] tupleSize = new int[1];
-            	boolean[] isNatural = new boolean[1];
-                $result.setExpType(AST.decodeType(driver, type, tupleSize, isNatural, $t));
+            	boolean[] natural = new boolean[1];
+                $result.setExpType(ASTUtils.decodeType(driver, type, tupleSize, natural, $t));
                 $result.setTupleSize(tupleSize[0]);
-                $result.setIsNatural(isNatural[0]); 
+                $result.setNatural(natural[0]);
             }
         }
         |

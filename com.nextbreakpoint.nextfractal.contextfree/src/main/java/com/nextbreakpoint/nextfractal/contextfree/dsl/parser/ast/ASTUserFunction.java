@@ -24,7 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDeferUntilRuntimeException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackNumber;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackRule;
@@ -32,51 +34,36 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Modification;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.CFDGException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.DeferUntilRuntimeException;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 
 public class ASTUserFunction extends ASTExpression {
-	private ASTExpression arguments;
-	private ASTDefine definition;
-	private int nameIndex;
-	protected boolean isLet;
+	@Setter
+    @Getter
+    private ASTExpression arguments;
+	@Getter
+    private ASTDefine definition;
+	@Getter
+    private final int nameIndex;
+	@Getter
+    protected boolean let;
 	private int oldTop;
 	private int oldSize;
 
 	public ASTUserFunction(CFDGDriver driver, int nameIndex, ASTExpression arguments, ASTDefine definition, Token location) {
-		super(driver, false, false, ExpType.NoType, location);
+		super(driver, false, false, ExpType.None, location);
 		this.nameIndex = nameIndex;
 		this.definition = definition;
 		this.arguments = arguments;
-		this.isLet = false;
+		this.let = false;
 	}
 
-	public ASTExpression getArguments() {
-		return arguments;
-	}
-
-	public void setArguments(ASTExpression arguments) {
-		this.arguments = arguments;
-	}
-
-	public ASTDefine getDefinition() {
-		return definition;
-	}
-
-	public int getNameIndex() {
-		return nameIndex;
-	}
-
-	public boolean isLet() {
-		return isLet;
-	}
-
-	@Override
+    @Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-		if (type != ExpType.NumericType) {
+		if (type != ExpType.Numeric) {
 			driver.error("Function does not evaluate to a number", location);
 			return -1;
 		}
@@ -86,7 +73,7 @@ public class ASTUserFunction extends ASTExpression {
 		if (result == null) {
 			return definition.getTupleSize();
 		}
-		if (renderer == null) throw new DeferUntilRuntimeException(location);
+		if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 		if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
 			throw new CFDGException("Stopping", location);
 		}
@@ -100,11 +87,11 @@ public class ASTUserFunction extends ASTExpression {
 
 	@Override
 	public void evaluate(Modification result, boolean shapeDest, CFDGRenderer renderer) {
-		if (type != ExpType.ModType) {
+		if (type != ExpType.Mod) {
 			driver.error("Function does not evaluate to an adjustment", location);
 			return;
 		}
-		if (renderer == null) throw new DeferUntilRuntimeException(location);
+		if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 		if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
 			throw new CFDGException("Stopping", location);
 		}
@@ -124,9 +111,8 @@ public class ASTUserFunction extends ASTExpression {
 	@Override
 	public ASTExpression simplify() {
 		if (arguments != null) {
-			if (arguments instanceof ASTCons) {
-				ASTCons carg = (ASTCons)arguments;
-				for (int i = 0; i < carg.getChildren().size(); i++) {
+			if (arguments instanceof ASTCons carg) {
+                for (int i = 0; i < carg.getChildren().size(); i++) {
 					carg.setChild(i, simplify(carg.getChild(i)));
 				}
 			} else {
@@ -138,57 +124,56 @@ public class ASTUserFunction extends ASTExpression {
 
 	@Override
 	public ASTExpression compile(CompilePhase ph) {
-		switch (ph) {
-			case TypeCheck: {
-				// Function calls and shape specifications are ambiguous at parse
-				// time so the parser always chooses a function call. During
-				// type checkParam we may need to convert to a shape spec.
-				ASTDefine[] def = new ASTDefine[1];
-				@SuppressWarnings("unchecked")
-				List<ASTParameter>[] p = new List[1];
-				String name = driver.getTypeInfo(nameIndex, def, p);
-				if (def[0] != null && p[0] != null) {
-					driver.error("Name matches both a function and a shape", location);
-					return null;
-				}
-				if (def[0] == null && p[0] == null) {
-					driver.error("Name does not match shape name or function name", location);
-					return null;
-				}
-				if (def[0] != null) {
-					arguments = compile(arguments, ph);
-					definition = def[0];
-					ASTParameter.checkType(driver, def[0].getParameters(), arguments, false);
-					isConstant = false;
-					isNatural = definition.isNatural();
-					type = definition.getExpType();
-					locality = arguments != null ? arguments.getLocality() : Locality.PureLocal;
-					if (definition.getExp() != null && definition.getExp().getLocality() == Locality.ImpureNonlocal && locality == Locality.PureNonlocal) {
-						locality = Locality.ImpureNonlocal;
-					}
-					return null;
-				}
-				ASTRuleSpecifier r = new ASTRuleSpecifier(driver, nameIndex, name, arguments, null, location);
-				r.compile(ph);
-				return r;
+        switch (ph) {
+            case TypeCheck -> {
+                // Function calls and shape specifications are ambiguous at parse
+                // time so the parser always chooses a function call. During
+                // type checkParam we may need to convert to a shape spec.
+                ASTDefine[] def = new ASTDefine[1];
+                @SuppressWarnings("unchecked")
+                List<ASTParameter>[] p = new List[1];
+                String name = driver.getTypeInfo(nameIndex, def, p);
+                if (def[0] != null && p[0] != null) {
+                    driver.error("Name matches both a function and a shape", location);
+                    return null;
+                }
+                if (def[0] == null && p[0] == null) {
+                    driver.error("Name does not match shape name or function name", location);
+                    return null;
+                }
+                if (def[0] != null) {
+                    arguments = compile(arguments, ph);
+                    definition = def[0];
+                    ASTParameter.checkType(driver, def[0].getParameters(), arguments, false);
+                    constant = false;
+                    natural = definition.isNatural();
+                    type = definition.getExpType();
+                    locality = arguments != null ? arguments.getLocality() : Locality.PureLocal;
+                    if (definition.getExp() != null && definition.getExp().getLocality() == Locality.ImpureNonLocal && locality == Locality.PureNonLocal) {
+                        locality = Locality.ImpureNonLocal;
+                    }
+                    return null;
+                }
+                ASTRuleSpecifier r = new ASTRuleSpecifier(driver, nameIndex, name, arguments, null, location);
+                r.compile(ph);
+                return r;
+            }
+			case Simplify -> {
+				// do nothing
 			}
-	
-			case Simplify: 
-				break;
-	
-			default:
-				break;
-		}
+			default -> {
+            }
+        }
 		return null;
 	}
 
 	@Override
 	public CFStackRule evalArgs(CFDGRenderer renderer, CFStackRule parent) {
-		if (type != ExpType.RuleType) {
+		if (type != ExpType.Rule) {
 			driver.error("Function does not evaluate to a shape", location);
 			return null;
 		}
-		if (renderer == null) throw new DeferUntilRuntimeException(location);
+		if (renderer == null) throw new CFDGDeferUntilRuntimeException(location);
 		if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
 			throw new CFDGException("Stopping", location);
 		}
@@ -208,7 +193,7 @@ public class ASTUserFunction extends ASTExpression {
 			}
 			renderer.setStackSize(oldSize + definition.getStackCount());
 			renderer.setStackItem(oldSize, new CFStackNumber(renderer.getStack(), 0));
-			renderer.getStackItem(oldSize).evalArgs(renderer, arguments, definition.getParameters(), isLet);
+			renderer.getStackItem(oldSize).evalArgs(renderer, arguments, definition.getParameters(), let);
 			renderer.setLogicalStackTop(renderer.getStackSize());
 		}
 	}

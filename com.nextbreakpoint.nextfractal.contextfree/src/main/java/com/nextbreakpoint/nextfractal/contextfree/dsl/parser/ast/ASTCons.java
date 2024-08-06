@@ -30,16 +30,18 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Modification;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
+import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ASTCons extends ASTExpression {
-	private List<ASTExpression> children = new ArrayList<ASTExpression>();
+	private final List<ASTExpression> children = new ArrayList<>();
 
 	public ASTCons(CFDGDriver driver, List<ASTExpression> kids, Token location) {
-		super(driver, true, true, ExpType.NoType, location);
+		super(driver, true, true, ExpType.None, location);
 		locality = Locality.PureLocal;
 		for (ASTExpression kid : kids) {
 			append(kid);
@@ -47,7 +49,7 @@ public class ASTCons extends ASTExpression {
 	}
 
 	public ASTCons(CFDGDriver driver, Token location, ASTExpression... args) {
-		super(driver, true, true, ExpType.NoType, location);
+		super(driver, true, true, ExpType.None, location);
 		//TODO controllare
 		locality = Locality.PureLocal;
 		for (ASTExpression arg : args) {
@@ -59,17 +61,15 @@ public class ASTCons extends ASTExpression {
 	public ASTExpression simplify() {
 		if (children.size() == 1) {
 			//TODO controllare
-			return simplify(children.get(0));
+			return simplify(children.getFirst());
 		}
-		for (int i = 0; i < children.size(); i++) {
-			children.set(i, simplify(children.get(i)));
-		}
+        children.replaceAll(this::simplify);
         return this;
 	}
 
 	@Override
 	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-		if ((type.getType() & (ExpType.NumericType.getType() | ExpType.FlagType.getType())) == 0 || (type.getType() & (ExpType.ModType.getType() | ExpType.RuleType.getType())) != 0) {
+		if ((type.getType() & (ExpType.Numeric.getType() | ExpType.Flag.getType())) == 0 || (type.getType() & (ExpType.Mod.getType() | ExpType.Rule.getType())) != 0) {
 			driver.error("Non-numeric expression in a numeric context", null);
 			return -1;
 		}
@@ -111,36 +111,30 @@ public class ASTCons extends ASTExpression {
 
 	@Override
 	public ASTExpression compile(CompilePhase ph) {
-		switch (ph) {
-			case TypeCheck: {
-				isConstant = isNatural = false;
-				locality = Locality.PureLocal;
-				type = ExpType.NoType;
-				for (int i = 0; i < children.size(); i++) {
-					children.set(i, compile(children.get(i), ph));
-					ASTExpression child = children.get(i);
-					isConstant = isConstant && child.isConstant();
-					isNatural = isNatural && child.isNatural();
-					locality = AST.combineLocality(locality, child.getLocality());
-					type = ExpType.fromType(type.getType() | child.getType().getType());
-				}
-				break;
+        switch (ph) {
+            case TypeCheck -> {
+                constant = natural = false;
+                locality = Locality.PureLocal;
+                type = ExpType.None;
+                for (int i = 0; i < children.size(); i++) {
+                    children.set(i, compile(children.get(i), ph));
+                    ASTExpression child = children.get(i);
+                    constant = constant && child.isConstant();
+                    natural = natural && child.isNatural();
+                    locality = ASTUtils.combineLocality(locality, child.getLocality());
+                    type = ExpType.fromType(type.getType() | child.getType().getType());
+                }
+            }
+			case Simplify -> {
+				// do nothing
 			}
-
-			case Simplify:
-				break;
-
-			default:
-				break;
-		}
+            default -> {
+            }
+        }
 		return null;
 	}
 
-	public List<ASTExpression> getChildren() {
-		return children;
-	}
-
-	@Override
+    @Override
 	public int size() {
 		return children.size();
 	}
@@ -163,16 +157,15 @@ public class ASTCons extends ASTExpression {
 	@Override
 	public ASTExpression append(ASTExpression e) {
         if (e == null) return this;
-        isConstant = isConstant && e.isConstant();
-        isNatural = isNatural && e.isNatural();
-		locality = AST.combineLocality(locality, e.getLocality());
+        constant = constant && e.isConstant();
+        natural = natural && e.isNatural();
+		locality = ASTUtils.combineLocality(locality, e.getLocality());
         type = ExpType.fromType(type.getType() | e.getType().getType());
         
-        // can't  insert an ASTcons into children, it will be flattened away.
+        // can't insert an ASTcons into children, it will be flattened away.
         // You must wrap the ASTcons in an ASTparen in order to insert it whole.
-        if (e instanceof ASTCons) {
-        	ASTCons c = (ASTCons)e;
-        	children.addAll(c.getChildren());
+        if (e instanceof ASTCons c) {
+            children.addAll(c.getChildren());
         } else {
         	children.add(e);
         }

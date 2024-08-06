@@ -1,28 +1,22 @@
 /*
- * NextFractal 2.3.2
- * https://github.com/nextbreakpoint/nextfractal
- *
- * Copyright 2015-2024 Andrea Medeghini
- *
- * This file is part of NextFractal.
- *
- * NextFractal is an application for creating fractals and other graphics artifacts.
- *
- * NextFractal is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * NextFractal is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
- *
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
  */
-package com.nextbreakpoint.nextfractal.contextfree.core;
+package org.apache.batik.ext.awt.geom;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -36,7 +30,7 @@ import java.util.Arrays;
 
 /**
  * The <code>ExtendedGeneralPath</code> class represents a geometric
- * path constructed fromType straight lines, quadratic and cubic (Bezier)
+ * path constructed from straight lines, quadratic and cubic (Bezier)
  * curves and elliptical arc. This class delegates lines and curves to
  * an enclosed <code>GeneralPath</code>. Elliptical arc is implemented
  * using an <code>Arc2D</code> in float precision.
@@ -85,7 +79,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
     }
 
     /**
-     * Constructs a new <code>ExtendedGeneralPath</code> object fromType
+     * Constructs a new <code>ExtendedGeneralPath</code> object from
      * an arbitrary <code>Shape</code> object.
      */
     public ExtendedGeneralPath(Shape s) {
@@ -94,7 +88,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
     }
 
     /**
-     * Adds an elliptical arc, defined by two radii, an angle fromType the
+     * Adds an elliptical arc, defined by two radii, an angle from the
      * x-axis, a flag to choose the large arc or not, a flag to
      * indicate if we increase or decrease the angles and the final
      * point of the arc.
@@ -102,7 +96,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
      * @param rx the x radius of the ellipse
      * @param ry the y radius of the ellipse
      *
-     * @param angle the angle fromType the x-axis of the current
+     * @param angle the angle from the x-axis of the current
      * coordinate system to the x-axis of the ellipse in degrees.
      *
      * @param largeArcFlag the large arc flag. If true the arc
@@ -128,7 +122,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
             return;
         }
 
-        checkMoveTo();  // checkParam if prev command was moveto
+        checkMoveTo();  // check if prev command was moveto
 
         // Get the current (x, y) coordinates of the path
         double x0 = cx;
@@ -161,7 +155,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
 
 
     /**
-     * This constructs an unrotated Arc2D fromType the SVG specification of an
+     * This constructs an unrotated Arc2D from the SVG specification of an
      * Elliptical arc.  To get the final arc you need to apply a rotation
      * transform such as:
      *
@@ -181,7 +175,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
         // Compute the half distance between the current and the final point
         double dx2 = (x0 - x) / 2.0;
         double dy2 = (y0 - y) / 2.0;
-        // Convert angle fromType degrees to radians
+        // Convert angle from degrees to radians
         angle = Math.toRadians(angle % 360.0);
         double cosAngle = Math.cos(angle);
         double sinAngle = Math.sin(angle);
@@ -198,11 +192,12 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
         double Pry = ry * ry;
         double Px1 = x1 * x1;
         double Py1 = y1 * y1;
-        // checkParam that radii are large enough
+        // check that radii are large enough
         double radiiCheck = Px1/Prx + Py1/Pry;
-        if (radiiCheck > 1) {
-            rx = Math.sqrt(radiiCheck) * rx;
-            ry = Math.sqrt(radiiCheck) * ry;
+        if (radiiCheck > 0.99999) {  // don't cut it too close
+            double radiiScale = Math.sqrt(radiiCheck) * 1.00001;
+            rx = radiiScale * rx;
+            ry = radiiScale * ry;
             Prx = rx * rx;
             Pry = ry * ry;
         }
@@ -218,7 +213,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
         double cy1 = coef * -((ry * x1) / rx);
 
         //
-        // Step 3 : Compute (cx, cy) fromType (cx1, cy1)
+        // Step 3 : Compute (cx, cy) from (cx1, cy1)
         //
         double sx2 = (x0 + x) / 2.0;
         double sy2 = (y0 + y) / 2.0;
@@ -282,7 +277,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
     public synchronized void lineTo(float x, float y) {
-        checkMoveTo();  // checkParam if prev command was moveto
+        checkMoveTo();  // check if prev command was moveto
         path.lineTo(x, y);
 
         makeRoom(2);
@@ -295,7 +290,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
     public synchronized void quadTo(float x1, float y1, float x2, float y2) {
-        checkMoveTo();  // checkParam if prev command was moveto
+        checkMoveTo();  // check if prev command was moveto
         path.quadTo(x1, y1, x2, y2);
 
         makeRoom(4);
@@ -312,7 +307,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
     public synchronized void curveTo(float x1, float y1,
                                      float x2, float y2,
                                      float x3, float y3) {
-        checkMoveTo();   // checkParam if prev command was moveto
+        checkMoveTo();   // check if prev command was moveto
         path.curveTo(x1, y1, x2, y2, x3, y3);
 
         makeRoom(6);
@@ -520,88 +515,77 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public synchronized Rectangle getBounds() {
+    public synchronized Rectangle getBounds() {
         return path.getBounds();
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public synchronized Rectangle2D getBounds2D() {
+    public synchronized Rectangle2D getBounds2D() {
         return path.getBounds2D();
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public boolean contains(double x, double y) {
+    public boolean contains(double x, double y) {
         return path.contains(x, y);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public boolean contains(Point2D p) {
+    public boolean contains(Point2D p) {
         return path.contains(p);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public boolean contains(double x, double y, double w, double h) {
+    public boolean contains(double x, double y, double w, double h) {
         return path.contains(x, y, w, h);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public boolean contains(Rectangle2D r) {
+    public boolean contains(Rectangle2D r) {
         return path.contains(r);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public boolean intersects(double x, double y, double w, double h) {
+    public boolean intersects(double x, double y, double w, double h) {
         return path.intersects(x, y, w, h);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public boolean intersects(Rectangle2D r) {
+    public boolean intersects(Rectangle2D r) {
         return path.intersects(r);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public PathIterator getPathIterator(AffineTransform at) {
+    public PathIterator getPathIterator(AffineTransform at) {
         return path.getPathIterator(at);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public PathIterator getPathIterator(AffineTransform at, double flatness) {
+    public PathIterator getPathIterator(AffineTransform at, double flatness) {
         return path.getPathIterator(at, flatness);
     }
 
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public ExtendedPathIterator getExtendedPathIterator() {
+    public ExtendedPathIterator getExtendedPathIterator() {
         return new EPI();
     }
 
@@ -609,13 +593,11 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
         int segNum = 0;
         int valsIdx = 0;
 
-        @Override
-		public int currentSegment() {
+        public int currentSegment() {
             return types[segNum];
         }
 
-        @Override
-		public int currentSegment(double[] coords) {
+        public int currentSegment(double[] coords) {
             int ret = types[segNum];
             switch (ret) {
             case SEG_CLOSE: break;
@@ -654,8 +636,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
             return ret;
         }
 
-        @Override
-		public int currentSegment(float[] coords) {
+        public int currentSegment(float[] coords) {
             int ret = types[segNum];
             switch (ret) {
             case SEG_CLOSE: break;
@@ -677,16 +658,13 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
             return ret;
         }
 
-        @Override
-		public int getWindingRule() {
+        public int getWindingRule() {
             return path.getWindingRule();
         }
-        @Override
-		public boolean isDone() {
+        public boolean isDone() {
             return segNum == numSeg;
         }
-        @Override
-		public void next() {
+        public void next() {
             int type = types[segNum++];
             switch (type) {
             case SEG_CLOSE: break;
@@ -702,8 +680,7 @@ public class ExtendedGeneralPath implements ExtendedShape, Cloneable {
     /**
      * Delegates to the enclosed <code>GeneralPath</code>.
      */
-    @Override
-	public Object clone() {
+    public Object clone() {
         try {
             ExtendedGeneralPath result = (ExtendedGeneralPath) super.clone();
             result.path = (GeneralPath) path.clone();

@@ -37,6 +37,9 @@ import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Surface;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.java.Log;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -51,38 +54,36 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- * @author Andrea Medeghini
- */
+@Log
 public class Renderer {
-	private static final Logger logger = Logger.getLogger(Renderer.class.getName());
 	protected final ThreadFactory threadFactory;
 	protected final GraphicsFactory renderFactory;
-	protected volatile RendererDelegate rendererDelegate;
-	protected volatile Surface buffer;
-	protected volatile List<ScriptError> errors = new ArrayList<>();
-	protected volatile boolean aborted;
-	protected volatile boolean interrupted;
-	protected volatile boolean cfdgChanged;
-	protected volatile float progress;
-	protected boolean opaque;
-	protected Size size;
+	protected Surface buffer;
+	protected boolean aborted;
+	@Getter
+    protected volatile boolean interrupted;
+	@Getter
+	protected float progress;
+	@Getter
+	private boolean initialized;
+	protected boolean cfdgChanged;
+	@Setter
+    protected boolean opaque;
+	@Setter
+	protected RendererDelegate rendererDelegate;
+	@Getter
+    protected Size size;
 	protected Tile tile;
-	private final Lock lock = new Lock();
-	private final RenderRunnable renderTask = new RenderRunnable();
-	private ExecutorService executor;
-	private volatile Future<?> future;
+	protected List<ScriptError> errors = new ArrayList<>();
+	private Future<?> future;
 	private CFDGImage cfdgInterpreter;
 	private CFDGRenderer cfdgRenderer;
 	private String cfdgSeed;
-	private boolean initialized;
+	private final RenderRunnable renderTask = new RenderRunnable();
+	private final ExecutorService executor;
+	private final Lock lock = new Lock();
 
-	/**
-	 * @param threadFactory
-	 * @param tile
-	 */
 	public Renderer(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
@@ -95,32 +96,12 @@ public class Renderer {
 		executor = Executors.newSingleThreadExecutor(threadFactory);
 	}
 
-	/**
-	 * 
-	 */
 	public void dispose() {
 		shutdown();
 		free();
 	}
 
-	/**
-	 * @return
-	 */
-	public Size getSize() {
-		return size;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isInterrupted() {
-		return interrupted;
-	}
-
-	/**
-	 * 
-	 */
-	public void abortTasks() {
+    public void abortTasks() {
 		interrupted = true;
 		if (cfdgRenderer != null) {
 			cfdgRenderer.setRequestStop(interrupted);
@@ -130,9 +111,6 @@ public class Renderer {
 //		}
 	}
 
-	/**
-	 * 
-	 */
 	public void waitForTasks() {
 		try {
 			if (future != null) {
@@ -148,9 +126,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	public void runTask() {
 		if (future == null) {
 			interrupted = false;
@@ -158,54 +133,21 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @return
-	 */
-	public RendererDelegate getRendererDelegate() {
-		return rendererDelegate;
-	}
-
-	/**
-	 * @param rendererDelegate
-	 */
-	public void setRendererDelegate(RendererDelegate rendererDelegate) {
-		this.rendererDelegate = rendererDelegate;
-	}
-
-	/**
-	 * @return
-	 */
-	public float getProgress() {
-		return progress;
-	}
-
-	/**
-	 * 
-	 */
-	public void init() {
+    public void init() {
 		initialized = true;
 //		rendererFractal.initialize();
 	}
 
-	/**
-	 * @param cfdgInterpreter
-	 */
 	public void setInterpreter(CFDGImage cfdgInterpreter) {
 		this.cfdgInterpreter = cfdgInterpreter;
 		cfdgChanged = true;
 	}
 
-	/**
-	 * @param cfdgSeed
-	 */
 	public void setSeed(String cfdgSeed) {
 		this.cfdgSeed = cfdgSeed;
 		cfdgChanged = true;
 	}
 
-	/**
-	 * @param pixels
-	 */
 	public void getPixels(int[] pixels) {
 		int bufferWidth = buffer.getSize().width();
 		int bufferHeight = buffer.getSize().height();
@@ -227,9 +169,6 @@ public class Renderer {
 		}
 	}
 	
-	/**
-	 * @param gc
-	 */
 	public void drawImage(final GraphicsContext gc, final int x, final int y) {
 		lock.lock();
 		if (buffer != null) {
@@ -246,9 +185,6 @@ public class Renderer {
 		lock.unlock();
 	}
 
-	/**
-	 * @param gc
-	 */
 	public void copyImage(final GraphicsContext gc) {
 		lock.lock();
 		if (buffer != null) {
@@ -259,13 +195,6 @@ public class Renderer {
 		lock.unlock();
 	}
 
-//	/**
-//	 * @param gc
-//	 * @param x
-//	 * @param y
-//	 * @param w
-//	 * @param h
-//	 */
 //	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		lock.lock();
 //		if (buffer != null) {
@@ -293,11 +222,6 @@ public class Renderer {
 		buffer.setBuffer(renderFactory.createBuffer(size.width(), size.height()));
 	}
 
-	/**
-	 * @param tile
-	 * @param rotation
-	 * @return
-	 */
 	protected Tile computeOptimalBufferSize(Tile tile, double rotation) {
 		Size tileSize = tile.tileSize();
 		Size imageSize = tile.imageSize();
@@ -306,9 +230,6 @@ public class Renderer {
 		return new Tile(imageSize, tileSize, tileOffset, borderSize);
 	}
 
-	/**
-	 * 
-	 */
 	protected void doRender() {
 		Graphics2D g2d = null;
 		try {
@@ -343,7 +264,7 @@ public class Renderer {
 				didChanged(progress, pixels);
 			}
 		} catch (Throwable e) {
-			logger.log(Level.WARNING, "Can't render image", e);
+			log.log(Level.WARNING, "Can't render image", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
 		} finally {
 			if (g2d != null) {
@@ -352,10 +273,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * @param rotation
-	 * @return
-	 */
 	protected AffineTransform createTransform(double rotation) {
 		final Size tileSize = buffer.getTile().tileSize();
 		final Size borderSize = buffer.getTile().borderSize();
@@ -371,9 +288,6 @@ public class Renderer {
 		return affine;
 	}
 
-//	/**
-//	 * @return
-//	 */
 //	protected AffineTransform createTileTransform() {
 //		final RendererSize tileSize = buffer.getTile().tileSize();
 //		final RendererSize imageSize = buffer.getTile().imageSize();
@@ -387,10 +301,6 @@ public class Renderer {
 //		return affine;
 //	}
 
-	/**
-	 * @param progress
-	 * @param pixels
-	 */
 	protected void didChanged(float progress, int[] pixels) {
 		lock.lock();
 		if (buffer != null) {
@@ -402,9 +312,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	protected void free() {
 		if (buffer != null) {
 			buffer.dispose();
@@ -412,9 +319,6 @@ public class Renderer {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	protected void shutdown() {
 		executor.shutdownNow();
 		try {
@@ -436,17 +340,5 @@ public class Renderer {
 		List<ScriptError> result = new ArrayList<>(errors);
 		errors.clear();
 		return result;
-	}
-
-	public boolean isOpaque() {
-		return opaque;
-	}
-
-	public void setOpaque(boolean opaque) {
-		this.opaque = opaque;
-	}
-
-	public boolean isInitialized() {
-		return initialized;
 	}
 }

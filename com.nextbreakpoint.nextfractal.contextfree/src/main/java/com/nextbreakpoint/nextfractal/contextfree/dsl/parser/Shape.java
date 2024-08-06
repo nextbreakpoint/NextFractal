@@ -24,11 +24,19 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
 public class Shape implements Cloneable {
-	protected int shapeType;
-	protected Modification worldState;
-	protected double areaCache;
-	protected CFStackRule params;
+	@Setter
+    protected int shapeType;
+	@Setter
+    protected Modification worldState;
+	@Setter
+    protected double areaCache;
+	@Setter
+    protected CFStackRule parameters;
 
 	public Shape() {
 		shapeType = -1;
@@ -40,47 +48,15 @@ public class Shape implements Cloneable {
 		shapeType = shape.shapeType;
 		areaCache = shape.areaCache;
 		worldState = (Modification) shape.worldState.clone();
-		params = shape.params != null ? (CFStackRule) shape.params.clone() : null;
+		parameters = shape.parameters != null ? (CFStackRule) shape.parameters.clone() : null;
 	}
 
-	public CFStackRule getParameters() {
-		return params;
-	}
-
-	public void setParameters(CFStackRule params) {
-		this.params = params;
-	}
-
-	public int getShapeType() {
-		return shapeType;
-	}
-
-	public void setShapeType(int shapeType) {
-		this.shapeType = shapeType;
-	}
-
-	public Modification getWorldState() {
-		return worldState;
-	}
-
-	public void setWorldState(Modification worldState) {
-		this.worldState = worldState;
-	}
-
-	public double getAreaCache() {
-		return areaCache;
-	}
-
-	public void setAreaCache(double areaCache) {
-		this.areaCache = areaCache;
-	}
-
-	public Object clone() {
+    public Object clone() {
 		Shape shape = new Shape();
 		shape.shapeType = shapeType;
 		shape.areaCache = areaCache;
 		shape.worldState = (Modification)worldState.clone();
-		shape.params = params;
+		shape.parameters = parameters;
 		return shape;
 	}
 }

@@ -24,11 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGCompiler;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -78,7 +78,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 			renderer.waitForTasks();
 			renderer.getPixels(pixels);
 			aborted = renderer.isInterrupted();
-		} catch (ParserException e) {
+		} catch (CFDGParserException e) {
 			log.log(Level.WARNING, e.getMessage(), e);
 		} catch (Throwable e) {
 			log.severe(e.getMessage());

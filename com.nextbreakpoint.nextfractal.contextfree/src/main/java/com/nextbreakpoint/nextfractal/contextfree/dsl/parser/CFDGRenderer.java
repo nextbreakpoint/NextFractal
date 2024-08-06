@@ -25,7 +25,6 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
-import com.nextbreakpoint.nextfractal.contextfree.core.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTCompiledPath;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
@@ -37,9 +36,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PrimShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.CFDGException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.StopException;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.RenderListener;
+import lombok.extern.java.Log;
 import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.AffineTransform;
@@ -51,9 +49,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.IntStream;
 
+@Log
 public class CFDGRenderer {
-	private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CFDG.class.getName());
-
 	private static final double FIXED_BORDER = 8.0;
 	private static final double SHAPE_BORDER = 1.0;
 	public static final int DRAW_AT = 1000;
@@ -459,7 +456,7 @@ public class CFDGRenderer {
 			if (parameter.isLoopIndex() || parameter.getStackIndex() < 0) {
 				continue;
 			}
-			if (parameter.getType() == ExpType.RuleType) {
+			if (parameter.getType() == ExpType.Rule) {
 				//TODO rivedere
 				((CFStackRule)cfStack.getStackItem(pos)).setParamCount(0);
 			}
@@ -765,15 +762,15 @@ public class CFDGRenderer {
 				ASTRule rule = cfdg.findRule(shape.getShapeType(), shape.getWorldState().getRand64Seed().getDouble());
 				drawingMode = false;
 				rule.traverse(shape, false, this);
-			} catch (StopException e) {
+			} catch (CFDGStopException e) {
 				break;
 			} catch (CFDGException e) {
-				logger.log(Level.WARNING, "Can't render CFDG image", e);
+				log.log(Level.WARNING, "Can't render CFDG image", e);
 				requestStop = true;
 				cfdg.getDriver().error(e.getMessage(), e.getLocation());
 				break;
 			} catch (Exception e) {
-				logger.log(Level.WARNING, "Can't render CFDG image", e);
+				log.log(Level.WARNING, "Can't render CFDG image", e);
 				//TODO rivedere
 				requestStop = true;
 				cfdg.getDriver().error(e.getMessage(), null);
@@ -864,15 +861,15 @@ public class CFDGRenderer {
 					outputBounds.apply(shape);
 					return null;
 				});
-			} catch (StopException e) {
+			} catch (CFDGStopException e) {
 				return;
 			} catch (CFDGException e) {
-				logger.log(Level.WARNING, "Can't render CFDG image", e);
+				log.log(Level.WARNING, "Can't render CFDG image", e);
 				requestStop = true;
 				cfdg.getDriver().error(e.getMessage(), e.getLocation());
 				return;
 			} catch (Exception e) {
-				logger.log(Level.WARNING, "Can't render CFDG image", e);
+				log.log(Level.WARNING, "Can't render CFDG image", e);
 				//TODO rivedere
 				requestStop = true;
 				cfdg.getDriver().error(e.getMessage(), null);
@@ -1042,7 +1039,7 @@ public class CFDGRenderer {
 			long totalTime = System.currentTimeMillis() - time;
 			cfdg.getDriver().info("Drawing of " + finishedShapes.size() + " shapes took " + totalTime / 1000.0 + "s", null);
 			finishedShapes.clear();
-		} catch (StopException e) {
+		} catch (CFDGStopException e) {
 		} catch (Exception e) {
 			cfdg.getDriver().error(e.getMessage(), null);
 		}
@@ -1075,11 +1072,11 @@ public class CFDGRenderer {
 
 	private Object drawShape(FinishedShape shape) {
 		if (requestStop) {
-			throw new StopException();
+			throw new CFDGStopException();
 		}
 
 		if (!finalStep && requestFinishUp) {
-			throw new StopException();
+			throw new CFDGStopException();
 		}
 
 		if (requestUpdate) {
@@ -1094,7 +1091,7 @@ public class CFDGRenderer {
 
 		transform.preConcatenate(currTransform);
 
-		double a = shape.getWorldState().getTransformZ().sz() * currArea;
+		double a = shape.getWorldState().getTransformZ().getSz() * currArea;
 
 		if ((!Double.isFinite(a) && shape.getShapeType() != PrimShapeType.fillType.getType()) || a < minArea) {
 			return null;
@@ -1124,7 +1121,7 @@ public class CFDGRenderer {
 			} else {
 				cfdg.getDriver().error("Non drawable shape with no rules: " + cfdg.decodeShapeName(shape.getShapeType()), null);
 				requestStop = true;
-				throw new StopException();
+				throw new CFDGStopException();
 			}
 		}
 

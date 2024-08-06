@@ -24,14 +24,13 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGLogger;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeLexer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ErrorStrategy;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.exceptions.CFDGException;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.extern.java.Log;
 import org.antlr.v4.runtime.CharStream;
@@ -50,14 +49,14 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 public class CFDGParser {
 	private static final String INCLUDE_LOCATION = "include.location";
 
-	public CFDGParserResult parse(String source) throws ParserException {
+	public CFDGParserResult parse(String source) throws CFDGParserException {
 		//TODO move errors
 		List<ScriptError> errors = new ArrayList<>();
 		CFDG cfdg = parse(source, errors);
 		return new CFDGParserResult(cfdg, source, errors);
 	}
 
-	private CFDG parse(String source, List<ScriptError> errors) throws ParserException {
+	private CFDG parse(String source, List<ScriptError> errors) throws CFDGParserException {
 		try {
 			CharStream is = CharStreams.fromReader(new StringReader(source));
 			ContextFreeLexer lexer = new ContextFreeLexer(is);
@@ -72,7 +71,7 @@ public class CFDGParser {
 			errors.addAll(logger.getErrors());
 			final CFDG cfdg = parser.getDriver().getCFDG();
 			if (cfdg == null || !errors.isEmpty()) {
-				throw new ParserException("Can't parse source", errors);
+				throw new CFDGParserException("Can't parse source", errors);
 			}
 			return cfdg;
 		} catch (CFDGException e) {
@@ -83,12 +82,12 @@ public class CFDGParser {
             ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
 			log.log(Level.FINE, error.toString(), e);
 			errors.add(error);
-			throw new ParserException("Can't parse source", errors);
+			throw new CFDGParserException("Can't parse source", errors);
 		} catch (Exception e) {
             ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
 			log.log(Level.FINE, error.toString(), e);
 			errors.add(error);
-			throw new ParserException("Can't parse source", errors);
+			throw new CFDGParserException("Can't parse source", errors);
 		}
 	}
 

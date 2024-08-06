@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 public class FinishedShape extends Shape implements Comparable<FinishedShape> {
-	private Bounds bounds;
+	private final Bounds bounds;
 
 	public FinishedShape(Shape shape, int order, Bounds bounds) {
 		super(shape);
@@ -35,10 +35,15 @@ public class FinishedShape extends Shape implements Comparable<FinishedShape> {
 
 	@Override
 	public int compareTo(FinishedShape o) {
-		if (worldState.getTransformZ().tz() == o.worldState.getTransformZ().tz()) {
-			return worldState.colorAssignment() - o.worldState.colorAssignment() < 0 ? -1 : 1;
+		if (worldState.getTransformZ().getTz() == o.worldState.getTransformZ().getTz()) {
+			final int c = worldState.colorAssignment() - o.worldState.colorAssignment();
+			if (c == 0) {
+				return 0;
+			} else {
+				return c < 0 ? -1 : 1;
+			}
 		} else {
-			return worldState.getTransformZ().tz() - o.worldState.getTransformZ().tz() < 0 ? -1 : 1;
+			return worldState.getTransformZ().getTz() - o.worldState.getTransformZ().getTz() < 0 ? -1 : 1;
 		}
 	}
 
