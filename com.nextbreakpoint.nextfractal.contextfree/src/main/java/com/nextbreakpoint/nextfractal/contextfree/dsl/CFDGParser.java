@@ -53,7 +53,7 @@ public class CFDGParser {
 		//TODO move errors
 		List<ScriptError> errors = new ArrayList<>();
 		CFDG cfdg = parse(source, errors);
-		return new CFDGParserResult(cfdg, source, errors);
+		return new CFDGParserResult(new CFDGImage(cfdg), source, errors);
 	}
 
 	private CFDG parse(String source, List<ScriptError> errors) throws CFDGParserException {

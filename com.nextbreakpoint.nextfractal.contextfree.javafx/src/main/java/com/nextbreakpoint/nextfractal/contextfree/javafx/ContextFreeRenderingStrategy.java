@@ -1,15 +1,15 @@
 package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
@@ -40,7 +40,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     private Coordinator coordinator;
     private boolean hasError;
     private String cfdgSource;
-    private CFDG cfdg;
+    private CFDGImage cfdgImage;
 
     public ContextFreeRenderingStrategy(RenderingContext renderingContext, MetadataDelegate delegate, int width, int height, int rows, int columns) {
         this.renderingContext = renderingContext;
@@ -99,8 +99,8 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
             if (coordinator != null) {
                 coordinator.abort();
                 coordinator.waitFor();
-                if (cfdgChanged && cfdg != null) {
-                    coordinator.setInterpreter(new CFDGImage(cfdg));
+                if (cfdgChanged && cfdgImage != null) {
+                    coordinator.setImage(cfdgImage);
                     coordinator.setSeed(((ContextFreeMetadata)delegate.getMetadata()).getSeed());
                 }
                 coordinator.init();
@@ -129,12 +129,8 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     }
 
     private Coordinator createRendererCoordinator(Map<String, Integer> hints, Tile tile, int priority, String name) {
-        final DefaultThreadFactory threadFactory = createThreadFactory(name, priority);
+        final DefaultThreadFactory threadFactory = ThreadUtils.createThreadFactory(name, priority);
         return new Coordinator(threadFactory, renderFactory, tile, hints);
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name, int priority) {
-        return new DefaultThreadFactory(name, true, priority);
     }
 
     private boolean[] createCFDG(ParserResult result) throws CFDGParserException {
@@ -143,11 +139,11 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
             throw new CFDGParserException("Failed to compile source", result.errors());
         }
         boolean[] changed = new boolean[] { false, false };
-        CFDGParserResult cfdgResult = (CFDGParserResult) result.result();
-        String newCFDG = cfdgResult.source();
-        changed[0] = !newCFDG.equals(cfdgSource);
-        cfdgSource = newCFDG;
-        cfdg = cfdgResult.cfdg();
+        CFDGParserResult parserResult = (CFDGParserResult) result.result();
+        String source = parserResult.source();
+        changed[0] = !source.equals(cfdgSource);
+        cfdgSource = source;
+        cfdgImage = parserResult.image();
         return changed;
     }
 

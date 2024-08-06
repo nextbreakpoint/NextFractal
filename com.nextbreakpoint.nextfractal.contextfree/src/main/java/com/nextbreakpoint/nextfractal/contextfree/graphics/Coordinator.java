@@ -82,8 +82,8 @@ public class Coordinator implements RendererDelegate {
 		return renderer.getSize();
 	}
 
-	public void setInterpreter(CFDGImage cfdgInterpreter) {
-		renderer.setInterpreter(cfdgInterpreter);
+	public void setImage(CFDGImage cfdgImage) {
+		renderer.setImage(cfdgImage);
 	}
 
 	public void setSeed(String cfdgSeed) {

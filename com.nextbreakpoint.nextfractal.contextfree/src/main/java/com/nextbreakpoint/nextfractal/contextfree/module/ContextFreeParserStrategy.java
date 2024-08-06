@@ -37,15 +37,15 @@ public class ContextFreeParserStrategy implements ParserStrategy {
     private ParserResult createParserResult(Session session) {
         try {
             final CFDGParser parser = new CFDGParser();
-            final CFDGParserResult result = parser.parse(session.script());
-            return new ParserResult(session, List.of(), computeHighlighting(session.script()), result);
+            final CFDGParserResult parserResult = parser.parse(session.script());
+            return new ParserResult(session, List.of(), computeHighlighting(session.script()), parserResult);
         } catch (CFDGParserException e) {
-            final CFDGParserResult result = new CFDGParserResult(null, session.script(), e.getErrors());
-            return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
+            final CFDGParserResult parserResult = new CFDGParserResult(null, session.script(), e.getErrors());
+            return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), parserResult);
         } catch (Exception e) {
             final List<ScriptError> errors = List.of(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
-            final CFDGParserResult result = new CFDGParserResult(null, session.script(), errors);
-            return new ParserResult(session, errors, computeHighlighting(session.script()), result);
+            final CFDGParserResult parserResult = new CFDGParserResult(null, session.script(), errors);
+            return new ParserResult(session, errors, computeHighlighting(session.script()), parserResult);
         }
     }
 

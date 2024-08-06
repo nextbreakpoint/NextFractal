@@ -26,21 +26,23 @@ package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParamsStrategy;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParserStrategy;
-import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
@@ -52,9 +54,6 @@ import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.scene.layout.Pane;
 
 import java.util.HashMap;
@@ -77,9 +76,9 @@ public class ContextFreeUIFactory implements UIFactory {
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
 		GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 		Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
-		CFDG cfdg = (CFDG)bitmap.getProperty("cfdg");
+		CFDGImage cfdgImage = (CFDGImage)bitmap.getProperty("image");
 		Session session = (Session)bitmap.getProperty("session");
-		coordinator.setInterpreter(new CFDGImage(cfdg));
+		coordinator.setImage(cfdgImage);
 		coordinator.setSeed(((ContextFreeMetadata)session.metadata()).getSeed());
 		coordinator.init();
 		coordinator.run();
@@ -91,7 +90,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		CFDGParser compiler = new CFDGParser();
 		CFDGParserResult report = compiler.parse(session.script());
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
-		bitmap.setProperty("cfdg", report.cfdg());
+		bitmap.setProperty("image", report.image());
 		bitmap.setProperty("session", session);
 		return bitmap;
 	}

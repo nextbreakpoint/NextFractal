@@ -24,9 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
 import java.util.List;
 
-public record CFDGParserResult(CFDG cfdg, String source, List<ScriptError> errors) {}
+public record CFDGParserResult(CFDGImage image, String source, List<ScriptError> errors) {}

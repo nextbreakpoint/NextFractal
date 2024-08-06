@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGCompiler;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
@@ -75,12 +74,11 @@ public class ContextFreeImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
             CFDGParser parser = new CFDGParser();
-            CFDGParserResult report = parser.parse(script);
-            CFDGCompiler compiler = new CFDGCompiler();
-            CFDGImage interpreter = compiler.compile(report);
+            CFDGParserResult parserResult = parser.parse(script);
+            CFDGImage cfdgImage = parserResult.image();
             GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
-            renderer.setInterpreter(interpreter);
+            renderer.setImage(cfdgImage);
             renderer.setSeed(metadata.getSeed());
             renderer.setOpaque(opaque);
             renderer.init();

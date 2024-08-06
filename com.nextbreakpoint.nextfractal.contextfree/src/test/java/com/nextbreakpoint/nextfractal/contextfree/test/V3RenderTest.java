@@ -33,7 +33,6 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.graphics.internal.Java2DGraphicsFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -108,7 +107,7 @@ public class V3RenderTest extends AbstractBaseTest {
 		CFDG cfdg = parseSource(sourceName);
 
 		renderer.setOpaque(true);
-		renderer.setInterpreter(new CFDGImage(cfdg));
+		renderer.setImage(new CFDGImage(cfdg));
 		renderer.setSeed("ABCD");
 		renderer.init();
 		renderer.runTask();

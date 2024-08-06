@@ -77,7 +77,7 @@ public class Renderer {
 	protected Tile tile;
 	protected List<ScriptError> errors = new ArrayList<>();
 	private Future<?> future;
-	private CFDGImage cfdgInterpreter;
+	private CFDGImage cfdgImage;
 	private CFDGRenderer cfdgRenderer;
 	private String cfdgSeed;
 	private final RenderRunnable renderTask = new RenderRunnable();
@@ -138,8 +138,8 @@ public class Renderer {
 //		rendererFractal.initialize();
 	}
 
-	public void setInterpreter(CFDGImage cfdgInterpreter) {
-		this.cfdgInterpreter = cfdgInterpreter;
+	public void setImage(CFDGImage cfdgImage) {
+		this.cfdgImage = cfdgImage;
 		cfdgChanged = true;
 	}
 
@@ -248,10 +248,10 @@ public class Renderer {
 			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-			if (cfdgInterpreter != null) {
+			if (cfdgImage != null) {
 				CFDGLogger logger = new CFDGLogger();
 				if (cfdgRenderer == null) {
-					cfdgRenderer = cfdgInterpreter.create(tile.imageSize(), cfdgSeed, logger);
+					cfdgRenderer = cfdgImage.create(tile.imageSize(), cfdgSeed, logger);
 				}
 				cfdgRenderer.setRenderListener(() -> didChanged(progress, pixels));
 //					RendererFactory factory = new Java2DRendererFactory();
