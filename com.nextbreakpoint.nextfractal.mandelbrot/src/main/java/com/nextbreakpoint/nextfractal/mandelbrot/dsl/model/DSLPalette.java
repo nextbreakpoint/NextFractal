@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public final class DSLPalette extends DSLObject {
+public class DSLPalette extends DSLObject {
     private final String name;
     private final List<DSLPaletteElement> elements;
 

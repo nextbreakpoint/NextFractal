@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public final class DSLPaletteElement extends DSLObject {
+public class DSLPaletteElement extends DSLObject {
     private final float[] beginColor;
     private final float[] endColor;
     private final int steps;

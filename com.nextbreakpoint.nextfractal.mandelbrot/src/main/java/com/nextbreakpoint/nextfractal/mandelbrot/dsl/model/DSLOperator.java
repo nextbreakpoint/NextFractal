@@ -27,6 +27,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 
 public abstract class DSLOperator extends DSLExpression {
+	//TODO replace with array of expressions
 	protected final DSLExpression exp1;
 	protected final DSLExpression exp2;
 	protected final int numberIndex;

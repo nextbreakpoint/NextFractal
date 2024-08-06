@@ -383,7 +383,7 @@ public class DefaultResolver implements ASTResolver {
 
 	@Override
 	public DSLExpression resolve(ASTParen paren) {
-		return new DSLParen(paren.getLocation(), paren.getExp().resolve(this), context.newNumberIndex());
+		return new DSLParen(paren.getLocation(), paren.getExp().resolve(this));
 	}
 
 	@Override
@@ -393,7 +393,7 @@ public class DefaultResolver implements ASTResolver {
 
     @Override
     public DSLExpression resolve(ASTConditionalExpression conditional) {
-        return new DSLConditionalExpression(conditional.getLocation(), conditional.getConditionExp().resolve(this), conditional.getThenExp().resolve(this), conditional.getElseExp().resolve(this), context.newNumberIndex());
+        return new DSLConditionalExpression(conditional.getLocation(), conditional.getConditionExp().resolve(this), conditional.getThenExp().resolve(this), conditional.getElseExp().resolve(this));
     }
 
 	@Override

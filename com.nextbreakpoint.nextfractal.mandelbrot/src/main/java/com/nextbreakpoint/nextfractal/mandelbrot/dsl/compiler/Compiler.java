@@ -98,11 +98,11 @@ public class Compiler {
 	}
 
 	private static CompilerResult<Color> compileColor(DSLExpressionContext context, DSLColor color) {
-		return new CompilerResult<>(() -> new InterpretedColor(context, color), null);
+		return new CompilerResult<>(() -> new InterpretedColor(context, color));
 	}
 
 	private static CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLOrbit orbit) {
-		return new CompilerResult<>(() -> new InterpretedOrbit(context, orbit), null);
+		return new CompilerResult<>(() -> new InterpretedOrbit(context, orbit));
 	}
 
 	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext expressionContext, DSLFractal fractal, String source) throws CompilerException {
@@ -118,8 +118,9 @@ public class Compiler {
 			}
 			final CompilerAdapter compilerAdapter = new CompilerAdapter(javaCompiler);
 			final ClassFactory<Orbit> classFactory = compilerAdapter.compile(Orbit.class, javaSource, packageName, className + "Orbit");
-			return new CompilerResult<>(classFactory, javaSource);
+			return new CompilerResult<>(classFactory);
 		} catch (CompilerException e) {
+			log.log(Level.INFO, "Can't compile orbit class", e);
 			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
@@ -128,10 +129,12 @@ public class Compiler {
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
+			log.log(Level.INFO, "Can't compile orbit", e);
 			throw new CompilerException("Can't compile orbit", source, errors);
 		} catch (Throwable e) {
 			final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+			log.log(Level.INFO, "Can't compile orbit", e);
 			throw new CompilerException("Can't compile orbit", source, errors);
 		}
 	}
@@ -144,13 +147,11 @@ public class Compiler {
 				compileColor(context, fractal.getColor(), new HashMap<>());
 			}
 			final String javaSource = builder.toString();
-			if (log.isLoggable(Level.FINE)) {
-				log.fine(javaSource);
-			}
 			final CompilerAdapter compilerAdapter = new CompilerAdapter(javaCompiler);
 			final ClassFactory<Color> classFactory = compilerAdapter.compile(Color.class, javaSource, packageName, className + "Color");
-			return new CompilerResult<>(classFactory, javaSource);
+			return new CompilerResult<>(classFactory);
 		} catch (CompilerException e) {
+			log.log(Level.INFO, "Can't compile color class", e);
 			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
@@ -159,10 +160,12 @@ public class Compiler {
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, line, charPositionInLine, index, length, e.getMessage()));
+			log.log(Level.INFO, "Can't compile color", e);
 			throw new CompilerException("Can't compile color", source, errors);
 		} catch (Throwable e) {
 			final List<ScriptError> errors = new ArrayList<>();
 			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+			log.log(Level.INFO, "Can't compile color", e);
 			throw new CompilerException("Can't compile color", source, errors);
 		}
 	}

@@ -33,6 +33,7 @@ import java.util.Map;
 
 public abstract class DSLTrapOp {
 	protected final DSLToken token;
+	//TODO replace with array of complex numbers
 	protected final ComplexNumber c1;
 	protected final ComplexNumber c2;
 	protected final ComplexNumber c3;

@@ -32,11 +32,8 @@ import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import java.util.Map;
 
 public abstract class DSLExpression extends DSLObject {
-//	protected final int numberIndex;
-
 	protected DSLExpression(DSLToken token) {
 		super(token);
-//		this.numberIndex = numberIndex;
 	}
 	
 	public abstract double evaluateReal(DSLInterpreterContext context, Map<String, Variable> scope);

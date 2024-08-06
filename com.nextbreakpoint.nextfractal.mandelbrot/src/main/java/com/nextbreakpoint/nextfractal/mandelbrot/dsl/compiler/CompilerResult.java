@@ -26,4 +26,4 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
 
-public record CompilerResult<T>(ClassFactory<T> classFactory, String source) {}
+public record CompilerResult<T>(ClassFactory<T> classFactory) {}

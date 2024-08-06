@@ -10,7 +10,7 @@ import java.util.Map;
 public class DSLParen extends DSLExpression {
     private final DSLExpression exp;
 
-    public DSLParen(DSLToken token, DSLExpression exp, int numberIndex) {
+    public DSLParen(DSLToken token, DSLExpression exp) {
         super(token);
         this.exp = exp;
     }

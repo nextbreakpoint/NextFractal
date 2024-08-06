@@ -36,7 +36,7 @@ public class DSLConditionalExpression extends DSLExpression {
 	private final DSLExpression thenExp;
 	private final DSLExpression elseExp;
 	
-	public DSLConditionalExpression(DSLToken token, DSLCondition condition, DSLExpression thenExp, DSLExpression elseExp, int numberIndex) {
+	public DSLConditionalExpression(DSLToken token, DSLCondition condition, DSLExpression thenExp, DSLExpression elseExp) {
 		super(token);
 		this.condition = condition;
 		this.thenExp = thenExp;

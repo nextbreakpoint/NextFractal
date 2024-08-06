@@ -48,11 +48,13 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 
 @Log
 public class DSLParser {
-	private final Compiler compiler;
+	private final String packageName;
+	private final String className;
 
-    public DSLParser(String packageName, String className) {
-        this.compiler = new Compiler(packageName, className);
-    }
+	public DSLParser(String packageName, String className) {
+		this.packageName = packageName;
+		this.className = className;
+	}
 
     public DSLParserResult parse(DSLExpressionContext expressionContext, String source) throws DSLParserException {
 		final ASTFractal fractal = parse(source);
@@ -65,6 +67,7 @@ public class DSLParser {
 				.withOrbitDSL(orbitScript)
 				.withColorDSL(colorScript)
 				.build();
+		final Compiler compiler = new Compiler(packageName, className);
 		return compiler.compile(expressionContext, parserResult);
 	}
 
@@ -79,17 +82,21 @@ public class DSLParser {
 			parser.fractal();
 			ASTBuilder builder = parser.getBuilder();
 			final ASTFractal fractal = builder.getFractal();
-			if (fractal == null || !errors.isEmpty()) {
-				throw new DSLParserException("Can't parse script", errors);
+			if (!errors.isEmpty()) {
+				throw new DSLParserException("Script syntax error", errors);
+			}
+			if (fractal == null) {
+				throw new DSLParserException("Fractal not defined", errors);
 			}
 			if (fractal.getOrbit() == null) {
-				throw new DSLParserException("Can't parse orbit", errors);
+				throw new DSLParserException("Orbit not defined", errors);
 			}
 			if (fractal.getColor() == null) {
-				throw new DSLParserException("Can't parse color", errors);
+				throw new DSLParserException("Color not defined", errors);
 			}
 			return fractal;
 		} catch (DSLParserException e) {
+			log.log(Level.INFO, "Can't parse script", e);
 			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
@@ -97,11 +104,11 @@ public class DSLParser {
 			long index = e.getLocation().getStartIndex();
 			long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
             ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
-			log.log(Level.INFO, error.toString(), e);
+			log.log(Level.INFO, "Can't parse script", e);
             throw new DSLParserException("Can't parse script", List.of(error));
 		} catch (Exception e) {
             ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
-			log.log(Level.INFO, error.toString(), e);
+			log.log(Level.INFO, "Can't parse script", e);
             throw new DSLParserException("Can't parse script", List.of(error));
 		}
 	}
