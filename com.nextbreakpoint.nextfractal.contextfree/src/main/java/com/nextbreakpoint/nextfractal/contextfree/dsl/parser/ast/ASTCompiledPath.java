@@ -65,11 +65,11 @@ public class ASTCompiledPath extends ASTObject {
     private Long pathUID;
 	private final CFDGDriver driver;
 
-	public ASTCompiledPath(CFDGDriver driver, Token location) {
-		super(location);
+	public ASTCompiledPath(Token token, CFDGDriver driver) {
+		super(token);
 		this.driver = driver;
 		commandInfo = new Dequeue();
-		terminalCommand = new ASTPathCommand(driver, location);
+		terminalCommand = new ASTPathCommand(token, driver);
 		parameters = null;
 		cached = false;
 		useTerminal = false;

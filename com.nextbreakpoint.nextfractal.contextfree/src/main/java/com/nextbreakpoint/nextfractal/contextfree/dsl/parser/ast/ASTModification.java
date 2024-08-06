@@ -96,16 +96,16 @@ public class ASTModification extends ASTExpression {
     @Setter
     private boolean canonical;
 
-	public ASTModification(CFDGDriver driver, Token location) {
-		super(driver, true, false, ExpType.Mod, location);
+	public ASTModification(Token token, CFDGDriver driver) {
+		super(token, driver, true, false, ExpType.Mod);
 		this.driver = driver;
 		this.modClass = ModClass.NotAClass;
 		this.entropyIndex = 0;
 		this.canonical = true;
 	}
 	
-	public ASTModification(CFDGDriver driver, ASTModification mod, Token location) {
-		super(driver, true, false, ExpType.Mod, location);
+	public ASTModification(Token token, CFDGDriver driver, ASTModification mod) {
+		super(token, driver, true, false, ExpType.Mod);
 		this.driver = driver;
 		if (mod != null) {
 			modData.setRand64Seed(new Rand64());
@@ -116,7 +116,7 @@ public class ASTModification extends ASTExpression {
 	}
 
 	public ASTModification(ASTModification mod) {
-		super(mod.driver, true, false, ExpType.Mod, mod.getToken());
+		super(mod.getToken(), mod.driver, true, false, ExpType.Mod);
 		this.driver = mod.driver;
 		this.modClass = mod.modClass;
 		this.entropyIndex = mod.entropyIndex;
@@ -253,12 +253,12 @@ public class ASTModification extends ASTExpression {
                         case sizexyz: {
                             double[] d = new double[3];
                             if (term.getArguments().isConstant() && term.getArguments().evaluate(d, 3) == 3) {
-                                term.setArguments(new ASTCons(driver, getToken(), new ASTReal(driver, d[0], getToken()), new ASTReal(driver, d[1], getToken())));
+                                term.setArguments(new ASTCons(getToken(), driver, new ASTReal(getToken(), driver, d[0]), new ASTReal(getToken(), driver, d[1])));
                                 term.setModType(term.getModType() == ModType.xyz ? ModType.x : ModType.size);
                                 term.setArgumentsCount(2);
 
                                 ModType ztype = term.getModType() == ModType.size ? ModType.zsize : ModType.z;
-                                ASTModTerm zmod = new ASTModTerm(driver, ztype, new ASTReal(driver, d[2], getToken()), getToken());
+                                ASTModTerm zmod = new ASTModTerm(getToken(), driver, ztype, new ASTReal(getToken(), driver, d[2]));
                                 zmod.setArgumentsCount(1);
 
                                 // Check if xy part is the identity transform and only save it if it is not
@@ -292,7 +292,7 @@ public class ASTModification extends ASTExpression {
                                 term.setArgumentsCount(2);
 
                                 ModType ztype = term.getModType() == ModType.size ? ModType.zsize : ModType.z;
-                                ASTModTerm zmod = new ASTModTerm(driver, ztype, new ASTReal(driver, d[2], getToken()), getToken());
+                                ASTModTerm zmod = new ASTModTerm(getToken(), driver, ztype, new ASTReal(getToken(), driver, d[2]));
                                 zmod.setArgumentsCount(1);
 
                                 if (term.getModType() == ModType.size && xyargs.isConstant() && xyargs.evaluate(d, 2) == 2 && d[0] == 1.0 && d[1] == 1.0) {

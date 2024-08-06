@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
 import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGListener;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTCompiledPath;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
@@ -37,7 +38,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PrimShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
-import com.nextbreakpoint.nextfractal.contextfree.graphics.RenderListener;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.java.Log;
 import org.antlr.v4.runtime.Token;
 
@@ -60,32 +62,71 @@ public class CFDGRenderer {
 	private int width;
 	private int height;
 
-	private Point2D.Double lastPoint;
-	private boolean stop;
-	private boolean closed;
-	private boolean wantMoveTo;
-	private boolean wantCommand;
-	private boolean opsOnly;
-	private int index;
-	private int nextIndex;
+	@Setter
+    @Getter
+    private Point2D.Double lastPoint;
+	@Setter
+    @Getter
+    private boolean stop;
+	@Setter
+    @Getter
+    private boolean closed;
+	@Setter
+    @Getter
+    private boolean wantMoveTo;
+	@Setter
+    @Getter
+    private boolean wantCommand;
+	@Setter
+    @Getter
+    private boolean opsOnly;
+	@Setter
+    @Getter
+    private int index;
+	@Setter
+    @Getter
+    private int nextIndex;
 
-	private ASTCompiledPath currentPath;
-	private CommandIterator currentCommand;
-	private double currentTime;
-	private double currentFrame;
-	private Rand64 currentSeed = new Rand64();
-	private boolean randUsed;
-	private double maxNatural;
-	private double maxSteps;
-	private volatile boolean requestStop;
-	private volatile boolean requestFinishUp;
-	private volatile boolean requestUpdate;
+	@Setter
+    @Getter
+    private ASTCompiledPath currentPath;
+	@Setter
+    @Getter
+    private CommandIterator currentCommand;
+	@Setter
+    @Getter
+    private double currentTime;
+	@Setter
+    @Getter
+    private double currentFrame;
+	@Setter
+    @Getter
+    private Rand64 currentSeed = new Rand64();
+	@Setter
+    @Getter
+    private boolean randUsed;
+	@Setter
+    @Getter
+    private double maxNatural;
+	@Setter
+    @Getter
+    private double maxSteps;
+	@Setter
+    @Getter
+    private volatile boolean requestStop;
+	@Setter
+    @Getter
+    private volatile boolean requestFinishUp;
+	@Setter
+    @Getter
+    private volatile boolean requestUpdate;
 
-	private CFDG cfdg;
+	private final CFDG cfdg;
 	private CFCanvas canvas;
 	private TiledCanvas tiledCanvas;
 	private boolean colorConflict;
-	private int maxShapes = 2000000;
+	@Getter
+    private int maxShapes = 2000000;
 	private boolean tiled;
 	private boolean sized;
 	private boolean timed;
@@ -94,8 +135,8 @@ public class CFDGRenderer {
 	private boolean drawingMode;
 	private boolean finalStep;
 
-	private int variation;
-	private double border;
+	private final int variation;
+	private final double border;
 
 	private double scaleArea;
 	private double scale;
@@ -107,28 +148,30 @@ public class CFDGRenderer {
 	private double currScale;
 	private double currArea;
 	private double minArea;
-	private double minSize;
+	private final double minSize;
 	private Bounds bounds = new Bounds();
-	private Bounds pathBounds = new Bounds();
+	private final Bounds pathBounds = new Bounds();
 	private AffineTransform currTransform = new AffineTransform();
 	private AffineTransformTime timeBounds = new AffineTransformTime();
-	private AffineTransformTime frameTimeBounds = new AffineTransformTime();
+	private AffineTransformTime frameTimeBounds = AffineTransformTime.getTranslateInstance(Double.MIN_VALUE, Double.MAX_VALUE);
 	private int outputSoFar;
 	private int shapeCount;
 	private int todoCount;
 	private boolean animating;
 
-	private List<AffineTransform> symmetryOps = new ArrayList<>();
+	private final List<AffineTransform> symmetryOps = new ArrayList<>();
 
-	private List<CommandInfo> shapeMap = new ArrayList<>();
-	private List<Shape> unfinishedShapes = new ArrayList<>();
-	private List<FinishedShape> finishedShapes = new ArrayList<>();
+	private final List<CommandInfo> shapeMap = new ArrayList<>();
+	private final List<Shape> unfinishedShapes = new ArrayList<>();
+	private final List<FinishedShape> finishedShapes = new ArrayList<>();
 
-	private ASTRule[] primitivePaths;
+	private final ASTRule[] primitivePaths;
 
 	private CFStack cfStack;
 	private AffineTransform tileTransform;
-	private RenderListener renderListener;
+	@Getter
+    @Setter
+    private CFDGListener cfdgListener;
 
 	public CFDGRenderer(CFDG cfdg, int width, int height, double minSize, int variation, double border) {
 		this.cfdg = cfdg;
@@ -138,12 +181,10 @@ public class CFDGRenderer {
 		this.variation = variation;
 		this.border = border;
 
-		frameTimeBounds = AffineTransformTime.getTranslateInstance(Double.MIN_VALUE, Double.MAX_VALUE);
-
 		primitivePaths = new ASTRule[PrimShape.getShapeNames().size()];
 
 		for (int i = 0; i < primitivePaths.length; i++) {
-			primitivePaths[i] = new ASTRule(cfdg.getDriver(), i, null);
+			primitivePaths[i] = new ASTRule(null, cfdg.getDriver(), i);
 		}
 
 		for (PrimShape primShape : PrimShape.getShapeMap().values()) {
@@ -159,167 +200,11 @@ public class CFDGRenderer {
 		currentFrame = value[0];
 	}
 
-	public ASTCompiledPath getCurrentPath() {
-		return currentPath;
-	}
-
-	public void setCurrentPath(ASTCompiledPath currentPath) {
-		this.currentPath = currentPath;
-	}
-
-	public CommandIterator getCurrentCommand() {
-		return currentCommand;
-	}
-
-	public void setCurrentCommand(CommandIterator iterator) {
-		this.currentCommand = iterator;
-	}
-
-	public double getCurrentTime() {
-		return currentTime;
-	}
-
-	public void setCurrentTime(double currentTime) {
-		this.currentTime = currentTime;
-	}
-
-	public double getCurrentFrame() {
-		return currentFrame;
-	}
-
-	public void setCurrentFrame(double currentFrame) {
-		this.currentFrame = currentFrame;
-	}
-
-	public Rand64 getCurrentSeed() {
-		return currentSeed;
-	}
-
-	public void setCurrentSeed(Rand64 currentSeed) {
-		this.currentSeed = currentSeed;
-	}
-
-	public boolean isRandUsed() {
-		return randUsed;
-	}
-
-	public void setRandUsed(boolean randUsed) {
-		this.randUsed = randUsed;
-	}
-
-	public double getMaxNatural() {
-		return maxNatural;
-	}
-
-	public void setMaxNatural(double maxNatural) {
-		this.maxNatural = maxNatural;
-	}
-
-	public boolean isRequestStop() {
-		return requestStop;
-	}
-
-	public void setRequestStop(boolean requestStop) {
-		this.requestStop = requestStop;
-	}
-
-	public int getMaxShapes() {
-		return maxShapes;
-	}
-
-	public void setMaxShapes(int maxShapes) {
+    public void setMaxShapes(int maxShapes) {
 		this.maxShapes = (maxShapes != 0) ? maxShapes : 400000000;
 	}
 
-	public Point2D.Double getLastPoint() {
-		return lastPoint;
-	}
-
-	public void setLastPoint(Point2D.Double lastPoint) {
-		this.lastPoint = lastPoint;
-	}
-
-	public boolean isStop() {
-		return stop;
-	}
-
-	public void setStop(boolean stop) {
-		this.stop = stop;
-	}
-
-	public boolean isClosed() {
-		return closed;
-	}
-
-	public void setClosed(boolean closed) {
-		this.closed = closed;
-	}
-
-	public boolean isWantMoveTo() {
-		return wantMoveTo;
-	}
-
-	public void setWantMoveTo(boolean wantMoveTo) {
-		this.wantMoveTo = wantMoveTo;
-	}
-
-	public boolean isWantCommand() {
-		return wantCommand;
-	}
-
-	public void setWantCommand(boolean wantCommand) {
-		this.wantCommand = wantCommand;
-	}
-
-	public boolean isOpsOnly() {
-		return opsOnly;
-	}
-
-	public void setOpsOnly(boolean opsOnly) {
-		this.opsOnly = opsOnly;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
-
-	public int getNextIndex() {
-		return nextIndex;
-	}
-
-	public void setNextIndex(int nextIndex) {
-		this.nextIndex = nextIndex;
-	}
-
-	public double getMaxSteps() {
-		return maxSteps;
-	}
-
-	public void setMaxSteps(double maxSteps) {
-		this.maxSteps = maxSteps;
-	}
-
-	public boolean isRequestFinishUp() {
-		return requestFinishUp;
-	}
-
-	public void setRequestFinishUp(boolean requestFinishUp) {
-		this.requestFinishUp = requestFinishUp;
-	}
-
-	public boolean isRequestUpdate() {
-		return requestUpdate;
-	}
-
-	public void setRequestUpdate(boolean requestUpdate) {
-		this.requestUpdate = requestUpdate;
-	}
-
-	public CFStackItem getStackItem(int stackIndex) {
+    public CFStackItem getStackItem(int stackIndex) {
 		return getStack().getStackItem(stackIndex);
 	}
 
@@ -369,9 +254,8 @@ public class CFDGRenderer {
 		cfStack = new CFStack(new CFStackItem[8192]);
 
 		for (ASTReplacement rep : cfdg.getContents().getBody()) {
-			if (rep instanceof ASTDefine) {
-				ASTDefine def = (ASTDefine) rep;
-				def.traverse(new Shape(), false, this);
+			if (rep instanceof ASTDefine def) {
+                def.traverse(new Shape(), false, this);
 			}
 		}
 
@@ -410,7 +294,7 @@ public class CFDGRenderer {
 			throw new RuntimeException((value[0] < 1.0) ? "CF::MaxNatural must be >= 1" : "CF::MaxNatural must be < 9007199254740992");
 		}
 
-		currentPath = new ASTCompiledPath(cfdg.getDriver(), null);
+		currentPath = new ASTCompiledPath(null, cfdg.getDriver());
 
 		cfdg.getSymmetry(symmetryOps, this);
 
@@ -428,7 +312,7 @@ public class CFDGRenderer {
 		nextIndex = 0;
 	}
 
-	public boolean isNatual(double n) {
+	public boolean isNatural(double n) {
 		//TODO rivedere
 		return n >= 0 && n <= getMaxNatural() && n == Math.floor(n);
 	}
@@ -600,7 +484,7 @@ public class CFDGRenderer {
 	}
 
 	public void processSubpath(Shape shape, boolean tr, RepElemType expectedType) {
-		ASTRule rule = null;
+		ASTRule rule;
 		if (cfdg.getShapeType(shape.getShapeType()) != ShapeType.PathType && PrimShape.isPrimShape(shape.getShapeType()) && expectedType == RepElemType.op) {
 			rule = primitivePaths[shape.getShapeType()];
 		} else {
@@ -755,7 +639,7 @@ public class CFDGRenderer {
 				break;
 			}
 
-			Shape shape = (Shape)unfinishedShapes.remove(0).clone();
+			Shape shape = (Shape)unfinishedShapes.removeFirst().clone();
 
 			todoCount -= 1;
 
@@ -799,12 +683,10 @@ public class CFDGRenderer {
 
 		if (!requestStop) {
 			outputStats();
-			if (canvas != null) {
-				cfdg.getDriver().info("Done.", null);
-			}
-		}
+            cfdg.getDriver().info("Done.", null);
+        }
 
-		if (canvas != null && frieze != FriezeType.NoFrieze) {
+		if (frieze != FriezeType.NoFrieze) {
 			int[] currWidth = new int[] { width };
 			int[] currHeight = new int[] { height };
 			rescaleOutput(currWidth, currHeight, true);
@@ -1047,7 +929,7 @@ public class CFDGRenderer {
 	}
 
 	private void notifyRenderListener() {
-		RenderListener renderListener = getRenderListener();
+		CFDGListener renderListener = getCfdgListener();
 		if (renderListener != null) {
 			renderListener.partialDraw();
 		}
@@ -1141,12 +1023,4 @@ public class CFDGRenderer {
     public CFDGDriver getDriver() {
         return cfdg.getDriver();
     }
-
-	public void setRenderListener(RenderListener renderListener) {
-		this.renderListener = renderListener;
-	}
-
-	public RenderListener getRenderListener() {
-		return renderListener;
-	}
 }

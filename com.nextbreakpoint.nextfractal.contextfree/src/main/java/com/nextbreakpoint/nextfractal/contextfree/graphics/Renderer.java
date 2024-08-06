@@ -26,7 +26,6 @@ package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGHandle;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CollectingLogger;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;

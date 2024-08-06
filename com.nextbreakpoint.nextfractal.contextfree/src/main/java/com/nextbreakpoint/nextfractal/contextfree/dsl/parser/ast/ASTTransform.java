@@ -46,9 +46,9 @@ public class ASTTransform extends ASTReplacement {
 	@Setter
     private boolean clone;
 	
-	public ASTTransform(CFDGDriver driver, ASTExpression exp, Token location) {
-		super(driver, null, RepElemType.empty, location);
-		body = new ASTRepContainer(driver);
+	public ASTTransform(Token token, CFDGDriver driver, ASTExpression exp) {
+		super(token, driver, null, RepElemType.empty);
+		body = new ASTRepContainer(token, driver);
 		this.expHolder = exp;
 		this.clone = false;
 	}

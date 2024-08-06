@@ -84,8 +84,8 @@ public class CFDG {
 
 	public CFDG(CFDGDriver cfdgDriver) {
 		this.driver = cfdgDriver;
-		cfdgContents = new ASTRepContainer(cfdgDriver);
-		needle = new ASTRule(cfdgDriver, -1, null);
+		cfdgContents = new ASTRepContainer(null, cfdgDriver);
+		needle = new ASTRule(null, cfdgDriver, -1);
 		PrimShape.getShapeNames().forEach(this::encodeShapeName);
 	}
 
@@ -597,7 +597,7 @@ public class CFDG {
 			}
 
 			if (startExp instanceof ASTStartSpecifier specStart) {
-                initShape = new ASTReplacement(driver, specStart, specStart.getModification(), RepElemType.empty, startExp.getToken());
+                initShape = new ASTReplacement(startExp.getToken(), driver, specStart, specStart.getModification(), RepElemType.empty);
 				initShape.getChildChange().addEntropy(initShape.getShapeSpecifier().getEntropy());
 			} else {
 				driver.fail("Type error in startshape", startExp.getToken());

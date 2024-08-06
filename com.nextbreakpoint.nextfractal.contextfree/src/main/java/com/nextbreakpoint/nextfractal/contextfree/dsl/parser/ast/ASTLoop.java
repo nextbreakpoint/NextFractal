@@ -45,16 +45,16 @@ public class ASTLoop extends ASTReplacement {
 	private ASTModification loopModHolder;
 	private double[] loopData;
 
-	public ASTLoop(CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mods, Token location) {
-		super(driver, mods, RepElemType.empty, location);
-		loopBody = new ASTRepContainer(driver);
-		finallyBody = new ASTRepContainer(driver);
+	public ASTLoop(Token token, CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mods) {
+		super(token, driver, mods, RepElemType.empty);
+		loopBody = new ASTRepContainer(token, driver);
+		finallyBody = new ASTRepContainer(token, driver);
 		loopIndexName = nameIndex;
 		loopArgs = args;
 		loopModHolder = null;
 		loopName = name;
-		loopBody.addLoopParameter(loopIndexName, false, false, location);
-		finallyBody.addLoopParameter(loopIndexName, false, false, location);
+		loopBody.addLoopParameter(loopIndexName, false, false, token);
+		finallyBody.addLoopParameter(loopIndexName, false, false, token);
 	}
 
     public void setLoopHolder(ASTModification loopModHolder) {

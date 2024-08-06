@@ -43,9 +43,9 @@ public class ASTSwitch extends ASTReplacement {
 	private final ASTRepContainer elseBody;
 	private ASTExpression switchExp;
 	
-	public ASTSwitch(CFDGDriver driver, ASTExpression switchExp, Token location) {
-		super(driver, null, RepElemType.empty, location);
-		elseBody = new ASTRepContainer(driver);
+	public ASTSwitch(Token token, CFDGDriver driver, ASTExpression switchExp) {
+		super(token, driver, null, RepElemType.empty);
+		elseBody = new ASTRepContainer(token, driver);
 		this.switchExp = switchExp;
 	}
 

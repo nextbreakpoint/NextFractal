@@ -38,15 +38,15 @@ public class ASTReal extends ASTExpression {
 	@Setter
     private String text;
 
-	public ASTReal(CFDGDriver driver, double value, Token location) {
-		super(driver, true, false, ExpType.Numeric, location);
+	public ASTReal(Token token, CFDGDriver driver, double value) {
+		super(token, driver, true, false, ExpType.Numeric);
 		this.value = value;
 		natural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
 		locality = Locality.PureLocal;
 	}
 
-	public ASTReal(CFDGDriver driver, String text, boolean negative, Token location) {
-		super(driver, true, false, ExpType.Numeric, location);
+	public ASTReal(Token token, CFDGDriver driver, String text, boolean negative) {
+		super(token, driver, true, false, ExpType.Numeric);
 		if (negative) {
 			this.text = "-" + text;
 			this.value = Double.parseDouble(text);

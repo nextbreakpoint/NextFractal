@@ -53,8 +53,8 @@ public class ASTUserFunction extends ASTExpression {
 	private int oldTop;
 	private int oldSize;
 
-	public ASTUserFunction(CFDGDriver driver, int nameIndex, ASTExpression arguments, ASTDefine definition, Token location) {
-		super(driver, false, false, ExpType.None, location);
+	public ASTUserFunction(Token token, CFDGDriver driver, int nameIndex, ASTExpression arguments, ASTDefine definition) {
+		super(token, driver, false, false, ExpType.None);
 		this.nameIndex = nameIndex;
 		this.definition = definition;
 		this.arguments = arguments;
@@ -80,7 +80,7 @@ public class ASTUserFunction extends ASTExpression {
 		setupStack(renderer);
 		if (definition.getExp().evaluate(result, length, renderer) != definition.getTupleSize()) {
 			driver.error("Error evaluating function", getToken());
-		};
+		}
 		cleanupStack(renderer);
 		return definition.getTupleSize();
 	}
@@ -154,7 +154,7 @@ public class ASTUserFunction extends ASTExpression {
                     }
                     return null;
                 }
-                ASTRuleSpecifier r = new ASTRuleSpecifier(driver, nameIndex, name, arguments, null, getToken());
+                ASTRuleSpecifier r = new ASTRuleSpecifier(getToken(), driver, nameIndex, name, arguments, null);
                 r.compile(ph);
                 return r;
             }

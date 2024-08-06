@@ -50,36 +50,36 @@ public class ASTReplacement extends ASTObject {
     private PathOp pathOp;
 	protected CFDGDriver driver;
 
-	public ASTReplacement(CFDGDriver driver, ASTRuleSpecifier shapeSpecifier, ASTModification childChange, RepElemType repType, Token location) {
-		super(location);
+	public ASTReplacement(Token token, CFDGDriver driver, ASTRuleSpecifier shapeSpecifier, ASTModification childChange, RepElemType repType) {
+		super(token);
 		this.driver = driver;
 		this.repType = repType;
 		this.shapeSpecifier = shapeSpecifier;
 		this.pathOp = PathOp.UNKNOWN;
 		this.childChange = childChange;
 		if (this.childChange == null) {
-			this.childChange = new ASTModification(driver, location);
+			this.childChange = new ASTModification(token, driver);
 		}
 	}
 
-	public ASTReplacement(CFDGDriver driver, ASTModification childChange, RepElemType repType, Token location) {
-		this(driver, new ASTRuleSpecifier(driver, location), childChange, repType, location);
+	public ASTReplacement(Token token, CFDGDriver driver, ASTModification childChange, RepElemType repType) {
+		this(token, driver, new ASTRuleSpecifier(token, driver), childChange, repType);
 	}
 
-//	public ASTReplacement(CFDGDriver driver, ASTModification childChange, Token location) {
-//		this(driver, new ASTRuleSpecifier(driver, location), childChange, RepElemType.replacement, location);
+//	public ASTReplacement(Token token, CFDGDriver driver, ASTModification childChange) {
+//		this(token, driver, new ASTRuleSpecifier(token, driver), childChange, RepElemType.replacement);
 //	}
 
-	public ASTReplacement(CFDGDriver driver, String name, Token location) {
-		this(driver, new ASTRuleSpecifier(driver, location), new ASTModification(driver, location), RepElemType.op, location);
+	public ASTReplacement(Token token, CFDGDriver driver, String name) {
+		this(token, driver, new ASTRuleSpecifier(token, driver), new ASTModification(token, driver), RepElemType.op);
 		this.pathOp = PathOp.byName(name);
 		if (this.pathOp == PathOp.UNKNOWN) {
-			driver.error("Unknown path operation type", location);
+			driver.error("Unknown path operation type", token);
 		}
 	}
 
 	public ASTReplacement(ASTReplacement replacement) {
-		this(replacement.driver, replacement.getShapeSpecifier(), replacement.getChildChange(), replacement.getRepType(), replacement.getToken());
+		this(replacement.getToken(), replacement.driver, replacement.getShapeSpecifier(), replacement.getChildChange(), replacement.getRepType());
 		this.pathOp = replacement.getPathOp();
 	}
 

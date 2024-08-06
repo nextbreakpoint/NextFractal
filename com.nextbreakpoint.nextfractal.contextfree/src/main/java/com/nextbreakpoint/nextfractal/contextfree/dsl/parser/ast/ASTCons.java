@@ -40,16 +40,16 @@ import java.util.List;
 public class ASTCons extends ASTExpression {
 	private final List<ASTExpression> children = new ArrayList<>();
 
-	public ASTCons(CFDGDriver driver, List<ASTExpression> kids, Token location) {
-		super(driver, true, true, ExpType.None, location);
+	public ASTCons(Token token, CFDGDriver driver, List<ASTExpression> kids) {
+		super(token, driver, true, true, ExpType.None);
 		locality = Locality.PureLocal;
 		for (ASTExpression kid : kids) {
 			append(kid);
 		}
 	}
 
-	public ASTCons(CFDGDriver driver, Token location, ASTExpression... args) {
-		super(driver, true, true, ExpType.None, location);
+	public ASTCons(Token token, CFDGDriver driver, ASTExpression... args) {
+		super(token, driver, true, true, ExpType.None);
 		//TODO controllare
 		locality = Locality.PureLocal;
 		for (ASTExpression arg : args) {

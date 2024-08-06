@@ -40,7 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ASTRuleSpecifier extends ASTExpression {
-	private final CFDGDriver driver;
+	protected final CFDGDriver driver;
 	@Setter
     @Getter
     private int shapeType;
@@ -65,8 +65,8 @@ public class ASTRuleSpecifier extends ASTExpression {
     @Getter
     private List<ASTParameter> parentSignature;
 
-	public ASTRuleSpecifier(CFDGDriver driver, Token location) {
-		super(driver, false, false, ExpType.Rule, location);
+	public ASTRuleSpecifier(Token token, CFDGDriver driver) {
+		super(token, driver, false, false, ExpType.Rule);
 		this.driver = driver;
 		this.shapeType = -1;
 		this.argSize = 0;
@@ -79,8 +79,8 @@ public class ASTRuleSpecifier extends ASTExpression {
 		this.parentSignature = null;
 	}
 
-	public ASTRuleSpecifier(CFDGDriver driver, int nameIndex, String name, ASTExpression arguments, List<ASTParameter> parent, Token location) {
-		super(driver, arguments == null || arguments.isConstant(), false, ExpType.Rule, location);
+	public ASTRuleSpecifier(Token token, CFDGDriver driver, int nameIndex, String name, ASTExpression arguments, List<ASTParameter> parent) {
+		super(token, driver, arguments == null || arguments.isConstant(), false, ExpType.Rule);
 		this.driver = driver;
 		this.shapeType = nameIndex;
 		this.entropy = name;
@@ -95,8 +95,8 @@ public class ASTRuleSpecifier extends ASTExpression {
 		}
 	}
 
-	public ASTRuleSpecifier(CFDGDriver driver, int nameIndex, String name, Token location) {
-		super(driver, false, false, ExpType.Rule, location);
+	public ASTRuleSpecifier(Token token, CFDGDriver driver, int nameIndex, String name) {
+		super(token, driver, false, false, ExpType.Rule);
 		this.driver = driver;
 		this.shapeType = nameIndex;
 		this.argSize = 0;
@@ -109,8 +109,8 @@ public class ASTRuleSpecifier extends ASTExpression {
 		this.parentSignature = null;
 	}
 
-	public ASTRuleSpecifier(CFDGDriver driver, ASTExpression args, Token location) {
-		super(driver, false, false, ExpType.Rule, location);
+	public ASTRuleSpecifier(Token token, CFDGDriver driver, ASTExpression args) {
+		super(token, driver, false, false, ExpType.Rule);
 		this.driver = driver;
 		this.shapeType = -1;
 		this.argSize = 0;
@@ -123,9 +123,9 @@ public class ASTRuleSpecifier extends ASTExpression {
 		this.parentSignature = null;
 	}
 
-	public ASTRuleSpecifier(CFDGDriver driver, ASTRuleSpecifier spec) {
-		super(driver, spec.constant, false, spec.type, spec.getToken());
-		this.driver = driver;
+	public ASTRuleSpecifier(ASTRuleSpecifier spec) {
+		super(spec.getToken(), spec.driver, spec.constant, false, spec.type);
+		this.driver = spec.driver;
 		this.argSize = spec.argSize;
 		this.entropy = spec.entropy;
 		this.argSource = spec.argSource;
@@ -308,7 +308,7 @@ public class ASTRuleSpecifier extends ASTExpression {
                         if (func[0] != null) {
                             if (func[0].getExpType() == ExpType.Rule) {
                                 argSource = ArgSource.ShapeArgs;
-                                arguments = new ASTUserFunction(driver, shapeType, arguments, func[0], getToken());
+                                arguments = new ASTUserFunction(getToken(), driver, shapeType, arguments, func[0]);
                                 arguments = arguments.compile(ph);
                                 constant = false;
                                 locality = arguments.getLocality();

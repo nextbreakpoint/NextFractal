@@ -56,22 +56,22 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
     @Getter
     private int nameIndex;
 
-	public ASTRule(CFDGDriver driver, int nameIndex, float weight, boolean percent, Token location) {
-		super(driver, null, RepElemType.rule, location);
-		ruleBody = new ASTRepContainer(driver);
+	public ASTRule(Token token, CFDGDriver driver, int nameIndex, float weight, boolean percent) {
+		super(token, driver, null, RepElemType.rule);
+		ruleBody = new ASTRepContainer(token, driver);
 		this.nameIndex = nameIndex;
 		this.path = false;
 		this.weight = weight <= 0.0 ? 1.0f : weight;
 		this.weightType = percent ? WeightType.PercentWeight : WeightType.ExplicitWeight;
 		this.cachedPath = null;
 		if (weight <= 0.0) {
-			driver.warning("Rule weight coerced to 1.0", location);
+			driver.warning("Rule weight coerced to 1.0", token);
 		}
 	}
 
-	public ASTRule(CFDGDriver driver, int nameIndex, Token location) {
-		super(driver, null, RepElemType.rule, location);
-		ruleBody = new ASTRepContainer(driver);
+	public ASTRule(Token token, CFDGDriver driver, int nameIndex) {
+		super(token, driver, null, RepElemType.rule);
+		ruleBody = new ASTRepContainer(token, driver);
 		this.nameIndex = nameIndex;
 		this.path = false;
 		this.weight = 1.0f;
@@ -85,23 +85,23 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 				int cmd;
 				for (PathIterator iterator = shape.getPathIterator(); !iterator.isDone(); iterator.next()) {
 					if (isVertex(cmd = iterator.currentSegment(coords))) {
-						ASTExpression a = new ASTCons(driver, location, new ASTReal(driver, coords[0], location), new ASTReal(driver, coords[1], location));
-						ASTPathOp op = new ASTPathOp(driver, isMoveTo(cmd) ? PathOp.MOVETO.name() : PathOp.LINETO.name(), a, location);
+						ASTExpression a = new ASTCons(token, driver, new ASTReal(token, driver, coords[0]), new ASTReal(token, driver, coords[1]));
+						ASTPathOp op = new ASTPathOp(token, driver, isMoveTo(cmd) ? PathOp.MOVETO.name() : PathOp.LINETO.name(), a);
 						getRuleBody().getBody().add(op);
 					}
 				}
 			} else {
-				ASTExpression a = new ASTCons(driver, location, new ASTReal(driver, 0.5, location), new ASTReal(driver, 0.0, location));
-				ASTPathOp op = new ASTPathOp(driver, PathOp.MOVETO.name(), a, location);
+				ASTExpression a = new ASTCons(token, driver, new ASTReal(token, driver, 0.5), new ASTReal(token, driver, 0.0));
+				ASTPathOp op = new ASTPathOp(token, driver, PathOp.MOVETO.name(), a);
 				getRuleBody().getBody().add(op);
-				a = new ASTCons(driver, location, new ASTReal(driver, -0.5, location), new ASTReal(driver, 0.0, location), new ASTReal(driver, 0.5, location));
-				op = new ASTPathOp(driver, PathOp.ARCTO.name(), a, location);
+				a = new ASTCons(token, driver, new ASTReal(token, driver, -0.5), new ASTReal(token, driver, 0.0), new ASTReal(token, driver, 0.5));
+				op = new ASTPathOp(token, driver, PathOp.ARCTO.name(), a);
 				getRuleBody().getBody().add(op);
-				a = new ASTCons(driver, location, new ASTReal(driver, 0.5, location), new ASTReal(driver, 0.0, location), new ASTReal(driver, 0.5, location));
-				op = new ASTPathOp(driver, PathOp.ARCTO.name(), a, location);
+				a = new ASTCons(token, driver, new ASTReal(token, driver, 0.5), new ASTReal(token, driver, 0.0), new ASTReal(token, driver, 0.5));
+				op = new ASTPathOp(token, driver, PathOp.ARCTO.name(), a);
 				getRuleBody().getBody().add(op);
 			}
-			getRuleBody().getBody().add(new ASTPathOp(driver, PathOp.CLOSEPOLY.name(), null, location));
+			getRuleBody().getBody().add(new ASTPathOp(token, driver, PathOp.CLOSEPOLY.name(), null));
 			getRuleBody().setRepType(RepElemType.op.getType());
 			getRuleBody().setPathOp(PathOp.MOVETO);
 		}
@@ -159,7 +159,7 @@ public class ASTRule extends ASTReplacement implements Comparable<ASTRule> {
 				cachedPath = renderer.getCurrentPath();
 				cachedPath.setCached(true);
 				cachedPath.setParameters(parent.getParameters());
-				renderer.setCurrentPath(new ASTCompiledPath(driver, getToken()));
+				renderer.setCurrentPath(new ASTCompiledPath(getToken(), driver));
 			} else {
 				renderer.getCurrentPath().setPathStorage(new PathStorage());
 				renderer.getCurrentPath().getCommandInfo().clear();

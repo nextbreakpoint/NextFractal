@@ -40,10 +40,10 @@ public class ASTIf extends ASTReplacement {
 	@Getter
     private final ASTRepContainer elseBody;
 	
-	public ASTIf(CFDGDriver driver, ASTExpression condition, Token location) {
-		super(driver, null, RepElemType.empty, location);
-		thenBody = new ASTRepContainer(driver);
-		elseBody = new ASTRepContainer(driver);
+	public ASTIf(Token token, CFDGDriver driver, ASTExpression condition) {
+		super(token, driver, null, RepElemType.empty);
+		thenBody = new ASTRepContainer(token, driver);
+		elseBody = new ASTRepContainer(token, driver);
 		this.condition = condition;
 	}
 

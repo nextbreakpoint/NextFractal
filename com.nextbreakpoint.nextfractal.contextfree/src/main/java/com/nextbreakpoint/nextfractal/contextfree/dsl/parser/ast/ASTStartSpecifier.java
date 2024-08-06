@@ -33,23 +33,23 @@ import org.antlr.v4.runtime.Token;
 public class ASTStartSpecifier extends ASTRuleSpecifier {
 	private ASTModification modification;
 	
-	public ASTStartSpecifier(CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mod, Token location) {
-		super(driver, nameIndex, name, args, null, location);
+	public ASTStartSpecifier(Token token, CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mod) {
+		super(token, driver, nameIndex, name, args, null);
 		this.modification = mod;
 	}
 	
-	public ASTStartSpecifier(CFDGDriver driver, int nameIndex, String name, ASTModification mod, Token location) {
-		super(driver, nameIndex, name, null, null, location);
+	public ASTStartSpecifier(Token token, CFDGDriver driver, int nameIndex, String name, ASTModification mod) {
+		super(token, driver, nameIndex, name, null, null);
 		this.modification = mod;
 	}
 	
-	public ASTStartSpecifier(CFDGDriver driver, ASTExpression exp, ASTModification mod, Token location) {
-		super(driver, exp, location);
+	public ASTStartSpecifier(Token token, CFDGDriver driver, ASTExpression exp, ASTModification mod) {
+		super(token, driver, exp);
 		this.modification = mod;
 	}
 
-	public ASTStartSpecifier(CFDGDriver driver, ASTRuleSpecifier rule, ASTModification mod) {
-		super(driver, rule);
+	public ASTStartSpecifier(ASTRuleSpecifier rule, ASTModification mod) {
+		super(rule.getToken(), rule.driver);
 		this.modification = mod;
 	}
 

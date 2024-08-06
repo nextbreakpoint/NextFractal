@@ -37,8 +37,7 @@ import org.antlr.v4.runtime.Token;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO ASTObject?
-public class ASTRepContainer {
+public class ASTRepContainer extends ASTObject {
 	private final CFDGDriver driver;
 	@Getter
     private final List<ASTReplacement> body = new ArrayList<>();
@@ -57,7 +56,8 @@ public class ASTRepContainer {
     @Setter
     private int stackCount;
 
-	public ASTRepContainer(CFDGDriver driver) {
+	public ASTRepContainer(Token token, CFDGDriver driver) {
+		super(token);
 		this.driver = driver;
 		pathOp = PathOp.UNKNOWN;
 		repType = RepElemType.empty.getType();
@@ -66,6 +66,7 @@ public class ASTRepContainer {
 	}
 	
 	public ASTRepContainer(ASTRepContainer repCont) {
+		super(repCont.getToken());
 		driver = repCont.driver;
 		pathOp = repCont.pathOp;
 		repType = repCont.repType;
@@ -74,21 +75,21 @@ public class ASTRepContainer {
 	}
 
     public void addParameter(String type, int nameIndex, Token nameLocation) {
-		parameters.add(new ASTParameter(driver, type, nameIndex, nameLocation));
+		parameters.add(new ASTParameter(nameLocation, driver, type, nameIndex));
 		ASTParameter param = parameters.getLast();
 		param.setParameter(true);
 		param.checkParam();
 	}
 
 	public ASTParameter addDefParameter(int nameIndex, ASTDefine def, Token nameLocation) {
-		parameters.add(new ASTParameter(driver, nameIndex, def, nameLocation));
+		parameters.add(new ASTParameter(nameLocation, driver, nameIndex, def));
 		ASTParameter param = parameters.getLast();
 		param.checkParam();
 		return param;
 	}
 
 	public void addLoopParameter(int nameIndex, boolean natural, boolean local, Token nameLocation) {
-		parameters.add(new ASTParameter(driver, nameIndex, natural, local, nameLocation));
+		parameters.add(new ASTParameter(nameLocation, driver, nameIndex, natural, local));
 		ASTParameter param = parameters.getLast();
 		param.checkParam();
 		stackCount += param.getTupleSize();

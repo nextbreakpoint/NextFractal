@@ -288,7 +288,7 @@ shape_singleton_header returns [ASTRule result]
         : 
         s=shape t='{' {
         	driver.setInPathContainer(false);
-        	$result = new ASTRule(driver, -1, $s.start);
+        	$result = new ASTRule($s.start, driver, -1);
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
         }
@@ -309,7 +309,7 @@ rule_header_v2 returns [ASTRule result]
         	String name = $s.getText();
             driver.setMaybeVersion("CFDG2");
         	driver.setShape(null, $RULE);
-        	$result = new ASTRule(driver, driver.stringToShape(name, false, $RULE), $RULE);
+        	$result = new ASTRule($RULE, driver, driver.stringToShape(name, false, $RULE));
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
         }
@@ -320,7 +320,7 @@ rule_header_v2 returns [ASTRule result]
         	Float weight = $w.result.getValue();
         	Boolean percentage = $w.result.isPercentage();
         	driver.setShape(null, $RULE);
-        	$result = new ASTRule(driver, driver.stringToShape(name, false, $RULE), weight, percentage, $RULE);
+        	$result = new ASTRule($RULE, driver, driver.stringToShape(name, false, $RULE), weight, percentage);
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
         }
@@ -339,7 +339,7 @@ rule_header returns [ASTRule result]
         : 
         RULE {
         	driver.setInPathContainer(false);
-        	$result = new ASTRule(driver, -1, $RULE);
+        	$result = new ASTRule($RULE, driver, -1);
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
         }
@@ -348,7 +348,7 @@ rule_header returns [ASTRule result]
         	driver.setInPathContainer(false);
         	Float weight = $w.result.getValue();
         	Boolean percentage = $w.result.isPercentage();
-        	$result = new ASTRule(driver, -1, weight, percentage, $RULE);
+        	$result = new ASTRule($RULE, driver, -1, weight, percentage);
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
         }
@@ -360,7 +360,7 @@ path_header returns [ASTRule result]
         	String name = $s.getText();
         	driver.setShape(name, true, $PATH);
         	driver.setInPathContainer(true);
-        	$result = new ASTRule(driver, -1, $PATH);
+        	$result = new ASTRule($PATH, driver, -1);
         	$result.setPath(true);
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
@@ -392,7 +392,7 @@ path_header_v2 returns [ASTRule result]
         	String name = $s.getText();
             driver.setMaybeVersion("CFDG2");
         	driver.setShape(null, $PATH);
-        	$result = new ASTRule(driver, driver.stringToShape(name, false, $PATH), $PATH);
+        	$result = new ASTRule($PATH, driver, driver.stringToShape(name, false, $PATH));
         	$result.setPath(true);
         	driver.addRule($result);
         	driver.pushRepContainer($result.getRuleBody());
@@ -467,7 +467,7 @@ parameter_spec returns [ASTExpression result]
         }
         |
         t='(' BECOMES ')' { 
-        	$result = new ASTExpression(driver, false, false, ExpType.Reuse, $t);
+        	$result = new ASTExpression($t, driver, false, false, ExpType.Reuse);
         }
         | '(' ')' { 
         	$result = null; 
@@ -499,14 +499,14 @@ pathOp_simple_v2 returns [ASTReplacement result]
         	String pop = $o.getText();
         	ASTModification mod = $a.result;
             driver.setMaybeVersion("CFDG2");
-        	$result = new ASTPathOp(driver, pop, mod, $o);
+        	$result = new ASTPathOp($o, driver, pop, mod);
         }
         |
         s=shapeName m=modification_v2 {
         	String cmd = $s.result;
         	ASTModification mod = $m.result;
             driver.setMaybeVersion("CFDG2");
-        	$result = new ASTPathCommand(driver, cmd, mod, null, $s.start);
+        	$result = new ASTPathCommand($s.start, driver, cmd, mod, null);
         }
         ;
 
@@ -515,12 +515,12 @@ element_simple returns [ASTReplacement result]
         o=USER_PATHOP '(' e=exp2 ')' {
         	String pop = $o.getText();
         	ASTExpression exp = $e.result;
-        	$result = new ASTPathOp(driver, pop, exp, $o);
+        	$result = new ASTPathOp($o, driver, pop, exp);
         }
         |
         o=USER_PATHOP '(' ')' {
         	String operator = $o.getText();
-        	$result = new ASTPathOp(driver, operator, null, $o);
+        	$result = new ASTPathOp($o, driver, operator, null);
         }
         |
         s=shapeName p=parameter_spec m=modification {
@@ -725,7 +725,7 @@ replacement_simple_v2 returns [ASTReplacement result]
         	ASTModification mod = $m.result;
             driver.setMaybeVersion("CFDG2");
         	ASTRuleSpecifier r = driver.makeRuleSpec(name, null, $s.start);
-        	$result = new ASTReplacement(driver, r, mod, RepElemType.replacement, $s.start);
+        	$result = new ASTReplacement($s.start, driver, r, mod, RepElemType.replacement);
         }
         ;
 
@@ -749,12 +749,12 @@ loopHeader_v2 returns [ASTLoop result]
         r=user_rational '*' {
         	driver.incSwitchStack();
         } m=modification_v2 {
-        	ASTExpression count = new ASTReal(driver, $r.result.getValue(), $r.start);
+        	ASTExpression count = new ASTReal($r.start, driver, $r.result.getValue());
         	ASTModification mod = $m.result;
         	driver.decSwitchStack();
             driver.setMaybeVersion("CFDG2");
             String dummyvar = "~~inaccessiblevar~~";
-        	$result = new ASTLoop(driver, driver.stringToShape(dummyvar, false, $m.start), dummyvar, count, mod, $m.start);
+        	$result = new ASTLoop($m.start, driver, driver.stringToShape(dummyvar, false, $m.start), dummyvar, count, mod);
         	driver.pushRepContainer($result.getLoopBody());
         }
         ;
@@ -764,21 +764,21 @@ loopHeader returns [ASTLoop result]
         LOOP v=USER_STRING BECOMES i=exp2 {
         	String var = $v.getText();
         	ASTExpression index = $i.result;
-        	$result = new ASTLoop(driver, driver.stringToShape(var, false, $LOOP), var, index, null, $LOOP);
+        	$result = new ASTLoop($LOOP, driver, driver.stringToShape(var, false, $LOOP), var, index, null);
         	driver.pushRepContainer($result.getLoopBody());
         }
         |
         LOOP modtype BECOMES c=exp2 {
         	ASTExpression index = $c.result;
             String dummyvar = "~~inaccessiblevar~~";
-        	$result = new ASTLoop(driver, driver.stringToShape(dummyvar, false, $LOOP), dummyvar, index, null, $LOOP);
+        	$result = new ASTLoop($LOOP, driver, driver.stringToShape(dummyvar, false, $LOOP), dummyvar, index, null);
         	driver.pushRepContainer($result.getLoopBody());
         }
         |
         LOOP c=exp2 {
         	ASTExpression count = $c.result;
             String dummyvar = "~~inaccessiblevar~~";
-        	$result = new ASTLoop(driver, driver.stringToShape(dummyvar, false, $LOOP), dummyvar, count, null, $LOOP);
+        	$result = new ASTLoop($LOOP, driver, driver.stringToShape(dummyvar, false, $LOOP), dummyvar, count, null);
         	driver.pushRepContainer($result.getLoopBody());
         }
         ;
@@ -787,7 +787,7 @@ ifHeader returns [ASTIf result]
         : 
         IF '(' e=exp2 ')' {
         	ASTExpression cond = $e.result;
-        	$result = new ASTIf(driver, cond, $IF);
+        	$result = new ASTIf($IF, driver, cond);
         	driver.pushRepContainer($result.getThenBody());
         }
         ;
@@ -808,13 +808,13 @@ transHeader returns [ASTTransform result]
         	if (!$t.result.equals(ModType.transform.name())) {
         		driver.error("Syntax error", $t.start);
         	} 
-        	$result = new ASTTransform(driver, exp, $t.start);
+        	$result = new ASTTransform($t.start, driver, exp);
         	driver.pushRepContainer($result.getBody());
         }
         |
         c=clone e=exp2 {
         	ASTExpression exp = $e.result;
-        	$result = new ASTTransform(driver, exp, $c.start);
+        	$result = new ASTTransform($c.start, driver, exp);
         	driver.pushRepContainer($result.getBody());
         	$result.setClone(true);
         }
@@ -824,7 +824,7 @@ switchHeader returns [ASTSwitch result]
         : 
         SWITCH '(' e=exp2 ')' {
         	ASTExpression caseVal = $e.result;
-            $result = new ASTSwitch(driver, caseVal, $SWITCH);
+            $result = new ASTSwitch($SWITCH, driver, caseVal);
             driver.getSwitchStack().push($result);
         }
         ;
@@ -844,7 +844,7 @@ caseHeader returns [Integer result]
                 		driver.error("Case value already in use", $CASE);
                 		driver.pushRepContainer(caseMap.get(intval));
                 	} else {
-                		ASTRepContainer caseBody = new ASTRepContainer(driver);
+                		ASTRepContainer caseBody = new ASTRepContainer($CASE, driver);
                 		driver.pushRepContainer(caseBody);
                 		caseMap.put(intval, caseBody);
                 	}
@@ -897,14 +897,14 @@ buncha_adjustments returns [ASTModification result]
         	$result = $a2.result;
         }
         | {
-			$result = new ASTModification(driver, (Token)null);
+			$result = new ASTModification((Token)null, driver);
         }
         ;
 
 adjustment returns [ASTModTerm result]
         : 
         t=modtype el=explist {
-        	$result = new ASTModTerm(driver, ModType.byName($t.result), $el.result, $t.start);
+        	$result = new ASTModTerm($t.start, driver, ModType.byName($t.result), $el.result);
         }
         |
         t=modtype e=exp '|' {
@@ -913,23 +913,23 @@ adjustment returns [ASTModTerm result]
         		driver.error("The target operator can only be applied to color adjustments", $t.start);
         		$result = null;
         	} else {
-	        	$result = new ASTModTerm(driver, ModType.fromType(type.getType() + 4), $e.result, $t.start);
+	        	$result = new ASTModTerm($t.start, driver, ModType.fromType(type.getType() + 4), $e.result);
         	}
         }
         |
         PARAM p=USER_STRING {
-        	$result = new ASTModTerm(driver, ModType.param, $p.getText(), $PARAM);
+        	$result = new ASTModTerm($PARAM, driver, ModType.param, $p.getText());
         }
         |
         PARAM p=USER_QSTRING {
-        	$result = new ASTModTerm(driver, ModType.param, $p.getText().substring(1, $p.getText().length() - 1), $PARAM);
+        	$result = new ASTModTerm($PARAM, driver, ModType.param, $p.getText().substring(1, $p.getText().length() - 1));
         }
         ;
         
 letHeader returns [ASTRepContainer result]
 		:
         LET {
-            $result = new ASTRepContainer(driver);
+            $result = new ASTRepContainer($LET, driver);
             driver.pushRepContainer($result);
         }
         ;
@@ -973,7 +973,7 @@ arglist returns [ASTExpression result]
         }
         |
         e=exp3 {
-        	$result = new ASTCons(driver, $e.start, new ASTParen(driver, $e.result, $e.start));
+        	$result = new ASTCons($e.start, driver, new ASTParen($e.start, driver, $e.result));
         }
         ;
 
@@ -981,11 +981,11 @@ exp returns [ASTExpression result]
         :
         (
         n=user_rational {
-			$result = new ASTReal(driver, $n.result.getValue(), $n.start);
+			$result = new ASTReal($n.start, driver, $n.result.getValue());
         }
         |
         CF_INFINITY { 
-			$result = new ASTReal(driver, Float.MAX_VALUE, $CF_INFINITY);
+			$result = new ASTReal($CF_INFINITY, driver, Float.MAX_VALUE);
         }
         |
         s=USER_STRING '(' a=arglist ')' {
@@ -999,26 +999,26 @@ exp returns [ASTExpression result]
         }
         |
         t='(' x=exp2 ')' {
-			$result = new ASTParen(driver, $x.result, $t);
+			$result = new ASTParen($t, driver, $x.result);
         }
         |
         t='-' e=exp {
-			$result = new ASTOperator(driver, 'N', $e.result, $t);
+			$result = new ASTOperator($t, driver, 'N', $e.result);
         }
         |
         t='+' e=exp { 
-			$result = new ASTOperator(driver, 'P', $e.result, $t);
+			$result = new ASTOperator($t, driver, 'P', $e.result);
         }
         )
         (
         RANGE r=exp {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand", pair, driver.getSeed(), $result.getToken());
+        	$result = new ASTFunction($result.getToken(), driver, "rand", pair, driver.getSeed());
         }
         |
         PLUSMINUS r=exp {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand+/-", pair, driver.getSeed(), $result.getToken());
+        	$result = new ASTFunction($result.getToken(), driver, "rand+/-", pair, driver.getSeed());
         }
         )?
         ;
@@ -1038,11 +1038,11 @@ exp3 returns [ASTExpression result]
         :
         (
         n=user_rational {
-			$result = new ASTReal(driver, $n.result.getValue(), $n.start);
+			$result = new ASTReal($n.start, driver, $n.result.getValue());
         }
         |
         CF_INFINITY { 
-			$result = new ASTReal(driver, Float.MAX_VALUE, $CF_INFINITY);
+			$result = new ASTReal($CF_INFINITY, driver, Float.MAX_VALUE);
         }
         |
         s=USER_STRING '(' a=arglist ')' {
@@ -1056,19 +1056,19 @@ exp3 returns [ASTExpression result]
         }
         |
         t='(' x=exp2 ')' {
-			$result = new ASTParen(driver, $x.result, $t);
+			$result = new ASTParen($t, driver, $x.result);
         }
         |
         t='-' e=exp3 {
-			$result = new ASTOperator(driver, 'N', $e.result, $t);
+			$result = new ASTOperator($t, driver, 'N', $e.result);
         }
         |
         t='+' e=exp3 { 
-			$result = new ASTOperator(driver, 'P', $e.result, $t);
+			$result = new ASTOperator($t, driver, 'P', $e.result);
         }
         |
         t=NOT e=exp3 { 
-			$result = new ASTOperator(driver, '!', $e.result, $t);
+			$result = new ASTOperator($t, driver, '!', $e.result);
         }
         |
         m=modification {
@@ -1077,73 +1077,73 @@ exp3 returns [ASTExpression result]
         )
         (
         '+' r=exp3 {
-        	$result = new ASTOperator(driver, '+', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '+', $result, $r.result);
         }
         |
         '-' r=exp3 {
-        	$result = new ASTOperator(driver, '-', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '-', $result, $r.result);
         }
         |
         '_' r=exp3 {
-        	$result = new ASTOperator(driver, '_', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '_', $result, $r.result);
         }
         |
         '*' r=exp3 {
-        	$result = new ASTOperator(driver, '*', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '*', $result, $r.result);
         }
         |
         '/' r=exp3 {
-        	$result = new ASTOperator(driver, '/', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '/', $result, $r.result);
         }
         |
         '^' r=exp3 {
-        	$result = new ASTOperator(driver, '^', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '^', $result, $r.result);
         }
         |
         LT r=exp3 {
-        	$result = new ASTOperator(driver, '<', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '<', $result, $r.result);
         }
         |
         GT r=exp3 {
-        	$result = new ASTOperator(driver, '>', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '>', $result, $r.result);
         }
         |
         LE r=exp3 {
-        	$result = new ASTOperator(driver, 'L', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, 'L', $result, $r.result);
         }
         |
         GE r=exp3 {
-        	$result = new ASTOperator(driver, 'G', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, 'G', $result, $r.result);
         }
         |
         EQ r=exp3 {
-        	$result = new ASTOperator(driver, '=', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '=', $result, $r.result);
         }
         |
         NEQ r=exp3 {
-        	$result = new ASTOperator(driver, 'n', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, 'n', $result, $r.result);
         }
         |
         AND r=exp3 {
-        	$result = new ASTOperator(driver, '&', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '&', $result, $r.result);
         }
         |
         OR r=exp3 {
-        	$result = new ASTOperator(driver, '|', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, '|', $result, $r.result);
         }
         |
         XOR r=exp3 {
-        	$result = new ASTOperator(driver, 'X', $result, $r.result, $result.getToken());
+        	$result = new ASTOperator($result.getToken(), driver, 'X', $result, $r.result);
         }
         |
         RANGE r=exp3 {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand", pair, driver.getSeed(), $result.getToken());
+        	$result = new ASTFunction($result.getToken(), driver, "rand", pair, driver.getSeed());
         }
         |
         PLUSMINUS r=exp3 {
         	ASTExpression pair = $result.append($r.result);
-        	$result = new ASTFunction(driver, "rand+/-", pair, driver.getSeed(), $result.getToken());
+        	$result = new ASTFunction($result.getToken(), driver, "rand+/-", pair, driver.getSeed());
         }
         )?
         ;
@@ -1168,7 +1168,7 @@ expfunc returns [ASTExpression result]
         |
         f=USER_STRING '(' BECOMES ')' { 
         	String func = $f.getText();
-        	ASTExpression args = new ASTExpression(driver, false, false, ExpType.Reuse, $f);
+        	ASTExpression args = new ASTExpression($f, driver, false, false, ExpType.Reuse);
         	$result = driver.makeArray(func, args, $f);
         }
         |
@@ -1344,7 +1344,7 @@ clone returns [String result]
 user_rational returns [ASTValue result]
     :
     t=(INTEGER | RATIONAL | FLOAT) {
-        $result = new ASTValue($t.getText());
+        $result = new ASTValue($t, driver, $t.getText());
     }
     ;
 

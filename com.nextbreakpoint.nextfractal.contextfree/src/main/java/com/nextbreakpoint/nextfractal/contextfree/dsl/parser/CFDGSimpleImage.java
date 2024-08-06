@@ -46,7 +46,7 @@ public class CFDGSimpleImage implements CFDGImage {
         cfdg.getDriver().setLogger(logger);
         cfdg.rulesLoaded();
         final CFDGRenderer renderer = cfdg.createRenderer(canvas.getWidth(), canvas.getHeight(), 1, seed.hashCode(), 0.1);
-        renderer.setRenderListener(this::partialDraw);
+        renderer.setCfdgListener(this::partialDraw);
         renderer.run(canvas, partialDraw);
         return new DefaultHandle(renderer, logger);
     }

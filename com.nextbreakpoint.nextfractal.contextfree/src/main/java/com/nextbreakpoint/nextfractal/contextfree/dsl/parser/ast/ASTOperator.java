@@ -39,28 +39,28 @@ public class ASTOperator extends ASTExpression {
 	private ASTExpression left;
 	private ASTExpression right;
 
-	public ASTOperator(CFDGDriver driver, char op, ASTExpression left, ASTExpression right, Token location) {
-		super(driver, location);
+	public ASTOperator(Token token, CFDGDriver driver, char op, ASTExpression left, ASTExpression right) {
+		super(token, driver);
 		this.op = op;
 		this.left = left;
 		this.right = right;
 		this.tupleSize = 1;
 		int index = "NP!+-*/^_<>LG=n&|X".indexOf(String.valueOf(op));
 		if (index == -1) {
-            this.driver.error("Unknown operator", location);
+            this.driver.error("Unknown operator", token);
         } else if (index < 3) {
 			if (right != null) {
-                this.driver.error("Operator takes only one operand", location);
+                this.driver.error("Operator takes only one operand", token);
             }
 		} else {
 			if (right == null) {
-                this.driver.error("Operator takes two operands", location);
+                this.driver.error("Operator takes two operands", token);
             }
 		}
 	}
 
-	public ASTOperator(CFDGDriver driver, char op, ASTExpression left, Token location) {
-		this(driver, op, left, null, location);
+	public ASTOperator(Token token, CFDGDriver driver, char op, ASTExpression left) {
+		this(token, driver, op, left, null);
 	}
 
     @Override

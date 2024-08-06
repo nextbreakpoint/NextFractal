@@ -35,8 +35,8 @@ import org.antlr.v4.runtime.Token;
 public class ASTParen extends ASTExpression {
 	private ASTExpression expression;
 	
-	public ASTParen(CFDGDriver driver, ASTExpression expression, Token location) {
-		super(driver, expression.isConstant(), expression.isNatural(), expression.getType(), location);
+	public ASTParen(Token token, CFDGDriver driver, ASTExpression expression) {
+		super(token, driver, expression.isConstant(), expression.isNatural(), expression.getType());
 		this.expression = expression;
 	}
 

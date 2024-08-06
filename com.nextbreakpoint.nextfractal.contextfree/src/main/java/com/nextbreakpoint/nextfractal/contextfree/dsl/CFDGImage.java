@@ -25,7 +25,6 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFCanvas;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CollectingLogger;
 
 public interface CFDGImage {
     void setListener(CFDGListener listener);

@@ -50,24 +50,24 @@ public class ASTExpression extends ASTObject {
     @Getter
     protected ExpType type;
 
-	public ASTExpression(CFDGDriver driver, Token location) {
-		this(driver, false, false, Locality.UnknownLocal, ExpType.None, location);
+	public ASTExpression(Token token, CFDGDriver driver) {
+		this(token, driver, false, false, Locality.UnknownLocal, ExpType.None);
 	}
 
-	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Token location) {
-		this(driver, constant, natural, Locality.UnknownLocal, ExpType.None, location);
+	public ASTExpression(Token token, CFDGDriver driver, boolean constant, boolean natural) {
+		this(token, driver, constant, natural, Locality.UnknownLocal, ExpType.None);
 	}
 	
-	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, ExpType type, Token location) {
-		this(driver, constant, natural, Locality.UnknownLocal, type, location);
+	public ASTExpression(Token token, CFDGDriver driver, boolean constant, boolean natural, ExpType type) {
+		this(token, driver, constant, natural, Locality.UnknownLocal, type);
 	}
 
-	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Locality locality, Token location) {
-		this(driver, constant, natural, locality, ExpType.None, location);
+	public ASTExpression(Token token, CFDGDriver driver, boolean constant, boolean natural, Locality locality) {
+		this(token, driver, constant, natural, locality, ExpType.None);
 	}
 
-	public ASTExpression(CFDGDriver driver, boolean constant, boolean natural, Locality locality, ExpType type, Token location) {
-		super(location);
+	public ASTExpression(Token token, CFDGDriver driver, boolean constant, boolean natural, Locality locality, ExpType type) {
+		super(token);
 		this.driver = driver;
 		this.constant = constant;
 		this.natural = natural;
@@ -122,7 +122,7 @@ public class ASTExpression extends ASTObject {
 	}
 
 	public ASTExpression append(ASTExpression sib) {
-		return sib != null ? new ASTCons(driver, getToken(), this, sib) : this;
+		return sib != null ? new ASTCons(getToken(), driver, this, sib) : this;
 	}
 
 	public int getTupleSize() {

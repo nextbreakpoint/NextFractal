@@ -32,8 +32,8 @@ import org.antlr.v4.runtime.Token;
 public class ASTLet extends ASTUserFunction {
 	private ASTRepContainer definitions;
 	
-	public ASTLet(CFDGDriver driver, ASTRepContainer definitions, ASTDefine func, Token location) {
-		super(driver, -1, null, func, location);
+	public ASTLet(Token token, CFDGDriver driver, ASTRepContainer definitions, ASTDefine func) {
+		super(token, driver, -1, null, func);
 		this.definitions = definitions;
 		let = true;
 	}
@@ -44,7 +44,7 @@ public class ASTLet extends ASTUserFunction {
 		if (isConstant()) {
 			StringBuilder e = new StringBuilder();
 			entropy(e);
-			ASTParameter p = new ASTParameter(driver, -1, getDefinition(), getToken());
+			ASTParameter p = new ASTParameter(getToken(), driver, -1, getDefinition());
 			ASTExpression ret = p.constCopy(e.toString());
 			if (ret != null) {
 				return ret;

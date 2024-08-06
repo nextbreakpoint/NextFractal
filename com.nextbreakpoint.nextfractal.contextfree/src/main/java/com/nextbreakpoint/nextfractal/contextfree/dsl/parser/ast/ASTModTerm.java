@@ -69,8 +69,8 @@ public class ASTModTerm extends ASTExpression {
 	private ModType modType;
 	private ASTExpression arguments;
 
-	public ASTModTerm(CFDGDriver driver, ModType modType, String paramStrings, Token location) {
-		super(driver, true, false, ExpType.Mod, location);
+	public ASTModTerm(Token token, CFDGDriver driver, ModType modType, String paramStrings) {
+		super(token, driver, true, false, ExpType.Mod);
 		this.modType = modType;
 		this.arguments = null;
 		this.argumentsCount = 0;
@@ -85,15 +85,15 @@ public class ASTModTerm extends ASTExpression {
 		}
 	}
 
-	public ASTModTerm(CFDGDriver driver, ModType modType, ASTExpression arguments, Token location) {
-		super(driver, arguments.isConstant(), false, ExpType.Mod, location);
+	public ASTModTerm(Token token, CFDGDriver driver, ModType modType, ASTExpression arguments) {
+		super(token, driver, arguments.isConstant(), false, ExpType.Mod);
 		this.modType = modType;
 		this.arguments = arguments;
 		this.argumentsCount = 0;
 	}
 
-	public ASTModTerm(CFDGDriver driver, ModType modType, Token location) {
-		super(driver, true, false, ExpType.Mod, location);
+	public ASTModTerm(Token token, CFDGDriver driver, ModType modType) {
+		super(token, driver, true, false, ExpType.Mod);
 		this.modType = modType;
 		this.arguments = null;
 		this.argumentsCount = 0;

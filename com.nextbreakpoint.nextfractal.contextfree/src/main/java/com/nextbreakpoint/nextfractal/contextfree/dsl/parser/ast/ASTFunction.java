@@ -68,20 +68,20 @@ public class ASTFunction extends ASTExpression {
             Mod, Abs, Min, Max, BitNot, BitOr, BitAnd, BitXOR, BitLeft, BitRight, RandInt
     };
 
-	public ASTFunction(CFDGDriver driver, String name, ASTExpression arguments, Rand64 seed, Token location) {
-		super(driver, true, false, ExpType.Numeric, location);
+	public ASTFunction(Token token, CFDGDriver driver, String name, ASTExpression arguments, Rand64 seed) {
+		super(token, driver, true, false, ExpType.Numeric);
 		this.funcType = FuncType.NotAFunction;
 		this.arguments = arguments;
 
 		if (name.isEmpty()) {
-			driver.error("Bad function call", location);
+			driver.error("Bad function call", token);
 			return;
 		}
 
 		funcType = FuncType.byName(name);
 
 		if (funcType == FuncType.NotAFunction) {
-			driver.error("Unknown function", location);
+			driver.error("Unknown function", token);
 			return;
 		}
 
@@ -380,7 +380,7 @@ public class ASTFunction extends ASTExpression {
 
 	@Override
 	public ASTExpression compile(CompilePhase ph) {
-		final Token location = getToken();
+		final Token token = getToken();
 		arguments = compile(arguments, ph);
         switch (ph) {
             case TypeCheck -> {
@@ -398,18 +398,18 @@ public class ASTFunction extends ASTExpression {
                     if (arguments.getType() == ExpType.Numeric) {
                         argcount = arguments.evaluate(null, 0);
                     } else {
-                        driver.error("Function arguments must be numeric", location);
+                        driver.error("Function arguments must be numeric", token);
                     }
                 }
                 switch (funcType) {
                     case Abs:
                         if (argcount < 1 || argcount > 2) {
-                            driver.error("Function takes one or two arguments", location);
+                            driver.error("Function takes one or two arguments", token);
                         }
                         break;
                     case Infinity:
                         if (argcount == 0) {
-                            arguments = new ASTReal(driver, 1.0, location);
+                            arguments = new ASTReal(token, driver, 1.0);
                             argcount = 1;
                         }
                         break;
@@ -437,7 +437,7 @@ public class ASTFunction extends ASTExpression {
                     case Sg:
                     case IsNatural:
                         if (argcount != 1) {
-                            driver.error("Function takes one argument", location);
+                            driver.error("Function takes one argument", token);
                         }
                         break;
                     case BitOr:
@@ -450,47 +450,47 @@ public class ASTFunction extends ASTExpression {
                     case Divides:
                     case Div:
                         if (argcount != 2) {
-                            driver.error("Function takes two arguments", location);
+                            driver.error("Function takes two arguments", token);
                         }
                         break;
                     case Dot:
                     case Cross:
                         if (argnum != 2) {
-                            driver.error("Dot/cross product takes two vectors", location);
+                            driver.error("Dot/cross product takes two vectors", token);
                         } else {
                             int l = arguments.getChild(0).evaluate(null, 0);
                             int r = arguments.getChild(0).evaluate(null, 0);
                             if (funcType == FuncType.Dot && (l != r || l < 2)) {
-                                driver.error("Dot product takes two vectors of the same length", location);
+                                driver.error("Dot product takes two vectors of the same length", token);
                             }
                             if (funcType == FuncType.Cross && (l != 3 || r != 3)) {
-                                driver.error("Cross product takes two vector3s", location);
+                                driver.error("Cross product takes two vector3s", token);
                             }
                         }
                         break;
                     case Hsb2Rgb:
                     case Rgb2Hsb:
                         if (argcount != 3) {
-                            driver.error("RGB/HSB conversion function takes 3 arguments", location);
+                            driver.error("RGB/HSB conversion function takes 3 arguments", token);
                         }
                         break;
                     case Vec:
                         double[] value = new double[1];
                         if (argnum != 2) {
-                            driver.error("Vec function takes two arguments", location);
+                            driver.error("Vec function takes two arguments", token);
                         } else if (!arguments.getChild(1).isConstant() || !arguments.getChild(1).isNatural() || arguments.getChild(1).evaluate(value, 1) != 1) {
-                            driver.error("Vec function length argument must be a scalar constant", location);
+                            driver.error("Vec function length argument must be a scalar constant", token);
                         } else if ((int) Math.floor(value[0]) < 2 || (int) Math.floor(value[0]) > ASTUtils.MAX_VECTOR_SIZE) {
-                            driver.error("Vec function length argument must be >= 2 and <= 99", location);
+                            driver.error("Vec function length argument must be >= 2 and <= 99", token);
                         }
                         break;
                     case Ftime:
                     case Frame:
                         if (arguments != null) {
-                            driver.error("ftime/frame functions takes no arguments", location);
+                            driver.error("ftime/frame functions takes no arguments", token);
                         }
                         constant = false;
-                        arguments = new ASTReal(driver, 1.0, location);
+                        arguments = new ASTReal(token, driver, 1.0);
                         break;
                     case Rand:
                     case Rand2:
@@ -499,26 +499,26 @@ public class ASTFunction extends ASTExpression {
                     case RandStatic:
                         switch (argcount) {
                             case 0:
-                                arguments = new ASTCons(driver, location, new ASTReal(driver, 0.0, location), new ASTReal(driver, funcType == FuncType.RandInt ? 2.0 : 1.0, location));
+                                arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0), new ASTReal(token, driver, funcType == FuncType.RandInt ? 2.0 : 1.0));
                                 break;
                             case 1:
-                                arguments = new ASTCons(driver, location, new ASTReal(driver, 0.0, location));
+                                arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0));
                                 break;
                             case 2:
                                 break;
                             default:
-                                driver.error("Illegal argument(s) for random function", location);
+                                driver.error("Illegal argument(s) for random function", token);
                                 break;
                         }
                         if (!constant && funcType == FuncType.RandStatic) {
-                            driver.error("Argument(s) for rand_static() must be constant", location);
+                            driver.error("Argument(s) for rand_static() must be constant", token);
                         }
                         break;
                     case RandIntDiscrete:
                         constant = false;
                         natural = isNatural(null, argcount);
                         if (argcount < 1) {
-                            driver.error("Function takes at least one argument", location);
+                            driver.error("Function takes at least one argument", token);
                         }
                         break;
                     case RandIntBernoulli:
@@ -529,7 +529,7 @@ public class ASTFunction extends ASTExpression {
                     case RandStudentT:
                         constant = false;
                         if (argcount != 1) {
-                            driver.error("Function takes one argument", location);
+                            driver.error("Function takes one argument", token);
                         }
                         break;
                     case RandIntBinomial:
@@ -544,22 +544,22 @@ public class ASTFunction extends ASTExpression {
                     case RandWeibull:
                         constant = false;
                         if (argcount != 2) {
-                            driver.error("Function takes two arguments", location);
+                            driver.error("Function takes two arguments", token);
                         }
                         break;
                     case Min:
                     case Max:
                         if (argcount != 2) {
-                            driver.error("Function takes at least two arguments", location);
+                            driver.error("Function takes at least two arguments", token);
                         }
                         break;
                     case NotAFunction:
-                        driver.error("Unknown function", location);
+                        driver.error("Unknown function", token);
                         break;
                 }
 
                 if (funcType == FuncType.Infinity && argcount == 0) {
-                    arguments = new ASTReal(driver, 1.0, location);
+                    arguments = new ASTReal(token, driver, 1.0);
                     return null;
                 }
                 if (funcType == FuncType.Ftime) {
@@ -567,14 +567,14 @@ public class ASTFunction extends ASTExpression {
                         driver.error("ftime() function takes no arguments", null);
                     }
                     constant = false;
-                    arguments = new ASTReal(driver, 1.0, location);
+                    arguments = new ASTReal(token, driver, 1.0);
                 }
                 if (funcType == FuncType.Frame) {
                     if (arguments != null) {
                         driver.error("time() function takes no arguments", null);
                     }
                     constant = false;
-                    arguments = new ASTReal(driver, 1.0, location);
+                    arguments = new ASTReal(token, driver, 1.0);
                 }
                 if (funcType.getType() >= FuncType.RandStatic.getType() && funcType.getType() <= FuncType.RandInt.getType()) {
                     if (funcType != FuncType.RandStatic) {
@@ -582,11 +582,11 @@ public class ASTFunction extends ASTExpression {
                     }
                     switch (argcount) {
                         case 0:
-                            arguments = new ASTCons(driver, location, new ASTReal(driver, 0.0, location), new ASTReal(driver, funcType == FuncType.RandInt ? 2.0 : 1.0, location));
+                            arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0), new ASTReal(token, driver, funcType == FuncType.RandInt ? 2.0 : 1.0));
                             break;
 
                         case 1:
-                            arguments = new ASTCons(driver, location, new ASTReal(driver, 0.0, location), arguments);
+                            arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0), arguments);
                             break;
 
                         case 2:

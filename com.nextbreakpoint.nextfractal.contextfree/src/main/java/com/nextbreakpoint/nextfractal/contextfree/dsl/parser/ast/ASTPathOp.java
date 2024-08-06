@@ -44,16 +44,16 @@ public class ASTPathOp extends ASTReplacement {
 	@Getter
     private long flags;
 	
-	public ASTPathOp(CFDGDriver driver, String op, ASTModification args, Token location) {
-		super(driver, op, location);
+	public ASTPathOp(Token token, CFDGDriver driver, String op, ASTModification args) {
+		super(token, driver, op);
 		this.arguments = null;
 		this.oldStyleArguments = args;
 		this.argCount = 0;
 		this.flags = 0;
 	}
 
-	public ASTPathOp(CFDGDriver driver, String op, ASTExpression args, Token location) {
-		super(driver, op, location);
+	public ASTPathOp(Token token, CFDGDriver driver, String op, ASTExpression args) {
+		super(token, driver, op);
 		this.arguments = args;
 		this.oldStyleArguments = null;
 		this.argCount = 0;
@@ -230,7 +230,7 @@ public class ASTPathOp extends ASTReplacement {
                     ary = null;
                     ASTExpression angle = ar;
                     if (angle == null) {
-                        angle = new ASTReal(driver, 0.0, getToken());
+                        angle = new ASTReal(getToken(), driver, 0.0);
                     }
                     if (angle.getType() != ExpType.Numeric || angle.evaluate(null, 0) != 1) {
                         driver.error("Arc angle must be a scalar value", angle.getToken());
@@ -240,7 +240,7 @@ public class ASTPathOp extends ASTReplacement {
                     ASTExpression radius = ar;
                     ar = null;
                     if (radius == null) {
-                        radius = new ASTReal(driver, 1.0, getToken());
+                        radius = new ASTReal(getToken(), driver, 1.0);
                     }
                     if (radius.getType() != ExpType.Numeric || radius.evaluate(null, 0) != 1) {
                         driver.error("Arc radius must be a scalar value", radius.getToken());
@@ -300,10 +300,10 @@ public class ASTPathOp extends ASTReplacement {
 		}
 	}
 
-	private ASTExpression parseXY(ASTExpression ax, ASTExpression ay, double def, Token location) {
+	private ASTExpression parseXY(ASTExpression ax, ASTExpression ay, double def, Token token) {
 		//TODO controllare
 		if (ax == null) {
-			ax = new ASTReal(driver, def, location);
+			ax = new ASTReal(token, driver, def);
 		}
 		int sz = 0;
 		if (ax.getType() == ExpType.Numeric) {
@@ -312,7 +312,7 @@ public class ASTPathOp extends ASTReplacement {
 			driver.error("Path argument must be a scalar value", ax.getToken());
 		}
 		if (sz == 1 && ay == null) {
-			ay = new ASTReal(driver, def, location);
+			ay = new ASTReal(token, driver, def);
 		}
 		if (ay != null && sz >= 0) {
 			if (ay.getType() == ExpType.Numeric) {
@@ -322,7 +322,7 @@ public class ASTPathOp extends ASTReplacement {
 			}
 		}
 		if (sz != 2) {
-			driver.error("Error parsing path operation arguments", location);
+			driver.error("Error parsing path operation arguments", token);
 		}
 		return ax.append(ay);
 	}

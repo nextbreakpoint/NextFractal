@@ -54,8 +54,8 @@ public class ASTDefine extends ASTReplacement {
 	private int stackCount;
     private boolean natural;
 
-	public ASTDefine(CFDGDriver driver, String name, Token location) {
-		super(driver, new ASTModification(driver, location), RepElemType.empty, location);
+	public ASTDefine(Token token, CFDGDriver driver, String name) {
+		super(token, driver, new ASTModification(token, driver), RepElemType.empty);
 		this.name = name;
 		this.configDepth = -1;
 		this.defineType = DefineType.Stack;
@@ -77,7 +77,7 @@ public class ASTDefine extends ASTReplacement {
 	@Override
 	public void compile(CompilePhase ph) {
 		if (defineType == DefineType.Function || defineType == DefineType.Let) {
-			ASTRepContainer tempCont = new ASTRepContainer(driver);
+			ASTRepContainer tempCont = new ASTRepContainer(getToken(), driver);
 			tempCont.setParameters(parameters);
 			tempCont.setStackCount(stackCount);
 			driver.pushRepContainer(tempCont);

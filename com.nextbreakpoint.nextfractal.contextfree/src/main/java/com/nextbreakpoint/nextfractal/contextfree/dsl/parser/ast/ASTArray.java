@@ -46,8 +46,8 @@ public class ASTArray extends ASTExpression {
 	private boolean isParameter;
 	private String entropy;
 	
-	public ASTArray(CFDGDriver driver, int nameIndex, ASTExpression args, String entropy, Token location) {
-		super(driver, false, false, ExpType.Numeric, location);
+	public ASTArray(Token token, CFDGDriver driver, int nameIndex, ASTExpression args, String entropy) {
+		super(token, driver, false, false, ExpType.Numeric);
 		this.driver = driver;
 		this.nameIndex = nameIndex;
 		this.data = null;
@@ -133,7 +133,7 @@ public class ASTArray extends ASTExpression {
 			driver.error("Array index exceeds bounds", getToken());
 			return this;
 		}
-		ASTReal top = new ASTReal(driver, data[index], getToken());
+		ASTReal top = new ASTReal(getToken(), driver, data[index]);
 		top.setText(entropy);
 		top.setNatural(natural);
 		return top;

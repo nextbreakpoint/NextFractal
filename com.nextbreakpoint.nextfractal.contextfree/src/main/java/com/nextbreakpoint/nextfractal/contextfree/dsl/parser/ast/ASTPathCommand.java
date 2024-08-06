@@ -55,8 +55,8 @@ public class ASTPathCommand extends ASTReplacement {
 	@Getter
     private long flags;
 
-	public ASTPathCommand(CFDGDriver driver, Token location) {
-		super(driver, null, RepElemType.command, location);
+	public ASTPathCommand(Token token, CFDGDriver driver) {
+		super(token, driver, null, RepElemType.command);
 		this.miterLimit = 1.0;
 		this.strokeWidth = 0.1;
 		this.parameters = null;
@@ -64,17 +64,17 @@ public class ASTPathCommand extends ASTReplacement {
 		this.flags = FlagType.CF_ROUND_JOIN.getMask() + FlagType.CF_BUTT_CAP.getMask() + CF_FILL.getMask();
 	}
 
-	public ASTPathCommand(CFDGDriver driver, String s, ASTModification mods, ASTExpression params, Token location) {
-		super(driver, mods, RepElemType.command, location);
+	public ASTPathCommand(Token token, CFDGDriver driver, String operation, ASTModification mods, ASTExpression params) {
+		super(token, driver, mods, RepElemType.command);
 		this.miterLimit = 1.0;
 		this.strokeWidth = 0.1;
 		this.parameters = params;
 		this.commandInfo = new CommandInfo();
 		this.flags = FlagType.CF_ROUND_JOIN.getMask() + FlagType.CF_BUTT_CAP.getMask();
-		if (s.equals("FILL")) {
+		if (operation.equals("FILL")) {
 			this.flags |= CF_FILL.getMask();
-		} else if (!s.equals("STROKE")) {
-			driver.error("Unknown path command/operation", location);
+		} else if (!operation.equals("STROKE")) {
+			driver.error("Unknown path command/operation", token);
 		}
 	}
 

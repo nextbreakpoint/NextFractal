@@ -61,25 +61,25 @@ public class ASTParameter extends ASTObject {
 	@Getter
     private ASTDefine definition;
 
-	public ASTParameter(CFDGDriver driver, Token location) {
-		super(location);
+	public ASTParameter(Token token, CFDGDriver driver) {
+		super(token);
 		this.driver = driver;
 	}
 
-	public ASTParameter(CFDGDriver driver, String type, int nameIndex, Token location) {
-		super(location);
+	public ASTParameter(Token token, CFDGDriver driver, String type, int nameIndex) {
+		super(token);
 		this.driver = driver;
 		init(type, nameIndex);
 	}
 
-	public ASTParameter(CFDGDriver driver, int nameIndex, ASTDefine definition, Token location) {
-		super(location);
+	public ASTParameter(Token token, CFDGDriver driver, int nameIndex, ASTDefine definition) {
+		super(token);
 		this.driver = driver;
 		init(nameIndex, definition);
 	}
 
-	public ASTParameter(CFDGDriver driver, int nameIndex, boolean natural, boolean local, Token location) {
-		super(location);
+	public ASTParameter(Token token, CFDGDriver driver, int nameIndex, boolean natural, boolean local) {
+		super(token);
 		this.driver = driver;
 		this.loopIndex = true;
 		this.natural = natural;
@@ -218,11 +218,11 @@ public class ASTParameter extends ASTObject {
                 if (valCount != tupleSize) {
                     driver.error("Unexpected compile error", getToken());
                 }
-                ASTReal top = new ASTReal(driver, data[0], definition.getExp().getToken());
+                ASTReal top = new ASTReal(definition.getExp().getToken(), driver, data[0]);
                 top.setText(entropy);
                 ASTExpression list = top;
                 for (int i = 1; i < valCount; i++) {
-                    ASTReal next = new ASTReal(driver, data[i], getToken());
+                    ASTReal next = new ASTReal(getToken(), driver, data[i]);
                     list = list.append(next);
                 }
                 list.setNatural(natural);
@@ -232,16 +232,16 @@ public class ASTParameter extends ASTObject {
             case Mod -> {
                 ASTModification ret;
                 if (definition.getExp() instanceof ASTModification) {
-                    ret = new ASTModification(definition.driver, (ASTModification) definition.getExp(), getToken());
+                    ret = new ASTModification(getToken(), definition.driver, (ASTModification) definition.getExp());
                 } else {
-                    ret = new ASTModification(definition.driver, definition.getChildChange(), getToken());
+                    ret = new ASTModification(getToken(), definition.driver, definition.getChildChange());
                 }
                 ret.setLocality(locality);
                 return ret;
             }
             case Rule -> {
                 if (definition.getExp() instanceof ASTRuleSpecifier r) {
-                    ASTRuleSpecifier ret = new ASTRuleSpecifier(definition.driver, r.getShapeType(), entropy, null, null, getToken());
+                    ASTRuleSpecifier ret = new ASTRuleSpecifier(getToken(), definition.driver, r.getShapeType(), entropy, null, null);
                     ret.grab(r);
                     ret.setLocality(locality);
                     return ret;

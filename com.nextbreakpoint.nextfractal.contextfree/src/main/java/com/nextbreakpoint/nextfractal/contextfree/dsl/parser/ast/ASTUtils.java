@@ -51,7 +51,7 @@ public class ASTUtils {
     public static final double M_SQRT1_2 = 1 / Math.sqrt(2);
     public static final double M_SQRT2 = Math.sqrt(2);
 
-    public static ExpType decodeType(CFDGDriver driver, String typeName, int[] tupleSize, boolean[] isNatural, Token location) {
+    public static ExpType decodeType(CFDGDriver driver, String typeName, int[] tupleSize, boolean[] isNatural, Token token) {
         ExpType type;
         tupleSize[0] = 1;
         isNatural[0] = false;
@@ -71,14 +71,14 @@ public class ASTUtils {
             if (typeName.matches("vector[0-9]+")) {
                 tupleSize[0] = Integer.parseInt(typeName.substring(6));
                 if (tupleSize[0] <= 1 || tupleSize[0] > 99) {
-                    driver.error("Illegal vector size (<=1 or >99)", location);
+                    driver.error("Illegal vector size (<=1 or >99)", token);
                 }
             } else {
-                driver.error("Illegal vector type specification", location);
+                driver.error("Illegal vector type specification", token);
             }
         } else {
             type = ExpType.None;
-            driver.error("Unrecognized type name", location);
+            driver.error("Unrecognized type name", token);
         }
         return type;
     }
@@ -160,9 +160,9 @@ public class ASTUtils {
         }
     }
 
-    public static void processDihedral(CFDGDriver driver, List<AffineTransform> syms, double order, double x, double y, boolean dihedral, double angle, Token location) {
+    public static void processDihedral(CFDGDriver driver, List<AffineTransform> syms, double order, double x, double y, boolean dihedral, double angle, Token token) {
         if (order < 1.0) {
-            driver.fail("Rotational symmetry order must be one or larger", location);
+            driver.fail("Rotational symmetry order must be one or larger", token);
         }
         AffineTransform reg = new AffineTransform();
         reg.translate(-x, -y);
@@ -194,7 +194,7 @@ public class ASTUtils {
                 0.0, 0.0);
     }
 
-    public static void processSymmSpec(CFDGDriver driver, List<AffineTransform> syms, AffineTransform tile, boolean tiled, List<Double> data, Token location) {
+    public static void processSymmSpec(CFDGDriver driver, List<AffineTransform> syms, AffineTransform tile, boolean tiled, List<Double> data, Token token) {
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -231,15 +231,15 @@ public class ASTUtils {
         }
 
         if (type >= FlagType.CF_P11G.getMask() && type <= FlagType.CF_P2MM.getMask() && !frieze) {
-            driver.fail("Frieze symmetry only works in frieze designs", location);
+            driver.fail("Frieze symmetry only works in frieze designs", token);
         }
 
         if (type >= FlagType.CF_PM.getMask() && type <= FlagType.CF_P6M.getMask() && !tiled) {
-            driver.fail("Wallpaper symmetry only works in tiled designs", location);
+            driver.fail("Wallpaper symmetry only works in tiled designs", token);
         }
 
         if (type == FlagType.CF_P2.getMask() && !frieze && !tiled) {
-            driver.fail("p2 symmetry only works in frieze or tiled designs", location);
+            driver.fail("p2 symmetry only works in frieze or tiled designs", token);
         }
 
         AffineTransform ref45 = getMirrorTransform(M_PI_4);
@@ -258,11 +258,11 @@ public class ASTUtils {
                         order = data.get(1);
                         break;
                     default:
-                        driver.fail("Cyclic symmetry requires an order argument and an optional center of rotation", location);
+                        driver.fail("Cyclic symmetry requires an order argument and an optional center of rotation", token);
                         order = 1.0;    // suppress warning, never executed
                         break;  // never gets here
                 }
-                processDihedral(driver, syms, order, x, y, false, 0.0, location);
+                processDihedral(driver, syms, order, x, y, false, 0.0, token);
             }
             case CF_DIHEDRAL -> {
                 double order, angle = 0.0, x = 0.0, y = 0.0;
@@ -281,11 +281,11 @@ public class ASTUtils {
                         order = data.get(1);
                         break;
                     default:
-                        driver.fail("Dihedral symmetry requires an order argument, an optional mirror angle, and an optional center of rotation", location);
+                        driver.fail("Dihedral symmetry requires an order argument, an optional mirror angle, and an optional center of rotation", token);
                         order = 1.0;    // suppress warning, never executed
                         break;  // never gets here
                 }
-                processDihedral(driver, syms, order, x, y, true, angle, location);
+                processDihedral(driver, syms, order, x, y, true, angle, token);
             }
             case CF_P11G -> {
                 double mirrorx = 0.0, mirrory = 0.0;
@@ -295,7 +295,7 @@ public class ASTUtils {
                     else
                         mirrorx = data.get(1);
                 } else if (data.size() > 2) {
-                    driver.fail("p11g symmetry takes no arguments or an optional glide axis position argument", location);
+                    driver.fail("p11g symmetry takes no arguments or an optional glide axis position argument", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 addUnique(syms, tr);
@@ -315,7 +315,7 @@ public class ASTUtils {
                     else
                         mirrorx = data.get(1);
                 } else if (data.size() > 2) {
-                    driver.fail("p11m symmetry takes no arguments or an optional mirror axis position argument", location);
+                    driver.fail("p11m symmetry takes no arguments or an optional mirror axis position argument", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 addUnique(syms, tr);
@@ -335,7 +335,7 @@ public class ASTUtils {
                     else
                         mirrory = data.get(1);
                 } else if (data.size() > 2) {
-                    driver.fail("p1m1 symmetry takes no arguments or an optional mirror axis position argument", location);
+                    driver.fail("p1m1 symmetry takes no arguments or an optional mirror axis position argument", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 addUnique(syms, tr);
@@ -353,9 +353,9 @@ public class ASTUtils {
                     mirrorx = data.get(1);
                     mirrory = data.get(2);
                 } else if (data.size() != 1) {
-                    driver.fail("p2 symmetry takes no arguments or a center of rotation", location);
+                    driver.fail("p2 symmetry takes no arguments or a center of rotation", token);
                 }
-                processDihedral(driver, syms, 2.0, mirrorx, mirrory, false, 0.0, location);
+                processDihedral(driver, syms, 2.0, mirrorx, mirrory, false, 0.0, token);
             }
             case CF_P2MG -> {
                 double mirrorx = 0.0, mirrory = 0.0;
@@ -363,7 +363,7 @@ public class ASTUtils {
                     mirrorx = data.get(1);
                     mirrory = data.get(2);
                 } else if (data.size() != 1) {
-                    driver.fail("p2mg symmetry takes no arguments or a center of rotation", location);
+                    driver.fail("p2mg symmetry takes no arguments or a center of rotation", token);
                 }
                 AffineTransform tr1 = new AffineTransform();
                 AffineTransform tr2 = AffineTransform.getTranslateInstance(-mirrorx, -mirrory);
@@ -386,13 +386,13 @@ public class ASTUtils {
                     mirrorx = data.get(1);
                     mirrory = data.get(2);
                 } else if (data.size() != 1) {
-                    driver.fail("p2mm symmetry takes no arguments or a center of relection", location);
+                    driver.fail("p2mm symmetry takes no arguments or a center of relection", token);
                 }
-                processDihedral(driver, syms, 2.0, mirrorx, mirrory, true, 0.0, location);
+                processDihedral(driver, syms, 2.0, mirrorx, mirrory, true, 0.0, token);
             }
             case CF_PM -> {
                 if (!rectangular && !square45) {
-                    driver.fail("pm symmetry requires rectangular tiling", location);
+                    driver.fail("pm symmetry requires rectangular tiling", token);
                 }
                 double offset = 0.0;
                 switch (data.size()) {
@@ -402,15 +402,15 @@ public class ASTUtils {
                         offset = data.get(2);
                         break;
                     default:
-                        driver.fail("pm symmetry takes a mirror axis argument and an optional axis position argument", location);
+                        driver.fail("pm symmetry takes a mirror axis argument and an optional axis position argument", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 addUnique(syms, tr);
                 int axis = data.get(1).intValue();
                 if (rectangular && (axis < 0 || axis > 1))
-                    driver.fail("pm symmetry mirror axis argument must be 0 or 1", location);
+                    driver.fail("pm symmetry mirror axis argument must be 0 or 1", token);
                 else if (square45 && (axis < 2 || axis > 3))
-                    driver.fail("pm symmetry mirror axis argument must be 2 or 3", location);
+                    driver.fail("pm symmetry mirror axis argument must be 2 or 3", token);
                 switch (axis) {
                     case 0:         // mirror on x axis
                         tr.translate(0, -offset);
@@ -433,14 +433,14 @@ public class ASTUtils {
                         tr.translate(offset * M_SQRT1_2, offset * M_SQRT1_2);
                         break;
                     default:
-                        driver.fail("pm symmetry mirror axis argument must be 0, 1, 2, or 3", location);
+                        driver.fail("pm symmetry mirror axis argument must be 0, 1, 2, or 3", token);
                         break;
                 }
                 addUnique(syms, tr);
             }
             case CF_PG -> {
                 if (!rectangular && !square45) {
-                    driver.fail("pg symmetry requires rectangular tiling", location);
+                    driver.fail("pg symmetry requires rectangular tiling", token);
                 }
                 double offset = 0.0;
                 switch (data.size()) {
@@ -450,15 +450,15 @@ public class ASTUtils {
                         offset = data.get(2);
                         break;
                     default:
-                        driver.fail("pg symmetry takes a glide axis argument and an optional axis position argument", location);
+                        driver.fail("pg symmetry takes a glide axis argument and an optional axis position argument", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 addUnique(syms, tr);
                 int axis = data.get(1).intValue();
                 if (rectangular && (axis < 0 || axis > 1))
-                    driver.fail("pg symmetry mirror axis argument must be 0 or 1", location);
+                    driver.fail("pg symmetry mirror axis argument must be 0 or 1", token);
                 else if (square45 && (axis < 2 || axis > 3))
-                    driver.fail("pg symmetry mirror axis argument must be 2 or 3", location);
+                    driver.fail("pg symmetry mirror axis argument must be 2 or 3", token);
                 switch (axis) {
                     case 0:         // mirror on x axis
                         tr.translate(0, -offset);
@@ -481,14 +481,14 @@ public class ASTUtils {
                         tr.translate((offset - size45 * 0.5) * M_SQRT1_2, (offset + size45 * 0.5) * M_SQRT1_2);
                         break;
                     default:
-                        driver.fail("pg symmetry glide axis argument must be 0, 1, 2, or 3", location);
+                        driver.fail("pg symmetry glide axis argument must be 0, 1, 2, or 3", token);
                         break;
                 }
                 addUnique(syms, tr);
             }
             case CF_CM -> {
                 if (!rhombic && !square) {
-                    driver.fail("cm symmetry requires diamond tiling", location);
+                    driver.fail("cm symmetry requires diamond tiling", token);
                 }
                 double offset = 0.0;
                 switch (data.size()) {
@@ -498,15 +498,15 @@ public class ASTUtils {
                         offset = data.get(2);
                         break;
                     default:
-                        driver.fail("cm symmetry takes a mirror axis argument and an optional axis position argument", location);
+                        driver.fail("cm symmetry takes a mirror axis argument and an optional axis position argument", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 addUnique(syms, tr);
                 int axis = data.get(1).intValue();
                 if (rhombic && (axis < 0 || axis > 1))
-                    driver.fail("cm symmetry mirror axis argument must be 0 or 1", location);
+                    driver.fail("cm symmetry mirror axis argument must be 0 or 1", token);
                 else if (square && (axis < 2 || axis > 3))
-                    driver.fail("cm symmetry mirror axis argument must be 2 or 3", location);
+                    driver.fail("cm symmetry mirror axis argument must be 2 or 3", token);
                 switch (axis) {
                     case 0:         // mirror on x axis
                         tr.translate(0, -offset);
@@ -529,14 +529,14 @@ public class ASTUtils {
                         tr.translate(offset * M_SQRT1_2, offset * M_SQRT1_2);
                         break;
                     default:
-                        driver.fail("cm symmetry mirror axis argument must be 0, 1, 2, or 3", location);
+                        driver.fail("cm symmetry mirror axis argument must be 0, 1, 2, or 3", token);
                         break;
                 }
                 addUnique(syms, tr);
             }
             case CF_PMM -> {
                 if (!rectangular && !square45) {
-                    driver.fail("pmm symmetry requires rectangular tiling", location);
+                    driver.fail("pmm symmetry requires rectangular tiling", token);
                 }
                 double centerx = 0.0, centery = 0.0;
                 switch (data.size()) {
@@ -547,13 +547,13 @@ public class ASTUtils {
                         centery = data.get(2);
                         break;
                     default:
-                        driver.fail("pmm symmetry takes no arguments or a center of reflection", location);
+                        driver.fail("pmm symmetry takes no arguments or a center of reflection", token);
                 }
-                processDihedral(driver, syms, 2.0, centerx, centery, true, square45 ? M_PI_4 : 0.0, location);
+                processDihedral(driver, syms, 2.0, centerx, centery, true, square45 ? M_PI_4 : 0.0, token);
             }
             case CF_PMG -> {
                 if (!rectangular && !square45) {
-                    driver.fail("pmg symmetry requires rectangular tiling", location);
+                    driver.fail("pmg symmetry requires rectangular tiling", token);
                 }
                 double centerx = 0.0, centery = 0.0;
                 switch (data.size()) {
@@ -564,20 +564,20 @@ public class ASTUtils {
                         centery = data.get(3);
                         break;
                     default:
-                        driver.fail("pmg symmetry takes a mirror axis argument and an optional center of reflection", location);
+                        driver.fail("pmg symmetry takes a mirror axis argument and an optional center of reflection", token);
                 }
                 AffineTransform tr = new AffineTransform();
                 AffineTransform tr2 = new AffineTransform();
                 int axis = data.get(1).intValue();
                 if (rectangular && (axis < 0 || axis > 1))
-                    driver.fail("pmg symmetry mirror axis argument must be 0 or 1", location);
+                    driver.fail("pmg symmetry mirror axis argument must be 0 or 1", token);
                 else if (square45 && (axis < 2 || axis > 3))
-                    driver.fail("pmg symmetry mirror axis argument must be 2 or 3", location);
+                    driver.fail("pmg symmetry mirror axis argument must be 2 or 3", token);
                 switch (axis) {
                     case 0: {       // mirror on x axis
                         double cy = Math.abs(centery + 0.25 * tile.getScaleY()) < Math.abs(centery - 0.25 * tile.getScaleY()) ?
                                 centery + 0.25 * tile.getScaleY() : centery - 0.25 * tile.getScaleY();
-                        processDihedral(driver, syms, 2.0, centerx, cy, false, 0.0, location);
+                        processDihedral(driver, syms, 2.0, centerx, cy, false, 0.0, token);
                         tr.translate(-centerx, 0.0);
                         tr.scale(-1, 1);
                         tr.translate(centerx, 0.5 * tile.getScaleY());
@@ -591,7 +591,7 @@ public class ASTUtils {
                     case 1: {       // mirror on y axis
                         double cx = Math.abs(centerx + 0.25 * tile.getScaleX()) < Math.abs(centerx - 0.25 * tile.getScaleX()) ?
                                 centerx + 0.25 * tile.getScaleX() : centerx - 0.25 * tile.getScaleX();
-                        processDihedral(driver, syms, 2.0, cx, centery, false, 0.0, location);
+                        processDihedral(driver, syms, 2.0, cx, centery, false, 0.0, token);
                         tr.translate(-centerx, 0.0);
                         tr.scale(-1, 1);
                         tr.translate(centerx, 0.0);
@@ -611,7 +611,7 @@ public class ASTUtils {
                             cx = cx2;
                             cy = cy2;
                         }
-                        processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, location);
+                        processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, token);
                         tr.translate(-centerx, -centery);   // mirror on x=y
                         tr.concatenate(ref45);
                         tr.translate(centerx, centery);
@@ -631,7 +631,7 @@ public class ASTUtils {
                             cx = cx2;
                             cy = cy2;
                         }
-                        processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, location);
+                        processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, token);
                         tr.translate(-centerx, -centery);   // mirror on x=-y
                         tr.concatenate(ref135);
                         tr.translate(centerx, centery);
@@ -643,13 +643,13 @@ public class ASTUtils {
                         break;
                     }
                     default:
-                        driver.fail("pmg symmetry mirror axis argument must be 0, 1, 2, or 3", location);
+                        driver.fail("pmg symmetry mirror axis argument must be 0, 1, 2, or 3", token);
                         break;
                 }
             }
             case CF_PGG -> {
                 if (!rectangular && !square45) {
-                    driver.fail("pgg symmetry requires rectangular tiling", location);
+                    driver.fail("pgg symmetry requires rectangular tiling", token);
                 }
                 double centerx = 0.0, centery = 0.0;
                 switch (data.size()) {
@@ -660,7 +660,7 @@ public class ASTUtils {
                         centery = data.get(2);
                         break;
                     default:
-                        driver.fail("pgg symmetry takes no arguments or a center of glide axis intersection", location);
+                        driver.fail("pgg symmetry takes no arguments or a center of glide axis intersection", token);
                 }
                 if (square45) {
                     double cx = centerx + 0.25 * M_SQRT2 * size45;
@@ -683,7 +683,7 @@ public class ASTUtils {
                         cx = cx2;
                         cy = cy2;
                     }
-                    processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, location);
+                    processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, token);
                     AffineTransform tr = new AffineTransform();
                     AffineTransform tr2 = new AffineTransform();
                     tr.translate(-centerx, -centery);   // glide on x=y
@@ -700,7 +700,7 @@ public class ASTUtils {
                         centerx + 0.25 * tile.getScaleX() : centerx - 0.25 * tile.getScaleX();
                 double cy = Math.abs(centery + 0.25 * tile.getScaleY()) < Math.abs(centery - 0.25 * tile.getScaleY()) ?
                         centery + 0.25 * tile.getScaleY() : centery - 0.25 * tile.getScaleY();
-                processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, location);
+                processDihedral(driver, syms, 2.0, cx, cy, false, 0.0, token);
                 AffineTransform tr = new AffineTransform();
                 AffineTransform tr2 = new AffineTransform();
                 tr.translate(-centerx, 0.0);
@@ -714,7 +714,7 @@ public class ASTUtils {
             }
             case CF_CMM -> {
                 if (!rhombic && !square) {
-                    driver.fail("cmm symmetry requires diamond tiling", location);
+                    driver.fail("cmm symmetry requires diamond tiling", token);
                 }
                 double centerx = 0.0, centery = 0.0;
                 switch (data.size()) {
@@ -725,13 +725,13 @@ public class ASTUtils {
                         centery = data.get(2);
                         break;
                     default:
-                        driver.fail("cmm symmetry takes no arguments or a center of reflection", location);
+                        driver.fail("cmm symmetry takes no arguments or a center of reflection", token);
                 }
-                processDihedral(driver, syms, 2.0, centerx, centery, true, square45 ? M_PI_4 : 0.0, location);
+                processDihedral(driver, syms, 2.0, centerx, centery, true, square45 ? M_PI_4 : 0.0, token);
             }
             case CF_P4, CF_P4M -> {
                 if (!square && !square45) {
-                    driver.fail("p4 & p4m symmetry requires square tiling", location);
+                    driver.fail("p4 & p4m symmetry requires square tiling", token);
                 }
                 double x = 0.0, y = 0.0;
                 switch (data.size()) {
@@ -742,13 +742,13 @@ public class ASTUtils {
                         y = data.get(2);
                         break;
                     default:
-                        driver.fail("p4 & p4m symmetry takes no arguments or a center of rotation", location);
+                        driver.fail("p4 & p4m symmetry takes no arguments or a center of rotation", token);
                 }
-                processDihedral(driver, syms, 4.0, x, y, type == FlagType.CF_P4M.getMask(), square ? M_PI_4 : 0.0, location);
+                processDihedral(driver, syms, 4.0, x, y, type == FlagType.CF_P4M.getMask(), square ? M_PI_4 : 0.0, token);
             }
             case CF_P4G -> {
                 if (!square && !square45) {
-                    driver.fail("p4g symmetry requires square tiling", location);
+                    driver.fail("p4g symmetry requires square tiling", token);
                 }
                 double centerx = 0.0, centery = 0.0;
                 switch (data.size()) {
@@ -759,7 +759,7 @@ public class ASTUtils {
                         centery = data.get(2);
                         break;
                     default:
-                        driver.fail("p4g symmetry takes no arguments or a center of rotation", location);
+                        driver.fail("p4g symmetry takes no arguments or a center of rotation", token);
                 }
                 AffineTransform reg = new AffineTransform();
                 reg.translate(-centerx, -centery);
@@ -788,7 +788,7 @@ public class ASTUtils {
             }
             case CF_P3 -> {
                 if (!hexagonal) {
-                    driver.fail("p3 symmetry requires hexagonal tiling", location);
+                    driver.fail("p3 symmetry requires hexagonal tiling", token);
                 }
                 double x = 0.0, y = 0.0;
                 switch (data.size()) {
@@ -799,13 +799,13 @@ public class ASTUtils {
                         y = data.get(2);
                         break;
                     default:
-                        driver.fail("p3 symmetry takes no arguments or a center of rotation", location);
+                        driver.fail("p3 symmetry takes no arguments or a center of rotation", token);
                 }
-                processDihedral(driver, syms, 3.0, x, y, false, 0.0, location);
+                processDihedral(driver, syms, 3.0, x, y, false, 0.0, token);
             }
             case CF_P3M1, CF_P31M -> {
                 if (!hexagonal) {
-                    driver.fail("p3m1 & p31m symmetry requires hexagonal tiling", location);
+                    driver.fail("p3m1 & p31m symmetry requires hexagonal tiling", token);
                 }
                 double x = 0.0, y = 0.0;
                 switch (data.size()) {
@@ -816,15 +816,15 @@ public class ASTUtils {
                         y = data.get(2);
                         break;
                     default:
-                        driver.fail("p3m1 & p31m symmetry takes no arguments or a center of rotation", location);
+                        driver.fail("p3m1 & p31m symmetry takes no arguments or a center of rotation", token);
                 }
                 boolean deg30 = (Math.abs(tile.getShearX()) <= 0.000001) != (type == FlagType.CF_P3M1.getMask());
                 double angle = M_PI / (deg30 ? 6.0 : 3.0);
-                processDihedral(driver, syms, 3.0, x, y, true, angle, location);
+                processDihedral(driver, syms, 3.0, x, y, true, angle, token);
             }
             case CF_P6, CF_P6M -> {
                 if (!hexagonal) {
-                    driver.fail("p6 & p6m symmetry requires hexagonal tiling", location);
+                    driver.fail("p6 & p6m symmetry requires hexagonal tiling", token);
                 }
                 double x = 0.0, y = 0.0;
                 switch (data.size()) {
@@ -835,11 +835,11 @@ public class ASTUtils {
                         y = data.get(2);
                         break;
                     default:
-                        driver.fail("p6 & p6m symmetry takes no arguments or a center of rotation", location);
+                        driver.fail("p6 & p6m symmetry takes no arguments or a center of rotation", token);
                 }
-                processDihedral(driver, syms, 6.0, x, y, type == FlagType.CF_P6M.getMask(), 0.0, location);
+                processDihedral(driver, syms, 6.0, x, y, type == FlagType.CF_P6M.getMask(), 0.0, token);
             }
-            default -> driver.fail("Unknown symmetry type", location);
+            default -> driver.fail("Unknown symmetry type", token);
             // never gets here
         }
 
@@ -860,14 +860,14 @@ public class ASTUtils {
         }
     }
 
-    public static ASTExpression makeResult(CFDGDriver driver, double result, int lenght, ASTExpression from) {
-        ASTReal r = new ASTReal(driver, result, from.getToken());
+    public static ASTExpression makeResult(CFDGDriver driver, double result, int length, ASTExpression from) {
+        ASTReal r = new ASTReal(from.getToken(), driver, result);
         r.setType(from.getType());
         r.setNatural(from.isNatural());
-        if (lenght > 1) {
-            ASTCons l = new ASTCons(driver, from.getToken(), r);
-            for (int i = 1; i< lenght; i++) {
-                r = new ASTReal(driver, result, from.getToken());
+        if (length > 1) {
+            ASTCons l = new ASTCons(from.getToken(), driver, r);
+            for (int i = 1; i< length; i++) {
+                r = new ASTReal(from.getToken(), driver, result);
                 r.setType(from.getType());
                 r.setNatural(from.isNatural());
                 l.append(r);
@@ -909,7 +909,7 @@ public class ASTUtils {
                 case Numeric -> {
                     double[] value = new double[dest.getType().getTupleSize()];
                     int num = arg.evaluate(value, dest.getType().getTupleSize(), renderer);
-                    if (!ASTParameter.Impure && dest.getType().isNatural() && !renderer.isNatual(value[0])) {
+                    if (!ASTParameter.Impure && dest.getType().isNatural() && !renderer.isNatural(value[0])) {
                         renderer.getDriver().error("Expression does not evaluate to a legal natural number", arg.getToken());
                     }
                     if (num != dest.getType().getTupleSize()) {

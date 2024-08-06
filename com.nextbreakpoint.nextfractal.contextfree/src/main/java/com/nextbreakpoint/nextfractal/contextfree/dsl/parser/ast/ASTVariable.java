@@ -48,8 +48,8 @@ public class ASTVariable extends ASTExpression {
 	@Getter
     private boolean parameter;
 
-	public ASTVariable(CFDGDriver driver, int stringIndex, String text, Token location) {
-		super(driver, location);
+	public ASTVariable(Token token, CFDGDriver driver, int stringIndex, String text) {
+		super(token, driver);
 		this.driver = driver;
 		this.stringIndex = stringIndex;
 		this.parameter = false;
@@ -116,7 +116,7 @@ public class ASTVariable extends ASTExpression {
                     return ret;
                 } else {
                     if (bound.getType() == ExpType.Rule) {
-                        ASTRuleSpecifier ret = new ASTRuleSpecifier(driver, stringIndex, name, getToken());
+                        ASTRuleSpecifier ret = new ASTRuleSpecifier(getToken(), driver, stringIndex, name);
                         ret.compile(ph);
                         return ret;
                     }

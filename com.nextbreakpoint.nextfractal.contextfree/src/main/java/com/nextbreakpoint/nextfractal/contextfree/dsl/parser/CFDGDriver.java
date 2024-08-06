@@ -76,7 +76,7 @@ public class CFDGDriver {
 	@Getter
     private final Stack<ASTRepContainer> containerStack = new Stack<>();
 	@Getter
-    private final ASTRepContainer paramDecls = new ASTRepContainer(this);
+    private final ASTRepContainer paramDecls = new ASTRepContainer(null, this);
 	private final Map<String, Long> flagNames = new HashMap<>();
 	private final List<CFStackRule> longLivedParams = new ArrayList<>();
 	private final Stack<String> fileNames = new Stack<>();
@@ -113,7 +113,7 @@ public class CFDGDriver {
 	private int pathCount = -1;
 
 	public CFDGDriver() {
-		containerStack.add(new ASTRepContainer(this));
+		containerStack.add(new ASTRepContainer(null, this));
 		currentShape = -1;
 		pathCount = 1;
 		flagNames.put("CF::None",        FlagType.CF_NONE.getMask());
@@ -302,7 +302,7 @@ public class CFDGDriver {
 				error("Configuration parameters must be at global scope", location);
 				return null;
 			}
-			ASTDefine def = new ASTDefine(this, name, location);
+			ASTDefine def = new ASTDefine(location, this, name);
 			def.setConfigDepth(includeDepth);
 			def.setDefineType(DefineType.Config);
 			return def;
@@ -318,7 +318,7 @@ public class CFDGDriver {
 			return null;
 		}
 		checkVariableName(nameIndex, false, location);
-		def = new ASTDefine(this, name, location);
+		def = new ASTDefine(location, this, name);
 		def.getShapeSpecifier().setShapeType(nameIndex);
 		if (isFunction) {
 			for (ASTParameter param : paramDecls.getParameters()) {
@@ -380,9 +380,9 @@ public class CFDGDriver {
 					break;
 			}
 			if (mod == null) {
-				mod = new ASTModification(this, cfg.getToken());
+				mod = new ASTModification(cfg.getToken(), this);
 			}
-			cfg.setExp(new ASTStartSpecifier(this, rule, mod, cfg.getToken()));
+			cfg.setExp(new ASTStartSpecifier(cfg.getToken(), this, rule, mod));
 		}
 		ASTExpression current = cfg.getExp();
 		if (!cfdg.addParameter(cfg.getName(), cfg.getExp(), cfg.getConfigDepth())) {
@@ -417,25 +417,25 @@ public class CFDGDriver {
 	public ASTExpression makeVariable(String name, Token location) {
 		Long flagItem = flagNames.get(name);
 		if (flagItem != null) {
-			ASTReal flag = new ASTReal(this, flagItem, location);
+			ASTReal flag = new ASTReal(location, this, flagItem);
 			flag.setType(ExpType.Flag);
 			return flag;
 		}
 		if (name.startsWith("CF::")) {
 			error("Configuration parameter names are reserved", location);
-			return new ASTExpression(this, location);
+			return new ASTExpression(location, this);
 		}
 		if (FuncType.byName(name) != FuncType.NotAFunction) {
 			error("Internal function names are reserved", location);
-			return new ASTExpression(this, location);
+			return new ASTExpression(location, this);
 		}
 		int varNum = stringToShape(name, true, location);
 		boolean isGlobal = false;
 		ASTParameter bound = findExpression(varNum, isGlobal);
 		if (bound == null) {
-			return new ASTRuleSpecifier(this, varNum, name, null, cfdg.getShapeParams(currentShape), location);
+			return new ASTRuleSpecifier(location, this, varNum, name, null, cfdg.getShapeParams(currentShape));
 		}
-		return new ASTVariable(this, varNum, name, location);
+		return new ASTVariable(location, this, varNum, name);
 	}
 
 	public ASTExpression makeArray(String name, ASTExpression args, Token location) {
@@ -449,16 +449,16 @@ public class CFDGDriver {
 		if (bound == null) {
 			return args;
 		}
-		return new ASTArray(this, varNum, args, "", location);
+		return new ASTArray(location, this, varNum, args, "");
 	}
 
 	public ASTExpression makeLet(ASTRepContainer vars, ASTExpression exp, Token location) {
 		int nameIndex = stringToShape("let", false, location);
-		ASTDefine def = new ASTDefine(this, "let", location);
+		ASTDefine def = new ASTDefine(location, this, "let");
 		def.getShapeSpecifier().setShapeType(nameIndex);
 		def.setExp(exp);
 		def.setDefineType(DefineType.Let);
-		return new ASTLet(this, vars, def, location);
+		return new ASTLet(location, this, vars, def);
 	}
 
 	public ASTRuleSpecifier makeRuleSpec(String name, ASTExpression args, Token location) {
@@ -468,12 +468,12 @@ public class CFDGDriver {
 	public ASTRuleSpecifier makeRuleSpec(String name, ASTExpression args, ASTModification mod, boolean makeStart, Token location) {
 		if (name.equals("if") || name.equals("let") || name.equals("select")) {
 			if (name.equals("select")) {
-				args = new ASTSelect(this, args, false, location);
+				args = new ASTSelect(location, this, args, false);
 			}
 			if (makeStart) {
-				return new ASTStartSpecifier(this, args, mod, location);
+				return new ASTStartSpecifier(location, this, args, mod);
 			} else {
-				return new ASTRuleSpecifier(this, args, location);
+				return new ASTRuleSpecifier(location, this, args);
 			}
 		}
 		int nameIndex = stringToShape(name, true, location);
@@ -484,14 +484,14 @@ public class CFDGDriver {
 			error("Shape name binds to global variable and current shape, using current shape", location);
 		}
 		if (bound != null && bound.isParameter() && bound.getType() == ExpType.Rule) {
-			return new ASTRuleSpecifier(this, nameIndex, name, location);
+			return new ASTRuleSpecifier(location, this, nameIndex, name);
 		}
 		ASTRuleSpecifier ret = null;
 		cfdg.setShapeHasNoParam(nameIndex, args);
 		if (makeStart) {
-			ret = new ASTStartSpecifier(this, nameIndex, name, args, mod, location);
+			ret = new ASTStartSpecifier(location, this, nameIndex, name, args, mod);
 		} else {
-			ret = new ASTRuleSpecifier(this, nameIndex, name, args, cfdg.getShapeParams(currentShape), location);
+			ret = new ASTRuleSpecifier(location, this, nameIndex, name, args, cfdg.getShapeParams(currentShape));
 		}
 		if (ret.getArguments() != null && ret.getArguments().getType() == ExpType.Reuse) {
 			if (makeStart) {
@@ -522,7 +522,7 @@ public class CFDGDriver {
 	
 	public ASTReplacement makeElement(String name, ASTModification mods, ASTExpression params, boolean subPath, Token location) {
 		if (inPathContainer && !subPath && (name.equals("FILL") || name.equals("STROKE"))) {
-			return new ASTPathCommand(this, name, mods, params, location);
+			return new ASTPathCommand(location, this, name, mods, params);
 		}
 		ASTRuleSpecifier ruleSpecifier = makeRuleSpec(name, params, null, false, location);
 		RepElemType t = RepElemType.replacement;
@@ -552,7 +552,7 @@ public class CFDGDriver {
 				t = RepElemType.op;
 			}
 		}
-		return new ASTReplacement(this, ruleSpecifier, mods, t, location);
+		return new ASTReplacement(location, this, ruleSpecifier, mods, t);
 	}
 
 	public ASTExpression makeFunction(String name, ASTExpression args, Token location) {
@@ -570,19 +570,19 @@ public class CFDGDriver {
 			return makeVariable(name, location).append(args); 
 		}
 		if (name.equals("select") || name.equals("if")) {
-			return new ASTSelect(this, args, name.equals("if"), location);
+			return new ASTSelect(location, this, args, name.equals("if"));
 		}
 		FuncType t = FuncType.byName(name);
 		if (t == FuncType.Ftime || t == FuncType.Frame) {
 			cfdg.addParameter(Param.FrameTime);
 		}
 		if (t != FuncType.NotAFunction) {
-			return new ASTFunction(this, name, args, seed, location);
+			return new ASTFunction(location, this, name, args, seed);
 		}
 		if (args != null && args.getType() == ExpType.Reuse) {
 			return makeRuleSpec(name, args, null, false, location);
 		}
-		return new ASTUserFunction(this, nameIndex, args, null, location);
+		return new ASTUserFunction(location, this, nameIndex, args, null);
 	}
 	
 	public ASTModification makeModification(ASTModification mod, boolean canonical, Token location) {

@@ -45,15 +45,15 @@ public class ASTSelect extends ASTExpression {
 	private int indexCache;
 	private String entropy;
 
-	public ASTSelect(CFDGDriver driver, ASTExpression arguments, boolean asIf, Token location) {
-		super(driver, location);
+	public ASTSelect(Token token, CFDGDriver driver, ASTExpression arguments, boolean asIf) {
+		super(token, driver);
 		tupleSize = -1;
 		indexCache = NOT_CACHED;
 		selector = arguments;
 		constant = false;
 		select = asIf;
 		if (selector == null || selector.size() < 3) {
-			driver.error("select()/if() function requires arguments", location);
+			driver.error("select()/if() function requires arguments", token);
 		}
 	}
 
