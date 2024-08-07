@@ -133,7 +133,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         return new Coordinator(threadFactory, renderFactory, tile, hints);
     }
 
-    private boolean[] createCFDG(ParserResult result) throws CFDGParserException {
+    private boolean[] createCFDG(ParserResult result) throws Exception {
         if (!result.errors().isEmpty()) {
             cfdgSource = null;
             throw new CFDGParserException("Failed to compile source", result.errors());
@@ -143,7 +143,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
         String source = parserResult.source();
         changed[0] = !source.equals(cfdgSource);
         cfdgSource = source;
-        cfdgImage = parserResult.image();
+        cfdgImage = parserResult.classFactory().create();
         return changed;
     }
 

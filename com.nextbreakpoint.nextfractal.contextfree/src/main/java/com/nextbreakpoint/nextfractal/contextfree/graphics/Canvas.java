@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFCanvas;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.PrimShape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;

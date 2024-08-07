@@ -39,7 +39,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassFactory;
+import com.nextbreakpoint.nextfractal.core.common.ClassFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;

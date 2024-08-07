@@ -71,18 +71,21 @@ public class CFDGParser {
 			if (cfdg == null) {
 				throw new CFDGParserException("CFDG not defined", errors);
 			}
-			return new CFDGParserResult(new CFDGSimpleImage(cfdg), source);
+			return new CFDGParserResult(source, () -> new CFDGSimpleImage(cfdg));
+		} catch (CFDGParserException e) {
+			log.log(Level.INFO, "Can't parse script", e);
+			throw e;
 		} catch (CFDGException e) {
 			final long line = e.getLocation().getLine();
 			final long charPositionInLine = e.getLocation().getCharPositionInLine();
 			final long index = e.getLocation().getStartIndex();
 			final long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			final ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
-			log.log(Level.FINE, "Can't parse script", e);
+			log.log(Level.INFO, "Can't parse script", e);
             throw new CFDGParserException("Can't parse script", List.of(error));
 		} catch (Exception e) {
             final ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
-            log.log(Level.FINE, "Can't parse script", e);
+            log.log(Level.INFO, "Can't parse script", e);
 			throw new CFDGParserException("Can't parse script", List.of(error));
 		}
 	}

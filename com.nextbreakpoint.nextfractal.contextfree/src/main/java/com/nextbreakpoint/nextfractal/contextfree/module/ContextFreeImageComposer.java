@@ -75,7 +75,7 @@ public class ContextFreeImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
             CFDGParser parser = new CFDGParser();
             CFDGParserResult parserResult = parser.parse(script);
-            CFDGImage cfdgImage = parserResult.image();
+            CFDGImage cfdgImage = parserResult.classFactory().create();
             GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             renderer.setImage(cfdgImage);

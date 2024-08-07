@@ -1,4 +1,4 @@
-package com.nextbreakpoint.nextfractal.contextfree.dsl;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import lombok.Getter;
 

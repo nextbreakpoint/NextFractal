@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
 import lombok.extern.java.Log;

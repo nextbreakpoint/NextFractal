@@ -60,19 +60,19 @@ public class ASTArray extends ASTExpression {
 		this.entropy = entropy;
 	}
 
-//	public ASTArray(ASTArray array) {
-//		super(array.driver, false, false, ExpType.NumericType, array.getLocation());
-//		this.driver = array.driver;
-//		this.nameIndex = array.nameIndex;
-//		this.data = array.data;
-//		this.args = array.args;
-//		this.length = array.length;
-//		this.stride = array.stride;
-//		this.stackIndex = array.stackIndex;
-//		this.count = array.count;
-//		this.isParameter = array.isParameter;
-//		this.entropy = array.entropy;
-//	}
+	public ASTArray(ASTArray array) {
+		super(array.getToken(), array.driver, false, false, ExpType.Numeric);
+		this.driver = array.driver;
+		this.nameIndex = array.nameIndex;
+		this.data = array.data;
+		this.args = array.args;
+		this.length = array.length;
+		this.stride = array.stride;
+		this.stackIndex = array.stackIndex;
+		this.count = array.count;
+		this.isParameter = array.isParameter;
+		this.entropy = array.entropy;
+	}
 
 	public boolean isParameter() {
 		return isParameter;

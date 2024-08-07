@@ -22,8 +22,27 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.core;
+package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-public interface ClassFactory<T> {
-	T create() throws Exception;
+import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+
+public interface CFCanvas {
+    int getWidth();
+
+    int getHeight();
+
+    void primitive(int shapeType, double[] color, AffineTransform transform);
+
+    void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit);
+
+    void start(boolean first, double[] backgroundColor, int currWidth, int currHeight);
+
+    void end();
+
+    void tileTransform(Bounds bounds);
+
+    void clear(double[] backgroundColor);
 }

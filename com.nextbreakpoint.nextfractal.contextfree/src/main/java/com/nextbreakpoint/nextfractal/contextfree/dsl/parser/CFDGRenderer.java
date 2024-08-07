@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
 import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGListener;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTCompiledPath;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;

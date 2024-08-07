@@ -71,7 +71,7 @@ public class ContextFreeUIFactory implements UIFactory {
 
 	@Override
 	public GridItemRenderer createRenderer(Bitmap bitmap) {
-		Map<String, Integer> hints = new HashMap<String, Integer>();
+		Map<String, Integer> hints = new HashMap<>();
 		Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
 		DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
 		GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
@@ -90,7 +90,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		CFDGParser compiler = new CFDGParser();
 		CFDGParserResult report = compiler.parse(session.script());
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
-		bitmap.setProperty("image", report.image());
+		bitmap.setProperty("image", report.classFactory().create());
 		bitmap.setProperty("session", session);
 		return bitmap;
 	}

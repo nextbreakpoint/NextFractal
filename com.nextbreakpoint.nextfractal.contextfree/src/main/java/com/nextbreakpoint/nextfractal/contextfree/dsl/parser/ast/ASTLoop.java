@@ -33,6 +33,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.Token;
 
 @Getter
@@ -42,7 +43,8 @@ public class ASTLoop extends ASTReplacement {
 	private final int loopIndexName;
 	private final String loopName;
 	private ASTExpression loopArgs;
-	private ASTModification loopModHolder;
+	@Setter
+    private ASTModification loopModHolder;
 	private double[] loopData;
 
 	public ASTLoop(Token token, CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mods) {
@@ -57,11 +59,7 @@ public class ASTLoop extends ASTReplacement {
 		finallyBody.addLoopParameter(loopIndexName, false, false, token);
 	}
 
-    public void setLoopHolder(ASTModification loopModHolder) {
-		this.loopModHolder = loopModHolder;
-	}
-
-	public void compileLoopMod() {
+    public void compileLoopMod() {
        if (loopModHolder != null) {
             loopModHolder.compile(CompilePhase.TypeCheck);
             getChildChange().grab(loopModHolder);

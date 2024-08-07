@@ -66,7 +66,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 		try {
 			CFDGParser parser = new CFDGParser();
 			CFDGParserResult parserResult = parser.parse(script);
-			CFDGImage cfdgImage = parserResult.image();
+			CFDGImage cfdgImage = parserResult.classFactory().create();
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 			renderer.setImage(cfdgImage);
 			renderer.setSeed(metadata.getSeed());

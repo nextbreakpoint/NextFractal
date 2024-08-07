@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGToken;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGToken;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 
