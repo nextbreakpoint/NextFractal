@@ -70,30 +70,30 @@ public class Compiler {
 		this.className = Objects.requireNonNull(className);
 	}
 
-	public DSLParserResult compile(DSLExpressionContext context, DSLParserResult result) throws CompilerException {
-		CompilerResult<Orbit> orbitResult = compileOrbit(context, result);
-		CompilerResult<Color> colorResult = compileColor(context, result);
+	public DSLParserResult compile(DSLExpressionContext context, DSLParserResult result, DSLFractal fractal) throws CompilerException {
+		CompilerResult<Orbit> orbitResult = compileOrbit(context, result, fractal);
+		CompilerResult<Color> colorResult = compileColor(context, result, fractal);
 		return result.toBuilder()
 				.withOrbitClassFactory(orbitResult.classFactory())
 				.withColorClassFactory(colorResult.classFactory())
 				.build();
 	}
 
-	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLParserResult result) throws CompilerException {
+	private CompilerResult<Orbit> compileOrbit(DSLExpressionContext context, DSLParserResult result, DSLFractal fractal) throws CompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
-			return compileOrbit(context, result.fractal().getOrbit());
+			return compileOrbit(context, fractal.getOrbit());
 		} else {
-			return compileOrbit(context, result.fractal(), result.orbitDSL());
+			return compileOrbit(context, fractal, result.orbitDSL());
 		}
 	}
 
-	private CompilerResult<Color> compileColor(DSLExpressionContext context, DSLParserResult result) throws CompilerException {
+	private CompilerResult<Color> compileColor(DSLExpressionContext context, DSLParserResult result, DSLFractal fractal) throws CompilerException {
 		final JavaCompiler javaCompiler = JavaCompilerProvider.getJavaCompiler();
 		if (javaCompiler == null) {
-			return compileColor(context, result.fractal().getColor());
+			return compileColor(context, fractal.getColor());
 		} else {
-			return compileColor(context, result.fractal(), result.colorDSL());
+			return compileColor(context, fractal, result.colorDSL());
 		}
 	}
 

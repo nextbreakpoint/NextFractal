@@ -28,8 +28,8 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import org.junit.jupiter.api.Test;
@@ -48,9 +48,7 @@ public class DSLCompiler1Test extends BaseTest {
 //			assertThat(Pattern.matches("([A-Z][a-z]*)-(\\d).(.jpg|.png)", "Andrea-10.png")).isTrue();
 			final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
 			final DSLExpressionContext expressionContext = new DSLExpressionContext();
-			final DSLParserResult parserResult = parser.parse(expressionContext, getSource("/source1.m"));
-			assertThat(parserResult.fractal()).isNotNull();
-			System.out.println(parserResult.fractal());
+			final DSLParserResult parserResult = parser.parse(getSource("/source1.m"));
 			assertThat(parserResult.orbitDSL()).isNotNull();
 			System.out.println(parserResult.orbitDSL());
 			assertThat(parserResult.colorDSL()).isNotNull();
@@ -72,10 +70,10 @@ public class DSLCompiler1Test extends BaseTest {
 			color.render();
 			float[] c = color.getColor();
 			assertThat(c).isNotNull();
-			System.out.println(String.format("%f,%f,%f,%f", c[0], c[1], c[2], c[3]));
+			System.out.printf("%f,%f,%f,%f%n", c[0], c[1], c[2], c[3]);
 			ComplexNumber z = orbit.getVariable(0);
 			assertThat(z).isNotNull();
-			System.out.println(String.format("%f,%f", z.r(), z.i()));
+			System.out.printf("%f,%f%n", z.r(), z.i());
 		} catch (DSLParserException e) {
 			printErrors(e.getErrors());
 			e.printStackTrace();

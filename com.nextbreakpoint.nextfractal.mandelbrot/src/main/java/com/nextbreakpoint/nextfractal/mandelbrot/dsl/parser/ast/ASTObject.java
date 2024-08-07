@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLToken;
 import lombok.Getter;
 import org.antlr.v4.runtime.Token;
 

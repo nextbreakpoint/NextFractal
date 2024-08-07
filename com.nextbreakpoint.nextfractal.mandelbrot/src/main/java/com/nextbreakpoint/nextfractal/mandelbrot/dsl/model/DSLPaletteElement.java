@@ -28,7 +28,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.PaletteElement;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.PaletteExpression;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Variable;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import lombok.Getter;
 
 import java.util.HashMap;

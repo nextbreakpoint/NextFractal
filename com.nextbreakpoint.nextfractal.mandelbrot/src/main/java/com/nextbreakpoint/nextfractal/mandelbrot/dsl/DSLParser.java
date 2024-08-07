@@ -56,22 +56,22 @@ public class DSLParser {
 		this.className = className;
 	}
 
-    public DSLParserResult parse(DSLExpressionContext expressionContext, String source) throws DSLParserException {
-		final ASTFractal fractal = parse(source);
+    public DSLParserResult parse(String source) throws DSLParserException {
+		final ASTFractal fractal = parseFractal(source);
 		final String orbitScript = fractal.getOrbit().toString();
 		final String colorScript = fractal.getColor().toString();
-        final DSLFractal resolvedFractal = fractal.resolve(expressionContext);
+		final DSLExpressionContext context = new DSLExpressionContext();
+        final DSLFractal resolvedFractal = fractal.resolve(context);
 		final DSLParserResult parserResult = DSLParserResult.builder()
-				.withFractal(resolvedFractal)
 				.withSource(source)
 				.withOrbitDSL(orbitScript)
 				.withColorDSL(colorScript)
 				.build();
 		final Compiler compiler = new Compiler(packageName, className);
-		return compiler.compile(expressionContext, parserResult);
+		return compiler.compile(context, parserResult, resolvedFractal);
 	}
 
-	private ASTFractal parse(String source) throws DSLParserException {
+	private ASTFractal parseFractal(String source) throws DSLParserException {
 		try {
 			final List<ScriptError> errors = new ArrayList<>();
 			final CharStream is = CharStreams.fromReader(new StringReader(source));

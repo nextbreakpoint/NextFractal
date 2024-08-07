@@ -24,8 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
-
 public abstract class DSLLogicOperator extends DSLCondition {
 	protected final DSLCondition[] operands;
 

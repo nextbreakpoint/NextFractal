@@ -2,11 +2,11 @@ package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.VariableDeclaration;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCompilerContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLCondition;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpression;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLToken;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

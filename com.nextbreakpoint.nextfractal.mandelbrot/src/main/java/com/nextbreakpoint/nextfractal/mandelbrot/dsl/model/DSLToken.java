@@ -1,4 +1,4 @@
-package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
+package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
 import lombok.Getter;
 

@@ -24,8 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.model;
 
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLToken;
-
 public abstract class DSLFunction extends DSLExpression {
 	protected final DSLExpression[] arguments;
 	protected final int numberIndex;

@@ -34,7 +34,6 @@ import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,8 +61,7 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     private ParserResult createParserResult(Session session) {
         try {
             final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
-            final DSLExpressionContext expressionContext = new DSLExpressionContext();
-            final DSLParserResult parserResult = parser.parse(expressionContext, session.script());
+            final DSLParserResult parserResult = parser.parse(session.script());
             //TODO is create required here?
             parserResult.colorClassFactory().create();
             parserResult.orbitClassFactory().create();
