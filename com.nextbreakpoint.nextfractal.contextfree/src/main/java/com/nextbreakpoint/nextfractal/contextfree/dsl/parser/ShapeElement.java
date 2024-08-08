@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTWhere;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,23 +33,33 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Setter
 class ShapeElement {
+	@Setter
 	@Getter
-	private List<ASTParameter> parameters = new ArrayList<ASTParameter>();
+	private List<ASTParameter> parameters = new ArrayList<>();
+	@Setter
+	@Getter
+	private final ASTWhere where;
+	@Setter
 	@Getter
     private String name;
+	@Setter
 	@Getter
     private boolean shape;
+	@Setter
 	@Getter
     private ShapeType shapeType;
+	@Setter
 	@Getter
     private int argSize;
+	@Setter
 	@Getter
     private boolean shouldHaveNoParams;
+	@Setter
 	private boolean hasRules;
 
-	public ShapeElement(String name) {
+	public ShapeElement(ASTWhere where, String name) {
+		this.where = where;
 		this.name = name;
 		this.hasRules = false;
 		this.shape = false;
@@ -59,5 +70,9 @@ class ShapeElement {
 
     public boolean hasRules() {
 		return hasRules;
+	}
+
+	public ASTWhere getFirstUse() {
+		return where;
 	}
 }

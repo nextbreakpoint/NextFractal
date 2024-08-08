@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
@@ -37,6 +36,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 
 @Log
@@ -56,30 +56,35 @@ public class SimpleCanvas implements CFCanvas {
         size = new Size(width, height);
     }
 
+    @Override
     public int getWidth() {
         return size.width();
     }
 
+    @Override
     public int getHeight() {
         return size.height();
     }
 
-    public void primitive(int shapeType, double[] color, AffineTransform transform) {
+    @Override
+    public void primitive(int shapeType, double[] color, AffineTransform transform, int blend) {
         try {
             g2d.setColor(new Color((float) color[0], (float) color[1], (float) color[2], (float) color[3]));
         } catch (IllegalArgumentException e) {
             log.log(Level.WARNING, "Can't set color", e);
         }
 
-        AffineTransform oldTransform = g2d.getTransform();
+        //TODO implement blend
 
-        AffineTransform t = new AffineTransform(normTransform);
+        final AffineTransform oldTransform = g2d.getTransform();
+
+        final AffineTransform t = new AffineTransform(normTransform);
 
         t.concatenate(transform);
 
         g2d.setTransform(t);
 
-        PrimShape primShape = PrimShape.getShapeMap().get(shapeType);
+        final PrimShape primShape = PrimShape.getShapeMap().get(shapeType);
 
         if (primShape != null) {
             g2d.fill(primShape.getPath());
@@ -90,16 +95,19 @@ public class SimpleCanvas implements CFCanvas {
         g2d.setTransform(oldTransform);
     }
 
-    public void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit) {
+    @Override
+    public void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit, int blend) {
         try {
             g2d.setColor(new Color((float) color[0], (float) color[1], (float) color[2], (float) color[3]));
         } catch (IllegalArgumentException e) {
             log.log(Level.WARNING, "Can't set color", e);
         }
 
-        AffineTransform oldTransform = g2d.getTransform();
+        //TODO implement blend
 
-        AffineTransform t = new AffineTransform(normTransform);
+        final AffineTransform oldTransform = g2d.getTransform();
+
+        final AffineTransform t = new AffineTransform(normTransform);
 
         java.awt.Shape shape = path;
 
@@ -115,11 +123,11 @@ public class SimpleCanvas implements CFCanvas {
             final int cap = mapToCap(flags);
             final int join = mapToJoin(flags);
             if ((flags & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
-                double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
+                final double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
                 g2d.setStroke(new BasicStroke((float) (strokeWidth * scale), cap, join, (float) miterLimit));
                 t.concatenate(transform);
             } else {
-                double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
+                final double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
                 g2d.setStroke(new BasicStroke((float) (strokeWidth * scale), cap, join, (float) miterLimit));
                 shape = path.createTransformedShape(transform);
             }
@@ -160,29 +168,34 @@ public class SimpleCanvas implements CFCanvas {
         }
     }
 
+    @Override
     public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
         final Size imageSize = tile.imageSize();
         final Size borderSize = tile.borderSize();
         final Point tileOffset = tile.tileOffset();
         normTransform = new AffineTransform();
-//        normTransform.translate(0, imageSize.height());
-//        normTransform.scale(1, -1);
         normTransform.translate(-tileOffset.x() + borderSize.width(), -tileOffset.y() + borderSize.height());
         normTransform.translate(-(currWidth - imageSize.width()) / 2d, -(currHeight - imageSize.height()) / 2d);
-//        normTransform.translate(0, imageSize.height() / 2);
-//        normTransform.scale(1, -1);
-//        normTransform.translate(0, -imageSize.height() / 2);
     }
 
+    @Override
     public void clear(double[] backgroundColor) {
         g2d.setColor(new Color((float)backgroundColor[0], (float)backgroundColor[1], (float)backgroundColor[2], (float)backgroundColor[3]));
         g2d.fillRect(0, 0, getWidth(), getHeight());
     }
 
-    public void end() {
-        g2d.dispose();
+    @Override
+    public void drawRect(double x, double y, double width, double height) {
+        g2d.setColor(new Color(1, 1, 1, 0.9f));
+        final AffineTransform oldTransform = g2d.getTransform();
+        g2d.setTransform(normTransform);
+        g2d.setStroke(new BasicStroke((float) 1, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 2));
+        g2d.draw(new Rectangle2D.Double(x, y, width, height));
+        g2d.setTransform(oldTransform);
     }
 
-    public void tileTransform(Bounds bounds) {
+    @Override
+    public void end() {
+        g2d.dispose();
     }
 }

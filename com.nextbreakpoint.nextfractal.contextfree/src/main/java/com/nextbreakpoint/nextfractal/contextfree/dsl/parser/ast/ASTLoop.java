@@ -24,9 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGStopException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackNumber;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
@@ -34,118 +35,147 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
+
+// astreplacement.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Getter
 public class ASTLoop extends ASTReplacement {
 	private final ASTRepContainer loopBody;
 	private final ASTRepContainer finallyBody;
-	private final int loopIndexName;
+	private final int loopNameIndex;
 	private final String loopName;
+	private final double[] loopData;
 	private ASTExpression loopArgs;
 	@Setter
     private ASTModification loopModHolder;
-	private double[] loopData;
 
-	public ASTLoop(Token token, CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mods) {
-		super(token, driver, mods, RepElemType.empty);
-		loopBody = new ASTRepContainer(token, driver);
-		finallyBody = new ASTRepContainer(token, driver);
-		loopIndexName = nameIndex;
+	public ASTLoop(CFDGSystem system, ASTWhere where, int nameIndex, String name, ASTExpression args, ASTModification mods) {
+		super(system, where, mods, RepElemType.empty);
+		loopBody = new ASTRepContainer(system, where);
+		finallyBody = new ASTRepContainer(system, where);
+		loopNameIndex = nameIndex;
 		loopArgs = args;
 		loopModHolder = null;
+		loopData = new double[] { 0, 0, 0 };
 		loopName = name;
-		loopBody.addLoopParameter(loopIndexName, false, false, token);
-		finallyBody.addLoopParameter(loopIndexName, false, false, token);
+		loopBody.addLoopParameter(loopNameIndex, where);
+		finallyBody.addLoopParameter(loopNameIndex, where);
 	}
 
-    public void compileLoopMod() {
-       if (loopModHolder != null) {
-            loopModHolder.compile(CompilePhase.TypeCheck);
-            getChildChange().grab(loopModHolder);
-        } else {
-        	getChildChange().compile(CompilePhase.TypeCheck);
-        }
- 	}
-
 	@Override
-	public void compile(CompilePhase ph) {
-		loopArgs = compile(loopArgs, ph);
-		loopData = new double[3];
+	public void compile(CFDGBuilder builder, CompilePhase phase) {
+		super.compile(builder, phase);
+		loopArgs = ASTExpression.compile(builder, phase, loopArgs);
 
-        switch (ph) {
+        switch (phase) {
             case TypeCheck -> {
                 if (loopArgs == null) {
-                    driver.error("A loop must have one to three index parameters", getToken());
-                    return;
+                    system.error("A loop must have one to three index parameters", getWhere());
+					return;
                 }
-                StringBuilder ent = new StringBuilder();
-                ent.append(loopName);
-                loopArgs.entropy(ent);
+
+                final StringBuilder entropy = new StringBuilder();
+                entropy.append(loopName);
+                loopArgs.entropy(entropy);
                 if (loopModHolder != null) {
-                    getChildChange().addEntropy(ent.toString());
+                    getChildChange().addEntropy(entropy.toString());
                 }
 
                 boolean bodyNatural = false;
                 boolean finallyNatural = false;
-                Locality locality = loopArgs.getLocality();
+                final Locality locality = loopArgs.getLocality();
 
-                if (loopArgs.isConstant()) {
-                    setupLoop(loopData, loopArgs, null);
-                    bodyNatural = loopData[0] == Math.floor(loopData[0]) && loopData[1] == Math.floor(loopData[1]) && loopData[2] == Math.floor(loopData[2]) && loopData[0] >= 0 && loopData[1] >= 0 && loopData[0] < 9007199254740992.0 && loopData[1] < 9007199254740992.0;
-                    finallyNatural = bodyNatural && loopData[1] + loopData[2] >= -1.0 && loopData[1] + loopData[2] < 9007199254740992.0;
-//					loopArgs = null;
+				final int c = loopArgs.evaluate(builder, null, 0);
+				if (c < 1 || c > 3) {
+					system.error("A loop must have one to three index parameters", getWhere());
+					//TODO missing return. is it a bug?
+				}
+
+				if (loopArgs.isConstant()) {
+					bodyNatural = finallyNatural = loopArgs.isNatural();
                 } else {
-                    int c = loopArgs.evaluate(null, 0);
-                    if (c < 1 || c > 3) {
-                        driver.error("A loop must have one to three index parameters", getToken());
-                    }
-
                     for (int i = 0, count = 0; i < loopArgs.size(); i++) {
-                        ASTExpression loopArg = loopArgs.getChild(i);
-                        int num = loopArg.evaluate(null, 0);
+                        final ASTExpression loopArg = loopArgs.getChild(i);
+                        final int num = loopArg.evaluate(builder, null, 0);
                         switch (count) {
                             case 0:
                                 if (loopArg.isNatural()) {
                                     bodyNatural = finallyNatural = true;
                                 }
                                 break;
-
                             case 2:
                                 // Special case: if 1st & 2nd args are natural and 3rd
                                 // is -1 then that is ok
-                                double[] step = new double[1];
-                                if (loopArg.isConstant() && loopArg.evaluate(step, 1) == 1 && step[0] == -1.0) {
+                                final double[] step = new double[1];
+                                if (loopArg.isConstant() && loopArg.evaluate(builder, step, 1) == 1 && step[0] == -1.0) {
                                     break;
                                 } // else fall through
-
                             case 1:
                                 if (!loopArg.isNatural()) {
                                     bodyNatural = finallyNatural = false;
                                 }
                                 break;
-
                             default:
                                 break;
                         }
                         count += num;
                     }
                 }
-                loopBody.getParameters().getLast().setNatural(bodyNatural);
-                loopBody.getParameters().getLast().setLocality(locality);
-                loopBody.compile(ph, this, null);
-                finallyBody.getParameters().getLast().setNatural(finallyNatural);
-                finallyBody.getParameters().getLast().setLocality(locality);
-                finallyBody.compile(ph, null, null);
+
+                loopBody.getParameters().getFirst().setNatural(bodyNatural);
+                loopBody.getParameters().getFirst().setLocality(locality);
+                loopBody.compile(builder, phase, this, null);
+                finallyBody.getParameters().getFirst().setNatural(finallyNatural);
+                finallyBody.getParameters().getFirst().setLocality(locality);
+                finallyBody.compile(builder, phase, null, null);
 
                 if (loopModHolder == null) {
-                    getChildChange().addEntropy(ent.toString());
+                    getChildChange().addEntropy(entropy.toString());
                 }
             }
             case Simplify -> {
-                loopArgs = simplify(loopArgs);
-                loopBody.compile(ph, null, null);
-                finallyBody.compile(ph, null, null);
+                loopArgs = ASTExpression.simplify(builder, loopArgs);
+				if (loopArgs.isConstant()) {
+					boolean bodyNatural = loopBody.getParameters().getFirst().isNatural();
+					boolean finallyNatural = loopBody.getParameters().getFirst().isNatural();
+					//TODO check arguments are correct
+					setupLoop(builder, null, loopData, loopArgs);
+					bodyNatural = bodyNatural && loopData[0] == Math.floor(loopData[0]) &&
+							loopData[1] == Math.floor(loopData[1]) &&
+							loopData[2] == Math.floor(loopData[2]) &&
+							loopData[0] >= 0.0 && loopData[1] >= 0.0 &&
+							loopData[0] < AST.MAX_NATURAL &&
+							loopData[1] < AST.MAX_NATURAL;
+					finallyNatural = finallyNatural && bodyNatural &&
+							loopData[1] + loopData[2] >= -1.0 &&
+							loopData[1] + loopData[2] < AST.MAX_NATURAL;
+					loopArgs = null;
+					loopBody.getParameters().getFirst().setNatural(bodyNatural);
+					finallyBody.getParameters().getFirst().setNatural(finallyNatural);
+
+				}
+                loopBody.compile(builder, phase, null, null);
+                finallyBody.compile(builder, phase, null, null);
             }
             default -> {
             }
@@ -153,59 +183,73 @@ public class ASTLoop extends ASTReplacement {
 	}
 
 	@Override
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
-		Shape loopChild = (Shape) parent.clone();
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr) {
+		final Shape loopChild = (Shape) parent.clone();
 		boolean opsOnly = (loopBody.getRepType() | finallyBody.getRepType()) == RepElemType.op.getType();
 		if (opsOnly && !tr) {
 			loopChild.getWorldState().getTransform().setToIdentity();
 		}
-		double[] data = new double[3];
+		final double[] data = new double[3];
 		renderer.getCurrentSeed().add(getChildChange().getModData().getRand64Seed());
-		if (!loopArgs.isConstant()) {
-			setupLoop(data, loopArgs, renderer);
+		if (loopArgs != null) {
+			//TODO check arguments are correct
+			setupLoop(builder, renderer, data, loopArgs);
 		} else {
 			data[0] = loopData[0];
 			data[1] = loopData[1];
 			data[2] = loopData[2];
 		}
-		//TODO controllare
-		renderer.addStackItem(new CFStackNumber(renderer.getStack(), data[0]));
-		int index = (int)((CFStackNumber)renderer.getStackItem(-1)).getNumber();
+		final double start = data[0];
+		final double end = data[1];
+		final double step = data[2];
+		if (renderer.getStackSize() + 1 > renderer.getStack().getMaxStackSize()) {
+			system.error("Maximum stack depth exceeded", getWhere());
+		}
+		//TODO verify stack behaviour
+		final CFStackNumber stackNumber = new CFStackNumber(renderer.getStack(), start);
+		renderer.addStackItem(stackNumber);
+		double index = stackNumber.getNumber();
 		for (;;) {
 			if (renderer.isRequestStop() || CFDGRenderer.abortEverything()) {
-				throw new CFDGStopException();
+				throw new CFDGStopException("Stopping", getWhere());
 			}
-			if (data[2] > 0.0) {
-				if (index >= data[1]) {
+			if (step > 0.0) {
+				if (index >= end) {
 					break;
 				}
 			} else {
-				if (index <= data[1]) {
+				if (index <= end) {
 					break;
 				}
 			}
-			loopBody.traverse(loopChild, tr || opsOnly, renderer, false);
-			getChildChange().evaluate(loopChild.getWorldState(), true, renderer);
-			index += (int)data[2];
-			renderer.setStackItem(-1, new CFStackNumber(renderer.getStack(), index));
+			loopBody.traverse(builder, renderer, loopChild, tr || opsOnly, false);
+			getChildChange().evaluate(builder, renderer, loopChild.getWorldState(), true);
+			index += step;
+			stackNumber.setNumber(index);
 		}
-		finallyBody.traverse(loopChild, tr || opsOnly, renderer, false);
+		finallyBody.traverse(builder, renderer, loopChild, tr || opsOnly, false);
 		renderer.removeStackItem();
 	}
-	
-	private void setupLoop(double[] data, ASTExpression exp, CFDGRenderer renderer) {
-		switch (exp.evaluate(data, 3, renderer)) {
+
+	public void compileLoopMod(CFDGBuilder builder) {
+		if (loopModHolder != null) {
+			loopModHolder.compile(builder, CompilePhase.TypeCheck);
+			getChildChange().grab(loopModHolder);
+		} else {
+			getChildChange().compile(builder, CompilePhase.TypeCheck);
+		}
+	}
+
+	private void setupLoop(CFDGBuilder builder, CFDGRenderer renderer, double[] data, ASTExpression exp) {
+		switch (exp.evaluate(builder, renderer, data, 3)) {
 			case 1:
 				data[1] = data[0];
 				data[0] = 0.0;
 			case 2:
 				data[2] = 1.0;
-				break;
 			case 3:
 				break;
 			default:
-				driver.error("A loop must have one to three index parameters", getToken());
-				break;
 		}
 	}
 }

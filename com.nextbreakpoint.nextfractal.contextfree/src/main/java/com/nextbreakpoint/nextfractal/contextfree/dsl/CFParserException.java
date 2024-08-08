@@ -22,30 +22,22 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
+package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.Getter;
+import lombok.ToString;
 
+import java.util.Collections;
 import java.util.List;
 
 @Getter
-public class CFStackParams extends CFStackItem {
-    private final List<ASTParameter> params;
+@ToString
+public class CFParserException extends Exception {
+	private final List<ScriptError> errors;
 
-    public CFStackParams(CFStack stack, List<ASTParameter> params) {
-        super(stack);
-        this.params = params;
-    }
-
-    @Override
-    public ExpType getType() {
-        return ExpType.Rule;
-    }
-
-    @Override
-    public int getTupleSize() {
-        return params.size();
-    }
+	public CFParserException(String message, List<ScriptError> errors) {
+		super(message);
+		this.errors = Collections.unmodifiableList(errors);
+	}
 }

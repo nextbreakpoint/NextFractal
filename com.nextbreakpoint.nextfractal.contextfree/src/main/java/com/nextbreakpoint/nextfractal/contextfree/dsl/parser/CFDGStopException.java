@@ -24,5 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-public class CFDGStopException extends RuntimeException {
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTWhere;
+
+public class CFDGStopException extends CFDGException {
+    public CFDGStopException(String message, ASTWhere where) {
+        super(message, where);
+    }
 }

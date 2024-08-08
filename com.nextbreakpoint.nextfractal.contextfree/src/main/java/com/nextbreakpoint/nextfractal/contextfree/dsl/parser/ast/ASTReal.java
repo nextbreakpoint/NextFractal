@@ -24,13 +24,35 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
+
+// astexpression.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2014 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Getter
 public class ASTReal extends ASTExpression {
@@ -38,15 +60,15 @@ public class ASTReal extends ASTExpression {
 	@Setter
     private String text;
 
-	public ASTReal(Token token, CFDGDriver driver, double value) {
-		super(token, driver, true, false, ExpType.Numeric);
+	public ASTReal(CFDGSystem system, ASTWhere where, double value) {
+		super(system, where, true, false, ExpType.Numeric);
 		this.value = value;
-		natural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
+		natural = Math.floor(value) == value && value >= 0 && value < AST.MAX_NATURAL;
 		locality = Locality.PureLocal;
 	}
 
-	public ASTReal(Token token, CFDGDriver driver, String text, boolean negative) {
-		super(token, driver, true, false, ExpType.Numeric);
+	public ASTReal(CFDGSystem system, ASTWhere where, String text, boolean negative) {
+		super(system, where, true, false, ExpType.Numeric);
 		if (negative) {
 			this.text = "-" + text;
 			this.value = Double.parseDouble(text);
@@ -54,17 +76,17 @@ public class ASTReal extends ASTExpression {
 			this.text = text;
 			this.value = Double.parseDouble(text);
 		}
-		natural = Math.floor(value) == value && value >= 0 && value < 9007199254740992.0;
+		natural = Math.floor(value) == value && value >= 0 && value < AST.MAX_NATURAL;
 		locality = Locality.PureLocal;
 	}
 
     @Override
-	public void entropy(StringBuilder e) {
-		e.append(text);
+	public void entropy(StringBuilder entropy) {
+		entropy.append(text);
 	}
 
 	@Override
-	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
+	public int evaluate(CFDGBuilder builder, CFDGRenderer renderer, double[] result, int length) {
 		if (result != null && length < 1) {
 			return -1;
 		}

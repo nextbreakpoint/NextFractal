@@ -24,8 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.test;
 
+import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeLexer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ContextFreeParser;
 import org.antlr.v4.runtime.CharStream;
@@ -33,6 +35,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -40,21 +43,34 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.function.Function;
 
 public abstract class AbstractBaseTest {
-	protected CFDG parseSource(String resourceName) throws IOException {
+	protected CFDG parseSource(String resourceName) {
+		return Command.of(() -> parseSource(resourceName, "CFDG3", ContextFreeParser::cfdg3)).execute()
+//				.or(() -> Command.of(() -> parseSource(resourceName, "CFDG2", ContextFreeParser::cfdg2)).execute())
+				.optional()
+				.orElseThrow();
+	}
+
+	private CFDG parseSource(String resourceName, String version, Function<ContextFreeParser, ParseTree> callback) throws IOException {
+		CFDG cfdg = new CFDG(new CFDGSystem(), version);
+		CFDGBuilder builder = new CFDGBuilder(cfdg, 0);
 		CharStream is = CharStreams.fromReader(new InputStreamReader(getResourceAsStream(resourceName)));
 		ContextFreeParser parser = new ContextFreeParser(new CommonTokenStream(new ContextFreeLexer(is)));
-		parser.setDriver(new CFDGDriver());
-		parser.getDriver().setCurrentPath(System.getProperty("cfdg.root", "src/test/resources"));
+		parser.setBuilder(builder);
+		parser.getBuilder().setCurrentPath(System.getProperty("cfdg.root", "src/test/resources"));
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(new DefaultParseTreeListener() {
 			@Override
 			public void visitTerminal(TerminalNode node) {
 				System.out.println(node.getText() + " " + node.getSymbol());
 			}
-		}, parser.choose());
-		return parser.getDriver().getCFDG();
+		}, callback.apply(parser));
+		if (builder.getMaybeVersion() != null && !version.equals(builder.getMaybeVersion())) {
+			throw new RuntimeException("Unexpected version");
+		}
+		return parser.getBuilder().getCfdg();
 	}
 
 	protected InputStream getResourceAsStream(String resourceName) {

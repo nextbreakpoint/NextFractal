@@ -27,8 +27,8 @@ package com.nextbreakpoint.nextfractal.contextfree.javafx;
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParamsStrategy;
@@ -87,8 +87,8 @@ public class ContextFreeUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
-		CFDGParser compiler = new CFDGParser();
-		CFDGParserResult report = compiler.parse(session.script());
+		CFParser compiler = new CFParser();
+		CFParserResult report = compiler.parse(session.script());
 		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("image", report.classFactory().create());
 		bitmap.setProperty("session", session);

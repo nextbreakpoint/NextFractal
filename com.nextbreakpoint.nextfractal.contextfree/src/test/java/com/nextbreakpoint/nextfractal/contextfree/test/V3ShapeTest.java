@@ -60,7 +60,7 @@ public class V3ShapeTest extends AbstractBaseTest {
 	public void shouldReloadRules() throws IOException {
 		CFDG cfdg = parseSource(RESOURCE_NAME);
 		assertThat(cfdg.getContents().getBody()).hasSize(2);
-		assertThat(cfdg.getRulesCount()).isEqualTo(1);
+		assertThat(cfdg.numRules()).isEqualTo(1);
 		assertThat(cfdg.getRule(0).getWeight()).isEqualTo(1.0);
 		cfdg.rulesLoaded();
 		assertThat(cfdg.getRule(0).getWeight()).isEqualTo(1.1);
@@ -92,6 +92,6 @@ public class V3ShapeTest extends AbstractBaseTest {
 		AffineTransform transform = new AffineTransform();
 		transform.translate(100.0, 100.0);
 		transform.scale(198.4, 198.4);
-		verify(canvas, times(1)).primitive(1, new double[] { 0, 0, 0, 1 }, transform);
+		verify(canvas, times(1)).primitive(1, new double[] { 0, 0, 0, 1 }, transform, 0);
 	}
 }

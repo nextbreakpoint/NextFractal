@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGHandle;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGListener;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFHandle;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFListener;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.Setter;
 
@@ -35,46 +35,49 @@ import java.util.List;
 
 public class CFDGSimpleImage implements CFDGImage {
     private final CFDG cfdg;
+
     @Setter
-    private CFDGListener listener;
+    private CFListener listener;
 
     public CFDGSimpleImage(CFDG cfdg) {
         this.cfdg = cfdg;
     }
 
-    public CFDGHandle render(CFCanvas canvas, String seed, boolean partialDraw) {
-        CollectingLogger logger = new CollectingLogger();
-        cfdg.getDriver().setLogger(logger);
+    public CFHandle render(CFCanvas canvas, String seed, boolean partialDraw) {
         cfdg.rulesLoaded();
         final CFDGRenderer renderer = cfdg.createRenderer(canvas.getWidth(), canvas.getHeight(), 1, seed.hashCode(), 0.1);
-        renderer.setCfdgListener(this::partialDraw);
-        renderer.run(canvas, partialDraw);
-        return new DefaultHandle(renderer, logger);
+        if (renderer != null) {
+            renderer.setListener(this::draw);
+            renderer.run(canvas, partialDraw);
+        }
+        return new DefaultHandle(renderer, cfdg);
     }
 
-    private void partialDraw() {
+    private void draw() {
         if (listener != null) {
-            listener.partialDraw();
+            listener.draw();
         }
     }
 
-    private static class DefaultHandle implements CFDGHandle {
+    private static class DefaultHandle implements CFHandle {
         private final CFDGRenderer renderer;
-        private final CollectingLogger logger;
+        private final CFDG cfdg;
 
-        public DefaultHandle(CFDGRenderer renderer, CollectingLogger logger) {
+        public DefaultHandle(CFDGRenderer renderer, CFDG cfdg) {
             this.renderer = renderer;
-            this.logger = logger;
+            this.cfdg = cfdg;
         }
 
         @Override
         public void stop() {
-            renderer.setRequestStop(true);
+            if (renderer != null) {
+                renderer.setRequestStop(true);
+            }
         }
 
         @Override
         public List<ScriptError> errors() {
-            return logger.getErrors();
+            return cfdg.getSystem().getErrors();
         }
     }
 }

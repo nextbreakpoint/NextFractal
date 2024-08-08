@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
 import lombok.Getter;
 
+@Getter
 public enum FuncType {
 	IllegalArguments(-2, "", ""), 
 	NotAFunction(-1, "", ""),
@@ -76,6 +77,7 @@ public enum FuncType {
 	Frame(91, "frame", "\u0090\u0070\u006A\u00BB\u00BA\u00B0"), 
 	RandStatic(100, "rand_static", "\u00C8\u00F7\u00E5\u003E\u0005\u00A3"),
 	Rand(101, "rand", "\u00DA\u0018\u005B\u00E2\u00DB\u0079"), 
+	RandOp(101, "rand.", "\u00DA\u0018\u005B\u00E2\u00DB\u0079"),
 	Rand2(102, "rand+/-", "\u00DC\u008D\u0009\u0015\u008A\u00C4"),
 	RandExponential(110, "rand::exponential", "\u0032\u00DF\u004A\u00FD\u0000\u001F"),
 	RandGamma(111, "rand::gamma", "\u00C9\u00D5\u0057\u004F\u00E6\u0077"),
@@ -88,18 +90,16 @@ public enum FuncType {
 	RandFisherF(118, "rand::fisherF", "\u009B\u0076\u001B\u0051\u00CD\u00AE"),
 	RandStudentT(119, "rand::studentT", "\u00F9\u0041\u0044\u00F2\u0063\u00A7"),
 	RandInt(120, "randint", "\u0048\u0014\u004E\u0027\u0035\u002E"),
-	RandIntBernoulli(121, "randint::bernoulli", "\u00BE\u00D1\u0055\u0004\u00D4\u0054"),
-	RandIntBinomial(122, "randint::binomial", "\u006A\u0069\u009A\u0094\u0036\u006C"),
-	RandIntNegBinomial(123, "randint::negbinomial", "\u00ED\u0031\u0046\u009C\u00A6\u00AD"),
-	RandIntPoisson(124, "randint::poisson", "\u0009\u0089\u00F3\u0077\u00AE\u0067"),
-	RandIntDiscrete(125, "randint::discrete", "\u0017\u0069\u008D\u0061\u00FF\u002A"),
-	RandIntGeometric(126, "randint::geometric", "\u00D5\u0010\u002E\u00A5\u0003\u00B4");
+	RandBernoulli(121, "randint::bernoulli", "\u00BE\u00D1\u0055\u0004\u00D4\u0054"),
+	RandBinomial(122, "randint::binomial", "\u006A\u0069\u009A\u0094\u0036\u006C"),
+	RandNegBinomial(123, "randint::negbinomial", "\u00ED\u0031\u0046\u009C\u00A6\u00AD"),
+	RandPoisson(124, "randint::poisson", "\u0009\u0089\u00F3\u0077\u00AE\u0067"),
+	RandDiscrete(125, "randint::discrete", "\u0017\u0069\u008D\u0061\u00FF\u002A"),
+	RandGeometric(126, "randint::geometric", "\u00D5\u0010\u002E\u00A5\u0003\u00B4");
 
-	@Getter
-    private final int type;
+	private final int type;
 	private final String name;
-	@Getter
-    private final String entropy;
+	private final String entropy;
 
 	FuncType(int type, String name, String entropy) {
 		this.type = type;

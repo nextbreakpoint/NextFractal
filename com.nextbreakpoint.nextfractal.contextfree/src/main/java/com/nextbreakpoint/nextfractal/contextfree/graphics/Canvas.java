@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.PrimShape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
@@ -60,8 +59,11 @@ public class Canvas implements CFCanvas {
         this.height = height;
     }
 
-    public void primitive(int shapeType, double[] color, java.awt.geom.AffineTransform transform) {
+    @Override
+    public void primitive(int shapeType, double[] color, java.awt.geom.AffineTransform transform, int blend) {
         context.save();
+
+        //TODO implement blend
 
         AffineTransform affine = factory.createAffineTransform();
         affine.append(normTransform);
@@ -85,8 +87,11 @@ public class Canvas implements CFCanvas {
         context.restore();
     }
 
-    public void path(double[] color, java.awt.geom.AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit) {
+    @Override
+    public void path(double[] color, java.awt.geom.AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit, int blend) {
         context.save();
+
+        //TODO implement blend
 
         AffineTransform affine = factory.createAffineTransform();
         affine.append(normTransform);
@@ -212,16 +217,22 @@ public class Canvas implements CFCanvas {
         context.fillRect(0, 0, getWidth(), getHeight());
     }
 
+    @Override
+    public void drawRect(double x, double y, double width, double height) {
+    }
+
+    @Override
     public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
         normTransform = factory.createTranslateAffineTransform(0, getHeight());
         normTransform.append(factory.createScaleAffineTransform(1, -1));
         normTransform.append(factory.createTranslateAffineTransform(-(currWidth - getWidth()) / 2f, -(currHeight - getHeight()) / 2f));
     }
 
+    @Override
     public void end() {
     }
 
-    @Override
-    public void tileTransform(Bounds bounds) {
+    public boolean error() {
+        return false;
     }
 }

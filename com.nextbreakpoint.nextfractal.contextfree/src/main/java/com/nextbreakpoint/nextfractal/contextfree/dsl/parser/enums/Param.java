@@ -28,7 +28,7 @@ import lombok.Getter;
 
 @Getter
 public enum Param {
-	Color(1), Alpha(2), Time(4), FrameTime(8);
+	Color(1), Alpha(2), Time(4), FrameTime(8), Blend(16);
 	
 	private final int type;
 

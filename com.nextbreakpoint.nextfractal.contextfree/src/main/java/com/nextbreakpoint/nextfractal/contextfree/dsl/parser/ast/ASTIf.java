@@ -24,14 +24,36 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
+
+// astreplacement.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 public class ASTIf extends ASTReplacement {
 	private ASTExpression condition;
@@ -40,43 +62,48 @@ public class ASTIf extends ASTReplacement {
 	@Getter
     private final ASTRepContainer elseBody;
 	
-	public ASTIf(Token token, CFDGDriver driver, ASTExpression condition) {
-		super(token, driver, null, RepElemType.empty);
-		thenBody = new ASTRepContainer(token, driver);
-		elseBody = new ASTRepContainer(token, driver);
+	public ASTIf(CFDGSystem system, ASTWhere where, ASTExpression condition) {
+		super(system, where, null, RepElemType.empty);
+		thenBody = new ASTRepContainer(system, where);
+		elseBody = new ASTRepContainer(system, where);
 		this.condition = condition;
 	}
 
     @Override
-	public void compile(CompilePhase ph) {
-		super.compile(ph);
-		condition = compile(condition, ph);
-		thenBody.compile(ph, null, null);
-		elseBody.compile(ph, null, null);
+	public void compile(CFDGBuilder builder, CompilePhase phase) {
+		super.compile(builder, phase);
+		condition = ASTExpression.compile(builder, phase, condition);
+		thenBody.compile(builder, phase, null, null);
+		elseBody.compile(builder, phase, null, null);
 
-        switch (ph) {
+		if (condition == null) {
+			system.error("If condition missing", getWhere());
+			return;
+		}
+
+        switch (phase) {
             case TypeCheck -> {
-                if (condition.getType() != ExpType.Numeric || condition.evaluate(null, 0) != 1) {
-                    driver.error("If condition must be a numeric scalar", condition.getToken());
+                if (condition.getType() != ExpType.Numeric || condition.evaluate(builder, null, 0) != 1) {
+                    system.error("If condition must be a numeric scalar", getWhere());
                 }
             }
-            case Simplify -> condition = simplify(condition);
+            case Simplify -> condition = ASTExpression.simplify(builder, condition);
             default -> {
             }
         }
 	}
 
 	@Override
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
-		double[] cond = new double[1];
-		if (condition.evaluate(cond, 1, renderer) != 1) {
-			driver.error("Error evaluating if condition", getToken());
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr) {
+		final double[] value = new double[1];
+		if (condition.evaluate(builder, renderer, value, 1) != 1) {
+			system.error("Error evaluating if condition", getWhere());
 			return;
 		}
-		if (cond[0] != 0) {
-			thenBody.traverse(parent, tr, renderer, false);
+		if (value[0] != 0) {
+			thenBody.traverse(builder, renderer, parent, tr, false);
 		} else {
-			elseBody.traverse(parent, tr, renderer, false);
+			elseBody.traverse(builder, renderer, parent, tr, false);
 		}
 	}
 }

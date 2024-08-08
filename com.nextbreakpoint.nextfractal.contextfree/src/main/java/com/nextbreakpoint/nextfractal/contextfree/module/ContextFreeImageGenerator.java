@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -64,8 +64,8 @@ public class ContextFreeImageGenerator implements ImageGenerator {
         Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			CFDGParser parser = new CFDGParser();
-			CFDGParserResult parserResult = parser.parse(script);
+			CFParser parser = new CFParser();
+			CFParserResult parserResult = parser.parse(script);
 			CFDGImage cfdgImage = parserResult.classFactory().create();
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 			renderer.setImage(cfdgImage);
@@ -76,7 +76,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 			renderer.waitForTasks();
 			renderer.getPixels(pixels);
 			aborted = renderer.isInterrupted();
-		} catch (CFDGParserException e) {
+		} catch (CFParserException e) {
 			log.log(Level.WARNING, e.getMessage(), e);
 		} catch (Throwable e) {
 			log.severe(e.getMessage());

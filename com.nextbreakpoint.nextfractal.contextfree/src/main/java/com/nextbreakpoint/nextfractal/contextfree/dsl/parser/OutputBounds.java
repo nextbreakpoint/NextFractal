@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
-import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTWhere;
 
 import java.util.stream.IntStream;
 
@@ -47,7 +47,7 @@ public class OutputBounds {
         this.height = height;
         this.renderer = renderer;
 
-        frameScale = (double)frames / (timeBounds.getEnd() / timeBounds.getBegin());
+        frameScale = (double)frames / (timeBounds.getEnd() - timeBounds.getBegin());
         frameBounds = new Bounds[frames];
         frameCounts = new Integer[frames];
 
@@ -57,22 +57,21 @@ public class OutputBounds {
 
     public void apply(FinishedShape shape) {
         if (renderer.isRequestStop() || renderer.isRequestFinishUp()) {
-            throw new CFDGStopException();
+            throw new CFDGStopException("Stopping", ASTWhere.DEFAULT_WHERE);
         }
 
         if (scale == 0.0) {
+            // If we don't know the approximate scale yet then just
+            // make an educated guess.
             scale = (width + height) / Math.sqrt(Math.abs(shape.getWorldState().getTransform().getDeterminant()));
         }
 
-        //TODO rivedere
-
-        AffineTransformTime frameTime = shape.getWorldState().getTransformTime();
-
+        final AffineTransformTime frameTime = shape.getWorldState().getTransformTime();
         frameTime.translate(-timeBounds.getBegin());
         frameTime.scale(frameScale);
 
-        int begin = frameTime.getBegin() < frames ? (int)Math.floor(frameTime.getBegin()) : (frames - 1);
-        int end = frameTime.getEnd() < frames ? (int)Math.floor(frameTime.getEnd()) : (frames - 1);
+        final int begin = frameTime.getBegin() < frames ? (int)Math.floor(frameTime.getBegin()) : (frames - 1);
+        final int end = frameTime.getEnd() < frames ? (int)Math.floor(frameTime.getEnd()) : (frames - 1);
 
         for (int frame = begin; frame <= end; frame++) {
             frameBounds[frame].merge(shape.bounds());
@@ -85,12 +84,13 @@ public class OutputBounds {
     }
 
     public void backwardFilter(double framesToHalf) {
-        //TODO rivedere
+        double alpha = Math.pow(0.5, 1.0 / framesToHalf);
+
         int frames = frameBounds.length;
         if (frames == 0) {
             return;
         }
-        double alpha = Math.pow(0.5, 1.0 / framesToHalf);
+
         Bounds prev = frameBounds[frameBounds.length - 1];
         for (int i = frameBounds.length - 2; i >= 0; i--) {
             Bounds curr = frameBounds[i];
@@ -99,50 +99,50 @@ public class OutputBounds {
         }
     }
 
+    //TODO verify smooth
     public void smooth(int window) {
         int frames = frameBounds.length;
-
         if (frames == 0) {
             return;
         }
 
-        Bounds[] backFrameBounds = frameBounds;
+        resizeBounds(frames + window - 1);
 
-        frameBounds = new Bounds[frames + window - 1];
-        System.arraycopy(backFrameBounds, 0, frameBounds, 0, frames);
-        for (int i = 0; i < window; i++) {
-            frameBounds[frames + i] = frameBounds[frames - 1];
-        }
+        final double factor = 1.0 - window;
 
-        double factor = 1.0 - window;
-
-        Bounds accum = new Bounds();
-
+        final Bounds accum = new Bounds();
         for (int i = 0; i < window; i++) {
             accum.gather(frameBounds[i], factor);
         }
-
-        //TODO rivedere
 
         int i = 0;
         int j = window;
         for (;;) {
             Bounds old = frameBounds[i];
-
             frameBounds[i++] = accum;
-
             accum.gather(old, -factor);
-
-            if (j == frameBounds.length) {
+            if (j == frameBounds.length - 1) {
                 break;
             }
-
             accum.gather(frameBounds[j++], factor);
         }
 
-        backFrameBounds = frameBounds;
-        frameBounds = new Bounds[frames];
-        System.arraycopy(backFrameBounds, 0, frameBounds, 0, frames);
+        resizeBounds(frames);
+    }
+
+    private void resizeBounds(int length) {
+        if (length > frameBounds.length) {
+            final Bounds[] tempFrameBounds = frameBounds;
+            frameBounds = new Bounds[length];
+            System.arraycopy(tempFrameBounds, 0, frameBounds, 0, tempFrameBounds.length);
+            for (int i = 0; i < length - frameBounds.length; i++) {
+                frameBounds[tempFrameBounds.length + i] = frameBounds[tempFrameBounds.length - 1];
+            }
+        } else {
+            final Bounds[] tempFrameBounds = frameBounds;
+            frameBounds = new Bounds[length];
+            System.arraycopy(tempFrameBounds, 0, frameBounds, 0, length);
+        }
     }
 
     public Bounds frameBounds(int index) {

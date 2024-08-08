@@ -31,52 +31,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CFStackIterator {
-    private int stackPos;
-    private int paramPos;
-    @Getter
-    private final CFStack stack;
     private final List<ASTParameter> params;
+    private int paramPos;
+
+    @Getter
+    private CFStack stack;
 
     public CFStackIterator(CFStack stack, List<ASTParameter> parameters) {
-        this.stack = stack;
-        this.params = new ArrayList<>(parameters);
+        this.params = parameters;
         this.paramPos = 0;
-        this.stackPos = stack.getStackTop();
+        this.stack = parameters != null ? stack : null;
     }
 
-    public CFStackIterator(CFStack stack) {
-        this.stack = stack;
+    public CFStackIterator() {
         this.params = new ArrayList<>();
         this.paramPos = 0;
-        this.stackPos = stack.getStackTop();
+        this.stack = null;
     }
 
     public CFStackIterator(CFStackIterator iterator) {
-        this.stack = iterator.stack;
         this.params = iterator.params;
-        this.stackPos = iterator.stackPos;
         this.paramPos = iterator.paramPos;
+        this.stack = iterator.stack;
     }
 
     public ASTParameter getType() {
         return params.get(paramPos);
     }
 
-    public CFStackItem getItem() {
-        return stack.getStackItem(stackPos);
-    }
-
-    public void setItem(int index, CFStackItem item) {
-        stack.setStackItem(stackPos + index, item);
-    }
-
     public CFStackIterator next() {
-        if (paramPos >= params.size()) {
-            return null;
+        if (stack == null) {
+            return this;
         }
-        ASTParameter next = params.get(paramPos);
-        stackPos += next.getTupleSize();
+        final ASTParameter param = params.get(paramPos);
+        stack.setStackTop(stack.getStackTop() + param.getTupleSize());
         paramPos += 1;
+        if (paramPos >= params.size()) {
+            stack = null;
+        }
         return this;
+    }
+
+    public void setStack(CFStack stack) {
+
+    }
+
+    public void setLogicalStackTop(int stackTop) {
+
     }
 }

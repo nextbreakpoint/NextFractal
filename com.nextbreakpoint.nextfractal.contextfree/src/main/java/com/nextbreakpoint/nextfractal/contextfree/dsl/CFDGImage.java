@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 public interface CFDGImage {
-    void setListener(CFDGListener listener);
+    void setListener(CFListener listener);
 
-    CFDGHandle render(CFCanvas canvas, String seed, boolean partialDraw);
+    CFHandle render(CFCanvas canvas, String seed, boolean partialDraw);
 }

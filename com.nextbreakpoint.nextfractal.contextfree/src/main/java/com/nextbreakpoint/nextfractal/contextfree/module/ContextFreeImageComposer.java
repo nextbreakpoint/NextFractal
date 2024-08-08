@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
@@ -73,8 +73,8 @@ public class ContextFreeImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            CFDGParser parser = new CFDGParser();
-            CFDGParserResult parserResult = parser.parse(script);
+            CFParser parser = new CFParser();
+            CFParserResult parserResult = parser.parse(script);
             CFDGImage cfdgImage = parserResult.classFactory().create();
             GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
@@ -86,7 +86,7 @@ public class ContextFreeImageComposer implements ImageComposer {
             renderer.waitForTasks();
             renderer.copyImage(renderFactory.createGraphicsContext(g2d));
             aborted = renderer.isInterrupted();
-        } catch (CFDGParserException e) {
+        } catch (CFParserException e) {
             log.log(Level.WARNING, e.getMessage(), e);
         } catch (Throwable e) {
             log.severe(e.getMessage());

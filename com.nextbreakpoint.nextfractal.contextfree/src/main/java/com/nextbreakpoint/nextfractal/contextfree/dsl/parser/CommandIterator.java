@@ -48,4 +48,8 @@ public class CommandIterator {
         }
         return false;
     }
+
+    public boolean hasNext() {
+        return current < commands.size();
+    }
 }

@@ -24,206 +24,208 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.DefineType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
+import java.util.Iterator;
 import java.util.List;
 
+// astexpression.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2014 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
+
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ASTParameter extends ASTObject {
 	public static boolean Impure = false;
 
-	private final CFDGDriver driver;
-	@Getter
-    private ExpType type = ExpType.None;
-	@Getter
-    @Setter
+	private ExpType type = ExpType.None;
+	@Setter
     private boolean parameter;
-	@Getter
-    private boolean loopIndex;
-	@Getter
-    @Setter
+	private boolean loopIndex;
+	@Setter
     private boolean natural;
 	@Setter
-    @Getter
     private Locality locality;
 	@Setter
-    @Getter
     private int stackIndex = -1;
-	@Getter
-    private int nameIndex = -1;
-	@Getter
-    private int tupleSize = -1;
-	@Getter
-    private ASTDefine definition;
+	private int tupleSize = -1;
+	private int nameIndex = -1;
+	@Setter
+	private ASTDefine definition;
 
-	public ASTParameter(Token token, CFDGDriver driver) {
-		super(token);
-		this.driver = driver;
+	public ASTParameter(CFDGSystem system, ASTWhere where) {
+		super(system, where);
 	}
 
-	public ASTParameter(Token token, CFDGDriver driver, String type, int nameIndex) {
-		super(token);
-		this.driver = driver;
+	public ASTParameter(CFDGSystem system, ASTWhere where, String type, int nameIndex) {
+		super(system, where);
 		init(type, nameIndex);
 	}
 
-	public ASTParameter(Token token, CFDGDriver driver, int nameIndex, ASTDefine definition) {
-		super(token);
-		this.driver = driver;
+	public ASTParameter(CFDGSystem system, ASTWhere where, int nameIndex, ASTDefine definition) {
+		super(system, where);
 		init(nameIndex, definition);
 	}
 
-	public ASTParameter(Token token, CFDGDriver driver, int nameIndex, boolean natural, boolean local) {
-		super(token);
-		this.driver = driver;
-		this.loopIndex = true;
-		this.natural = natural;
+	public ASTParameter(CFDGSystem system, ASTWhere where, int nameIndex) {
+		super(system, where);
+		loopIndex = true;
 		this.nameIndex = nameIndex;
 	}
 
-	public ASTParameter(ASTParameter param) {
-		super(param.getToken());
-		this.driver = param.driver;
-		this.parameter = param.parameter;
-		this.loopIndex = param.loopIndex;
-		this.stackIndex = param.stackIndex;
-		this.nameIndex = param.nameIndex;
-		this.natural = param.natural;
-		this.locality = param.locality;
-		this.tupleSize = param.tupleSize;
+	public ASTParameter(CFDGSystem system, ASTParameter param) {
+		super(system, param.getWhere());
+		parameter = param.parameter;
+		loopIndex = param.loopIndex;
+		natural = param.natural;
+		locality = param.locality;
+		stackIndex = param.stackIndex;
+		tupleSize = param.tupleSize;
+		nameIndex = param.nameIndex;
+		definition = param.definition;
 	}
 
     public void init(String type, int nameIndex) {
 		locality = Locality.PureNonLocal;
-		int[] tupleSizeVal = new int[1];
-		boolean[] isNaturalVal = new boolean[1];
-		this.type = ASTUtils.decodeType(driver, type, tupleSizeVal, isNaturalVal, getToken());
+		final int[] tupleSizeVal = new int[1];
+		final boolean[] isNaturalVal = new boolean[1];
+		this.type = AST.decodeType(system, type, tupleSizeVal, isNaturalVal, getWhere());
 		tupleSize = tupleSizeVal[0];
 		natural = isNaturalVal[0];
 		this.nameIndex = nameIndex;
 		definition = null;
 	}
 
-	public void init(int nameIndex, ASTDefine definition) {
-		type = definition.getExpType();
-		locality = definition.getExp() != null ? definition.getExp().getLocality() : Locality.PureLocal;
-		tupleSize = definition.getTupleSize();
+	public void init(int paramName, ASTDefine def) {
+		type = def.getExpType();
+		locality = def.getExp() != null ? def.getExp().getLocality() : Locality.PureLocal;
+		tupleSize = def.getTupleSize();
 		if (type == ExpType.Numeric) {
-			natural = definition.getExp() != null && definition.getExp().isNatural();
+			natural = def.getExp() != null && def.getExp().isNatural();
 			if (tupleSize == 0) {
-				tupleSize = 1;
+				tupleSize = 1;  // loop index
 			}
-			if (tupleSize < 1 || tupleSize > 1000000000) {
-				driver.error("Illegal vector size (<1 or >99)", getToken());
+			if (tupleSize < 1 || tupleSize > AST.MAX_VECTOR_SIZE) {
+				system.error("Illegal vector size (<1 or >%d)".formatted(AST.MAX_VECTOR_SIZE), getWhere());
 			}
 		}
-		this.nameIndex = nameIndex;
-		if (definition.getDefineType() == DefineType.Const) {
-			this.definition = definition;
+		nameIndex = paramName;
+		if (def.getDefineType() == DefineType.Const) {
+			definition = def;
 		}
 	}
 
 	public void checkParam() {
 		if (nameIndex == -1) {
-			throw new RuntimeException("Reserved keyword used for parameter name");
+			system.error("Reserved keyword used for parameter name", getWhere());
 		}
 	}
 
-	//TODO controllare
-
-	public boolean compare(ASTParameter p) {
-		if (type != p.type) return true;
-        return type == ExpType.Numeric && tupleSize != p.tupleSize;
-    }
-
-	public boolean compare(ASTExpression e) {
-		if (type != e.type) return true;
-        return type == ExpType.Numeric && tupleSize != e.evaluate(null, 0, null);
-    }
-
-	public static int checkType(CFDGDriver driver, List<? extends ASTParameter> types, ASTExpression args, boolean checkNumber) {
+	//TODO verify
+	public static int checkType(CFDGBuilder builder, ASTWhere where, List<? extends ASTParameter> types, ASTExpression args, boolean checkNumber) {
 		// Walks down the right edge of an expression tree checking that the types
 		// of the children match the specified argument types
 		if ((types == null || types.isEmpty()) && args == null) {
 			return 0;
 		}
 		if (types == null || types.isEmpty()) {
-			driver.error("Arguments are not expected", args.getToken());
+			builder.error("Arguments are not expected", where);
 			return -1;
 		}
 		if (args == null) {
-			driver.error("Arguments are expected", null);
+			builder.error("Arguments are expected", where);
 			return -1;
 		}
 
-		boolean justCount = args.getType() == ExpType.None;
+		final boolean justCount = args.getType() == ExpType.None;
 
-		int count = 0;
 		int size = 0;
-		int expect = args.size();
 
-		for (ASTParameter param : types) {
-			size += param.getTupleSize();
-			count += 1;
-			if (justCount) {
-				continue;
-			}
-			if (count > expect) {
-				driver.error("Not enough arguments", args.getToken());
+		final Iterator<? extends ASTParameter> it = types.iterator();
+
+		for (ASTExpression arg : AST.extract(args)) {
+			if (!it.hasNext()) {
+				builder.error("Too many arguments", args.getWhere());
 				return -1;
 			}
-			ASTExpression arg = args.getChild(count - 1);
-			if (param.getType() != arg.getType()) {
-				driver.error("Incorrect argument type", arg.getToken());
-				driver.error("This is the expected type", param.getToken());
-				return -1;
-			}
-			if (param.isNatural() && !arg.isNatural() && !Impure) {
-				driver.error("This expression does not satisfy the natural number requirement", arg.getToken());
-			}
-			if (param.getType() == ExpType.Numeric && param.getTupleSize() != arg.evaluate(null, 0)) {
-				if (param.getTupleSize() == 1) {
-					driver.error("This argument should be scalar", arg.getToken());
-				} else {
-					driver.error("This argument should be a vector", arg.getToken());
-					driver.error("This is the expected type", param.getToken());
+			final ASTParameter param = it.next();
+			if (!justCount) {
+				if (param.getType() != arg.getType()) {
+					builder.error("Incorrect argument type", args.getWhere());
+					builder.error("This is the expected type", param.getWhere());
 				}
-				return -1;
+				if (param.isNatural() && !arg.isNatural() && !Impure) {
+					builder.error("This expression does not satisfy the natural number requirement", args.getWhere());
+				}
+				if (param.getType() == ExpType.Numeric && param.getTupleSize() != arg.evaluate(builder, null, 0)) {
+					if (param.getTupleSize() == 1) {
+						builder.error("This argument should be scalar", args.getWhere());
+					} else {
+						builder.error("This argument should be a vector", args.getWhere());
+						builder.error("This is the expected type", param.getWhere());
+					}
+				}
+				if (arg.getLocality() != Locality.PureLocal && arg.getLocality() != Locality.PureNonLocal && param.getType() == ExpType.Numeric && !param.isNatural() && !Impure && checkNumber) {
+					builder.error("This expression does not satisfy the number parameter requirement", args.getWhere());
+				}
 			}
-			if (arg.getLocality() != Locality.PureLocal && arg.getLocality() != Locality.PureNonLocal && param.getType() == ExpType.Numeric && !param.isNatural() && !Impure && checkNumber) {
-				driver.error("This expression does not satisfy the number parameter requirement", arg.getToken());
-				return -1;
-			}
-		}
+			size += param.getTupleSize();
+        }
 
-		if (count < expect) {
-			driver.error("Too many arguments", args.getChild(count).getToken());
-			return -1;
+		if (it.hasNext()) {
+			final ASTParameter param = it.next();
+			builder.error("Not enough arguments.", args.getWhere());
+			builder.error("Expecting this argument.", param.getWhere());
 		}
 
 		return size;
 	}
 
-	public ASTExpression constCopy(String entropy) {
+	//TODO verify
+	public ASTExpression constCopy(CFDGBuilder builder, String entropy) {
         switch (type) {
             case Numeric -> {
-                double[] data = new double[tupleSize];
-                boolean natural = this.natural;
-                int valCount = definition.getExp().evaluate(data, tupleSize);
-                if (valCount != tupleSize) {
-                    driver.error("Unexpected compile error", getToken());
+                final double[] data = new double[tupleSize];
+				final boolean natural = this.natural;
+				final int valCount = definition.getExp().evaluate(builder, data, tupleSize);
+                if (valCount != tupleSize || valCount == 0) {
+                    system.error("Unexpected compile error", getWhere());  // this also shouldn't happen
                 }
-                ASTReal top = new ASTReal(definition.getExp().getToken(), driver, data[0]);
-                top.setText(entropy);
-                ASTExpression list = top;
-                for (int i = 1; i < valCount; i++) {
-                    ASTReal next = new ASTReal(getToken(), driver, data[i]);
-                    list = list.append(next);
+				if (valCount < 1)
+					return new ASTReal(system, definition.getExp().getWhere(), 0.0);     // shouldn't happen, but we don't want to crash if it does
+				// Create a new cons-list based on the evaluated variable's expression
+                ASTExpression list = null;
+                for (int i = 0; i < valCount; i++) {
+                    ASTReal next = new ASTReal(system, getWhere(), data[i]);
+					if (list == null) {
+						next.setText(entropy);
+					}
+                    list = list != null ? list.append(next) : next;
                 }
                 list.setNatural(natural);
                 list.setLocality(locality);
@@ -232,21 +234,22 @@ public class ASTParameter extends ASTObject {
             case Mod -> {
                 ASTModification ret;
                 if (definition.getExp() instanceof ASTModification) {
-                    ret = new ASTModification(getToken(), definition.driver, (ASTModification) definition.getExp());
+                    ret = new ASTModification(system, getWhere(), (ASTModification) definition.getExp());
                 } else {
-                    ret = new ASTModification(getToken(), definition.driver, definition.getChildChange());
+                    ret = new ASTModification(system, getWhere(), definition.getChildChange());
                 }
                 ret.setLocality(locality);
                 return ret;
             }
             case Rule -> {
+				// This must be bound to an ASTruleSpecifier, otherwise it would not be constant
                 if (definition.getExp() instanceof ASTRuleSpecifier r) {
-                    ASTRuleSpecifier ret = new ASTRuleSpecifier(getToken(), definition.driver, r.getShapeType(), entropy, null, null);
+                    ASTRuleSpecifier ret = new ASTRuleSpecifier(system, getWhere(), r.getShapeType(), entropy, null, null);
                     ret.grab(r);
                     ret.setLocality(locality);
                     return ret;
                 } else {
-                    driver.error("Internal error computing bound rule specifier", getToken());
+                    system.error("Internal error computing bound rule specifier", getWhere());
                 }
             }
             default -> {
@@ -254,4 +257,14 @@ public class ASTParameter extends ASTObject {
         }
 		return null;
 	}
+
+	public boolean compare(ASTParameter p) {
+		if (type != p.type) return true;
+        return type == ExpType.Numeric && tupleSize != p.tupleSize;
+    }
+
+	public boolean compare(ASTExpression e) {
+		if (type != e.type) return true;
+        return type == ExpType.Numeric && tupleSize != e.evaluate(null, null, null, 0);
+    }
 }

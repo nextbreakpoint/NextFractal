@@ -24,19 +24,41 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
+
+// astreplacement.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Getter
 public class ASTTransform extends ASTReplacement {
@@ -46,35 +68,33 @@ public class ASTTransform extends ASTReplacement {
 	@Setter
     private boolean clone;
 	
-	public ASTTransform(Token token, CFDGDriver driver, ASTExpression exp) {
-		super(token, driver, null, RepElemType.empty);
-		body = new ASTRepContainer(token, driver);
+	public ASTTransform(CFDGSystem system, ASTWhere where, ASTExpression exp) {
+		super(system, where, null, RepElemType.empty);
+		body = new ASTRepContainer(this.system, where);
 		this.expHolder = exp;
 		this.clone = false;
 	}
 
     @Override
-	public void compile(CompilePhase ph) {
-		super.compile(ph);
+	public void compile(CFDGBuilder builder, CompilePhase phase) {
+		super.compile(builder, phase);
 		ASTExpression ret = null;
 		if (expHolder != null) {
-			ret = expHolder.compile(ph);
+			ret = expHolder.compile(builder, phase);
 		}
 		if (ret != null) {
-			driver.error("Error analyzing transform list", getToken());
+			system.error("Error analyzing transform list", getWhere());
 		}
-		body.compile(ph, null, null);
+		body.compile(builder, phase, null, null);
 
-        switch (ph) {
+        switch (phase) {
             case TypeCheck -> {
                 if (clone && !ASTParameter.Impure) {
-                    driver.error("Shape cloning only permitted in impure mode", getToken());
+                    system.error("Shape cloning only permitted in impure mode", getWhere());
                 }
             }
             case Simplify -> {
-                if (expHolder != null) {
-                    expHolder = expHolder.simplify();
-                }
+				expHolder = ASTExpression.simplify(builder, expHolder);
             }
             default -> {
             }
@@ -82,31 +102,34 @@ public class ASTTransform extends ASTReplacement {
 	}
 
 	@Override
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
-		AffineTransform dummy = new AffineTransform();
-		List<AffineTransform> transforms = new ArrayList<>();
-		List<ASTModification> mods = ASTUtils.getTransforms(driver, expHolder, transforms, renderer, false, dummy);
-		Rand64 cloneSeed = renderer.getCurrentSeed();
-		Shape transChild = (Shape)parent.clone();
-		boolean opsOnly = body.getRepType() == RepElemType.op.getType();
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr) {
+		final AffineTransform dummy = new AffineTransform();
+		final List<AffineTransform> transforms = new ArrayList<>();
+		final List<ASTModification> mods = AST.getTransforms(builder, expHolder, transforms, renderer, false, dummy);
+
+		final Rand64 cloneSeed = renderer.getCurrentSeed();
+		final Shape transChild = (Shape)parent.clone();
+		final boolean opsOnly = body.getRepType() == RepElemType.op.getType();
 		if (opsOnly && !tr) {
 			transChild.getWorldState().getTransform().setToIdentity();
 		}
-		int modsLength = mods.size();
-		int totalLength = modsLength + transforms.size();
+
+		final int modsLength = mods.size();
+		final int totalLength = modsLength + transforms.size();
 		for (int i = 0; i < totalLength; i++) {
-			//TODO revedere
+			final Shape child = (Shape)transChild.clone();
             if (i < modsLength) {
-				mods.get(i).evaluate(transChild.getWorldState(), true, renderer);
+				mods.get(i).evaluate(builder, renderer, child.getWorldState(), true);
 			} else {
-				transChild.getWorldState().getTransform().concatenate(transforms.get(i - modsLength));
+				child.getWorldState().getTransform().concatenate(transforms.get(i - modsLength));
 			}
-			int size = renderer.getStackSize();
+			renderer.getCurrentSeed();
+			final int size = renderer.getStackSize();
 			for (ASTReplacement rep : body.getBody()) {
 				if (clone) {
 					renderer.setCurrentSeed(cloneSeed);
 				}
-				rep.traverse(transChild, tr || opsOnly, renderer);
+				rep.traverse(builder, renderer, child, tr || opsOnly);
 			}
 			renderer.unwindStack(size, body.getParameters());
 		}

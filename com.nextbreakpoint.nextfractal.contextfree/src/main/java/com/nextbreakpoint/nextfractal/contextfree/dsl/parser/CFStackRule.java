@@ -26,8 +26,8 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTUtils;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,9 +35,11 @@ import java.util.List;
 
 @Setter
 @Getter
+@EqualsAndHashCode(callSuper = false)
 public class CFStackRule extends CFStackItem implements Cloneable {
     private int ruleName;
     private int paramCount;
+    private List<ASTParameter> params;
 
     public CFStackRule(CFStack stack, int ruleName, int paramCount) {
         super(stack);
@@ -49,10 +51,7 @@ public class CFStackRule extends CFStackItem implements Cloneable {
         super(rule.getStack());
         this.ruleName = rule.ruleName;
         this.paramCount = rule.paramCount;
-    }
-
-    public Object clone() {
-        return new CFStackRule(stack, ruleName, paramCount);
+        this.params = rule.params;
     }
 
     @Override
@@ -66,29 +65,36 @@ public class CFStackRule extends CFStackItem implements Cloneable {
     }
 
     @Override
-    public void evalArgs(CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential) {
-        ASTUtils.evalArgs(renderer, (CFStackRule)stack.getStackItem(stack.getStackTop()), iterator(), arguments, false);
-    }
-
-    @Override
     protected CFStackIterator iterator() {
         if (paramCount > 0) {
-            return iterator(((CFStackParams)stack.getStackItem(stack.getStackTop() + 1)).getParams());
+            return iterator(((CFStackRule)stack.getStackItem(stack.getStackTop())).getParams());
         }
         return super.iterator();
     }
 
-    public void copyTo(CFStackItem[] dest, int destOffset) {
+    @Override
+    public void evalArgs(CFDGBuilder builder, CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential) {
+        CFStack.evalArgs(builder, renderer, (CFStackRule)stack.getStackItem(stack.getStackTop()), iterator(parameters), arguments, sequential);
+    }
+
+    public void copyParams(CFStackItem[] items, int destOffset) {
         int destIndex = destOffset;
         for (int srcIndex = 0; srcIndex < paramCount; srcIndex++) {
-            switch (stack.getStackItem(srcIndex).getType()) {
+            final CFStackItem item = stack.getStackItem(srcIndex);
+            switch (item.getType()) {
                 case Numeric, Flag, Mod ->
-                        System.arraycopy(stack.getStackItems(), srcIndex, dest, destIndex, stack.getStackItem(srcIndex).getTupleSize());
-                case Rule -> dest[destIndex] = stack.getStackItem(srcIndex);
+                        System.arraycopy(stack.getStackItems(), srcIndex, items, destIndex, item.getTupleSize());
+                case Rule -> items[destIndex] = item;
                 default -> {
                 }
             }
-            destIndex += stack.getStackItem(srcIndex).getTupleSize();
+            destIndex += item.getTupleSize();
         }
+    }
+
+    public Object clone() {
+        final CFStackRule rule = new CFStackRule(stack, ruleName, paramCount);
+        rule.setParams(params !=null ? params.stream().map(p -> new ASTParameter(p.getSystem(), p)).toList() : null);
+        return rule;
     }
 }

@@ -30,7 +30,7 @@ import lombok.Getter;
 public enum CFG {
 	AllowOverlap(0), Alpha(1), Background(2), BorderDynamic(3), BorderFixed(4), Color(5), 
 	ColorDepth(6), Frame(7), FrameTime(8), Impure(9), MaxNatural(10), MaxShapes(11), 
-	MinimumSize(12), Size(13), StartShape(14), Symmetry(15), Tile(16), Time(17);
+	MinimumSize(12), Size(13), StartShape(14), Symmetry(15), Tile(16), Time(17), Unknown(18);
 	
 	private final int ordinal;
 
@@ -44,11 +44,11 @@ public enum CFG {
 
 	public static CFG byName(String name) {
 		for (CFG value : CFG.values()) {
-			if (value.getName().equals(name)) {
+			if (value.getName().equalsIgnoreCase(name)) {
 				return value;
 			}
 		}
-		throw new RuntimeException("unknown parameter " + name);
+		return Unknown;
 	}
 
 	public static CFG fromOrdinal(int ordinal) {
@@ -93,16 +93,22 @@ public enum CFG {
                 return MinimumSize;
             }
             case 13 -> {
-                return StartShape;
+                return Size;
             }
             case 14 -> {
-                return Symmetry;
+                return StartShape;
             }
             case 15 -> {
-                return Tile;
+                return Symmetry;
             }
             case 16 -> {
+                return Tile;
+            }
+            case 17 -> {
                 return Time;
+            }
+            case 18 -> {
+                return Unknown;
             }
         }
 		return null;

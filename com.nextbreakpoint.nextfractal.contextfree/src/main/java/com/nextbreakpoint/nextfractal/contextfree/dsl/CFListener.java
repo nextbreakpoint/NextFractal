@@ -24,20 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
-import lombok.Getter;
-import lombok.ToString;
-
-import java.util.Collections;
-import java.util.List;
-
-@Getter
-@ToString
-public class CFDGParserException extends Exception {
-	private final List<ScriptError> errors;
-
-	public CFDGParserException(String message, List<ScriptError> errors) {
-		super(message);
-		this.errors = Collections.unmodifiableList(errors);
-	}
+public interface CFListener {
+    void draw();
 }

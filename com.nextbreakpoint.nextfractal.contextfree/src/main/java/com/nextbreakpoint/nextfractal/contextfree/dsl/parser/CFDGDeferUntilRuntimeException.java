@@ -24,14 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTWhere;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
 @Getter
 public class CFDGDeferUntilRuntimeException extends RuntimeException {
-	private final Token location;
+	private final ASTWhere where;
 
-	public CFDGDeferUntilRuntimeException(Token location) {
-		this.location = location;
+	public CFDGDeferUntilRuntimeException(ASTWhere where) {
+		this.where = where;
 	}
 }

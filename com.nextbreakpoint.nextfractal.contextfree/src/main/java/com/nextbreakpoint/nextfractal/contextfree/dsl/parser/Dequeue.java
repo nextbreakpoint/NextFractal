@@ -31,7 +31,6 @@ public class Dequeue {
     private final List<CommandInfo> commands = new ArrayList<>();
 
     public void pushBack(CommandInfo commandInfo) {
-        //TODO rivedere
         commands.add(commandInfo);
     }
 
@@ -45,5 +44,9 @@ public class Dequeue {
 
     public void clear() {
         commands.clear();
+    }
+
+    public boolean isEmpty() {
+        return commands.isEmpty();
     }
 }

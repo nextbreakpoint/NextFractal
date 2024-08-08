@@ -24,57 +24,77 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
+
+// astexpression.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2014 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Getter
 public class ASTStartSpecifier extends ASTRuleSpecifier {
-	private ASTModification modification;
-	
-	public ASTStartSpecifier(Token token, CFDGDriver driver, int nameIndex, String name, ASTExpression args, ASTModification mod) {
-		super(token, driver, nameIndex, name, args, null);
-		this.modification = mod;
-	}
-	
-	public ASTStartSpecifier(Token token, CFDGDriver driver, int nameIndex, String name, ASTModification mod) {
-		super(token, driver, nameIndex, name, null, null);
-		this.modification = mod;
-	}
-	
-	public ASTStartSpecifier(Token token, CFDGDriver driver, ASTExpression exp, ASTModification mod) {
-		super(token, driver, exp);
-		this.modification = mod;
-	}
+	private final ASTModification modification;
 
-	public ASTStartSpecifier(ASTRuleSpecifier rule, ASTModification mod) {
-		super(rule.getToken(), rule.driver);
+	public ASTStartSpecifier(CFDGSystem system, ASTWhere where, int nameIndex, String name, ASTExpression args, ASTModification mod) {
+		super(system, where, nameIndex, name, args, null);
+		this.modification = mod;
+	}
+	
+	public ASTStartSpecifier(CFDGSystem system, ASTWhere where, int nameIndex, String name, ASTModification mod) {
+		super(system, where, nameIndex, name, null, null);
+		this.modification = mod;
+	}
+	
+	public ASTStartSpecifier(CFDGSystem system, ASTWhere where, ASTExpression args, ASTModification mod) {
+		super(system, where, args);
 		this.modification = mod;
 	}
 
     @Override
-	public void entropy(StringBuilder e) {
-		e.append(getEntropy());
+	public void entropy(StringBuilder entropy) {
+		entropy.append(getEntropy());
 		if (modification != null) {
-			modification.entropy(e);
+			modification.entropy(entropy);
 		}
 	}
 
 	@Override
-	public ASTExpression simplify() {
-		super.simplify();
-		modification = (ASTModification) simplify(modification);
-		return this;
+	public ASTExpression simplify(CFDGBuilder builder) {
+		super.simplify(builder);
+		if (modification != null) {
+			modification.simplify(builder);
+		}
+		return null;
 	}
 
 	@Override
-	public ASTExpression compile(CompilePhase ph) {
-		//TODO controllare
-		String name = getEntropy();
-		super.compile(ph);
+	public ASTExpression compile(CFDGBuilder builder, CompilePhase phase) {
+		final String name = getEntropy();
+		super.compile(builder, phase);
 		setEntropy(name);
-		modification = (ASTModification) compile(modification, ph);
+		if (modification != null) {
+			modification.compile(builder, phase);
+		}
 		return null;
 	}
 }
