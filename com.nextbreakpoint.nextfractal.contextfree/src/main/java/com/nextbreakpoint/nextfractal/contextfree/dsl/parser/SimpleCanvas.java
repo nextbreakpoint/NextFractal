@@ -195,6 +195,11 @@ public class SimpleCanvas implements CFCanvas {
     }
 
     @Override
+    public boolean hasError() {
+        return false;
+    }
+
+    @Override
     public void end() {
         g2d.dispose();
     }

@@ -31,9 +31,6 @@ import java.lang.foreign.MemorySegment;
 import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_1.AV_CODEC_ID_MPEG2VIDEO;
 import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_2.FF_PROFILE_MPEG2_HIGH;
 
-/**
- * @author Andrea Medeghini
- */
 public class QuicktimeVideoEncoder extends AbstractVideoEncoder {
 	public String getSuffix() {
 		return ".mov";

@@ -68,7 +68,7 @@ public class SimpleExportService extends AbstractExportService {
 
 	@Override
 	protected Collection<ExportSessionHandle> updateInBackground(Collection<ExportSessionHandle> exportHandles) {
-		return exportHandles.stream().map(this::updateSession).filter(ExportSessionHandle::isFinished).collect(Collectors.toList());
+		return exportHandles.stream().map(this::updateSession).filter(ExportSessionHandle::isFinished).toList();
 	}
 
 	@Override

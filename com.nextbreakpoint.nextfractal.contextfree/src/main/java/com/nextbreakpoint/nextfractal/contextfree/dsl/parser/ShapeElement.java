@@ -34,12 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 class ShapeElement {
+	@Getter
+	private final ASTWhere where;
 	@Setter
 	@Getter
 	private List<ASTParameter> parameters = new ArrayList<>();
-	@Setter
-	@Getter
-	private final ASTWhere where;
 	@Setter
 	@Getter
     private String name;

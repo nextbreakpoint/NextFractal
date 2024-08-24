@@ -56,6 +56,7 @@ public class CFParser {
 	public CFParserResult parse(String source) throws CFParserException {
 		//TODO use variation from metadata
 		final int variation = 0;
+		//TODO all errors should be reported correctly
 		return Command.of(() -> parse(source, "CFDG3", variation, ContextFreeParser::cfdg3)).execute()
 				.or(() -> Command.of(() -> parse(source, "CFDG2", variation, ContextFreeParser::cfdg2)).execute())
 				.orThrow(e -> e instanceof CFParserException ? (CFParserException) e : new CFParserException("Failed to parse source", List.of()))
@@ -78,7 +79,7 @@ public class CFParser {
 			parser.setBuilder(builder);
 			callback.accept(parser);
 			if (builder.getMaybeVersion() != null && !version.equals(builder.getMaybeVersion())) {
-				throw new CFParserException("Unexpected version", errors);
+				throw new RuntimeException("Can't parse script using version " + version);
 			}
 			errors.addAll(cfdg.getSystem().getErrors());
 			if (!errors.isEmpty()) {

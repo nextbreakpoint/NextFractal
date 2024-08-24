@@ -90,16 +90,11 @@ import static java.lang.foreign.MemorySegment.NULL;
 public abstract class AbstractVideoEncoder implements Encoder {
 	private EncoderDelegate delegate;
 
-	/**
-	 * @return
-	 */
 	public boolean isVideoSupported() {
 		return true;
 	}
 
-	/**
-	 * @see com.nextbreakpoint.nextfractal.core.encoder.Encoder#setDelegate(com.nextbreakpoint.nextfractal.core.encoder.EncoderDelegate)
-	 */
+	@Override
 	public void setDelegate(EncoderDelegate delegate) {
 		this.delegate = delegate;
 	}
@@ -119,24 +114,15 @@ public abstract class AbstractVideoEncoder implements Encoder {
 		((VideoEncoderHandle) handle).encode(frameIndex, repeatFrameCount, totalFrameCount);
 	}
 
-	/**
-	 * @return
-	 */
 	protected abstract int getCodecID();
 
-	/**
-	 * @return
-	 */
 	protected abstract String getFormatName();
 
-	/**
-	 * @param pCodecContext
-	 */
 	protected abstract void configureCodecContext(MemorySegment pCodecContext);
 
 	private class VideoEncoderHandle implements EncoderHandle {
-		private Arena arena;
-		private EncoderContext context;
+		private final Arena arena;
+		private final EncoderContext context;
 		private MemorySegment pFormatContext;
 		private MemorySegment pCodecContext;
 		private MemorySegment pCodecParams;
@@ -235,7 +221,6 @@ public abstract class AbstractVideoEncoder implements Encoder {
 				AVStream.avg_frame_rate(pStream, pFrameRate);
 				final var pProperties = av_stream_new_side_data(pStream, AV_PKT_DATA_CPB_PROPERTIES(), AVCPBProperties.sizeof());
 				AVCPBProperties.buffer_size(pProperties, frameWidth * frameHeight * bytesPerPixel * 2L);
-//				final var pProperties = av_stream_get_side_data(pStream, AV_PKT_DATA_CPB_PROPERTIES(), NULL);
 				log.info("Session %s: Buffer size %d".formatted(context.getSessionId(), AVCPBProperties.buffer_size(pProperties)));
 				if (avcodec_open2(pCodecContext, pCodec, NULL) != 0) {
 					throw new EncoderException("Can't open encoder");

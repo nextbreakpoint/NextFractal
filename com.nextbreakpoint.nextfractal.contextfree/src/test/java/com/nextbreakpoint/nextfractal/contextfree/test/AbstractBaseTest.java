@@ -48,7 +48,7 @@ import java.util.function.Function;
 public abstract class AbstractBaseTest {
 	protected CFDG parseSource(String resourceName) {
 		return Command.of(() -> parseSource(resourceName, "CFDG3", ContextFreeParser::cfdg3)).execute()
-//				.or(() -> Command.of(() -> parseSource(resourceName, "CFDG2", ContextFreeParser::cfdg2)).execute())
+				.or(() -> Command.of(() -> parseSource(resourceName, "CFDG2", ContextFreeParser::cfdg2)).execute())
 				.optional()
 				.orElseThrow();
 	}

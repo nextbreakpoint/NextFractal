@@ -134,6 +134,11 @@ public class TiledCanvas implements CFCanvas {
         canvas.drawRect(x, y, width, height);
     }
 
+    @Override
+    public boolean hasError() {
+        return canvas.hasError();
+    }
+
     public void setScale(double scale) {
         final AffineTransform t = AffineTransform.getScaleInstance(scale, scale);
 

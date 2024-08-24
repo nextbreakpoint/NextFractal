@@ -43,4 +43,6 @@ public interface CFCanvas {
     void clear(double[] backgroundColor);
 
     void drawRect(double x, double y, double width, double height);
+
+    boolean hasError();
 }

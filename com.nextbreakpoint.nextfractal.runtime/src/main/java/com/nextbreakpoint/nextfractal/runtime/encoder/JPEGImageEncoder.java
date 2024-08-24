@@ -26,9 +26,6 @@ package com.nextbreakpoint.nextfractal.runtime.encoder;
 
 import com.nextbreakpoint.freeimage4java.Libfreeimage;
 
-/**
- * @author Andrea Medeghini
- */
 public class JPEGImageEncoder extends AbstractImageEncoder {
 	public String getSuffix() {
 		return ".jpeg";

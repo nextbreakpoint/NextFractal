@@ -41,7 +41,6 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PrimShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
-import com.nextbreakpoint.nextfractal.contextfree.graphics.Canvas;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -626,14 +625,14 @@ public class CFDGRenderer {
 		return currScale;
 	}
 
-	public void draw(Canvas canvas) {
+	public void draw(CFCanvas canvas) {
 		frameTimeBounds = AffineTransformTime.getTranslateInstance(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		outputPrep(canvas);
 		outputFinal();
 		outputStats();
 	}
 
-	public void animate(Canvas canvas, int frames, int frame, boolean zoom) {
+	public void animate(CFCanvas canvas, int frames, int frame, boolean zoom) {
 		if (canvas != null) {
 			canvas.clear(cfdg.getBackgroundColor());
 		}
@@ -727,7 +726,7 @@ public class CFDGRenderer {
 				cleanup();
 			}
 
-			if (canvas.error()) {
+			if (canvas.hasError()) {
 				cfdg.getSystem().error(String.format("An error occurred generating frame %d", frame), null);
 			}
 

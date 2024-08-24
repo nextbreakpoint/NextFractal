@@ -42,13 +42,13 @@ public class V3ShapeTest extends AbstractBaseTest {
 	public static final String RESOURCE_NAME = "/v3-shape-single-rule.cfdg";
 
 	@Test
-	public void shouldParseSource() throws IOException {
+	public void shouldParseSource() {
 		CFDG cfdg = parseSource(RESOURCE_NAME);
 		assertThat(cfdg).isNotNull();
 	}
 
 	@Test
-	public void shouldHaveTwoShapes() throws IOException {
+	public void shouldHaveTwoShapes() {
 		CFDG cfdg = parseSource(RESOURCE_NAME);
 		assertThat(cfdg.tryEncodeShapeName("Foo")).isEqualTo(4);
 		assertThat(cfdg.tryEncodeShapeName("CIRCLE")).isEqualTo(0);
@@ -57,7 +57,7 @@ public class V3ShapeTest extends AbstractBaseTest {
 	}
 
 	@Test
-	public void shouldReloadRules() throws IOException {
+	public void shouldReloadRules() {
 		CFDG cfdg = parseSource(RESOURCE_NAME);
 		assertThat(cfdg.getContents().getBody()).hasSize(2);
 		assertThat(cfdg.numRules()).isEqualTo(1);
@@ -67,7 +67,7 @@ public class V3ShapeTest extends AbstractBaseTest {
 	}
 
 	@Test
-	public void shouldReturnScale() throws IOException {
+	public void shouldReturnScale() {
 		SimpleCanvas canvas = mock(SimpleCanvas.class);
 		when(canvas.getWidth()).thenReturn(200);
 		when(canvas.getHeight()).thenReturn(200);
@@ -80,7 +80,7 @@ public class V3ShapeTest extends AbstractBaseTest {
 	}
 
 	@Test
-	public void shouldCallPrimitive() throws IOException {
+	public void shouldCallPrimitive() {
 		SimpleCanvas canvas = mock(SimpleCanvas.class);
 		when(canvas.getWidth()).thenReturn(200);
 		when(canvas.getHeight()).thenReturn(200);

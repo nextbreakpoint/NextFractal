@@ -54,9 +54,6 @@ public abstract class AbstractImageEncoder implements Encoder {
 		FreeImage_Initialise(TRUE());
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isVideoSupported() {
 		return false;
 	}
@@ -80,14 +77,8 @@ public abstract class AbstractImageEncoder implements Encoder {
 		((ImageEncoderHandle) handle).encode();
 	}
 
-	/**
-	 * @return
-	 */
 	protected abstract int getFormat();
 
-	/**
-	 * @return
-	 */
 	protected boolean isAlphaSupported() {
 		return false;
 	}
@@ -107,8 +98,8 @@ public abstract class AbstractImageEncoder implements Encoder {
 
 		public void encode() throws EncoderException {
 			try (var arena = Arena.ofConfined()) {
+				final int channels = isAlphaSupported() ? 4 : 3;
 				long time = System.currentTimeMillis();
-				int channels = isAlphaSupported() ? 4 : 3;
 				var pBitmap = NULL;
 				try {
 					pBitmap = FreeImage_Allocate(context.getImageWidth(), context.getImageHeight(), channels * 8, 0x00FF0000, 0x0000FF00, 0x000000FF);
@@ -118,7 +109,7 @@ public abstract class AbstractImageEncoder implements Encoder {
 						int j = y * context.getImageWidth();
 						for (int x = 0; x < context.getImageWidth(); x++) {
 							int i = (j + x) * channels;
-							tagRGBQUAD.rgbRed(value, (data[i + 0]));
+							tagRGBQUAD.rgbRed(value, (data[i]));
 							tagRGBQUAD.rgbGreen(value, (data[i + 1]));
 							tagRGBQUAD.rgbBlue(value, (data[i + 2]));
 							if (isAlphaSupported()) {

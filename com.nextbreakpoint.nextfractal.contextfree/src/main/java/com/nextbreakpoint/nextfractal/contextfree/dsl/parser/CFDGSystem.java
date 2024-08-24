@@ -62,7 +62,6 @@ public class CFDGSystem {
 	public void fail(String message) {
 		errorOccurred = true;
 		log.log(Level.SEVERE, message);
-//		throw new RuntimeException(message);
 	}
 
 	private static ScriptError makeError(long line, long charPositionInLine, long index, long length, String message) {

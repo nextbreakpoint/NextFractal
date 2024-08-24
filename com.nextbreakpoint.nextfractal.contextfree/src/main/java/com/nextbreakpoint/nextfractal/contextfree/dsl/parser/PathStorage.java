@@ -82,6 +82,7 @@ public class PathStorage implements Cloneable {
 		currentPath.lineTo((float)point.x, (float)point.y);
 	}
 
+	//TODO remove
 //	public void arcTo(double radiusX, double radiusY, double angle, boolean largeArc, boolean sweep, Point2D.Double point) {
 //		vertices.add(new Vertex(point, 3));
 //		currentPath.arcTo((float)radiusX, (float)radiusY, (float)angle, largeArc, sweep, (float)point.x, (float)point.y);

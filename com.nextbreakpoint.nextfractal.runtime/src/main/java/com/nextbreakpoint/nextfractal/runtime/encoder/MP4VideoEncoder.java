@@ -31,9 +31,6 @@ import java.lang.foreign.MemorySegment;
 import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_1.AV_CODEC_ID_MPEG4;
 import static com.nextbreakpoint.ffmpeg4java.Libffmpeg_2.FF_PROFILE_MPEG4_MAIN;
 
-/**
- * @author Andrea Medeghini
- */
 public class MP4VideoEncoder extends AbstractVideoEncoder {
 	public String getSuffix() {
 		return ".mp4";

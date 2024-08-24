@@ -43,6 +43,7 @@ import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_LINETO;
 import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_MOVETO;
 import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_QUADTO;
 
+//TODO replace SimpleCanvas with Canvas
 public class Canvas implements CFCanvas {
     private final GraphicsContext context;
     private final GraphicsFactory factory;
@@ -211,6 +212,13 @@ public class Canvas implements CFCanvas {
     }
 
     @Override
+    public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
+        normTransform = factory.createTranslateAffineTransform(0, getHeight());
+        normTransform.append(factory.createScaleAffineTransform(1, -1));
+        normTransform.append(factory.createTranslateAffineTransform(-(currWidth - getWidth()) / 2f, -(currHeight - getHeight()) / 2f));
+    }
+
+    @Override
     public void clear(double[] backgroundColor) {
         Color c = factory.createColor((float) backgroundColor[0], (float) backgroundColor[1], (float) backgroundColor[2], (float) backgroundColor[3]);
         context.setFill(c);
@@ -219,20 +227,15 @@ public class Canvas implements CFCanvas {
 
     @Override
     public void drawRect(double x, double y, double width, double height) {
+        //TODO implement drawRect
     }
 
     @Override
-    public void start(boolean first, double[] backgroundColor, int currWidth, int currHeight) {
-        normTransform = factory.createTranslateAffineTransform(0, getHeight());
-        normTransform.append(factory.createScaleAffineTransform(1, -1));
-        normTransform.append(factory.createTranslateAffineTransform(-(currWidth - getWidth()) / 2f, -(currHeight - getHeight()) / 2f));
+    public boolean hasError() {
+        return false;
     }
 
     @Override
     public void end() {
-    }
-
-    public boolean error() {
-        return false;
     }
 }
