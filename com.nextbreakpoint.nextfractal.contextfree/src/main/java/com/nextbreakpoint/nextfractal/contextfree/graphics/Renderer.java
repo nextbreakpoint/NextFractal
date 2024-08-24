@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGHandle;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFHandle;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
@@ -77,7 +77,7 @@ public class Renderer {
 	protected List<ScriptError> errors = new ArrayList<>();
 	private Future<?> future;
 	private CFDGImage cfdgImage;
-	private CFDGHandle cfdgHandle;
+	private CFHandle cfdgHandle;
 	private String cfdgSeed;
 	private final RenderRunnable renderTask = new RenderRunnable();
 	private final ExecutorService executor;

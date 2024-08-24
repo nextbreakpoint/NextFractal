@@ -1,8 +1,8 @@
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
@@ -36,15 +36,15 @@ public class ContextFreeParserStrategy implements ParserStrategy {
 
     private ParserResult createParserResult(Session session) {
         try {
-            final CFDGParser parser = new CFDGParser();
-            final CFDGParserResult parserResult = parser.parse(session.script());
+            final CFParser parser = new CFParser();
+            final CFParserResult parserResult = parser.parse(session.script());
             return new ParserResult(session, List.of(), computeHighlighting(session.script()), parserResult);
-        } catch (CFDGParserException e) {
-            final CFDGParserResult parserResult = new CFDGParserResult(session.script(), null);
+        } catch (CFParserException e) {
+            final CFParserResult parserResult = new CFParserResult(session.script(), null);
             return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), parserResult);
         } catch (Exception e) {
             final List<ScriptError> errors = List.of(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
-            final CFDGParserResult parserResult = new CFDGParserResult(session.script(), null);
+            final CFParserResult parserResult = new CFParserResult(session.script(), null);
             return new ParserResult(session, errors, computeHighlighting(session.script()), parserResult);
         }
     }

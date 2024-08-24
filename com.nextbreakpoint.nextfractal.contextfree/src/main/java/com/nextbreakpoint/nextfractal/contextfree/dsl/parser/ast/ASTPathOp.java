@@ -24,17 +24,39 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
 import java.awt.geom.AffineTransform;
+
+// astreplacement.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 public class ASTPathOp extends ASTReplacement {
 	private ASTExpression arguments;
@@ -44,132 +66,146 @@ public class ASTPathOp extends ASTReplacement {
 	@Getter
     private long flags;
 	
-	public ASTPathOp(Token token, CFDGDriver driver, String op, ASTModification args) {
-		super(token, driver, op);
+	public ASTPathOp(CFDGSystem system, ASTWhere where, String op, ASTModification args) {
+		super(system, where, op);
 		this.arguments = null;
 		this.oldStyleArguments = args;
 		this.argCount = 0;
 		this.flags = 0;
 	}
 
-	public ASTPathOp(Token token, CFDGDriver driver, String op, ASTExpression args) {
-		super(token, driver, op);
+	public ASTPathOp(CFDGSystem system, ASTWhere where, String op, ASTExpression args) {
+		super(system, where, op);
 		this.arguments = args;
 		this.oldStyleArguments = null;
 		this.argCount = 0;
 		this.flags = 0;
 	}
 
-	public ASTExpression getArguments() {
-		return arguments != null ? arguments : oldStyleArguments;
-	}
-
     @Override
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr) {
 		if (renderer.getCurrentPath().isCached()) {
 			return;
 		}
-		double[] opData = new double[7];
-		pushData(opData, renderer);
+		final double[] opData = new double[6];
+		pushData(builder, renderer, opData);
 		renderer.getCurrentPath().addPathOp(this, opData, parent, tr, renderer);
 	}
 
 	@Override
-	public void compile(CompilePhase ph) {
-		super.compile(ph);
-		arguments = compile(arguments, ph);
+	public void compile(CFDGBuilder builder, CompilePhase phase) {
+		super.compile(builder, phase);
+		arguments = ASTExpression.compile(builder, phase, arguments);
 
 		if (oldStyleArguments != null) {
-			oldStyleArguments.compile(ph);
+			oldStyleArguments.compile(builder, phase);
 		}
-        switch (ph) {
+
+        switch (phase) {
             case TypeCheck -> {
                 if (oldStyleArguments != null) {
-                    makePositional();
+                    makePositional(builder);
                 } else {
-                    checkArguments();
+                    checkArguments(builder);
                 }
             }
             case Simplify -> {
-                pathDataConst();
-                arguments = simplify(arguments);
+                arguments = ASTExpression.simplify(builder, arguments);
+                pathDataConst(builder);
             }
             default -> {
             }
         }
 	}
 
-	private void pushData(double[] opData, CFDGRenderer renderer) {
+	private void pushData(CFDGBuilder builder, CFDGRenderer renderer, double[] opData) {
 		if (arguments != null) {
-			if (arguments.evaluate(opData, 7, renderer) < 0) {
-				driver.error("Can't evaluate arguments", getToken());
+			if (arguments.evaluate(builder, renderer, opData, 6) < 0) {
+				system.error("Can't evaluate arguments", getWhere());
 			}
 		} else {
 			getChildChange().getModData().getTransform().getMatrix(opData);
 		}
 	}
 
-	private void pathDataConst() {
+	private void pathDataConst(CFDGBuilder builder) {
 		if (arguments != null && arguments.isConstant()) {
-			double[] data = new double[7];
-			if (arguments.evaluate(data, 7) < 0) {
-				driver.error("Can't evaluate arguments", getToken());
+			final double[] data = new double[6];
+			if (arguments.evaluate(builder, data, 6) < 0) {
+				system.error("Can't evaluate arguments", getWhere());
 			}
 			arguments = null;
 			getChildChange().getModData().setTransform(new AffineTransform(data));
 		}
 	}
 
-	private void checkArguments() {
+	private void checkArguments(CFDGBuilder builder) {
 		if (arguments != null) {
-			argCount = arguments.evaluate(null, 0);
+			argCount = arguments.evaluate(builder, null, 0);
 		}
-		
+
+		ASTExpression flag = null;
 		for (int i = 0; arguments != null && i < arguments.size(); i++) {
-			ASTExpression temp = arguments.getChild(i);
-            switch (temp.getType()) {
+			final ASTExpression arg = arguments.getChild(i);
+            switch (arg.getType()) {
                 case Flag -> {
-                    if (i != arguments.size() - 1) {
-                        driver.error("Flags must be the last argument", getToken());
-                    }
-                    if (temp instanceof ASTReal rf) {
-                        flags |= (int) rf.getValue();
-                    } else {
-                        driver.error("Flag expressions must be constant", getToken());
-                    }
+					if (flag != null) {
+						system.error("There can only be one flag argument", getWhere());
+					}
+					flag = arg;
+					double[] value = new double[1];
+					if (!arg.isConstant() || arg.evaluate(builder, value, 1) != 1) {
+						system.error("Flag expressions must be constant", getWhere());
+					}
+					flags |= (long) value[0];
                     argCount--;
                 }
                 case Numeric -> {
+					if (flag != null) {
+						system.error("Flags must be the last argument", getWhere());
+						flag = null;
+					}
                 }
-                default -> driver.error("Path operation arguments must be numeric expressions or flags", getToken());
+                default -> system.error("Path operation arguments must be numeric expressions or flags", getWhere());
             }
 		}
 
         switch (getPathOp()) {
             case LINETO, LINEREL, MOVETO, MOVEREL -> {
+				if (flags != 0) {
+					system.error("No flags can be used with this operation", getWhere());
+				}
                 if (argCount != 2) {
-                    driver.error("Move/line path operation requires two arguments", getToken());
+                    system.error("Move/line path operation requires two arguments", getWhere());
                 }
             }
             case ARCTO, ARCREL -> {
+				if ((flags & ~(FlagType.CF_ARC_CW.getMask() | FlagType.CF_ARC_LARGE.getMask())) != 0) {
+					system.error("Only CF::ArcCW and CF::ArcLarge flags can be used with this operation", getWhere());
+				}
                 if (argCount != 3 && argCount != 5) {
-                    driver.error("Arc path operations require three or five arguments", getToken());
+                    system.error("Arc path operations require three or five arguments", getWhere());
                 }
             }
             case CURVETO, CURVEREL -> {
-                if ((flags & FlagType.CF_CONTINUOUS.getMask()) != 0) {
-                    if (argCount != 2 && argCount != 4) {
-                        driver.error("Continuous curve path operations require two or four arguments", getToken());
-                    }
-                } else {
-                    if (argCount != 4 && argCount != 6) {
-                        driver.error("Non-continuous curve path operations require four or six arguments", getToken());
-                    }
-                }
+                if ((flags & ~FlagType.CF_CONTINUOUS.getMask()) != 0) {
+					system.error("Only CF::Continuous flag can be used with this operation", getWhere());
+				} else if ((flags & FlagType.CF_CONTINUOUS.getMask()) != 0) {
+					if (argCount != 2 && argCount != 4) {
+						system.error("Continuous curve path operations require two or four arguments", getWhere());
+					}
+				} else {
+					if (argCount != 4 && argCount != 6) {
+						system.error("Non-continuous curve path operations require four or six arguments", getWhere());
+					}
+				}
             }
             case CLOSEPOLY -> {
+				if ((flags & ~FlagType.CF_ALIGN.getMask()) != 0) {
+					system.error("Only CF::Align flag can be used with this operation", getWhere());
+				}
                 if (argCount > 0) {
-                    driver.error("CLOSEPOLY takes no arguments, only flags", getToken());
+                    system.error("CLOSEPOLY takes no arguments, only flags", getWhere());
                 }
             }
             default -> {
@@ -177,13 +213,18 @@ public class ASTPathOp extends ASTReplacement {
         }
 	}
 
-	private void makePositional() {
-		long[] value = new long[1];
-		ASTExpression w = ASTUtils.getFlagsAndStroke(driver, oldStyleArguments.getModExp(), value);
-		flags = value[0];
-		if (w != null) {
-			driver.error("Stroke width not allowed in a path operation", w.getToken());
+	private void makePositional(CFDGBuilder builder) {
+		if (oldStyleArguments == null) {
+			system.error("Path operation arguments missing", getWhere());
+			return;
 		}
+
+		final long[] value = new long[1];
+		final ASTExpression w = AST.getFlagsAndStroke(system, oldStyleArguments.getModExp(), value);
+		if (w != null) {
+			system.error("Stroke width not allowed in a path operation", w.getWhere());
+		}
+		flags = value[0];
 
 		ASTExpression ax = null;
 		ASTExpression ay = null;
@@ -206,44 +247,41 @@ public class ASTPathOp extends ASTReplacement {
                 case xrad -> arx = acquireTerm(arx, term);
                 case yrad -> ary = acquireTerm(ary, term);
                 case rotate -> ar = acquireTerm(ar, term);
-                case z, zsize -> driver.error("Z changes are not permitted in paths", term.getToken());
-                case unknown -> driver.error("Unrecognized element in a path operation", term.getToken());
-                default -> driver.error("Unrecognized element in a path operation", term.getToken());
+                case z, zsize -> system.error("Z changes are not permitted in paths", term.getWhere());
+                default -> system.error("Unrecognized element in a path operation", term.getWhere());
             }
 		}
 
 		ASTExpression xy = null;
 		if (getPathOp() != PathOp.CLOSEPOLY) {
-			xy = parseXY(ax, ay, 0.0, getToken());
+			xy = parseXY(builder, ax, ay, 0.0, getWhere());
 			ax = null;
 			ay = null;
 		}
-
-		//TODO controllare
 
         switch (getPathOp()) {
             case LINETO, LINEREL, MOVETO, MOVEREL -> arguments = xy;
             case ARCTO, ARCREL -> {
                 if (arx != null && ary != null) {
-                    ASTExpression rxy = parseXY(arx, ary, 1.0, getToken());
+					final ASTExpression rxy = parseXY(builder, arx, ary, 1.0, getWhere());
                     arx = null;
                     ary = null;
                     ASTExpression angle = ar;
                     if (angle == null) {
-                        angle = new ASTReal(getToken(), driver, 0.0);
+                        angle = new ASTReal(system, getWhere(), 0.0);
                     }
-                    if (angle.getType() != ExpType.Numeric || angle.evaluate(null, 0) != 1) {
-                        driver.error("Arc angle must be a scalar value", angle.getToken());
+                    if (angle.getType() != ExpType.Numeric || angle.evaluate(builder, null, 0) != 1) {
+                        system.error("Arc angle must be a scalar value", angle.getWhere());
                     }
                     arguments = xy.append(rxy).append(angle);
                 } else {
                     ASTExpression radius = ar;
                     ar = null;
                     if (radius == null) {
-                        radius = new ASTReal(getToken(), driver, 1.0);
+                        radius = new ASTReal(system, getWhere(), 1.0);
                     }
-                    if (radius.getType() != ExpType.Numeric || radius.evaluate(null, 0) != 1) {
-                        driver.error("Arc radius must be a scalar value", radius.getToken());
+                    if (radius.getType() != ExpType.Numeric || radius.evaluate(builder, null, 0) != 1) {
+                        system.error("Arc radius must be a scalar value", radius.getWhere());
                     }
                     arguments = xy.append(radius);
                 }
@@ -252,12 +290,12 @@ public class ASTPathOp extends ASTReplacement {
                 ASTExpression xy1 = null;
                 ASTExpression xy2 = null;
                 if (ax1 != null || ay1 != null) {
-                    xy1 = parseXY(ax1, ay1, 0.0, getToken());
+                    xy1 = parseXY(builder, ax1, ay1, 0.0, getWhere());
                 } else {
                     flags |= FlagType.CF_CONTINUOUS.getMask();
                 }
                 if (ax2 != null || ay2 != null) {
-                    xy2 = parseXY(ax2, ay2, 0.0, getToken());
+                    xy2 = parseXY(builder, ax2, ay2, 0.0, getWhere());
                 }
                 ax1 = null;
                 ay1 = null;
@@ -282,47 +320,46 @@ public class ASTPathOp extends ASTReplacement {
 		rejectTerm(ax2);
 		rejectTerm(ay2);
 
-		argCount = arguments != null ? arguments.evaluate(null, 0) : 0;
+		argCount = arguments != null ? arguments.evaluate(builder, null, 0) : 0;
 		oldStyleArguments = null;
 	}
 
 	private ASTExpression acquireTerm(ASTExpression exp, ASTModTerm term) {
 		if (exp != null) {
-			driver.error("Duplicate argument", exp.getToken());
-			driver.error("Conflicts with this argument", term.getToken());
+			system.error("Duplicate argument", exp.getWhere());
+			system.error("Conflicts with this argument", term.getWhere());
 		}
 		return term.getArguments();
 	}
 
 	private void rejectTerm(ASTExpression exp) {
 		if (exp != null) {
-			driver.error("Illegal argument", exp.getToken());
+			system.error("Illegal argument", exp.getWhere());
 		}
 	}
 
-	private ASTExpression parseXY(ASTExpression ax, ASTExpression ay, double def, Token token) {
-		//TODO controllare
+	private ASTExpression parseXY(CFDGBuilder builder, ASTExpression ax, ASTExpression ay, double def, ASTWhere where) {
 		if (ax == null) {
-			ax = new ASTReal(token, driver, def);
+			ax = new ASTReal(system, where, def);
 		}
 		int sz = 0;
 		if (ax.getType() == ExpType.Numeric) {
-			sz = ax.evaluate(null, 0);
+			sz = ax.evaluate(builder, null, 0);
 		} else {
-			driver.error("Path argument must be a scalar value", ax.getToken());
+			system.error("Path argument must be a scalar value", ax.getWhere());
 		}
 		if (sz == 1 && ay == null) {
-			ay = new ASTReal(token, driver, def);
+			ay = new ASTReal(system, where, def);
 		}
 		if (ay != null && sz >= 0) {
 			if (ay.getType() == ExpType.Numeric) {
-				sz += ay.evaluate(null, 0);
+				sz += ay.evaluate(builder, null, 0);
 			} else {
-				driver.error("Path argument must be a scalar value", ay.getToken());
+				system.error("Path argument must be a scalar value", ay.getWhere());
 			}
 		}
 		if (sz != 2) {
-			driver.error("Error parsing path operation arguments", token);
+			system.error("Error parsing path operation arguments", where);
 		}
 		return ax.append(ay);
 	}

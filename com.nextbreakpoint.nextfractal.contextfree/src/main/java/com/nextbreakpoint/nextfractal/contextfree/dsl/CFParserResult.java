@@ -24,6 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-public interface CFDGListener {
-    void partialDraw();
-}
+import com.nextbreakpoint.nextfractal.core.common.ClassFactory;
+
+public record CFParserResult(String source, ClassFactory<CFDGImage> classFactory) {}

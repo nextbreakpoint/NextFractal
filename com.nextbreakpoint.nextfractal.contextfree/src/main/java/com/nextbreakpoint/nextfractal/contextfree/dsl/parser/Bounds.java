@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.core;
+package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FlagType;
 import lombok.Getter;
@@ -38,6 +38,32 @@ import java.awt.geom.Rectangle2D;
 import static java.awt.geom.PathIterator.SEG_CLOSE;
 import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
+
+// bounds.cpp
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2006-2007 Mark Lentczner - markl@glyphic.com
+// Copyright (C) 2006-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
+//
+// Mark Lentczner can be contacted at markl@glyphic.com or at
+// Mark Lentczner, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Setter
 @Getter
@@ -73,9 +99,9 @@ public class Bounds {
     }
 
     private boolean boundingRect(AffineTransform transform, java.awt.Shape path, double scale, long flags, double strokeWidth) {
-        double accuracy = scale * 0.1;
+        final double accuracy = scale * 0.1;
 
-        Rectangle2D bounds = getRectangle2D(transform, path, accuracy);
+        final Rectangle2D bounds = getRectangle2D(transform, path, accuracy);
 
         if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             minX = bounds.getMinX();
@@ -83,14 +109,14 @@ public class Bounds {
             maxX = bounds.getMaxX();
             maxY = bounds.getMaxY();
         } else if ((flags & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
-            double pathScale = Math.sqrt(Math.abs(transform.getDeterminant()));
-            double v = strokeWidth * pathScale / 2;
+            final double pathScale = Math.sqrt(Math.abs(transform.getDeterminant()));
+            final double v = strokeWidth * pathScale / 2;
             minX = bounds.getMinX() - v;
             minY = bounds.getMinY() - v;
             maxX = bounds.getMaxX() + v;
             maxY = bounds.getMaxY() + v;
         } else {
-            double v = strokeWidth / 2;
+            final double v = strokeWidth / 2;
             minX = bounds.getMinX() - v;
             minY = bounds.getMinY() - v;
             maxX = bounds.getMaxX() + v;
@@ -101,7 +127,7 @@ public class Bounds {
     }
 
     private Rectangle2D getRectangle2D(AffineTransform transform, Shape path, double accuracy) {
-        double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
+        final double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
 
         double minX = 1;
         double minY = 1;
@@ -109,7 +135,7 @@ public class Bounds {
         double maxY = 0;
         boolean first = true;
 
-        double[] coords = new double[2];
+        final double[] coords = new double[2];
 
         for (PathIterator iterator = path.getPathIterator(transform, accuracy * scale); !iterator.isDone(); iterator.next()) {
             switch (iterator.currentSegment(coords)) {
@@ -154,9 +180,9 @@ public class Bounds {
     }
 
     public Bounds interpolate(Bounds other, double alpha) {
-        double beta = 1.0 - alpha;
+        final double beta = 1.0 - alpha;
 
-        Bounds bounds = new Bounds();
+        final Bounds bounds = new Bounds();
 
         if (!valid() || !other.valid()) return bounds;
 
@@ -169,9 +195,9 @@ public class Bounds {
     }
 
     public Bounds dilate(double dilation) {
-        Bounds bounds = new Bounds();
+        final Bounds bounds = new Bounds();
 
-        Point2D.Double center = new Point2D.Double((minX + maxX) * 0.5, (minY + maxY) * 0.5);
+        final Point2D.Double center = new Point2D.Double((minX + maxX) * 0.5, (minY + maxY) * 0.5);
 
         bounds.minX = dilation * (minX - center.x) + center.x;
         bounds.maxX = dilation * (maxX - center.x) + center.x;
@@ -182,15 +208,15 @@ public class Bounds {
     }
 
     public Bounds slewCenter(Bounds other, double alpha) {
-        Bounds bounds = new Bounds();
+        final Bounds bounds = new Bounds();
 
         if (!valid() || !other.valid()) return bounds;
 
-        double offsetX = alpha * ((other.maxX + other.minX) - (maxX + minX)) / 2.0;
-        double offsetY = alpha * ((other.maxY + other.minY) - (maxY + minY)) / 2.0;
+        final double offsetX = alpha * ((other.maxX + other.minX) - (maxX + minX)) / 2.0;
+        final double offsetY = alpha * ((other.maxY + other.minY) - (maxY + minY)) / 2.0;
 
-        double absX = Math.abs(offsetX);
-        double absY = Math.abs(offsetY);
+        final double absX = Math.abs(offsetX);
+        final double absY = Math.abs(offsetY);
 
         bounds.maxX = maxX + absX + offsetX;
         bounds.minX = minX - absX + offsetX;
@@ -217,13 +243,13 @@ public class Bounds {
     }
 
     public double computeScale(int[] width, int[] height, double borderX, double borderY, boolean modify, AffineTransform transform, boolean exact) {
-        double scale = 0;
+        double scale;
 
         double virtualWidth = maxX - minX;
         double virtualHeight = maxY - minY;
 
-        double targetWidth = width[0] - 2.0 * borderX;
-        double targetHeight = height[0] - 2.0 * borderY;
+        final double targetWidth = width[0] - 2.0 * borderX;
+        final double targetHeight = height[0] - 2.0 * borderY;
 
         if (!valid()) virtualWidth = virtualHeight = 1.0;
 
@@ -253,8 +279,8 @@ public class Bounds {
         }
 
         if (transform != null) {
-            double offsetX = scale * (maxX + minX) / 2.0 - newWidth / 2.0;
-            double offsetY = scale * (maxY + minY) / 2.0 - newHeight / 2.0;
+            final double offsetX = scale * (maxX + minX) / 2.0 - newWidth / 2.0;
+            final double offsetY = scale * (maxY + minY) / 2.0 - newHeight / 2.0;
             transform.setToScale(scale, scale);
             transform.preConcatenate(AffineTransform.getTranslateInstance(-offsetX, -offsetY));
         }

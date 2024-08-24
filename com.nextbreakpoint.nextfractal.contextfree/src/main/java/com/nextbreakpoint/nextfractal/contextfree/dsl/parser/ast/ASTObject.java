@@ -24,19 +24,19 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGToken;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
+import lombok.Setter;
 
 @Getter
 public abstract class ASTObject {
-	private final Token token;
+	protected final CFDGSystem system;
 
-	public ASTObject(Token token) {
-		this.token = token;
-	}
+	@Setter
+	protected ASTWhere where;
 
-	public CFDGToken getLocation() {
-		return new CFDGToken(toString(), token.getLine(), token.getCharPositionInLine(), token.getStartIndex(), token.getStopIndex(), token.getText());
+	public ASTObject(CFDGSystem system, ASTWhere where) {
+		this.system = system;
+		this.where = where;
 	}
 }

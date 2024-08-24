@@ -24,8 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 public class CFStackModification extends CFStackItem {
@@ -44,5 +48,10 @@ public class CFStackModification extends CFStackItem {
     @Override
     public int getTupleSize() {
         return 1;
+    }
+
+    @Override
+    public void evalArgs(CFDGBuilder builder, CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential) {
+        CFStack.evalArgs(builder, renderer, null, iterator(parameters), arguments, sequential);
     }
 }

@@ -24,157 +24,156 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGStopException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackRule;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.PrimShape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ArgSource;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PrimShapeType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
+// astreplacement.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
+
+@Getter
 public class ASTReplacement extends ASTObject {
-	@Getter
-    private final ASTRuleSpecifier shapeSpecifier;
-	@Getter
-    private ASTModification childChange;
+	private final ASTRuleSpecifier shapeSpecifier;
+	private final ASTModification childChange;
 	@Setter
-    @Getter
     private RepElemType repType;
 	@Setter
-    @Getter
     private PathOp pathOp;
-	protected CFDGDriver driver;
 
-	public ASTReplacement(Token token, CFDGDriver driver, ASTRuleSpecifier shapeSpecifier, ASTModification childChange, RepElemType repType) {
-		super(token);
-		this.driver = driver;
+	public ASTReplacement(CFDGSystem system, ASTWhere where, ASTRuleSpecifier shapeSpecifier, ASTModification mods, RepElemType repType) {
+		super(system, where);
 		this.repType = repType;
 		this.shapeSpecifier = shapeSpecifier;
 		this.pathOp = PathOp.UNKNOWN;
-		this.childChange = childChange;
-		if (this.childChange == null) {
-			this.childChange = new ASTModification(token, driver);
+		if (mods != null) {
+			childChange = mods;
+		} else {
+			childChange = new ASTModification(system, getWhere());
 		}
 	}
 
-	public ASTReplacement(Token token, CFDGDriver driver, ASTModification childChange, RepElemType repType) {
-		this(token, driver, new ASTRuleSpecifier(token, driver), childChange, repType);
+	public ASTReplacement(CFDGSystem system, ASTWhere where, ASTModification mod, RepElemType repType) {
+		this(system, where, new ASTRuleSpecifier(system, where), mod, repType);
 	}
 
-//	public ASTReplacement(Token token, CFDGDriver driver, ASTModification childChange) {
-//		this(token, driver, new ASTRuleSpecifier(token, driver), childChange, RepElemType.replacement);
-//	}
-
-	public ASTReplacement(Token token, CFDGDriver driver, String name) {
-		this(token, driver, new ASTRuleSpecifier(token, driver), new ASTModification(token, driver), RepElemType.op);
+	public ASTReplacement(CFDGSystem system, ASTWhere where, String name) {
+		this(system, where, new ASTRuleSpecifier(system, where), new ASTModification(system, where), RepElemType.op);
 		this.pathOp = PathOp.byName(name);
 		if (this.pathOp == PathOp.UNKNOWN) {
-			driver.error("Unknown path operation type", token);
+			system.error("Unknown path operation type", where);
 		}
 	}
 
-	public ASTReplacement(ASTReplacement replacement) {
-		this(replacement.getToken(), replacement.driver, replacement.getShapeSpecifier(), replacement.getChildChange(), replacement.getRepType());
-		this.pathOp = replacement.getPathOp();
-	}
-
-    public void replace(Shape s, CFDGRenderer renderer) {
+    public void replace(CFDGBuilder builder, CFDGRenderer renderer, Shape shape) {
 		if (shapeSpecifier.getArgSource() == ArgSource.NoArgs) {
-			s.setShapeType(shapeSpecifier.getShapeType());
-			s.setParameters(null);
+			shape.setShapeType(shapeSpecifier.getShapeType());
+			shape.setParameters(null);
 		} else {
-			s.setParameters(shapeSpecifier.evalArgs(renderer, s.getParameters()));
-			CFStackRule stackRule = s.getParameters();
+			shape.setParameters(shapeSpecifier.evalArgs(builder, renderer, shape.getParameters()));
+			final CFStackRule stackRule = shape.getParameters();
 			if (shapeSpecifier.getArgSource() == ArgSource.SimpleParentArgs) {
-				s.setShapeType(shapeSpecifier.getShapeType());
+				shape.setShapeType(shapeSpecifier.getShapeType());
 			} else {
-				s.setShapeType(stackRule.getRuleName());
+				shape.setShapeType(stackRule.getRuleName());
 			}
 			if (stackRule != null && stackRule.getParamCount() == 0) {
-				s.setParameters(null);
+				shape.setParameters(null);
 			}
 		}
 		renderer.getCurrentSeed().add(childChange.getModData().getRand64Seed());
-		childChange.evaluate(s.getWorldState(), true, renderer);
-		s.setAreaCache(s.getWorldState().area());
+		//TODO do we need to call getCurrentSeed?
+		renderer.getCurrentSeed();
+		childChange.evaluate(builder, renderer, shape.getWorldState(), true);
+		shape.setAreaCache(shape.getWorldState().area());
 	}
 
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr) {
 		Shape child = (Shape)parent.clone();
 		switch (repType) {
 			case replacement:
-				replace(child, renderer);
+				replace(builder, renderer, child);
 				child.getWorldState().setRand64Seed(renderer.getCurrentSeed());
 				renderer.processShape(child);
 				break;
 			case op:
 				if (!tr) child.getWorldState().getTransform().setToIdentity();
+				// fall through
 			case mixed:
 			case command:
-				replace(child, renderer);
+				replace(builder, renderer, child);
 				renderer.processSubpath(child, tr || repType == RepElemType.op, repType);
 				break;
             default:
-				driver.fail("Subpaths must be all path operation or all path command", getToken());
+				throw new CFDGStopException("Subpaths must be all path operation or all path command", getWhere());
 		}
 	}
 
-	public void compile(CompilePhase ph) {
-		ASTExpression r = shapeSpecifier.compile(ph);
+	public void compile(CFDGBuilder builder, CompilePhase phase) {
+		ASTExpression r = shapeSpecifier.compile(builder, phase);
 		assert(r == null);
-		r = childChange.compile(ph);
+		r = childChange.compile(builder, phase);
 		assert(r == null);
 
-        switch (ph) {
+        switch (phase) {
             case TypeCheck -> {
                 childChange.addEntropy(shapeSpecifier.getEntropy());
-                if (getClass() == ASTReplacement.class && driver.isInPathContainer()) {
+                if (getClass() == ASTReplacement.class && builder.isInPathContainer()) {
                     // This is a subpath
                     if (shapeSpecifier.getArgSource() == ArgSource.ShapeArgs || shapeSpecifier.getArgSource() == ArgSource.StackArgs || PrimShape.isPrimShape(shapeSpecifier.getShapeType())) {
                         if (repType != RepElemType.op) {
-                            driver.error("Error in subpath specification", getToken());
+                            system.error("Error in subpath specification", getWhere());
                         }
+						if (shapeSpecifier.getShapeType() == PrimShapeType.fillType.getType()) {
+							system.error("FILL cannot be a subpath", getWhere());
+						}
                     } else {
-                        ASTRule rule = driver.getRule(shapeSpecifier.getShapeType());
-                        if (rule == null || rule.isPath()) {
-                            driver.error("Subpath can only refer to a path", getToken());
+                        ASTRule rule = builder.getRule(shapeSpecifier.getShapeType());
+                        if (rule == null || !rule.isPath()) {
+                            system.error("Subpath can only refer to a path", getWhere());
                         } else if (rule.getRuleBody().getRepType() != repType.getType()) {
-                            driver.error("Subpath type mismatch error", getToken());
+                            system.error("Subpath type mismatch error", getWhere());
                         }
                     }
                 }
             }
             case Simplify -> {
-                r = shapeSpecifier.simplify();
-                assert (r == shapeSpecifier);
-                r = childChange.simplify();
-                assert (r == childChange);
+                r = shapeSpecifier.simplify(builder);
+                assert (r == null);
+                r = childChange.simplify(builder);
+                assert (r == null);
             }
             default -> {
             }
         }
-	}
-
-	protected ASTExpression compile(ASTExpression exp, CompilePhase ph) {
-		if (exp == null) {
-			return null;
-		}
-		ASTExpression tmpExp = exp.compile(ph);
-		if (tmpExp != null) {
-			return tmpExp;
-		}
-		return exp;
-	}
-
-	protected ASTExpression simplify(ASTExpression exp) {
-		if (exp == null) {
-			return null;
-		}
-		return exp.simplify();
 	}
 }

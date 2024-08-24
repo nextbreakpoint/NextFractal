@@ -24,10 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FriezeType;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ShapeType;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PrimShapeType;
 import lombok.extern.java.Log;
 
 import java.awt.geom.AffineTransform;
@@ -35,9 +34,30 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
+
+// tiledCanvas.cpp
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2006-2016 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Log
 public class TiledCanvas implements CFCanvas {
@@ -70,24 +90,24 @@ public class TiledCanvas implements CFCanvas {
     }
 
     @Override
-    public void primitive(int shapeType, double[] color, AffineTransform transform) {
-        if (shapeType == ShapeType.FillType.ordinal()) {
-            canvas.primitive(shapeType, color, transform);
+    public void primitive(int shapeType, double[] color, AffineTransform transform, int blend) {
+        if (shapeType == PrimShapeType.fillType.getType()) {
+            canvas.primitive(shapeType, color, transform, blend);
             return;
         }
         for (Point2D.Double tile : tileList) {
-            AffineTransform t = AffineTransform.getTranslateInstance(tile.x, tile.y);
+            final AffineTransform t = AffineTransform.getTranslateInstance(tile.x, tile.y);
             t.concatenate(transform);
-            canvas.primitive(shapeType, color, t);
+            canvas.primitive(shapeType, color, t, blend);
         }
     }
 
     @Override
-    public void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit) {
+    public void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit, int blend) {
         for (Point2D.Double tile : tileList) {
-            AffineTransform t = AffineTransform.getTranslateInstance(tile.x, tile.y);
+            final AffineTransform t = AffineTransform.getTranslateInstance(tile.x, tile.y);
             t.concatenate(transform);
-            canvas.path(color, t, path, flags, strokeWidth, miterLimit);
+            canvas.path(color, t, path, flags, strokeWidth, miterLimit, blend);
         }
     }
 
@@ -100,11 +120,22 @@ public class TiledCanvas implements CFCanvas {
 
     @Override
     public void end() {
+        canvas.drawRect(0, 0, width, height);
         canvas.end();
     }
 
+    @Override
+    public void clear(double[] backgroundColor) {
+        canvas.clear(backgroundColor);
+    }
+
+    @Override
+    public void drawRect(double x, double y, double width, double height) {
+        canvas.drawRect(x, y, width, height);
+    }
+
     public void setScale(double scale) {
-        AffineTransform t = AffineTransform.getScaleInstance(scale, scale);
+        final AffineTransform t = AffineTransform.getScaleInstance(scale, scale);
 
         // Generate the tiling transform in pixel units
         transformOffset = new AffineTransform(transform);
@@ -113,7 +144,7 @@ public class TiledCanvas implements CFCanvas {
         // The invert transform can transform coordinates from the pixel unit tiling
         // to the unit square tiling.
         if (frieze != FriezeType.NoFrieze) {
-            transformInvert = AffineTransform.getScaleInstance(transformOffset.getScaleX() == 0.0 ? 0.0 : 1 / transformOffset.getScaleX(), transformOffset.getScaleY() == 0.0 ? 0.0 : 1 / transformOffset.getScaleY());
+            transformInvert.setToScale(transformOffset.getScaleX() == 0.0 ? 0.0 : 1 / transformOffset.getScaleX(), transformOffset.getScaleY() == 0.0 ? 0.0 : 1 / transformOffset.getScaleY());
         } else {
             transformInvert = new AffineTransform(transformOffset);
             try {
@@ -128,76 +159,74 @@ public class TiledCanvas implements CFCanvas {
         double centx = (bounds.getMinX() + bounds.getMaxX()) * 0.5;
         double centy = (bounds.getMinY() + bounds.getMaxY()) * 0.5;
 
-        Point2D.Double p = new Point2D.Double(centx, centy);
-
+        final Point2D.Double p = new Point2D.Double(centx, centy);
         transformInvert.transform(p, p);          // transform to unit square tesselation
         centx = Math.floor(p.x + 0.5);                 // round to nearest integer
         centy = Math.floor(p.y + 0.5);                 // round to nearest integer
 
         tileList.clear();
 
-        double dx = -centx;
-        double dy = -centy;
+        final double dx = -centx;
+        final double dy = -centy;
 
-        Point2D.Double o = new Point2D.Double(dx, dy);
-
+        final Point2D.Double o = new Point2D.Double(dx, dy);
         transformOffset.transform(o, o);
-
         tileList.add(o);
 
-        Bounds rect = new Bounds(-5, -5, width + 9, height + 9);
+        final Bounds canvas = new Bounds(-5, -5, width + 9, height + 9);
 
-        if (frieze != FriezeType.NoFrieze) {
-            centx += centy;
-            for (int offset = 1; ; ++offset) {
-                boolean hit = false;
-                for (int side : Arrays.asList(-1, 1)) {
-                    double x = offset * side - centx;
-                    Point2D.Double d = new Point2D.Double(x, x);
-                    transformOffset.transform(d, d);
-                    // If the tile might touch the canvas then record it
-                    Bounds shape = new Bounds(bounds.getMinX() + d.x, bounds.getMinY() + d.y, bounds.getMaxX() + d.x, bounds.getMaxY() + d.y);
-                    if (shape.overlaps(rect)) {
-                        hit = true;
-                        tileList.add(d);
-                    }
-                }
-                if (!hit) return;
-            }
-        }
+        if (frieze != FriezeType.NoFrieze)
+            centx = centy = centx + centy;      // one will be zero, set them both to the other one
 
         for (int ring = 1; ; ring++) {
             boolean hit = false;
-            for (int pos = -ring; pos < ring; pos++) {
-                List<Point2D.Double> points = List.of(new Point2D.Double(pos, -ring), new Point2D.Double(ring, pos), new Point2D.Double(-pos, ring), new Point2D.Double(-ring, -pos));
-                for (Point2D.Double point : points) {
-                    // Find where this tile is on the canvas
-                    Point2D.Double d = new Point2D.Double(point.x - centx, point.y - centy);
-                    transformOffset.transform(d, d);
-                    // If the tile might touch the canvas then record it
-                    Bounds shape = new Bounds(bounds.getMinX() + d.x, bounds.getMinY() + d.y, bounds.getMaxX() + d.x, bounds.getMaxY() + d.y);
-                    if (shape.overlaps(rect)) {
-                        hit = true;
-                        tileList.add(d);
-                    }
+            if (frieze != FriezeType.NoFrieze) {
+                // Works for x frieze and y frieze, the other dimension gets zeroed
+                hit = checkTile(bounds, canvas,  ring - centx,  ring - centy);
+                hit = checkTile(bounds, canvas, -ring - centx, -ring - centy) || hit;
+            } else {
+                for (int pos = -ring; pos < ring; pos++) {
+                    hit = checkTile(bounds, canvas,   pos - centx, -ring - centy) || hit;
+                    hit = checkTile(bounds, canvas,  ring - centx,   pos - centy) || hit;
+                    hit = checkTile(bounds, canvas,  -pos - centx,  ring - centy) || hit;
+                    hit = checkTile(bounds, canvas, -ring - centx,  -pos - centy) || hit;
                 }
             }
             if (!hit) return;
         }
     }
 
-    @Override
-    public void clear(double[] backgroundColor) {
-        canvas.clear(backgroundColor);
+    private boolean checkTile(Bounds bounds, Bounds canvas, double dx, double dy) {
+        final Point2D.Double d = new Point2D.Double(dx, dy);
+        transformOffset.transform(d, d);
+        final Bounds shape = new Bounds(bounds.getMinX() + d.x, bounds.getMinY() + d.y, bounds.getMaxX() + d.x, bounds.getMaxY() + d.y);
+        final boolean hit = shape.overlaps(canvas);
+        if (hit) {
+            tileList.add(d);
+        }
+        return hit;
+    }
+
+    private boolean checkTileInt(Bounds screen, AffineTransform screenTessellation, int x, int y, List<Point2D.Double> points) {
+        final Point2D.Double d = new Point2D.Double(x, y);
+        screenTessellation.transform(d, d);
+        final int px = (int) Math.floor(d.x + 0.5);
+        final int py = (int) Math.floor(d.y + 0.5);
+        final Bounds shape = new Bounds(px, py, width - 1 + px, height - 1 + py);
+        final boolean hit = shape.overlaps(screen);
+        if (hit) {
+            points.add(d);
+        }
+        return hit;
     }
 
     public List<Point2D.Double> getTesselation(int w, int h, int x1, int y1, boolean flipY) {
-        List<Point2D.Double> tessPoints = new ArrayList<>();
+        final List<Point2D.Double> tessPoints = new ArrayList<>();
 
         // Produce an integer version of mOffset that is centered in the w x h screen
-        AffineTransform tess = new AffineTransform(width, Math.floor(transformOffset.getShearY() + 0.5), Math.floor(transformOffset.getShearX() + 0.5), flipY ? -height : height, x1, y1);
+        final AffineTransform tess = new AffineTransform(width, Math.floor(transformOffset.getShearY() + 0.5), Math.floor(transformOffset.getShearX() + 0.5), flipY ? -height : height, x1, y1);
 
-        Bounds screen = new Bounds(0, 0, w - 1, h - 1);
+        final Bounds screen = new Bounds(0, 0, w - 1, h - 1);
 
         if (frieze == FriezeType.FriezeX) {
             tess.scale(1, 0);
@@ -208,47 +237,24 @@ public class TiledCanvas implements CFCanvas {
 
         tessPoints.add(new Point2D.Double(x1, y1));
 
-        if (frieze != FriezeType.NoFrieze) {
-            for (int offset = 1; ; ++offset) {
-                boolean hit = false;
-                for (int side : Arrays.asList(-1, 1)) {
-                    int x = offset * side;
-                    Point2D.Double d = new Point2D.Double(x, x);
-                    tess.transform(d, d);
-                    // If the tile is visible then record it
-                    int px = (int) Math.floor(d.x + 0.5);
-                    int py = (int) Math.floor(d.y + 0.5);
-                    Bounds tile = new Bounds(px, py, px + width - 1, py + height - 1);
-                    if (tile.overlaps(screen)) {
-                        hit = true;
-                        tessPoints.add(d);
-                    }
-                }
-                if (!hit) return tessPoints;
-            }
-        }
-
-        // examine rings of tile units around the center unit until you encounter a
-        // ring that doesn't have any tile units that intersect the screen. Then stop.
         for (int ring = 1; ; ring++) {
             boolean hit = false;
-            for (int pos = -ring; pos < ring; pos++) {
-                List<Point2D.Double> points = List.of(new Point2D.Double(pos, -ring), new Point2D.Double(ring, pos), new Point2D.Double(-pos, ring), new Point2D.Double(-ring, -pos));
-                for (Point2D.Double point : points) {
-                    // Find where this tile is on the canvas
-                    Point2D.Double d = new Point2D.Double(point.x, point.y);
-                    tess.transform(d, d);
-                    // If the tile is visible then record it
-                    int px = (int) Math.floor(d.x + 0.5);
-                    int py = (int) Math.floor(d.y + 0.5);
-                    Bounds tile = new Bounds(px, py, px + width - 1, py + height - 1);
-                    if (tile.overlaps(screen)) {
-                        hit = true;
-                        tessPoints.add(d);
-                    }
+            if (frieze != FriezeType.NoFrieze) {
+                // Works for x frieze and y frieze, the other dimension gets zeroed
+                hit = checkTileInt(screen, tess,  ring,  ring, tessPoints);
+                hit = checkTileInt(screen, tess, -ring, -ring, tessPoints) || hit;
+            } else {
+                for (int pos = -ring; pos < ring; pos++) {
+                    hit = checkTileInt(screen, tess,   pos, -ring, tessPoints) || hit;
+                    hit = checkTileInt(screen, tess,  ring,   pos, tessPoints) || hit;
+                    hit = checkTileInt(screen, tess,  -pos,  ring, tessPoints) || hit;
+                    hit = checkTileInt(screen, tess, -ring,  -pos, tessPoints) || hit;
                 }
             }
-            if (!hit) return tessPoints;
+
+            if (!hit) break;
         }
+
+        return tessPoints;
     }
 }

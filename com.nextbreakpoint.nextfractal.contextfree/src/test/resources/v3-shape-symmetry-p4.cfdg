@@ -1,5 +1,3 @@
-CFDG3
-
 CF::Tile = [s 2 2]
 
 CF::Symmetry = CF::p4, 0.3, 0.4

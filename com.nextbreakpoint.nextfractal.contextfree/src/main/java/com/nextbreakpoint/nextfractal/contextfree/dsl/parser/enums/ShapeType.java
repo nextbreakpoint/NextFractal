@@ -24,6 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ShapeType {
-	NewShape, RuleType, PathType, FillType;
+	NewShape(0), RuleType(1), PathType(2);
+
+	private final int value;
+
+	ShapeType(int value) {
+		this.value = value;
+	}
 }

@@ -24,11 +24,38 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Random;
 import java.util.function.UnaryOperator;
 
 import static org.apache.commons.math3.special.Gamma.logGamma;
 
+// Rand64.cpp
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2008-2015 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
+
+@Getter
+@Setter
 public class Rand64 implements Cloneable {
 	private static final long RAND64_SEED  = 0x3DF41234;
 	private static final long RAND64_MULT = 2685821657736338717L;
@@ -131,8 +158,8 @@ public class Rand64 implements Cloneable {
 		return new WeibullRand(pos(a), pos(b)).generate();
 	}
 
-	public double getExtremeValue(double location, double scale) {
-		return new ExtremeValueRand(location, pos(scale)).generate();
+	public double getExtremeValue(double where, double scale) {
+		return new ExtremeValueRand(where, pos(scale)).generate();
 	}
 
 	public double getNormal(double mean, double stddev) {
@@ -147,8 +174,8 @@ public class Rand64 implements Cloneable {
 		return new ChiSquaredRand(degree(freedom)).generate();
 	}
 
-	public double getCauchy(double location, double scale) {
-		return new CauchyRand(location, pos(scale)).generate();
+	public double getCauchy(double where, double scale) {
+		return new CauchyRand(where, pos(scale)).generate();
 	}
 
 	public double getFisherF(double mfree, double nfree) {
@@ -159,7 +186,7 @@ public class Rand64 implements Cloneable {
 		return new StudentTRand(degree(freedom)).generate();
 	}
 
-	public abstract class Rand<T> {
+    public abstract static class Rand<T> {
 		public abstract T min();
 		public abstract T max();
 		public abstract T generate();

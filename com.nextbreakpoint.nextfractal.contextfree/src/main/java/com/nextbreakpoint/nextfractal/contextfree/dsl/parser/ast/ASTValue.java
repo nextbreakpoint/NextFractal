@@ -24,19 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
 @Getter
 public class ASTValue extends ASTObject {
 	private final float value;
 	private final boolean percentage;
-	private final CFDGDriver driver;
 
-	public ASTValue(Token token, CFDGDriver driver, String value) {
-		super(token);
-		this.driver = driver;
+	public ASTValue(CFDGSystem system, ASTWhere where, String value) {
+		super(system, where);
 		if (value.contains("%")) {
 			this.value = Float.parseFloat(value.substring(0, value.indexOf("%")));
 			this.percentage = true;

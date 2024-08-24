@@ -4,7 +4,7 @@ import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
 import java.util.List;
 
-public interface CFDGHandle {
+public interface CFHandle {
     void stop();
 
     List<ScriptError> errors();

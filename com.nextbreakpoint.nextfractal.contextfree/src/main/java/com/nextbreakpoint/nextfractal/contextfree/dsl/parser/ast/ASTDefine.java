@@ -24,10 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackModification;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackNumber;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFStackRule;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Modification;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
@@ -36,128 +38,144 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+// astreplacement.cpp
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2009-2014 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
+
 @Getter
 @Setter
 public class ASTDefine extends ASTReplacement {
-	private final List<ASTParameter> parameters = new ArrayList<>();
-	private final String name;
-	private int configDepth;
+	private List<ASTParameter> parameters = new ArrayList<>();
 	private DefineType defineType;
-	private ExpType expType;
 	private ASTExpression exp;
+	private ExpType expType;
+	private final String name;
 	private int tupleSize;
-	private int stackCount;
+	private int configDepth;
+	private int paramSize;
     private boolean natural;
 
-	public ASTDefine(Token token, CFDGDriver driver, String name) {
-		super(token, driver, new ASTModification(token, driver), RepElemType.empty);
-		this.name = name;
-		this.configDepth = -1;
+	public ASTDefine(CFDGSystem system, ASTWhere where, String name) {
+		super(system, where, null, RepElemType.empty);
 		this.defineType = DefineType.Stack;
 		this.expType = ExpType.None;
-		this.stackCount = 0;
+		this.name = name;
+		this.configDepth = -1;
+		this.paramSize = 0;
 		this.natural = false;
-		int[] i = new int[1];
+        final int[] i = new int[1];
+        getChildChange().getModData().getRand64Seed().getSeed();
 		getChildChange().getModData().getRand64Seed().xorString(name, i);
 	}
 
-    public void incStackCount(int value) {
-		stackCount += value;
-	}
-	
-	public void decStackCount(int value) {
-		stackCount -= value;
-	}
-	
 	@Override
-	public void compile(CompilePhase ph) {
+	public void compile(CFDGBuilder builder, CompilePhase phase) {
 		if (defineType == DefineType.Function || defineType == DefineType.Let) {
-			ASTRepContainer tempCont = new ASTRepContainer(getToken(), driver);
+            final ASTRepContainer tempCont = new ASTRepContainer(system, getWhere());
 			tempCont.setParameters(parameters);
-			tempCont.setStackCount(stackCount);
-			driver.pushRepContainer(tempCont);
-			super.compile(ph);
-			exp = compile(exp, ph);
-			if (ph == CompilePhase.Simplify) {
-				exp = simplify(exp);
+            builder.pushRepContainer(tempCont);
+			super.compile(builder, phase);
+			exp = ASTExpression.compile(builder, phase, exp);
+			if (phase == CompilePhase.Simplify) {
+				exp = ASTExpression.simplify(builder, exp);
 			}
-			driver.popRepContainer(null);
+            builder.popRepContainer(null);
 		} else {
-			super.compile(ph);
-			exp = compile(exp, ph);
-			if (ph == CompilePhase.Simplify) {
-				exp = simplify(exp);
+			super.compile(builder, phase);
+			exp = ASTExpression.compile(builder, phase, exp);
+			if (phase == CompilePhase.Simplify) {
+				exp = ASTExpression.simplify(builder, exp);
 			}
 		}
 
-        switch (ph) {
+        switch (phase) {
             case TypeCheck -> {
                 if (defineType == DefineType.Config) {
-                    driver.makeConfig(this);
+                    builder.typeCheckConfig(this);
                     return;
                 }
 
+                getChildChange().getModData().getRand64Seed().getSeed();
                 getChildChange().setEntropyIndex(0);
                 getChildChange().addEntropy(name);
 
-                ExpType t = exp != null ? exp.getType() : ExpType.Mod;
+                final ExpType t = exp != null ? exp.getType() : ExpType.Mod;
                 int sz = 1;
                 if (t == ExpType.Numeric) {
-                    sz = exp.evaluate(null, 0);
+                    sz = exp.evaluate(builder, null, 0);
                 }
                 if (t == ExpType.Mod) {
                     sz = 6;
                 }
                 if (defineType == DefineType.Function) {
                     if (t != getExpType()) {
-                        driver.error("Mismatch between declared and defined type of user function", getToken());
+                        system.error("Mismatch between declared and defined type of user function", getWhere());
                     }
                     if (getExpType() == ExpType.Numeric && t == ExpType.Numeric && sz != tupleSize) {
-                        driver.error("Mismatch between declared and defined vector length of user function", getToken());
+                        system.error("Mismatch between declared and defined vector length of user function", getWhere());
                     }
                     if (isNatural() && (exp == null || exp.isNatural())) {
-                        driver.error("Mismatch between declared natural and defined not-natural type of user function", getToken());
+                        system.error("Mismatch between declared natural and defined not-natural type of user function", getWhere());
                     }
                 } else {
                     if (getShapeSpecifier().getShapeType() >= 0) {
-                        ASTDefine[] func = new ASTDefine[1];
+                        final ASTDefine[] func = new ASTDefine[1];
                         @SuppressWarnings("unchecked")
-                        List<ASTParameter>[] shapeParams = new List[1];
-                        driver.getTypeInfo(getShapeSpecifier().getShapeType(), func, shapeParams);
+                        final List<ASTParameter>[] shapeParams = new List[1];
+                        builder.getTypeInfo(getShapeSpecifier().getShapeType(), func, shapeParams);
                         if (func[0] != null) {
-                            driver.error("Variable name is also the name of a function", getToken());
-                            driver.error("function definition is here", func[0].getToken());
+                            system.error("Variable name is also the name of a function", getWhere());
+                            system.error("function definition is here", func[0].getWhere());
                         }
                         if (shapeParams[0] != null) {
-                            driver.error("Variable name is also the name of a shape", getToken());
+                            system.error("Variable name is also the name of a shape", getWhere());
                         }
                     }
 
                     tupleSize = sz;
                     expType = t;
-                    //TODO controllare
                     if (t.getType() != (t.getType() & (-t.getType())) || t.getType() == 0) {
-                        driver.error("Expression can only have one type", getToken());
+                        system.error("Expression can only have one type", getWhere());
                     }
                     if (defineType == DefineType.Stack && (exp != null ? exp.isConstant() : getChildChange().getModExp().isEmpty())) {
                         defineType = DefineType.Const;
                     }
                     natural = exp != null && exp.isNatural() && expType == ExpType.Numeric;
-                    ASTParameter param = driver.getContainerStack().peek().addDefParameter(getShapeSpecifier().getShapeType(), this, getToken());
-                    if (param.isParameter() || param.getDefinition() == null) {
-                        param.setStackIndex(driver.getLocalStackDepth());
-                        driver.getContainerStack().peek().setStackCount(driver.getContainerStack().peek().getStackCount() + param.getTupleSize());
-                        driver.setLocalStackDepth(driver.getLocalStackDepth() + param.getTupleSize());
+                    final ASTParameter param = builder.getContainerStack()
+                            .peek()
+                            .addDefParameter(getShapeSpecifier().getShapeType(), this, getWhere());
+                    if (defineType == DefineType.Stack) {
+                        param.setStackIndex(builder.getLocalStackDepth());
+                        builder.setLocalStackDepth(builder.getLocalStackDepth() + param.getTupleSize());
                     }
                 }
             }
             case Simplify -> {
-                // do nothing
+                if (defineType == DefineType.Config) {
+                    builder.makeConfig(this);
+                }
             }
             default -> {
             }
@@ -165,35 +183,49 @@ public class ASTDefine extends ASTReplacement {
 	}
 
 	@Override
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer) {
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr) {
 		if (defineType != DefineType.Stack) {
 			return;
 		}
 		if (renderer.getStackSize() + tupleSize > renderer.getMaxStackSize()) {
-			driver.error("Maximum stack depth exceeded", getToken());
+			system.error("Maximum stack depth exceeded", getWhere());
 		}
 
+        //TODO verify stack behaviour
+        final int stackIndex = renderer.getStackSize();
 		renderer.setStackSize(renderer.getStackSize() + tupleSize);
 		renderer.getCurrentSeed().add(getChildChange().getModData().getRand64Seed());
 
         switch (expType) {
             case Numeric -> {
-                double[] result = new double[1];
-                if (exp.evaluate(result, tupleSize, renderer) != tupleSize) {
-                    driver.error("Error evaluating parameters (too many or not enough)", null);
+                final double[] value = new double[1];
+                if (exp.evaluate(builder, renderer, value, tupleSize) != tupleSize) {
+                    system.error("Error evaluating parameters (too many or not enough)", getWhere());
                 }
-                renderer.setStackItem(renderer.getStackSize() - 1, new CFStackNumber(renderer.getStack(), result[0]));
+                final CFStackNumber item = new CFStackNumber(renderer.getStack(), value[0]);
+                renderer.setStackItem(stackIndex, item);
             }
             case Mod -> {
-                Modification[] mod = new Modification[1];
-                getChildChange().setVal(mod, renderer);
-                renderer.setStackItem(renderer.getStackSize() - 1, new CFStackModification(renderer.getStack(), mod[0]));
+                final Modification[] mod = new Modification[1];
+                getChildChange().setVal(builder, renderer, mod);
+                final CFStackModification item = new CFStackModification(renderer.getStack(), mod[0]);
+                renderer.setStackItem(stackIndex, item);
             }
-            case Rule ->
-                    renderer.setStackItem(renderer.getStackSize() - 1, exp.evalArgs(renderer, parent.getParameters()));
-            default -> driver.error("Unimplemented parameter type", null);
+            case Rule -> {
+                final CFStackRule item = exp.evalArgs(builder, renderer, parent.getParameters());
+                renderer.setStackItem(stackIndex, item);
+            }
+            default -> system.error("Unimplemented parameter type", getWhere());
         }
 
 		renderer.setLogicalStackTop(renderer.getStackSize());
 	}
+
+    public void incParamSize(int value) {
+        paramSize += value;
+    }
+
+    public void decParamSize(int value) {
+        paramSize -= value;
+    }
 }

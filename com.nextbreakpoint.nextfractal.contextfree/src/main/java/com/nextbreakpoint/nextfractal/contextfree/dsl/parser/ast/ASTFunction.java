@@ -24,9 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDeferUntilRuntimeException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.HSBColor;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Rand64;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
@@ -34,9 +35,8 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
 
-import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTUtils.MAX_VECTOR_SIZE;
+import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.AST.MAX_VECTOR_SIZE;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncType.Abs;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncType.BitAnd;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncType.BitLeft;
@@ -54,35 +54,62 @@ import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncTy
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncType.RandInt;
 import static com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.FuncType.Sg;
 
-public class ASTFunction extends ASTExpression {
-	@Getter
-    private ASTExpression arguments;
-	@Getter
-    private FuncType funcType;
-	private double random;
+// astexpression.cpp
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2009-2014 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
-	public static final FuncType[] MUST_BE_NATURAL = new FuncType[]{
+public class ASTFunction extends ASTExpression {
+    //TODO move to constants class
+    private static final boolean RandStaticIsConst = true;
+
+    private static final FuncType[] MUST_BE_NATURAL = new FuncType[] {
             Factorial, Sg, IsNatural, Div, Divides
     };
-	public static final FuncType[] MIGHT_BE_NATURAL = new FuncType[]{
+
+    private static final FuncType[] MIGHT_BE_NATURAL = new FuncType[] {
             Mod, Abs, Min, Max, BitNot, BitOr, BitAnd, BitXOR, BitLeft, BitRight, RandInt
     };
 
-	public ASTFunction(Token token, CFDGDriver driver, String name, ASTExpression arguments, Rand64 seed) {
-		super(token, driver, true, false, ExpType.Numeric);
+	private double random;
+
+    @Getter
+    private ASTExpression arguments;
+	@Getter
+    private FuncType funcType;
+
+    public ASTFunction(CFDGSystem system, ASTWhere where, String name, ASTExpression arguments, Rand64 seed) {
+		super(system, where, true, false, ExpType.Numeric);
 		this.funcType = FuncType.NotAFunction;
 		this.arguments = arguments;
 
 		if (name.isEmpty()) {
-			driver.error("Bad function call", token);
-			return;
+			system.error("Bad function call", where);
+            return;
 		}
 
 		funcType = FuncType.byName(name);
 
 		if (funcType == FuncType.NotAFunction) {
-			driver.error("Unknown function", token);
-			return;
+            system.error("Unknown function", where);
+            return;
 		}
 
 		if (funcType == FuncType.RandStatic) {
@@ -91,12 +118,13 @@ public class ASTFunction extends ASTExpression {
 	}
 
     @Override
-	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
+	public int evaluate(CFDGBuilder builder, CFDGRenderer renderer, double[] result, int length) {
 		if (type != ExpType.Numeric) {
-		   throw new RuntimeException("Non-numeric expression in a numeric context");
+		   system.error("Non-numeric expression in a numeric context", getWhere());
+           return -1;
 		}
 
-		int destLength = (funcType.getType() >= FuncType.Cross.getType() && funcType.getType() <= FuncType.Rgb2Hsb.getType()) ? 3 : funcType == FuncType.Vec ? (int)Math.floor(random) : 1;
+		final int destLength = (funcType.getType() >= FuncType.Cross.getType() && funcType.getType() <= FuncType.Rgb2Hsb.getType()) ? 3 : funcType == FuncType.Vec ? (int) Math.floor(random) : 1;
 
 		if (result == null)
 			return destLength;
@@ -106,14 +134,14 @@ public class ASTFunction extends ASTExpression {
 
         switch (funcType) {
             case Min, Max -> {
-                result[0] = minMax(arguments, renderer, funcType == FuncType.Min);
+                result[0] = minMax(builder, renderer, arguments, funcType == FuncType.Min);
                 return 1;
             }
             case Dot -> {
-                double[] l = new double[MAX_VECTOR_SIZE];
-                double[] r = new double[MAX_VECTOR_SIZE];
-                int lc = arguments.getChild(0).evaluate(l, MAX_VECTOR_SIZE, renderer);
-                int rc = arguments.getChild(1).evaluate(r, MAX_VECTOR_SIZE, renderer);
+                final double[] l = new double[MAX_VECTOR_SIZE];
+                final double[] r = new double[MAX_VECTOR_SIZE];
+                final int lc = arguments.getChild(0).evaluate(builder, renderer, l, MAX_VECTOR_SIZE);
+                final int rc = arguments.getChild(1).evaluate(builder, renderer, r, MAX_VECTOR_SIZE);
                 if (lc == rc && lc > 1) {
                     result[0] = 0.0;
                     for (int i = 0; i < lc; i++) {
@@ -123,10 +151,10 @@ public class ASTFunction extends ASTExpression {
                 return 1;
             }
             case Cross -> {
-                double[] l = new double[3];
-                double[] r = new double[3];
-                int lc = arguments.getChild(0).evaluate(l, 3, renderer);
-                int rc = arguments.getChild(1).evaluate(r, 3, renderer);
+                final double[] l = new double[3];
+                final double[] r = new double[3];
+                final int lc = arguments.getChild(0).evaluate(builder, renderer, l, 3);
+                final int rc = arguments.getChild(1).evaluate(builder, renderer, r, 3);
                 if (lc == rc && lc == 3) {
                     result[0] = l[1] * r[2] - l[2] * r[1];
                     result[1] = l[2] * r[0] - l[0] * r[2];
@@ -135,19 +163,19 @@ public class ASTFunction extends ASTExpression {
                 return 3;
             }
             case Vec -> {
-                double[] v = new double[MAX_VECTOR_SIZE];
-                int lv = arguments.getChild(0).evaluate(v, MAX_VECTOR_SIZE, renderer);
-                if (lv >= 1) {
+                final double[] v = new double[MAX_VECTOR_SIZE];
+                final int lc = arguments.getChild(0).evaluate(builder, renderer, v, MAX_VECTOR_SIZE);
+                if (lc >= 1) {
                     for (int i = 0; i < destLength; i++) {
-                        result[i] = v[i % lv];
+                        result[i] = v[i % lc];
                     }
                 }
                 return destLength;
             }
             case Hsb2Rgb -> {
-                double[] c = new double[3];
-                int l = arguments.evaluate(c, 3, renderer);
-                if (l == 3) {
+                final double[] c = new double[3];
+                final int lc = arguments.evaluate(builder, renderer, c, 3);
+                if (lc == 3) {
                     HSBColor color = new HSBColor(c[0], c[1], c[2], 1.0);
                     double[] rgb = color.getRGBA();
                     result[0] = rgb[0];
@@ -157,9 +185,9 @@ public class ASTFunction extends ASTExpression {
                 return 3;
             }
             case Rgb2Hsb -> {
-                double[] c = new double[3];
-                int l = arguments.evaluate(c, 3, renderer);
-                if (l == 3) {
+                final double[] c = new double[3];
+                final int lc = arguments.evaluate(builder, renderer, c, 3);
+                if (lc == 3) {
                     double[] rgb = new double[]{c[0], c[1], c[2], 1.0};
                     HSBColor color = new HSBColor(rgb);
                     result[0] = color.hue();
@@ -168,11 +196,11 @@ public class ASTFunction extends ASTExpression {
                 }
                 return 3;
             }
-            case RandIntDiscrete -> {
-                double[] w = new double[MAX_VECTOR_SIZE];
-                int lw = arguments.evaluate(w, MAX_VECTOR_SIZE, renderer);
-                if (lw >= 1) {
-                    result[0] = renderer.getCurrentSeed().getDiscrete(lw, w);
+            case RandDiscrete -> {
+                final double[] w = new double[MAX_VECTOR_SIZE];
+                final int lc = arguments.evaluate(builder, renderer, w, MAX_VECTOR_SIZE);
+                if (lc >= 1) {
+                    result[0] = renderer.getCurrentSeed().getDiscrete(lc, w);
                 }
                 return 1;
             }
@@ -180,8 +208,8 @@ public class ASTFunction extends ASTExpression {
             }
         }
 
-		double[] a = new double[2];
-		int count = arguments.evaluate(a, 2, renderer);
+        final double[] a = new double[2];
+        final int count = arguments.evaluate(builder, renderer, a, 2);
 		// no need to checkParam the argument count, the constructor already checked it
 
 		// But checkParam it anyway to make valgrind happy
@@ -216,7 +244,7 @@ public class ASTFunction extends ASTExpression {
             case Infinity -> result[0] = a[0] < 0.0 ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
             case Factorial -> {
                 if (a[0] < 0.0 || a[0] > 18.0 || a[0] != Math.floor(a[0])) {
-                    driver.fail("Illegal argument for factorial", getToken());
+                    system.error("Illegal argument for factorial", getWhere());
                 }
                 result[0] = 1.0;
                 for (double v = 1.0; v <= a[0]; v += 1.0) {
@@ -244,101 +272,101 @@ public class ASTFunction extends ASTExpression {
             case Floor -> result[0] = Math.floor(a[0]);
             case Ceiling -> result[0] = Math.ceil(a[0]);
             case Ftime -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 result[0] = renderer.getCurrentTime();
             }
             case Frame -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 result[0] = renderer.getCurrentFrame();
             }
             case RandStatic -> result[0] = random * Math.abs(a[1] - a[0]) + Math.min(a[0], a[1]);
-            case Rand -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+            case Rand, RandOp -> {
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getDouble() * Math.abs(a[1] - a[0]) + Math.min(a[0], a[1]);
             }
             case Rand2 -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = (renderer.getCurrentSeed().getDouble() * 2.0 - 1.0) * a[1] + a[0];
             }
             case RandExponential -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getExponential(a[0]);
             }
             case RandGamma -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getGamma(a[0], a[1]);
             }
             case RandWeibull -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getWeibull(a[0], a[1]);
             }
             case RandExtremeValue -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getExtremeValue(a[0], a[1]);
             }
             case RandNormal -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getNormal(a[0], a[1]);
             }
             case RandLogNormal -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getLogNormal(a[0], a[1]);
             }
             case RandChiSquared -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getChiSquared(a[0]);
             }
             case RandCauchy -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getCauchy(a[0], a[1]);
             }
             case RandFisherF -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getFisherF(a[0], a[1]);
             }
             case RandStudentT -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getStudentT(a[0]);
             }
             case RandInt -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getDouble() * Math.abs(a[1] - a[0]) + Math.min(a[0], a[1]));
             }
-            case RandIntBernoulli -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+            case RandBernoulli -> {
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = renderer.getCurrentSeed().getBernoulli(a[0]) ? 1.0 : 0.0;
             }
-            case RandIntBinomial -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+            case RandBinomial -> {
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getBinomial((long) a[0], a[1]));
             }
-            case RandIntNegBinomial -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+            case RandNegBinomial -> {
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getNegativeBinomial((long) a[0], a[1]));
             }
-            case RandIntPoisson -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+            case RandPoisson -> {
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getPoisson(a[0]));
             }
-            case RandIntGeometric -> {
-                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getToken());
+            case RandGeometric -> {
+                if (renderer == null) throw new CFDGDeferUntilRuntimeException(getWhere());
                 renderer.setRandUsed(true);
                 result[0] = Math.floor(renderer.getCurrentSeed().getGeometric(a[0]));
             }
@@ -350,69 +378,50 @@ public class ASTFunction extends ASTExpression {
 		return 1;
 	}
 
-	private static double minMax(ASTExpression e, CFDGRenderer renderer, boolean isMin) {
-		double[] res = new double[] { 0.0 };
-		if (e.getChild(0).evaluate(res, 1, renderer) != 1) {
-			renderer.getDriver().fail("Error computing min/max here", e.getChild(0).getToken());
-		}
-		for (int i = 1; i < e.size(); ++i) {
-			double[] val = new double[] { 0.0 };
-			if (e.getChild(i).evaluate(val, 1, renderer) != 1) {
-				renderer.getDriver().fail("Error computing min/max here", e.getChild(i).getToken());
-			}
-			boolean leftMin = res[0] < val[0];
-			res[0] = ((isMin && leftMin) || (!isMin && !leftMin)) ? res[0] : val[0];
-		}
-		return res[0];
-	}
-
-	private boolean isNatural(CFDGRenderer renderer, double n) {
-		return n >= 0 && n <= (renderer != null ? renderer.getMaxNatural() : Integer.MAX_VALUE) && n == Math.floor(n);
-	}
-
 	@Override
-	public void entropy(StringBuilder e) {
+	public void entropy(StringBuilder entropy) {
 		if (arguments != null) {
-			arguments.entropy(e);
+			arguments.entropy(entropy);
 		}
-		e.append(funcType.getEntropy());
+		entropy.append(funcType.getEntropy());
 	}
 
 	@Override
-	public ASTExpression compile(CompilePhase ph) {
-		final Token token = getToken();
-		arguments = compile(arguments, ph);
-        switch (ph) {
+	public ASTExpression compile(CFDGBuilder builder, CompilePhase phase) {
+        ASTWhere where = getWhere();
+		arguments = ASTExpression.compile(builder, phase, arguments);
+        int argCount = 0;
+        int argNum = 0;
+        switch (phase) {
             case TypeCheck -> {
                 constant = true;
                 locality = Locality.PureLocal;
-                int argcount = 0;
-                int argnum = 0;
                 if (arguments != null) {
-                    argnum = arguments.size();
+                    argNum = arguments.size();
+                    where = arguments.getWhere();
                     constant = arguments.isConstant();
                     locality = arguments.getLocality();
                     if (locality == Locality.PureNonLocal) {
                         locality = Locality.ImpureNonLocal;
                     }
                     if (arguments.getType() == ExpType.Numeric) {
-                        argcount = arguments.evaluate(null, 0);
+                        argCount = arguments.evaluate(builder, null, 0);
                     } else {
-                        driver.error("Function arguments must be numeric", token);
+                        system.error("Function arguments must be numeric", where);
                     }
                 }
                 switch (funcType) {
                     case Abs:
-                        if (argcount < 1 || argcount > 2) {
-                            driver.error("Function takes one or two arguments", token);
+                        if (argCount < 1 || argCount > 2) {
+                            system.error("Function takes one or two arguments", where);
                         }
                         break;
                     case Infinity:
-                        if (argcount == 0) {
-                            arguments = new ASTReal(token, driver, 1.0);
-                            argcount = 1;
+                        if (argCount == 0) {
+                            arguments = new ASTReal(system, this.where, 1.0);
+                            argCount = 1;
                         }
-                        break;
+                        // fall through
                     case Cos:
                     case Sin:
                     case Tan:
@@ -436,8 +445,8 @@ public class ASTFunction extends ASTExpression {
                     case Factorial:
                     case Sg:
                     case IsNatural:
-                        if (argcount != 1) {
-                            driver.error("Function takes one argument", token);
+                        if (argCount != 1) {
+                            system.error("Function takes one argument", where);
                         }
                         break;
                     case BitOr:
@@ -449,92 +458,97 @@ public class ASTFunction extends ASTExpression {
                     case Mod:
                     case Divides:
                     case Div:
-                        if (argcount != 2) {
-                            driver.error("Function takes two arguments", token);
+                        if (argCount != 2) {
+                            system.error("Function takes two arguments", where);
                         }
                         break;
                     case Dot:
                     case Cross:
-                        if (argnum != 2) {
-                            driver.error("Dot/cross product takes two vectors", token);
+                        if (argNum != 2) {
+                            system.error("Dot/cross product takes two vectors", where);
                         } else {
-                            int l = arguments.getChild(0).evaluate(null, 0);
-                            int r = arguments.getChild(0).evaluate(null, 0);
+                            int l = arguments.getChild(0).evaluate(builder, null, 0);
+                            int r = arguments.getChild(0).evaluate(builder, null, 0);
                             if (funcType == FuncType.Dot && (l != r || l < 2)) {
-                                driver.error("Dot product takes two vectors of the same length", token);
+                                system.error("Dot product takes two vectors of the same length", where);
                             }
                             if (funcType == FuncType.Cross && (l != 3 || r != 3)) {
-                                driver.error("Cross product takes two vector3s", token);
+                                system.error("Cross product takes two vector3s", where);
                             }
                         }
                         break;
                     case Hsb2Rgb:
                     case Rgb2Hsb:
-                        if (argcount != 3) {
-                            driver.error("RGB/HSB conversion function takes 3 arguments", token);
+                        if (argCount != 3) {
+                            system.error("RGB/HSB conversion function takes 3 arguments", where);
                         }
                         break;
                     case Vec:
-                        double[] value = new double[1];
-                        if (argnum != 2) {
-                            driver.error("Vec function takes two arguments", token);
-                        } else if (!arguments.getChild(1).isConstant() || !arguments.getChild(1).isNatural() || arguments.getChild(1).evaluate(value, 1) != 1) {
-                            driver.error("Vec function length argument must be a scalar constant", token);
-                        } else if ((int) Math.floor(value[0]) < 2 || (int) Math.floor(value[0]) > ASTUtils.MAX_VECTOR_SIZE) {
-                            driver.error("Vec function length argument must be >= 2 and <= 99", token);
+                        final double[] value = new double[1];
+                        if (argNum != 2) {
+                            system.error("Vec function takes two arguments", where);
+                        } else if (!arguments.getChild(1).isConstant() || !arguments.getChild(1).isNatural() || arguments.getChild(1).evaluate(builder, value, 1) != 1) {
+                            system.error("Vec function length argument must be a scalar constant", where);
+                        } else if ((int) Math.floor(value[0]) < 2 || (int) Math.floor(value[0]) > AST.MAX_VECTOR_SIZE) {
+                            system.error("Vec function length argument must be >= 2 and <= 99", where);
                         }
                         break;
                     case Ftime:
                     case Frame:
                         if (arguments != null) {
-                            driver.error("ftime/frame functions takes no arguments", token);
+                            system.error("ftime/frame functions takes no arguments", where);
                         }
                         constant = false;
-                        arguments = new ASTReal(token, driver, 1.0);
+                        arguments = new ASTReal(system, where, 1.0);
                         break;
                     case Rand:
                     case Rand2:
                     case RandInt:
                         constant = false;
+                        // fall through
                     case RandStatic:
-                        switch (argcount) {
+                        switch (argCount) {
                             case 0:
-                                arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0), new ASTReal(token, driver, funcType == FuncType.RandInt ? 2.0 : 1.0));
+                                arguments = new ASTCons(system, where, new ASTReal(system, where, 0.0), new ASTReal(system, where, funcType == FuncType.RandInt ? 2.0 : 1.0));
                                 break;
                             case 1:
-                                arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0));
+                                arguments = new ASTCons(system, where, new ASTReal(system, where, 0.0));
                                 break;
                             case 2:
                                 break;
                             default:
-                                driver.error("Illegal argument(s) for random function", token);
+                                system.error("Illegal argument(s) for random function", where);
                                 break;
                         }
-                        if (!constant && funcType == FuncType.RandStatic) {
-                            driver.error("Argument(s) for rand_static() must be constant", token);
+                        if (funcType == FuncType.RandStatic) {
+                            if (!constant) {
+                                system.error("Argument(s) for rand_static() must be constant", where);
+                            }
+                            constant = RandStaticIsConst; // terrible, but works for JSON
                         }
                         break;
-                    case RandIntDiscrete:
+                    case RandDiscrete:
                         constant = false;
-                        natural = isNatural(null, argcount);
-                        if (argcount < 1) {
-                            driver.error("Function takes at least one argument", token);
+                        natural = isNatural(null, argCount);
+                        if (argCount < 1) {
+                            system.error("Function takes at least one argument", where);
                         }
                         break;
-                    case RandIntBernoulli:
-                    case RandIntGeometric:
-                    case RandIntPoisson:
+                    case RandBernoulli:
+                    case RandGeometric:
+                    case RandPoisson:
                     case RandExponential:
                     case RandChiSquared:
                     case RandStudentT:
                         constant = false;
-                        if (argcount != 1) {
-                            driver.error("Function takes one argument", token);
+                        if (argCount != 1) {
+                            system.error("Function takes one argument", where);
                         }
                         break;
-                    case RandIntBinomial:
-                    case RandIntNegBinomial:
+                    case RandBinomial:
+                    case RandNegBinomial:
                         natural = arguments != null && arguments.size() == 2 && arguments.getChild(0).isNatural();
+                        //fall through
                     case RandCauchy:
                     case RandExtremeValue:
                     case RandFisherF:
@@ -543,71 +557,23 @@ public class ASTFunction extends ASTExpression {
                     case RandNormal:
                     case RandWeibull:
                         constant = false;
-                        if (argcount != 2) {
-                            driver.error("Function takes two arguments", token);
+                        if (argCount != 2) {
+                            system.error("Function takes two arguments", where);
                         }
                         break;
                     case Min:
                     case Max:
-                        if (argcount != 2) {
-                            driver.error("Function takes at least two arguments", token);
+                        if (argCount != 2) {
+                            system.error("Function takes at least two arguments", where);
                         }
                         break;
                     case NotAFunction:
-                        driver.error("Unknown function", token);
-                        break;
-                }
-
-                if (funcType == FuncType.Infinity && argcount == 0) {
-                    arguments = new ASTReal(token, driver, 1.0);
-                    return null;
-                }
-                if (funcType == FuncType.Ftime) {
-                    if (arguments != null) {
-                        driver.error("ftime() function takes no arguments", null);
-                    }
-                    constant = false;
-                    arguments = new ASTReal(token, driver, 1.0);
-                }
-                if (funcType == FuncType.Frame) {
-                    if (arguments != null) {
-                        driver.error("time() function takes no arguments", null);
-                    }
-                    constant = false;
-                    arguments = new ASTReal(token, driver, 1.0);
-                }
-                if (funcType.getType() >= FuncType.RandStatic.getType() && funcType.getType() <= FuncType.RandInt.getType()) {
-                    if (funcType != FuncType.RandStatic) {
-                        constant = false;
-                    }
-                    switch (argcount) {
-                        case 0:
-                            arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0), new ASTReal(token, driver, funcType == FuncType.RandInt ? 2.0 : 1.0));
-                            break;
-
-                        case 1:
-                            arguments = new ASTCons(token, driver, new ASTReal(token, driver, 0.0), arguments);
-                            break;
-
-                        case 2:
-                            break;
-
-                        default:
-                            driver.error("Illegal argument(s) for random function", null);
-                            break;
-                    }
-                    if (!constant && funcType == FuncType.RandStatic) {
-                        driver.error("Argument(s) for rand_static() must be constant", null);
-                    }
-                    if (funcType == FuncType.RandInt && arguments != null) {
-                        natural = arguments.isNatural();
-                    }
-                    return null;
+                        system.error("Unknown function", where);
                 }
 
                 for (FuncType t : MIGHT_BE_NATURAL) {
                     if (t == funcType) {
-                        natural = arguments != null && arguments.isNatural();
+                        natural = arguments == null || arguments.isNatural();
                         break;
                     }
                 }
@@ -615,7 +581,7 @@ public class ASTFunction extends ASTExpression {
                 for (FuncType t : MUST_BE_NATURAL) {
                     if (t == funcType) {
                         if (arguments != null && !arguments.isNatural() && !ASTParameter.Impure) {
-                            driver.error("Function is defined over natural numbers only", null);
+                            system.error("Function is defined over natural numbers only", null);
                         }
                         natural = true;
                         break;
@@ -632,16 +598,36 @@ public class ASTFunction extends ASTExpression {
 	}
 
 	@Override
-	public ASTExpression simplify() {
-		arguments = simplify(arguments);
+	public ASTExpression simplify(CFDGBuilder builder) {
+		arguments = ASTExpression.simplify(builder, arguments);
 		if (constant) {
-			double[] result = new double[MAX_VECTOR_SIZE];
-			int len = evaluate(result, MAX_VECTOR_SIZE, null);
+			final double[] result = new double[MAX_VECTOR_SIZE];
+			int len = evaluate(builder, null, result, MAX_VECTOR_SIZE);
 			if (len < 0) {
 				return this;
 			}
-            return ASTUtils.makeResult(driver, result[0], len, this);
+            return AST.makeResult(result, len, this);
 		}
-		return this;
+		return null;
 	}
+
+    private double minMax(CFDGBuilder builder, CFDGRenderer renderer, ASTExpression e, boolean isMin) {
+        final double[] result = new double[] { 0.0 };
+        if (e.getChild(0).evaluate(builder, renderer, result, 1) != 1) {
+            system.error("Error computing min/max here", e.getChild(0).getWhere());
+        }
+        for (int i = 1; i < e.size(); ++i) {
+            final double[] value = new double[] { 0.0 };
+            if (e.getChild(i).evaluate(builder, renderer, value, 1) != 1) {
+                system.error("Error computing min/max here", e.getChild(i).getWhere());
+            }
+            boolean leftMin = result[0] < value[0];
+            result[0] = ((isMin && leftMin) || (!isMin && !leftMin)) ? result[0] : value[0];
+        }
+        return result[0];
+    }
+
+    private boolean isNatural(CFDGRenderer renderer, double value) {
+        return value >= 0 && value <= (renderer != null ? renderer.getMaxNatural() : Integer.MAX_VALUE) && value == Math.floor(value);
+    }
 }

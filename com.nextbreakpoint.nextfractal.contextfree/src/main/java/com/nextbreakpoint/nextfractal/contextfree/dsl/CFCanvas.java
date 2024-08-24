@@ -24,8 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.nextfractal.contextfree.core.Bounds;
-
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 
@@ -34,15 +32,15 @@ public interface CFCanvas {
 
     int getHeight();
 
-    void primitive(int shapeType, double[] color, AffineTransform transform);
+    void primitive(int shapeType, double[] color, AffineTransform transform, int blend);
 
-    void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit);
+    void path(double[] color, AffineTransform transform, GeneralPath path, long flags, double strokeWidth, double miterLimit, int blend);
 
     void start(boolean first, double[] backgroundColor, int currWidth, int currHeight);
 
     void end();
 
-    void tileTransform(Bounds bounds);
-
     void clear(double[] backgroundColor);
+
+    void drawRect(double x, double y, double width, double height);
 }

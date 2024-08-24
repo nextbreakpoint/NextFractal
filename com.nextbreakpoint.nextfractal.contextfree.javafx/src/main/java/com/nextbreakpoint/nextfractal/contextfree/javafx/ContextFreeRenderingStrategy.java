@@ -1,8 +1,8 @@
 package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
@@ -136,10 +136,10 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     private boolean[] createCFDG(ParserResult result) throws Exception {
         if (!result.errors().isEmpty()) {
             cfdgSource = null;
-            throw new CFDGParserException("Failed to compile source", result.errors());
+            throw new CFParserException("Failed to compile source", result.errors());
         }
         boolean[] changed = new boolean[] { false, false };
-        CFDGParserResult parserResult = (CFDGParserResult) result.result();
+        CFParserResult parserResult = (CFParserResult) result.result();
         String source = parserResult.source();
         changed[0] = !source.equals(cfdgSource);
         cfdgSource = source;

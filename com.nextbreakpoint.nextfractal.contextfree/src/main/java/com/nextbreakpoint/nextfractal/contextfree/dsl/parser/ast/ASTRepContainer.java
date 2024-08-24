@@ -24,101 +24,97 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.Shape;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.PathOp;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.RepElemType;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
+// astreplacement.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2013 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
+
+@Getter
 public class ASTRepContainer extends ASTObject {
-	private final CFDGDriver driver;
-	@Getter
-    private final List<ASTReplacement> body = new ArrayList<>();
-	@Getter
-    private final boolean global;
+	private final List<ASTReplacement> body = new ArrayList<>();
 	@Setter
-    @Getter
+    private boolean global;
+	@Setter
     private List<ASTParameter> parameters = new ArrayList<>();
 	@Setter
-    @Getter
     private PathOp pathOp;
 	@Setter
-    @Getter
     private int repType;
-	@Getter
-    @Setter
-    private int stackCount;
 
-	public ASTRepContainer(Token token, CFDGDriver driver) {
-		super(token);
-		this.driver = driver;
+	public ASTRepContainer(CFDGSystem system, ASTWhere where) {
+		super(system, where);
 		pathOp = PathOp.UNKNOWN;
 		repType = RepElemType.empty.getType();
 		global = false;
-		stackCount = 0;
 	}
 	
-	public ASTRepContainer(ASTRepContainer repCont) {
-		super(repCont.getToken());
-		driver = repCont.driver;
-		pathOp = repCont.pathOp;
-		repType = repCont.repType;
-		global = repCont.global;
-		stackCount = repCont.stackCount;
+	public ASTRepContainer(CFDGSystem system, ASTRepContainer repContainer) {
+		super(system, repContainer.getWhere());
+		pathOp = repContainer.pathOp;
+		repType = repContainer.repType;
+		global = repContainer.global;
+		parameters = repContainer.parameters;
 	}
 
-    public void addParameter(String type, int nameIndex, Token nameLocation) {
-		parameters.add(new ASTParameter(nameLocation, driver, type, nameIndex));
+    public void addParameter(String type, int nameIndex, ASTWhere where) {
+		parameters.add(new ASTParameter(system, where, type, nameIndex));
 		ASTParameter param = parameters.getLast();
 		param.setParameter(true);
 		param.checkParam();
 	}
 
-	public ASTParameter addDefParameter(int nameIndex, ASTDefine def, Token nameLocation) {
-		parameters.add(new ASTParameter(nameLocation, driver, nameIndex, def));
+	public ASTParameter addDefParameter(int nameIndex, ASTDefine define, ASTWhere where) {
+		parameters.add(new ASTParameter(system, where, nameIndex, define));
 		ASTParameter param = parameters.getLast();
 		param.checkParam();
 		return param;
 	}
 
-	public void addLoopParameter(int nameIndex, boolean natural, boolean local, Token nameLocation) {
-		parameters.add(new ASTParameter(nameLocation, driver, nameIndex, natural, local));
+	public void addLoopParameter(int nameIndex, ASTWhere where) {
+		parameters.add(new ASTParameter(system, where, nameIndex));
 		ASTParameter param = parameters.getLast();
 		param.checkParam();
-		stackCount += param.getTupleSize();
 	}
 
-	public void compile(CompilePhase ph, ASTLoop loop, ASTDefine def) {
-        switch (ph) {
+	public void compile(CFDGBuilder builder, CompilePhase phase, ASTLoop loop, ASTDefine define) {
+        switch (phase) {
             case TypeCheck -> {
-                stackCount = 0;
                 for (int i = 0; i < parameters.size(); i++) {
-                    if (parameters.get(i).isParameter() || parameters.get(i).isLoopIndex()) {
-                        stackCount += parameters.get(i).getTupleSize();
-                    } else {
-                        parameters = parameters.subList(0, i);
-                        break;
+                    if (!parameters.get(i).isParameter() && !parameters.get(i).isLoopIndex()) {
+						parameters = parameters.subList(0, i);
+						break;
                     }
                 }
-
-                driver.pushRepContainer(this);
-                if (loop != null) {
-                    loop.compileLoopMod();
-                }
-                for (ASTReplacement rep : body) {
-                    rep.compile(ph);
-                }
-                if (def != null) {
-                    def.compile(ph);
-                }
-                driver.popRepContainer(null);
             }
 			case Simplify -> {
 				// do nothing
@@ -126,15 +122,27 @@ public class ASTRepContainer extends ASTObject {
 			default -> {
 			}
         }
+
+		builder.pushRepContainer(this);
+		if (loop != null) {
+			loop.compileLoopMod(builder);
+		}
+		for (ASTReplacement rep : body) {
+			rep.compile(builder, phase);
+		}
+		if (define != null) {
+			define.compile(builder, phase);
+		}
+		builder.popRepContainer(null);
 	}
-	
-	public void traverse(Shape parent, boolean tr, CFDGRenderer renderer, boolean getParams) {
+
+	public void traverse(CFDGBuilder builder, CFDGRenderer renderer, Shape parent, boolean tr, boolean getParams) {
 		int size = renderer.getStackSize();
 		if (getParams && parent.getParameters() != null) {
 			renderer.initStack(parent.getParameters());
 		}
 		for (ASTReplacement rep : body) {
-			rep.traverse(parent, tr, renderer);
+			rep.traverse(builder, renderer, parent, tr);
 		}
 		renderer.unwindStack(size, getParameters());
 	}

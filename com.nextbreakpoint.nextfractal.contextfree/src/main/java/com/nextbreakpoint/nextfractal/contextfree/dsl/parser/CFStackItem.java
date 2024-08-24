@@ -26,7 +26,6 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTParameter;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTUtils;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import lombok.Getter;
 
@@ -40,9 +39,7 @@ public abstract class CFStackItem {
         this.stack = stack;
     }
 
-    public void evalArgs(CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential) {
-        ASTUtils.evalArgs(renderer, null, iterator(parameters), arguments, sequential);
-    }
+    public abstract void evalArgs(CFDGBuilder builder, CFDGRenderer renderer, ASTExpression arguments, List<ASTParameter> parameters, boolean sequential);
 
     public abstract ExpType getType();
 
@@ -53,6 +50,6 @@ public abstract class CFStackItem {
     }
 
     protected CFStackIterator iterator() {
-        return new CFStackIterator(stack);
+        return new CFStackIterator();
     }
 }

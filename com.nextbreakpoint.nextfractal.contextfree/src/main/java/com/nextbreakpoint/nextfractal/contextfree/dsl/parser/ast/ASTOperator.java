@@ -24,71 +24,99 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGDriver;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGRenderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CompilePhase;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ExpType;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.Locality;
 import lombok.Getter;
-import org.antlr.v4.runtime.Token;
+
+// astexpression.h
+// this file is part of Context Free
+// ---------------------
+// Copyright (C) 2011-2014 John Horigan - john@glyphic.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// John Horigan can be contacted at john@glyphic.com or at
+// John Horigan, 1209 Villa St., Mountain View, CA 94041-1123, USA
 
 @Getter
 public class ASTOperator extends ASTExpression {
-	private final char op;
+    private final char op;
 	private int tupleSize;
 	private ASTExpression left;
 	private ASTExpression right;
 
-	public ASTOperator(Token token, CFDGDriver driver, char op, ASTExpression left, ASTExpression right) {
-		super(token, driver);
+	public ASTOperator(CFDGSystem system, ASTWhere where, char op, ASTExpression left, ASTExpression right) {
+		super(system, where);
 		this.op = op;
 		this.left = left;
 		this.right = right;
 		this.tupleSize = 1;
-		int index = "NP!+-*/^_<>LG=n&|X".indexOf(String.valueOf(op));
+
+        //TODO move to operator enum
+		final int index = "NP!+-*/^_<>LG=n&|X".indexOf(String.valueOf(op));
+
 		if (index == -1) {
-            this.driver.error("Unknown operator", token);
-        } else if (index < 3) {
-			if (right != null) {
-                this.driver.error("Operator takes only one operand", token);
+            system.error("Unknown operator", where);
+        }
+        if (index < 3) {
+            if (right != null) {
+                system.error("Operator takes only one operand", where);
             }
-		} else {
-			if (right == null) {
-                this.driver.error("Operator takes two operands", token);
+        } else {
+            if (right == null) {
+                system.error("Operator takes two operands", where);
             }
-		}
+        }
 	}
 
-	public ASTOperator(Token token, CFDGDriver driver, char op, ASTExpression left) {
-		this(token, driver, op, left, null);
+	public ASTOperator(CFDGSystem system, ASTWhere where, char op, ASTExpression left) {
+		this(system, where, op, left, null);
 	}
 
     @Override
-	public int evaluate(double[] result, int length, CFDGRenderer renderer) {
-		double[] l = new double[] { 0.0 };
-		double[] r = new double[] { 0.0 };
+	public int evaluate(CFDGBuilder builder, CFDGRenderer renderer, double[] result, int length) {
+        final double[] l = new double[AST.MAX_VECTOR_SIZE];
+        final double[] r = new double[AST.MAX_VECTOR_SIZE];
 
 		if (result != null && length < 1)
 			return -1;
 
 		if (type == ExpType.Flag && op == '+') {
-			if (left.evaluate(result != null ? l : null, 1, renderer) != 1)
+			if (left.evaluate(builder, renderer, result != null ? l : null, 1) != 1)
 				return -1;
-			if (right == null || right.evaluate(result != null ? r : null, 1, renderer) != 1)
+			if (right == null || right.evaluate(builder, renderer, result != null ? r : null, 1) != 1)
 				return -1;
-			int f = (int) l[0] | (int) r[0];
-			if (result != null)
-				result[0] = f;
+			if (result != null) {
+                int f = (int) l[0] | (int) r[0];
+                result[0] = f;
+            }
 			return 1;
 		}
 
 		if (type != ExpType.Numeric) {
-            driver.error("Non-numeric expression in a numeric context", getToken());
+            system.error("Non-numeric expression in a numeric context", getWhere());
             return -1;
 		}
 
-		if (left.evaluate(result != null ? l : null, result != null ? 1 : 0, renderer) != 1) {
-            driver.error("illegal operand", null);
+        final int leftNum = left.evaluate(builder, renderer, result != null ? l : null, result != null ? 1 : 0);
+        if (leftNum == -1) {
+            system.error("illegal operand", null);
             return -1;
 		}
 
@@ -104,9 +132,13 @@ public class ASTOperator extends ASTExpression {
             }
         }
         
-		int rightnum = right != null ? right.evaluate(result != null ? r : null, result != null ? 1 : 0, renderer) : 0;
+		final int rightNum = right != null ? right.evaluate(builder, renderer, result != null ? r : null, result != null ? 1 : 0) : 0;
+        if (right != null && rightNum != 1) {
+            system.error("illegal operand", getWhere());
+            return -1;
+        }
 
-		if (rightnum == 0 && (op == 'N' || op == 'P' || op == '!')) {
+		if (rightNum == 0 && (op == 'N' || op == 'P' || op == '!')) {
 			if (result != null) {
 				switch (op) {
 				case 'P':
@@ -125,29 +157,73 @@ public class ASTOperator extends ASTExpression {
 			return 1;
 		}
 
-		if (rightnum != 1) {
-            driver.error("illegal operand", getToken());
-            return -1;
-		}
-
 		if (result != null) {
             switch (op) {
-                case '+' -> result[0] = l[0] + r[0];
-                case '-' -> result[0] = l[0] - r[0];
-                case '_' -> result[0] = Math.max(l[0] - r[0], 0.0);
-                case '*' -> result[0] = l[0] * r[0];
-                case '/' -> result[0] = l[0] / r[0];
+                case '+' -> {
+                    for (int i = 0; i < tupleSize; i++) {
+                        result[i] = l[i] + r[i];
+                    }
+                }
+                case '-' -> {
+                    for (int i = 0; i < tupleSize; i++) {
+                        result[i] = l[i] - r[i];
+                    }
+                }
+                case '_' -> {
+                    for (int i = 0; i < tupleSize; i++) {
+                        result[i] = Math.max(l[i] - r[i], 0.0);
+                    }
+                }
+                case '*' -> {
+                    if (leftNum == rightNum) {
+                        for (int i = 0; i < tupleSize; i++) {
+                            result[i] = l[i] * r[i];
+                        }
+                    } else {
+                        for (int i = 0; i < tupleSize; i++) {
+                            result[i] = leftNum == 1 ? l[0] * r[i] : l[i] * r[0];
+                        }
+                    }
+                }
+                case '/' -> {
+                    if (leftNum == rightNum) {
+                        for (int i = 0; i < tupleSize; i++) {
+                            result[i] = l[i] / r[i];
+                        }
+                    } else {
+                        for (int i = 0; i < tupleSize; i++) {
+                            result[i] = leftNum == 1 ? l[0] / r[i] : l[i] / r[0];
+                        }
+                    }
+                }
                 case '<' -> result[0] = (l[0] < r[0]) ? 1.0 : 0.0;
                 case 'L' -> result[0] = (l[0] <= r[0]) ? 1.0 : 0.0;
                 case '>' -> result[0] = (l[0] > r[0]) ? 1.0 : 0.0;
                 case 'G' -> result[0] = (l[0] >= r[0]) ? 1.0 : 0.0;
-                case '=' -> result[0] = (l[0] == r[0]) ? 1.0 : 0.0;
-                case 'n' -> result[0] = (l[0] != r[0]) ? 1.0 : 0.0;
+
+                case '=' -> {
+                    result[0] = 0.0;
+                    for (int i = 0; i < tupleSize; i++) {
+                        if (l[i] != r[i]) {
+                            return 1;
+                        }
+                    }
+                    result[0] = 1.0;
+                }
+                case 'n' -> {
+                    result[0] = 1.0;
+                    for (int i = 0; i < tupleSize; i++) {
+                        if (l[i] != r[i]) {
+                            return 1;
+                        }
+                    }
+                    result[0] = 0.0;
+                }
                 case '&', '|' -> result[0] = r[0];
                 case 'X' -> result[0] = (l[0] != 0 && r[0] == 0 || l[0] == 0 && r[0] != 0) ? 1.0 : 0.0;
                 case '^' -> {
                     result[0] = Math.pow(l[0], r[0]);
-                    if (natural && result[0] < 9007199254740992.0) {
+                    if (natural && result[0] < AST.MAX_NATURAL) {
                         long pow = 1;
                         long il = (long) l[0];
                         long ir = (long) r[0];
@@ -172,105 +248,117 @@ public class ASTOperator extends ASTExpression {
 	}
 
 	@Override
-	public void entropy(StringBuilder e) {
+	public void entropy(StringBuilder entropy) {
 		if (left != null) {
-			left.entropy(e);
+			left.entropy(entropy);
 		}
 
 		if (right != null) {
-			right.entropy(e);
+			right.entropy(entropy);
 		}
 
+        //TODO move to operator enum
         switch (op) {
-            case '*' -> e.append("\u002E\u0032\u00D9\u002C\u0041\u00FE");
-            case '/' -> e.append("\u006B\u0015\u0023\u0041\u009E\u00EB");
-            case '+' -> e.append("\u00D7\u00B1\u00B0\u0039\u0033\u00C8");
-            case '-' -> e.append("\u005D\u00E7\u00F0\u0094\u00C4\u0013");
-            case '^' -> e.append("\u0002\u003C\u0068\u0036\u00C5\u00A0");
-            case 'N' -> e.append("\u0055\u0089\u0051\u0046\u00DB\u0084");
-            case 'P' -> e.append("\u008E\u00AC\u0029\u004B\u000E\u00DC");
-            case '!' -> e.append("\u0019\u003A\u003E\u0053\u0014\u00EA");
-            case '<' -> e.append("\u00BE\u00DB\u00C4\u00A6\u004E\u00AD");
-            case '>' -> e.append("\u00C7\u00D9\u0057\u0032\u00D6\u0087");
-            case 'L' -> e.append("\u00E3\u0056\u007E\u0044\u0057\u0080");
-            case 'G' -> e.append("\u00B1\u002D\u002A\u00CC\u002C\u0040");
-            case '=' -> e.append("\u0078\u0048\u00C2\u0095\u00A9\u00E2");
-            case 'n' -> e.append("\u0036\u00CC\u0001\u003B\u002F\u00AD");
-            case '&' -> e.append("\u0028\u009B\u00FB\u007F\u00DB\u009C");
-            case '|' -> e.append("\u002E\u0040\u001B\u0044\u0015\u007C");
-            case 'X' -> e.append("\u00A7\u002B\u0092\u00FA\u00FC\u00F9");
-            case '_' -> e.append("\u0060\u002F\u0010\u00AD\u0010\u00FF");
+            case '*' -> entropy.append("\u002E\u0032\u00D9\u002C\u0041\u00FE");
+            case '/' -> entropy.append("\u006B\u0015\u0023\u0041\u009E\u00EB");
+            case '+' -> entropy.append("\u00D7\u00B1\u00B0\u0039\u0033\u00C8");
+            case '-' -> entropy.append("\u005D\u00E7\u00F0\u0094\u00C4\u0013");
+            case '^' -> entropy.append("\u0002\u003C\u0068\u0036\u00C5\u00A0");
+            case 'N' -> entropy.append("\u0055\u0089\u0051\u0046\u00DB\u0084");
+            case 'P' -> entropy.append("\u008E\u00AC\u0029\u004B\u000E\u00DC");
+            case '!' -> entropy.append("\u0019\u003A\u003E\u0053\u0014\u00EA");
+            case '<' -> entropy.append("\u00BE\u00DB\u00C4\u00A6\u004E\u00AD");
+            case '>' -> entropy.append("\u00C7\u00D9\u0057\u0032\u00D6\u0087");
+            case 'L' -> entropy.append("\u00E3\u0056\u007E\u0044\u0057\u0080");
+            case 'G' -> entropy.append("\u00B1\u002D\u002A\u00CC\u002C\u0040");
+            case '=' -> entropy.append("\u0078\u0048\u00C2\u0095\u00A9\u00E2");
+            case 'n' -> entropy.append("\u0036\u00CC\u0001\u003B\u002F\u00AD");
+            case '&' -> entropy.append("\u0028\u009B\u00FB\u007F\u00DB\u009C");
+            case '|' -> entropy.append("\u002E\u0040\u001B\u0044\u0015\u007C");
+            case 'X' -> entropy.append("\u00A7\u002B\u0092\u00FA\u00FC\u00F9");
+            case '_' -> entropy.append("\u0060\u002F\u0010\u00AD\u0010\u00FF");
             default -> {
             }
         }
 	}
 
 	@Override
-	public ASTExpression simplify() {
-		left = left.simplify(left);
-
-		right = right.simplify(right);
+	public ASTExpression simplify(CFDGBuilder builder) {
+		left = ASTExpression.simplify(builder, left);
+		right = ASTExpression.simplify(builder, right);
 
 		if (constant && (type == ExpType.Numeric || type == ExpType.Flag)) {
-			double[] result = new double[1];
-			if (evaluate(result, 1, null) != 1) {
+			final double[] value = new double[AST.MAX_VECTOR_SIZE];
+			if (evaluate(builder, null, value, tupleSize) != tupleSize) {
 				return null;
 			}
 
-            return ASTUtils.makeResult(driver, result[0], tupleSize, this);
+            return AST.makeResult(value, tupleSize, this);
 		}
 
-		return this;
+		return null;
 	}
 
 	@Override
-	public ASTExpression compile(CompilePhase ph) {
-		left = compile(left, ph);
+	public ASTExpression compile(CFDGBuilder builder, CompilePhase phase) {
+		left = ASTExpression.compile(builder, phase, left);
+		right = ASTExpression.compile(builder, phase, right);
 
-		right = compile(right, ph);
+        if (left == null) {
+            system.error("Left operand missing", getWhere());
+            return null;
+        }
 
-        switch (ph) {
+        switch (phase) {
             case TypeCheck -> {
                 constant = left.isConstant() && (right == null || right.isConstant());
-                locality = right != null ? ASTUtils.combineLocality(left.getLocality(), right.getLocality()) : left.getLocality();
+                locality = right != null ? AST.combineLocality(left.getLocality(), right.getLocality()) : left.getLocality();
                 if (locality == Locality.PureNonLocal) {
                     locality = Locality.ImpureNonLocal;
                 }
                 type = right != null ? ExpType.fromType(left.getType().getType() | right.getType().getType()) : left.getType();
                 if (type == ExpType.Numeric) {
-                    int ls = left != null ? left.evaluate(null, 0) : 0;
-                    int rs = right != null ? right.evaluate(null, 0) : 0;
+                    int ls = left != null ? left.evaluate(builder, null, 0) : 0;
+                    int rs = right != null ? right.evaluate(builder, null, 0) : 0;
                     switch (op) {
                         case 'N':
                         case 'P':
                             tupleSize = ls;
                             if (rs != 0) {
-                                driver.error("Unitary operators must have only one operand", getToken());
+                                system.error("Unitary operators must have only one operand", getWhere());
                             }
                             break;
                         case '!':
                             if (rs != 0 || ls != 1) {
-                                driver.error("Unitary operators must have only one scalar operand", getToken());
+                                system.error("Unitary operators must have only one scalar operand", getWhere());
                             }
+                            break;
+                        case '/':
+                        case '*':
+                            if (ls < 1 || rs < 1) {
+                                system.error("Binary operators must have two operands", getWhere());
+                            }
+                            else if (ls != rs && Math.min(ls, rs) > 1) {
+                                system.error("At least one operand must be scalar (or both same size)", getWhere());
+                            }
+                            tupleSize = Math.max(ls, rs);
                             break;
                         case '+':
                         case '-':
                         case '_':
-                        case '/':
-                        case '*':
                             tupleSize = ls;
                         case '=':
                         case 'n':
                             if (ls != rs) {
-                                driver.error("Operands must have the same length", getToken());
+                                system.error("Operands must have the same length", getWhere());
                             }
                             if (ls < 1 || rs < 1) {
-                                driver.error("Binary operators must have two operands", getToken());
+                                system.error("Binary operators must have two operands", getWhere());
                             }
                             break;
                         default:
                             if (ls != 1 || rs != 1) {
-                                driver.error("Binary operators must have two scalar operands", getToken());
+                                system.error("Binary operators must have two scalar operands", getWhere());
                             }
                             break;
                     }
@@ -280,15 +368,15 @@ public class ASTOperator extends ASTExpression {
                 }
                 if (op == '+') {
                     if (type == ExpType.Flag || type != ExpType.Numeric) {
-                        driver.error("Operands must be numeric or flags", getToken());
+                        system.error("Operands must be numeric or flags", getWhere());
                     }
                 } else {
                     if (type != ExpType.Numeric) {
-                        driver.error("Operand(s) must be numeric", getToken());
+                        system.error("Operand(s) must be numeric", getWhere());
                     }
                 }
                 if (op == '_' && !isNatural() && !ASTParameter.Impure) {
-                    driver.error("Proper subtraction operands must be natural", getToken());
+                    system.error("Proper subtraction operands must be natural", getWhere());
                 }
             }
             case Simplify -> {
