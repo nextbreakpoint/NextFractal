@@ -66,19 +66,19 @@ public class Canvas implements CFCanvas {
 
         //TODO implement blend
 
-        AffineTransform affine = factory.createAffineTransform();
+        final AffineTransform affine = factory.createAffineTransform();
         affine.append(normTransform);
 
-        double[] matrix = new double[6];
+        final double[] matrix = new double[6];
         transform.getMatrix(matrix);
-        AffineTransform newAffine = factory.createAffineTransform(matrix);
+        final AffineTransform newAffine = factory.createAffineTransform(matrix);
         affine.append(newAffine);
 
         affine.setAffineTransform(context);
 
-        PrimShape primShape = PrimShape.getShapeMap().get(shapeType);
+        final PrimShape primShape = PrimShape.getShapeMap().get(shapeType);
         if (primShape != null) {
-            Color c = factory.createColor((float) color[0], (float) color[1], (float) color[2], (float) color[3]);
+            final Color c = factory.createColor((float) color[0], (float) color[1], (float) color[2], (float) color[3]);
             context.setFill(c);
             fill(primShape.getPath(), GraphicsContext.EVEN_ODD);
         } else {
@@ -94,7 +94,7 @@ public class Canvas implements CFCanvas {
 
         //TODO implement blend
 
-        AffineTransform affine = factory.createAffineTransform();
+        final AffineTransform affine = factory.createAffineTransform();
         affine.append(normTransform);
 
         Shape shape;
@@ -107,17 +107,17 @@ public class Canvas implements CFCanvas {
 
         if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             shape = path;
-            double[] matrix = new double[6];
+            final double[] matrix = new double[6];
             transform.getMatrix(matrix);
-            AffineTransform newAffine = factory.createAffineTransform(matrix);
+            final AffineTransform newAffine = factory.createAffineTransform(matrix);
             affine.append(newAffine);
         } else if ((flags & FlagType.CF_ISO_WIDTH.getMask()) != 0) {
-            double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
+            final double scale = Math.sqrt(Math.abs(transform.getDeterminant()));
             context.setStrokeLine((float) (strokeWidth * scale), mapToCap(flags), mapToJoin(flags), (float) miterLimit);
             shape = path;
-            double[] matrix = new double[6];
+            final double[] matrix = new double[6];
             transform.getMatrix(matrix);
-            AffineTransform newAffine = factory.createAffineTransform(matrix);
+            final AffineTransform newAffine = factory.createAffineTransform(matrix);
             affine.append(newAffine);
         } else {
             context.setStrokeLine((float) strokeWidth, mapToCap(flags), mapToJoin(flags), (float) miterLimit);
@@ -126,7 +126,7 @@ public class Canvas implements CFCanvas {
 
         affine.setAffineTransform(context);
 
-        Color c = factory.createColor((float) color[0], (float) color[1], (float) color[2], (float) color[3]);
+        final Color c = factory.createColor((float) color[0], (float) color[1], (float) color[2], (float) color[3]);
         if ((flags & FlagType.CF_FILL.getMask()) != 0) {
             context.setFill(c);
             fill(shape, path.getWindingRule());
@@ -153,8 +153,8 @@ public class Canvas implements CFCanvas {
     }
 
     private void createPath(Shape path) {
-        PathIterator iterator = path.getPathIterator(new java.awt.geom.AffineTransform());
-        float[] coords = new float[20];
+        final PathIterator iterator = path.getPathIterator(new java.awt.geom.AffineTransform());
+        final float[] coords = new float[20];
         while (!iterator.isDone()) {
             int code = iterator.currentSegment(coords);
             switch (code) {
@@ -220,7 +220,7 @@ public class Canvas implements CFCanvas {
 
     @Override
     public void clear(double[] backgroundColor) {
-        Color c = factory.createColor((float) backgroundColor[0], (float) backgroundColor[1], (float) backgroundColor[2], (float) backgroundColor[3]);
+        final Color c = factory.createColor((float) backgroundColor[0], (float) backgroundColor[1], (float) backgroundColor[2], (float) backgroundColor[3]);
         context.setFill(c);
         context.fillRect(0, 0, getWidth(), getHeight());
     }

@@ -148,17 +148,17 @@ public class Renderer {
 	}
 
 	public void getPixels(int[] pixels) {
-		int bufferWidth = buffer.getSize().width();
-		int bufferHeight = buffer.getSize().height();
-		int[] bufferPixels = new int[bufferWidth * bufferHeight];
-		IntBuffer tmpBuffer = IntBuffer.wrap(bufferPixels); 
+		final int bufferWidth = buffer.getSize().width();
+		final int bufferHeight = buffer.getSize().height();
+		final int[] bufferPixels = new int[bufferWidth * bufferHeight];
+		final IntBuffer tmpBuffer = IntBuffer.wrap(bufferPixels);
 		buffer.getBuffer().getImage().getPixels(tmpBuffer);
-		int tileWidth = tile.tileSize().width();
-		int tileHeight = tile.tileSize().height();
-		int borderWidth = tile.borderSize().width();
-		int borderHeight = tile.borderSize().height();
-		int offsetX = (bufferWidth - tileWidth - borderWidth * 2) / 2;
-		int offsetY = (bufferHeight - tileHeight - borderHeight * 2) / 2;
+		final int tileWidth = tile.tileSize().width();
+		final int tileHeight = tile.tileSize().height();
+		final int borderWidth = tile.borderSize().width();
+		final int borderHeight = tile.borderSize().height();
+		final int offsetX = (bufferWidth - tileWidth - borderWidth * 2) / 2;
+		final int offsetY = (bufferHeight - tileHeight - borderHeight * 2) / 2;
 		int offset = offsetY * bufferWidth + offsetX;
 		int tileOffset = 0;
 		for (int y = 0; y < tileHeight; y++) {
@@ -173,8 +173,8 @@ public class Renderer {
 		if (buffer != null) {
 			gc.save();
 //			RendererSize borderSize = buffer.getTile().borderSize();
-			Size imageSize = buffer.getTile().imageSize();
-			Size tileSize = buffer.getTile().tileSize();
+			final Size imageSize = buffer.getTile().imageSize();
+			final Size tileSize = buffer.getTile().tileSize();
 			gc.setAffineTransform(buffer.getAffine());
 			gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height());
 //			gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
@@ -198,8 +198,8 @@ public class Renderer {
 //		lock.lock();
 //		if (buffer != null) {
 //			gc.save();
-//			RendererSize imageSize = buffer.getTile().imageSize();
-//			RendererSize tileSize = buffer.getTile().tileSize();
+//			final RendererSize imageSize = buffer.getTile().imageSize();
+//			final RendererSize tileSize = buffer.getTile().tileSize();
 //			gc.setAffine(buffer.getAffine());
 //			final double sx = w / (double) buffer.getTile().tileSize().width();
 //			final double sy = h / (double) buffer.getTile().tileSize().height();
@@ -212,9 +212,9 @@ public class Renderer {
 //	}
 
 	private void ensureBufferAndSize() {
-		Tile newTile = computeOptimalBufferSize(tile, 0);
-		int width = newTile.tileSize().width() + newTile.borderSize().width() * 2;
-		int height = newTile.tileSize().height() + newTile.borderSize().height() * 2;
+		final Tile newTile = computeOptimalBufferSize(tile, 0);
+		final int width = newTile.tileSize().width() + newTile.borderSize().width() * 2;
+		final int height = newTile.tileSize().height() + newTile.borderSize().height() * 2;
 		size = new Size(width, height);
 		buffer.setSize(size);
 		buffer.setTile(newTile);
@@ -222,10 +222,10 @@ public class Renderer {
 	}
 
 	protected Tile computeOptimalBufferSize(Tile tile, double rotation) {
-		Size tileSize = tile.tileSize();
-		Size imageSize = tile.imageSize();
-		Size borderSize = tile.borderSize();
-		Point tileOffset = tile.tileOffset();
+		final Size tileSize = tile.tileSize();
+		final Size imageSize = tile.imageSize();
+		final Size borderSize = tile.borderSize();
+		final Point tileOffset = tile.tileOffset();
 		return new Tile(imageSize, tileSize, tileOffset, borderSize);
 	}
 
@@ -237,10 +237,10 @@ public class Renderer {
 				cfdgChanged = false;
 			}
 			progress = 0;
-			int width = getSize().width();
-			int height = getSize().height();
-			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+			final int width = getSize().width();
+			final int height = getSize().height();
+			final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 			g2d = image.createGraphics();
 			g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 			g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
@@ -332,7 +332,7 @@ public class Renderer {
 	}
 
 	public List<ScriptError> getErrors() {
-		List<ScriptError> result = new ArrayList<>(errors);
+		final List<ScriptError> result = new ArrayList<>(errors);
 		errors.clear();
 		return result;
 	}

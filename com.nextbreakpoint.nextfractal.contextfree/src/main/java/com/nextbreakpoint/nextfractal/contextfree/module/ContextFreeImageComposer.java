@@ -60,10 +60,10 @@ public class ContextFreeImageComposer implements ImageComposer {
 
     @Override
     public IntBuffer renderImage(String script, Metadata data) {
-        ContextFreeMetadata metadata = (ContextFreeMetadata) data;
-        Size suggestedSize = tile.tileSize();
-        BufferedImage image = new BufferedImage(suggestedSize.width(), suggestedSize.height(), BufferedImage.TYPE_INT_ARGB);
-        IntBuffer buffer = IntBuffer.wrap(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
+        final ContextFreeMetadata metadata = (ContextFreeMetadata) data;
+        final Size suggestedSize = tile.tileSize();
+        final BufferedImage image = new BufferedImage(suggestedSize.width(), suggestedSize.height(), BufferedImage.TYPE_INT_ARGB);
+        final IntBuffer buffer = IntBuffer.wrap(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         Graphics2D g2d = null;
         try {
             g2d = image.createGraphics();
@@ -73,11 +73,11 @@ public class ContextFreeImageComposer implements ImageComposer {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            CFParser parser = new CFParser();
-            CFParserResult parserResult = parser.parse(script);
-            CFDGImage cfdgImage = parserResult.classFactory().create();
-            GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
-            Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
+            final CFParser parser = new CFParser();
+            final CFParserResult parserResult = parser.parse(script);
+            final CFDGImage cfdgImage = parserResult.classFactory().create();
+            final GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
+            final Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
             renderer.setImage(cfdgImage);
             renderer.setSeed(metadata.getSeed());
             renderer.setOpaque(opaque);

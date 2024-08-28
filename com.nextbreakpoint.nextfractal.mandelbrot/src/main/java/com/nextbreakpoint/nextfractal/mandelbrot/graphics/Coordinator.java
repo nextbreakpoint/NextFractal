@@ -36,6 +36,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.xaos.XaosRenderer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -58,16 +58,16 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 
 	@Override
 	public IntBuffer renderImage(String script, Metadata data) {
-		ContextFreeMetadata metadata = (ContextFreeMetadata)data;
-		Size suggestedSize = tile.tileSize();
-		int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
+		final ContextFreeMetadata metadata = (ContextFreeMetadata)data;
+		final Size suggestedSize = tile.tileSize();
+		final int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
         Arrays.fill(pixels, 0xFF000000);
-		IntBuffer buffer = IntBuffer.wrap(pixels);
+		final IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			CFParser parser = new CFParser();
-			CFParserResult parserResult = parser.parse(script);
-			CFDGImage cfdgImage = parserResult.classFactory().create();
-			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
+			final CFParser parser = new CFParser();
+			final CFParserResult parserResult = parser.parse(script);
+			final CFDGImage cfdgImage = parserResult.classFactory().create();
+			final Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 			renderer.setImage(cfdgImage);
 			renderer.setSeed(metadata.getSeed());
 			renderer.setOpaque(opaque);

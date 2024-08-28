@@ -73,7 +73,7 @@ public class Coordinator implements RendererDelegate {
 	}
 
 	public boolean isPixelsChanged() {
-		boolean result = pixelsChanged;
+		final boolean result = pixelsChanged;
 		pixelsChanged = false;
 		return result;
 	}
