@@ -87,9 +87,9 @@ public class ToolRotate implements Tool {
 		if (active) {
 			x1 = (e.getX() - context.getWidth() / 2) / context.getWidth();
 			y1 = (context.getHeight() / 2 - e.getY()) / context.getHeight();
-			MandelbrotMetadata oldView = context.getMetadata();
-			double[] t = oldView.getTranslation().toArray();
-			double[] r = oldView.getRotation().toArray();
+			final MandelbrotMetadata oldView = context.getMetadata();
+			final double[] t = oldView.getTranslation().toArray();
+			final double[] r = oldView.getRotation().toArray();
 			a0 = r[2] * Math.PI / 180;
 			a1 = Math.atan2(y1 - y0, x1 - x0);
 			r0 = t[0];
@@ -103,7 +103,7 @@ public class ToolRotate implements Tool {
 
 	@Override
 	public void update(long timeInMillis, boolean timeAnimation) {
-		MandelbrotMetadata oldMetadata = context.getMetadata();
+		final MandelbrotMetadata oldMetadata = context.getMetadata();
 		Time time = oldMetadata.time();
 		if (timeAnimation || lastTimeInMillis == null) {
 			if (lastTimeInMillis == null) {
@@ -115,32 +115,32 @@ public class ToolRotate implements Tool {
 			lastTimeInMillis = null;
 		}
 		if (changed) {
-			double[] t = oldMetadata.getTranslation().toArray();
-			double[] r = oldMetadata.getRotation().toArray();
-			double[] s = oldMetadata.getScale().toArray();
-			double[] p = oldMetadata.getPoint().toArray();
-			boolean j = oldMetadata.isJulia();
-			double z = t[2];
-			ComplexNumber size = context.getInitialSize();
-			double a2 = Math.atan2(y1 - y0, x1 - x0) - a1;
-			double tx = x0 * z * size.r(); 
-			double ty = y0 * z * size.r(); 
-			double qx = (Math.cos(a0) * tx + Math.sin(a0) * ty);
-			double qy = (Math.cos(a0) * ty - Math.sin(a0) * tx);
-			double px = - qx;
-			double py = - qy;
-			double gx = (Math.cos(a2) * px + Math.sin(a2) * py);
-			double gy = (Math.cos(a2) * py - Math.sin(a2) * px);
-			double dx = gx - px;
-			double dy = gy - py;
-			double x = r0 + dx;
-			double y = i0 + dy;
-			double a = (a0 + a2) * 180 / Math.PI;
-			MandelbrotMetadata newMetadata = new MandelbrotMetadata(new double[] { x, y, z, t[3] }, new double[] { 0, 0, a, r[3] }, s, p, time, j, oldMetadata.getOptions());
+			final double[] t = oldMetadata.getTranslation().toArray();
+			final double[] r = oldMetadata.getRotation().toArray();
+			final double[] s = oldMetadata.getScale().toArray();
+			final double[] p = oldMetadata.getPoint().toArray();
+			final boolean j = oldMetadata.isJulia();
+			final double z = t[2];
+			final ComplexNumber size = context.getInitialSize();
+			final double a2 = Math.atan2(y1 - y0, x1 - x0) - a1;
+			final double tx = x0 * z * size.r();
+			final double ty = y0 * z * size.r();
+			final double qx = (Math.cos(a0) * tx + Math.sin(a0) * ty);
+			final double qy = (Math.cos(a0) * ty - Math.sin(a0) * tx);
+			final double px = - qx;
+			final double py = - qy;
+			final double gx = (Math.cos(a2) * px + Math.sin(a2) * py);
+			final double gy = (Math.cos(a2) * py - Math.sin(a2) * px);
+			final double dx = gx - px;
+			final double dy = gy - py;
+			final double x = r0 + dx;
+			final double y = i0 + dy;
+			final double a = (a0 + a2) * 180 / Math.PI;
+			final MandelbrotMetadata newMetadata = new MandelbrotMetadata(new double[] { x, y, z, t[3] }, new double[] { 0, 0, a, r[3] }, s, p, time, j, oldMetadata.getOptions());
 			context.setView(newMetadata, pressed, !pressed);
 			changed = false;
 		} else if (timeAnimation) {
-			MandelbrotMetadata newMetadata = new MandelbrotMetadata(oldMetadata.getTranslation(), oldMetadata.getRotation(), oldMetadata.getScale(), oldMetadata.getPoint(), time, oldMetadata.isJulia(), oldMetadata.getOptions());
+			final MandelbrotMetadata newMetadata = new MandelbrotMetadata(oldMetadata.getTranslation(), oldMetadata.getRotation(), oldMetadata.getScale(), oldMetadata.getPoint(), time, oldMetadata.isJulia(), oldMetadata.getOptions());
 			context.setTime(newMetadata, true, false);
 		}
 	}
@@ -159,15 +159,15 @@ public class ToolRotate implements Tool {
 
 	@Override
 	public void draw(GraphicsContext gc) {
-		double dw = context.getWidth();
-		double dh = context.getHeight();
+		final double dw = context.getWidth();
+		final double dh = context.getHeight();
 		gc.clearRect(0, 0, (int)dw, (int)dh);
 		if (active) {
 			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
-			double cx = dw / 2;
-			double cy = dh / 2;
-			int px = (int) Math.rint(cx + x0 * dw);
-			int py = (int) Math.rint(cy - y0 * dh);
+			final double cx = dw / 2;
+			final double cy = dh / 2;
+			final int px = (int) Math.rint(cx + x0 * dw);
+			final int py = (int) Math.rint(cy - y0 * dh);
 			gc.beginPath();
 			gc.moveTo(px - 4, py - 4);
 			gc.lineTo(px + 4, py + 4);
@@ -175,8 +175,8 @@ public class ToolRotate implements Tool {
 			gc.lineTo(px + 4, py - 4);
 			gc.stroke();
 			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
-			int qx = (int) Math.rint(cx + x1 * dw);
-			int qy = (int) Math.rint(cy - y1 * dh);
+			final int qx = (int) Math.rint(cx + x1 * dw);
+			final int qy = (int) Math.rint(cy - y1 * dh);
 			gc.beginPath();
 			gc.moveTo(qx - 4, qy - 4);
 			gc.lineTo(qx + 4, qy + 4);

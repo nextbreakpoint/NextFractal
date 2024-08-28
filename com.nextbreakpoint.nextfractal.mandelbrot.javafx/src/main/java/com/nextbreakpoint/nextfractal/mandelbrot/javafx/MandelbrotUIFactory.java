@@ -76,20 +76,20 @@ public class MandelbrotUIFactory implements UIFactory {
 
 	@Override
 	public GridItemRenderer createRenderer(Bitmap bitmap) {
-		MandelbrotSession session = (MandelbrotSession)bitmap.getProperty("session");
-		Map<String, Integer> hints = new HashMap<>();
+		final MandelbrotSession session = (MandelbrotSession)bitmap.getProperty("session");
+		final Map<String, Integer> hints = new HashMap<>();
 		hints.put(Coordinator.KEY_TYPE, Coordinator.VALUE_REALTIME);
 		hints.put(Coordinator.KEY_MULTITHREAD, Coordinator.VALUE_SINGLE_THREAD);
-		Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
-		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Mandelbrot Browser", true, Thread.MIN_PRIORITY);
-		GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
-		Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
-		Orbit orbit = (Orbit)bitmap.getProperty("orbit");
-		Color color = (Color)bitmap.getProperty("color");
+		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
+		final DefaultThreadFactory threadFactory = new DefaultThreadFactory("Mandelbrot Browser", true, Thread.MIN_PRIORITY);
+		final GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
+		final Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
+		final Orbit orbit = (Orbit)bitmap.getProperty("orbit");
+		final Color color = (Color)bitmap.getProperty("color");
 		coordinator.setOrbitAndColor(orbit, color);
 		coordinator.init();
-		MandelbrotMetadata data = (MandelbrotMetadata) session.metadata();
-		View view = new View();
+		final MandelbrotMetadata data = (MandelbrotMetadata) session.metadata();
+		final View view = new View();
 		view.setTranslation(data.getTranslation());
 		view.setRotation(data.getRotation());
 		view.setScale(data.getScale());
@@ -105,9 +105,9 @@ public class MandelbrotUIFactory implements UIFactory {
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
 		final DSLParser parser = new DSLParser(getPackageName(), getClassName());
 		final DSLParserResult parserResult = parser.parse(session.script());
-		Orbit orbit = parserResult.orbitClassFactory().create();
-		Color color = parserResult.colorClassFactory().create();
-		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
+		final Orbit orbit = parserResult.orbitClassFactory().create();
+		final Color color = parserResult.colorClassFactory().create();
+		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("orbit", orbit);
 		bitmap.setProperty("color", color);
 		bitmap.setProperty("session", session);

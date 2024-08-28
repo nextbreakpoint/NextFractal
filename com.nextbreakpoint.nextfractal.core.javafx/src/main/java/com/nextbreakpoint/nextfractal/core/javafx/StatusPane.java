@@ -31,22 +31,22 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 public class StatusPane extends BorderPane {
-	private StringObservableValue messageProperty;
+	private final StringObservableValue messageProperty;
 
 	public StatusPane() {
 		messageProperty = new StringObservableValue();
 
-		TextArea message = new TextArea();
+		final TextArea message = new TextArea();
 		message.setEditable(false);
 
-		VBox box = new VBox();
+		final VBox box = new VBox();
 		box.setAlignment(Pos.TOP_CENTER);
 		box.getChildren().add(message);
 		box.getStyleClass().add("status");
 
 		setCenter(box);
 
-		messageProperty().addListener((observable, oldValue, newValue) -> message.setText(newValue));
+		messageProperty().addListener((_, _, newValue) -> message.setText(newValue));
 	}
 
 	public void setMessage(String text) {

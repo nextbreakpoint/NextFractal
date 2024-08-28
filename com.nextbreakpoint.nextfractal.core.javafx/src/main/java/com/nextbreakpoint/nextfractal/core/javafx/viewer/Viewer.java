@@ -133,7 +133,7 @@ public class Viewer extends BorderPane {
 		});
 
 		controls.setOnMousePressed(e -> {
-			fadeOut(toolsTransition, x -> {
+			fadeOut(toolsTransition, _ -> {
 			});
 			eventBus.postEvent(HideControlsFired.builder().hide(true).build());
 			if (renderingContext != null && renderingContext.getTool() != null) {
@@ -142,7 +142,7 @@ public class Viewer extends BorderPane {
 		});
 
 		controls.setOnMouseReleased(e -> {
-			fadeIn(toolsTransition, x -> {
+			fadeIn(toolsTransition, _ -> {
 			});
 			eventBus.postEvent(HideControlsFired.builder().hide(false).build());
 			if (renderingContext != null && renderingContext.getTool() != null) {
@@ -162,14 +162,14 @@ public class Viewer extends BorderPane {
 			}
 		});
 
-		this.setOnMouseEntered(e -> {
-			fadeIn(toolsTransition, x -> {
+		this.setOnMouseEntered(_ -> {
+			fadeIn(toolsTransition, _ -> {
 			});
 			controls.requestFocus();
 		});
 
-		this.setOnMouseExited(e -> {
-			fadeOut(toolsTransition, x -> {
+		this.setOnMouseExited(_ -> {
+			fadeOut(toolsTransition, _ -> {
 			});
 		});
 
@@ -179,7 +179,7 @@ public class Viewer extends BorderPane {
 		stackPane.setOnDragOver(x -> Optional.of(x).filter(e -> e.getGestureSource() != stackPane)
 				.filter(e -> e.getDragboard().hasFiles()).ifPresent(e -> e.acceptTransferModes(TransferMode.COPY_OR_MOVE)));
 
-		errorProperty.addListener((observable, oldValue, newValue) -> {
+		errorProperty.addListener((_, _, newValue) -> {
 			errors.setVisible(newValue);
 		});
 
@@ -195,13 +195,13 @@ public class Viewer extends BorderPane {
 			}
 		});
 
-		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> {
+		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), _ -> {
 			if (renderingContext != null) {
 				renderingContext.setPlayback(true);
 			}
 		});
 
-		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> {
+		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> {
 			if (renderingContext != null) {
 				renderingContext.setPlayback(false);
 			}
@@ -221,23 +221,23 @@ public class Viewer extends BorderPane {
 //            eventBus.postEvent(SessionStatusChanged.builder().status(message).build());
 		});
 
-		eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> handleSessionTerminated());
+		eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> handleSessionTerminated());
 
 //		eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionLoaded(((SessionDataLoaded) event).session(), ((SessionDataLoaded) event).continuous()));
 		eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> handleSessionChanged(((SessionDataChanged) event).session(), ((SessionDataChanged) event).continuous()));
 
-		eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> toolbar.setCaptureEnabled(true));
-		eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), event -> toolbar.setCaptureEnabled(false));
+		eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), _ -> toolbar.setCaptureEnabled(true));
+		eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), _ -> toolbar.setCaptureEnabled(false));
 
 		eventBus.subscribe(AnimationStateChanged.class.getSimpleName(), event -> toolbar.setAnimationEnabled(((AnimationStateChanged) event).enabled()));
 
-		eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), event -> toolbar.setAnimationEnabled(false));
+		eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), _ -> toolbar.setAnimationEnabled(false));
 
 //		eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), event -> handleSessionLoaded(((PlaybackDataLoaded) event).session(), ((PlaybackDataLoaded) event).continuous()));
 		eventBus.subscribe(PlaybackDataChanged.class.getSimpleName(), event -> handleSessionChanged(((PlaybackDataChanged) event).session(), ((PlaybackDataChanged) event).continuous()));
 
-		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> toolbar.setDisable(true));
-		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> toolbar.setDisable(false));
+		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), _ -> toolbar.setDisable(true));
+		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> toolbar.setDisable(false));
 
 		Platform.runLater(controls::requestFocus);
 

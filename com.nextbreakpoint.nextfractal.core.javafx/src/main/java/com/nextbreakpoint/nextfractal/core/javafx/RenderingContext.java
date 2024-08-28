@@ -37,15 +37,12 @@ public class RenderingContext {
 	@Getter
 	@Setter
 	private boolean timeAnimation;
-
 	@Getter
 	@Setter
 	private boolean playback;
-
 	@Getter
 	@Setter
 	private double zoomSpeed;
-
 	@Getter
 	@Setter
 	private Tool tool;

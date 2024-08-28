@@ -30,14 +30,16 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import lombok.Getter;
 
 public class GridViewCell extends BorderPane {
-	private JavaFXGraphicsFactory renderFactory = new JavaFXGraphicsFactory();
+	private final JavaFXGraphicsFactory renderFactory = new JavaFXGraphicsFactory();
+	private final Canvas canvas;
 	private boolean redraw;
-	private Canvas canvas;
 	private Object data;
-	private int index;
-	
+	@Getter
+    private final int index;
+
 	public GridViewCell(int index, int width, int height) {
 		this.index = index;
 
@@ -45,21 +47,21 @@ public class GridViewCell extends BorderPane {
 		
 		setCenter(canvas);
 		
-		widthProperty().addListener((observable, oldValue, newValue) -> update());
-		heightProperty().addListener((observable, oldValue, newValue) -> update());
+		widthProperty().addListener((_, _, _) -> update());
+		heightProperty().addListener((_, _, _) -> update());
 	}
 
 	public void update() {
-		GridItem item = (GridItem)data;
+		final GridItem item = (GridItem)data;
 		if (item != null) {
 			if (item.isDirty()) {
 				item.setDirty(false);
 				redraw = true;
 			}
-			GridItemRenderer renderer = item.getRenderer();
+			final GridItemRenderer renderer = item.getRenderer();
 			if (renderer != null) {
 				if (redraw || renderer.isPixelsChanged()) {
-					GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+					final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
 					renderer.drawImage(gc, 0, 0);
 					redraw = false;
 				}
@@ -69,8 +71,8 @@ public class GridViewCell extends BorderPane {
 				g2d.fillRect(0, 0, getWidth(), getHeight());
 				g2d.setFill(Color.DARKGRAY);
 				g2d.setTextAlign(TextAlignment.CENTER);
-				BrowseBitmap bitmap = item.getBitmap();
-				if (item.getErrors().size() > 0) {
+				final BrowseBitmap bitmap = item.getBitmap();
+				if (!item.getErrors().isEmpty()) {
 					g2d.fillText("Error", getWidth() / 2, getHeight() / 2);
 				} else if (bitmap == null) {
 					g2d.fillText("Rendering...", getWidth() / 2, getHeight() / 2);
@@ -78,14 +80,14 @@ public class GridViewCell extends BorderPane {
 				redraw = false;
 			}
 			if (item.isSelected()) {
-				javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
+				final javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
 				g2d.setStroke(Color.YELLOW);
 				g2d.setLineWidth(5);
 				g2d.strokeRect(0, 0, getWidth(), getHeight());
 			}
 		} else {
 			if (redraw) {
-				javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
+				final javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
 				g2d.setFill(Color.WHITE);
 				g2d.fillRect(0, 0, getWidth(), getHeight());
 				redraw = false;
@@ -99,9 +101,5 @@ public class GridViewCell extends BorderPane {
 			redraw = true;
 			//update();
 		}
-	}
-
-	public int getIndex() {
-		return index;
 	}
 }

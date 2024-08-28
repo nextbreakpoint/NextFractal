@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 public interface GridViewDelegate {
-	public void didCellChange(GridView source, int row, int col);
+	void didCellChange(GridView source, int row, int col);
 
-	public void didRangeChange(GridView source, int firstRow, int lastRow);
+	void didRangeChange(GridView source, int firstRow, int lastRow);
 
-	public void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks);
+	void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks);
 }

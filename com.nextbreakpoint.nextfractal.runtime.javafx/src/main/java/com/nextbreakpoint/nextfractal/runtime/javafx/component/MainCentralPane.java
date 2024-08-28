@@ -145,34 +145,32 @@ public class MainCentralPane extends BorderPane {
 
         browsePane.setTranslateY(-height);
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, newValue) -> {
             renderPane.setPrefWidth(newValue.doubleValue());
             browsePane.setPrefWidth(newValue.doubleValue());
             playbackPane.setPrefWidth(newValue.doubleValue());
             recordingPane.setPrefWidth(newValue.doubleValue());
         });
 
-        heightProperty().addListener((observable, oldValue, newValue) -> {
+        heightProperty().addListener((_, _, newValue) -> {
             renderPane.setPrefHeight(newValue.doubleValue());
             browsePane.setPrefHeight(newValue.doubleValue());
             playbackPane.setPrefHeight(newValue.doubleValue());
             recordingPane.setPrefHeight(newValue.doubleValue());
         });
 
-        toggleProperty.addListener((source, oldValue, newValue) -> {
+        toggleProperty.addListener((_, _, newValue) -> {
             if (newValue) {
-                showBrowser(browserTransition, a -> {});
+                showBrowser(browserTransition, _ -> {});
                 browsePane.reload();
             } else {
-                hideBrowser(browserTransition, a -> {});
+                hideBrowser(browserTransition, _ -> {});
             }
         });
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> browsePane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> browsePane.dispose());
 
-        eventBus.subscribe(ToggleBrowserRequested.class.getSimpleName(), event -> {
-            toggleProperty.setValue(!toggleProperty.getValue());
-        });
+        eventBus.subscribe(ToggleBrowserRequested.class.getSimpleName(), _ -> toggleProperty.setValue(!toggleProperty.getValue()));
 
         eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> {
             browsePane.setDisable(true);
@@ -183,19 +181,19 @@ public class MainCentralPane extends BorderPane {
             playbackPane.start();
         });
 
-        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> {
+        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> {
             playbackPane.stop();
             browsePane.setDisable(false);
             renderPane.setDisable(false);
             playbackPane.setVisible(false);
         });
 
-        eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> {
+        eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), _ -> {
             recordingPane.setVisible(true);
             recordingPane.start();
         });
 
-        eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), event -> {
+        eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), _ -> {
             recordingPane.setVisible(false);
             recordingPane.stop();
         });

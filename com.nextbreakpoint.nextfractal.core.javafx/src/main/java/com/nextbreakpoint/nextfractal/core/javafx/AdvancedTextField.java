@@ -30,12 +30,17 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.function.Function;
 
 public class AdvancedTextField extends TextField {
-	private StringProperty restrict = new SimpleStringProperty();
-	private Function<String, String> transform = t -> t;
+	private final StringProperty restrict = new SimpleStringProperty();
+
+	@Setter
+    @Getter
+    private Function<String, String> transform = t -> t;
 
 	public void setRestrict(String restrict) {
 		this.restrict.set(restrict);
@@ -45,42 +50,34 @@ public class AdvancedTextField extends TextField {
 		return restrict.get();
 	}
 
-	public Function<String, String> getTransform() {
-		return transform;
-	}
-
-	public void setTransform(Function<String, String> transform) {
-		this.transform = transform;
-	}
-
-	public StringProperty restrictProperty() {
+    public StringProperty restrictProperty() {
 		return restrict;
 	}
 
 	public AdvancedTextField() {
 		setAlignment(Pos.CENTER_RIGHT);
-		textProperty().addListener(new ChangeListener<String>() {
-			private boolean ignore;
+		textProperty().addListener(new ChangeListener<>() {
+            private boolean ignore;
 
-			@Override
-			public void changed(ObservableValue<? extends String> observableValue, String text, String newText) {
-				if (ignore)
-					return;
-				String transText = transform != null ? transform.apply(newText) : newText;
-				if (restrict.get() != null && !restrict.get().equals("") && !transText.matches(restrict.get())) {
-					updateText(text);
-				} else {
-					if (!transText.equals(newText)) {
-						updateText(transText);
-					}
-				}
-			}
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String text, String newText) {
+                if (ignore)
+                    return;
+                String transText = transform != null ? transform.apply(newText) : newText;
+                if (restrict.get() != null && !restrict.get().isEmpty() && !transText.matches(restrict.get())) {
+                    updateText(text);
+                } else {
+                    if (!transText.equals(newText)) {
+                        updateText(transText);
+                    }
+                }
+            }
 
-			private void updateText(String text) {
-				ignore = true;
-				setText(text);
-				ignore = false;
-			}
-		});
+            private void updateText(String text) {
+                ignore = true;
+                setText(text);
+                ignore = false;
+            }
+        });
 	}
 }

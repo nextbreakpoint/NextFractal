@@ -127,7 +127,7 @@ public class NextFractalApp extends Application {
 
         eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> applicationHandler.handleSessionChanged(((SessionDataChanged) event).session()));
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> applicationHandler.handleSessionTerminate(exportService));
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> applicationHandler.handleSessionTerminate(exportService));
 
         eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), event -> applicationHandler.handleExportSessionCreated(exportService, ((ExportSessionCreated) event).session()));
 
@@ -163,9 +163,9 @@ public class NextFractalApp extends Application {
 
         eventBus.subscribe(EditorActionFired.class.getSimpleName(), event -> applicationHandler.handleEditorAction(primaryStage, ((EditorActionFired) event).action()));
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> sessionSourceHandler.handleSessionTerminate());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> sessionSourceHandler.handleSessionTerminate());
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> playbackSourceHandler.handleSessionTerminate());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> playbackSourceHandler.handleSessionTerminate());
 
         final Pane mainPane = createMainPane(eventBus, editorWidth, renderSize, renderSize);
 

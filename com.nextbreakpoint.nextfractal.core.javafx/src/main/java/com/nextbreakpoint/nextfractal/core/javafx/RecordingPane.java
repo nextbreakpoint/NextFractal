@@ -30,6 +30,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import lombok.extern.java.Log;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -37,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+@Log
 public class RecordingPane extends Pane {
     private static final int FRAMES_PER_SECOND = 1;
 
@@ -52,11 +54,11 @@ public class RecordingPane extends Pane {
 
         getChildren().add(canvas);
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, newValue) -> {
           canvas.setLayoutX(newValue.doubleValue() - 50 - 30);
         });
 
-        heightProperty().addListener((observable, oldValue, newValue) -> {
+        heightProperty().addListener((_, _, _) -> {
             canvas.setLayoutY(30);
         });
     }
@@ -67,7 +69,7 @@ public class RecordingPane extends Pane {
 
     private void updateUI() {
         frame += 1;
-        GraphicsContext g2d = canvas.getGraphicsContext2D();
+        final GraphicsContext g2d = canvas.getGraphicsContext2D();
         g2d.clearRect(0 ,0, canvas.getWidth(), canvas.getHeight());
         if (frame % 2 == 1) {
             g2d.setFill(Color.RED);
@@ -88,6 +90,7 @@ public class RecordingPane extends Pane {
             try {
                 future.get();
             } catch (Exception e) {
+                log.warning(e.getMessage());
             }
             future = null;
         }

@@ -24,6 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.nio.IntBuffer;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,13 +34,19 @@ import java.util.Map;
 import java.util.UUID;
 
 public class BrowseBitmap implements Bitmap {
-	private final UUID uuid;
-	private final int width;
-	private final int height;
 	private final Map<String, Object> properties = new HashMap<>();
-	private final Date timestamp;
-	private final IntBuffer pixels;
-	private double progress;
+	private final UUID uuid;
+	@Getter
+    private final int width;
+	@Getter
+    private final int height;
+	@Getter
+    private final Date timestamp;
+	@Getter
+    private final IntBuffer pixels;
+	@Setter
+    @Getter
+    private double progress;
 
 	public BrowseBitmap(int width, int height, IntBuffer pixels) {
 		this.pixels = pixels;
@@ -47,19 +56,7 @@ public class BrowseBitmap implements Bitmap {
 		uuid = UUID.randomUUID();
 	}
 
-	public IntBuffer getPixels() {
-		return pixels;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public Object getProperty(String key) {
+    public Object getProperty(String key) {
 		return properties.get(key);
 	}
 
@@ -67,19 +64,7 @@ public class BrowseBitmap implements Bitmap {
 		properties.put(key, value);
 	}
 
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public double getProgress() {
-		return progress;
-	}
-
-	public void setProgress(double progress) {
-		this.progress = progress;
-	}
-
-	@Override
+    @Override
 	public UUID getId() {
 		return uuid;
 	}

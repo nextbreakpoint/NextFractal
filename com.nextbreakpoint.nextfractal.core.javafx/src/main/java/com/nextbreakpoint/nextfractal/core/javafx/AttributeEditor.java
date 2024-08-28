@@ -5,9 +5,9 @@ import javafx.scene.layout.BorderPane;
 import lombok.Getter;
 import lombok.Setter;
 
+@Setter
+@Getter
 public abstract class AttributeEditor extends BorderPane {
-    @Getter
-    @Setter
     private AttributeEditorDelegate delegate;
 
     public abstract void loadSession(Session session);

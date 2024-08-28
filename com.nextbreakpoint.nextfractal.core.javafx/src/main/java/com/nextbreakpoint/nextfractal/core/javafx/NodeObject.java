@@ -24,27 +24,33 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Andrea Medeghini
- */
 public abstract class NodeObject {
-	private final Map<String, Object> map = new HashMap<String, Object>();
+	private final Map<String, Object> map = new HashMap<>();
 	private List<NodeObject> childList;
-	private NodeObject parentNode;
-	private final String nodeId;
-	private String nodeLabel;
-	private String nodeClass;
-	private Object value;
-	private boolean changed;
+	@Getter
+    private NodeObject parentNode;
+	@Getter
+    private final String nodeId;
+	@Setter(lombok.AccessLevel.PROTECTED)
+    @Getter
+    private String nodeLabel;
+	@Setter(lombok.AccessLevel.PROTECTED)
+    @Getter
+    private String nodeClass;
+	@Setter
+    @Getter
+    private Object value;
+	@Getter
+    private boolean changed;
 
-	/**
-	 * 
-	 */
 	public void dispose() {
 		if (childList != null) {
 			for (NodeObject child : childList) {
@@ -56,11 +62,6 @@ public abstract class NodeObject {
 		parentNode = null;
 	}
 
-	/**
-	 * Constructs a new node.
-	 * 
-	 * @param nodeId the nodeId.
-	 */
 	public NodeObject(final String nodeId) {
 		if (nodeId == null) {
 			throw new IllegalArgumentException("nodeId is null");
@@ -72,29 +73,10 @@ public abstract class NodeObject {
 		this.parentNode = parentNode;
 	}
 
-	/**
-	 * Returns the parent.
-	 * 
-	 * @return the parent.
-	 */
-	public NodeObject getParentNode() {
-		return parentNode;
-	}
-
-	/**
-	 * @param node
-	 * @return
-	 */
-	public boolean isChildNode(final NodeObject node) {
+    public boolean isChildNode(final NodeObject node) {
 		return childList.contains(node);
 	}
 
-	/**
-	 * Returns a child.
-	 * 
-	 * @param index the child index.
-	 * @return the child.
-	 */
 	public NodeObject getChildNode(final int index) {
 		if ((index < 0) || (index >= getChildList().size())) {
 			return null;
@@ -102,12 +84,6 @@ public abstract class NodeObject {
 		return getChildList().get(index);
 	}
 
-	/**
-	 * Returns a child.
-	 * 
-	 * @param nodeClass the child class.
-	 * @return the child.
-	 */
 	public NodeObject getChildNodeByClass(final String nodeClass) {
 		for (NodeObject node : getChildList()) {
 			if (node.getNodeClass().equals(nodeClass)) {
@@ -117,12 +93,6 @@ public abstract class NodeObject {
 		return null;
 	}
 
-	/**
-	 * Returns a child.
-	 * 
-	 * @param nodeId the child id.
-	 * @return the child.
-	 */
 	public NodeObject getChildNodeById(final String nodeId) {
 		for (NodeObject node : getChildList()) {
 			if (node.getNodeId().equals(nodeId)) {
@@ -132,112 +102,29 @@ public abstract class NodeObject {
 		return null;
 	}
 	
-	/**
-	 * Returns the number of childs.
-	 * 
-	 * @return the number of childs.
-	 */
 	public int getChildNodeCount() {
 		return getChildList().size();
 	}
 
-	/**
-	 * 
-	 */
 	protected void updateNode() {
 		updateChildNodes();
 	}
 
-	/**
-	 * 
-	 */
 	protected void updateChildNodes() {
 	}
 
-	/**
-	 * Returns the nodeId.
-	 * 
-	 * @return the nodeId.
-	 */
-	public String getNodeId() {
-		return nodeId;
-	}
-
-	/**
-	 * Returns the nodeClass.
-	 * 
-	 * @return the nodeClass.
-	 */
-	public String getNodeClass() {
-		return nodeClass;
-	}
-
-	/**
-	 * Sets the nodeClass.
-	 * 
-	 * @param nodeClass
-	 */
-	protected void setNodeClass(final String nodeClass) {
-		this.nodeClass = nodeClass;
-	}
-
-	/**
-	 * Returns the nodeLabel.
-	 * 
-	 * @return the nodeLabel
-	 */
-	public String getNodeLabel() {
-		return nodeLabel;
-	}
-
-	/**
-	 * Sets the nodeLabel.
-	 * 
-	 * @param nodeLabel
-	 */
-	protected void setNodeLabel(final String nodeLabel) {
-		this.nodeLabel = nodeLabel;
-	}
-
-	/**
-	 * Returns true if node has pending commands.
-	 * 
-	 * @return true if node has pending commands.
-	 */
-	public boolean isChanged() {
-		return changed;
-	}
-
-	/**
-	 * Returns true if the node is mutable.
-	 * 
-	 * @return true if the node is mutable.
-	 */
-	public boolean isMutable() {
+    public boolean isMutable() {
 		return false;
 	}
 
-	/**
-	 * Returns true if the node is editable.
-	 * 
-	 * @return true if the node is editable.
-	 */
 	public boolean isEditable() {
 		return false;
 	}
 
-	/**
-	 * Returns true if the node is an attribute.
-	 * 
-	 * @return true if the node is an attribute.
-	 */
 	public boolean isAttribute() {
 		return false;
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
@@ -251,22 +138,12 @@ public abstract class NodeObject {
 		return builder.toString();
 	}
 
-	/**
-	 * Appends a child to parent.
-	 * 
-	 * @param node the child to append.
-	 */
 	protected void appendChildNodeToParent(final NodeObject node) {
 		if (parentNode != null) {
 			parentNode.appendChildNode(node);
 		}
 	}
 
-	/**
-	 * Appends a child.
-	 * 
-	 * @param node the child to append.
-	 */
 	public void appendChildNode(final NodeObject node) {
 		node.setParentNode(this);
 		if (getChildList().contains(node)) {
@@ -276,11 +153,6 @@ public abstract class NodeObject {
 		node.nodeAdded();
 	}
 
-	/**
-	 * Removes a child.
-	 * 
-	 * @param index the child to remove.
-	 */
 	public void removeChildNode(final int index) {
 		final NodeObject node = getChildList().get(index);
 		getChildList().remove(index);
@@ -288,19 +160,12 @@ public abstract class NodeObject {
 		node.setParentNode(null);
 	}
 
-	/**
-	 * Removes all the children.
-	 */
 	public void removeAllChildNodes() {
 		for (int i = getChildNodeCount() - 1; i >= 0; i--) {
 			removeChildNode(i);
 		}
 	}
 
-	/**
-	 * @param index
-	 * @param node
-	 */
 	public void insertNodeBefore(final int index, final NodeObject node) {
 		node.setParentNode(this);
 		if (getChildList().contains(node)) {
@@ -313,10 +178,6 @@ public abstract class NodeObject {
 		node.nodeAdded();
 	}
 
-	/**
-	 * @param index
-	 * @param node
-	 */
 	public void insertNodeAfter(final int index, final NodeObject node) {
 		node.setParentNode(this);
 		if (getChildList().contains(node)) {
@@ -334,10 +195,6 @@ public abstract class NodeObject {
 		node.nodeAdded();
 	}
 
-	/**
-	 * @param index
-	 * @param node
-	 */
 	public void insertChildNodeAt(final int index, final NodeObject node) {
 		if (index < getChildList().size()) {
 			insertNodeBefore(index, node);
@@ -350,9 +207,6 @@ public abstract class NodeObject {
 		}
 	}
 
-	/**
-	 * @param index
-	 */
 	public void moveUpChildNode(final int index) {
 		final NodeObject node = getChildList().get(index);
 		if (index > 0) {
@@ -361,9 +215,6 @@ public abstract class NodeObject {
 		}
 	}
 
-	/**
-	 * @param index
-	 */
 	public void moveDownChildNode(final int index) {
 		final NodeObject node = getChildList().get(index);
 		if (index < getChildList().size() - 1) {
@@ -372,9 +223,6 @@ public abstract class NodeObject {
 		}
 	}
 
-	/**
-	 * @param index
-	 */
 	public void moveChildNode(final int index, final int newIndex) {
 		final NodeObject node = getChildList().get(index);
 		if (index < getChildList().size() - 1) {
@@ -383,9 +231,6 @@ public abstract class NodeObject {
 		}
 	}
 
-	/**
-	 * @param index
-	 */
 	public void setChildNode(final int index, final NodeObject node) {
 		if ((index < 0) || (index > getChildList().size() - 1)) {
 			throw new IllegalArgumentException("index out of bounds");
@@ -394,18 +239,10 @@ public abstract class NodeObject {
 		insertNodeAfter(index, node);
 	}
 
-	/**
-	 * Returns the node value as string.
-	 * 
-	 * @return the string.
-	 */
 	public String getValueAsString() {
 		return toString();
 	}
 
-	/**
-	 * @return the label.
-	 */
 	public final String getLabel() {
 		final StringBuilder builder = new StringBuilder();
 		if (isChanged()) {
@@ -415,18 +252,12 @@ public abstract class NodeObject {
 		return builder.toString();
 	}
 
-	/**
-	 * @param builder
-	 */
 	protected void addLabel(final StringBuilder builder) {
 		if (nodeLabel != null) {
 			builder.append(nodeLabel);
 		}
 	}
 
-	/**
-	 * @return the description.
-	 */
 	public final String getDescription() {
 		final StringBuilder builder = new StringBuilder();
 		addDescription(builder);
@@ -438,17 +269,10 @@ public abstract class NodeObject {
 		return builder.toString();
 	}
 
-	/**
-	 * @param builder
-	 */
 	protected void addDescription(final StringBuilder builder) {
 		addLabel(builder);
 	}
 
-	/**
-	 * @param node
-	 * @return the index.
-	 */
 	public int indexOf(final NodeObject node) {
 		return getChildList().indexOf(node);
 	}
@@ -460,21 +284,12 @@ public abstract class NodeObject {
 		return childList;
 	}
 
-	/**
-	 * 
-	 */
 	protected void nodeAdded() {
 	}
 
-	/**
-	 * 
-	 */
 	protected void nodeRemoved() {
 	}
 
-	/**
-	 * @return
-	 */
 	public String dump() {
 		final StringBuilder builder = new StringBuilder();
 		dumpNode(builder, this, 0);
@@ -482,9 +297,7 @@ public abstract class NodeObject {
 	}
 
 	private void dumpNode(final StringBuilder builder, final NodeObject node, final int level) {
-		for (int i = 0; i < level; i++) {
-			builder.append(" ");
-		}
+        builder.append(" ".repeat(Math.max(0, level)));
 		builder.append(node);
 		if (node.getChildNodeCount() > 0) {
 			if (node.getParentNode() != null) {
@@ -495,9 +308,7 @@ public abstract class NodeObject {
 			for (int i = 0; i < node.getChildNodeCount(); i++) {
 				dumpNode(builder, node.getChildNode(i), level + 1);
 			}
-			for (int i = 0; i < level; i++) {
-				builder.append(" ");
-			}
+            builder.append(" ".repeat(Math.max(0, level)));
 			builder.append("}\n");
 		}
 		else {
@@ -509,40 +320,15 @@ public abstract class NodeObject {
 		}
 	}
 
-	/**
-	 * @param key
-	 * @param value
-	 */
 	public void putObject(final String key, final Object value) {
 		map.put(key, value);
 	}
 
-	/**
-	 * @param key
-	 * @return
-	 */
 	public Object getObject(final String key) {
 		return map.get(key);
 	}
 
-	/**
-	 * @param key
-	 */
 	public void removeObject(final String key) {
 		map.remove(key);
-	}
-
-	/**
-	 * @return
-	 */
-	public Object getValue() {
-		return value;
-	}
-
-	/**
-	 * @param value
-	 */
-	public void setValue(Object value) {
-		this.value = value;
 	}
 }

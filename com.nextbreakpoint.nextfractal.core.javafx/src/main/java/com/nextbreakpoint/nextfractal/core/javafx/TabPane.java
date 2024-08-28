@@ -36,8 +36,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 public class TabPane extends Pane {
-    private ObjectProperty<EventHandler<ActionEvent>> onAction = new ObjectPropertyBase<EventHandler<ActionEvent>>() {
-        @Override protected void invalidated() {
+    private final ObjectProperty<EventHandler<ActionEvent>> onAction = new ObjectPropertyBase<>() {
+        @Override
+        protected void invalidated() {
             setEventHandler(ActionEvent.ACTION, get());
         }
 
@@ -55,11 +56,11 @@ public class TabPane extends Pane {
     private boolean entered;
 
     public TabPane(ImageView image) {
-        Canvas canvas = new Canvas();
+        final Canvas canvas = new Canvas();
         getChildren().add(canvas);
         getChildren().add(image);
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, newValue) -> {
             canvas.setWidth(newValue.doubleValue());
             canvas.setHeight(getHeight());
             image.setFitWidth(newValue.doubleValue() / 3);
@@ -67,7 +68,7 @@ public class TabPane extends Pane {
             redraw(canvas);
         });
 
-        heightProperty().addListener((observable, oldValue, newValue) -> {
+        heightProperty().addListener((_, _, newValue) -> {
             canvas.setWidth(getWidth());
             canvas.setHeight(newValue.doubleValue());
             image.setFitHeight(newValue.doubleValue() * 2 / 3);
@@ -75,28 +76,29 @@ public class TabPane extends Pane {
             redraw(canvas);
         });
 
-        addEventFilter(MouseEvent.MOUSE_ENTERED, mouseEvent -> {
+        addEventFilter(MouseEvent.MOUSE_ENTERED, _ -> {
             entered = true;
             redraw(canvas);
         });
 
-        addEventFilter(MouseEvent.MOUSE_EXITED, mouseEvent -> {
+        addEventFilter(MouseEvent.MOUSE_EXITED, _ -> {
             entered = false;
             redraw(canvas);
         });
 
-        addEventFilter(MouseEvent.MOUSE_CLICKED, mouseEvent -> onActionProperty().getValue().handle(new ActionEvent(TabPane.this, null)));
+        addEventFilter(MouseEvent.MOUSE_CLICKED, _ -> onActionProperty().getValue().handle(new ActionEvent(TabPane.this, null)));
     }
 
     private void redraw(Canvas canvas) {
-        double width = getWidth();
-        double height = getHeight();
-        GraphicsContext g2d = canvas.getGraphicsContext2D();
+        final double width = getWidth();
+        final double height = getHeight();
+        final GraphicsContext g2d = canvas.getGraphicsContext2D();
         g2d.clearRect(0,0, width, height);
         g2d.setFill(new Color(1,1,1,entered ? 0.9 : 0.7));
         g2d.fillOval(0, -height, width, height * 2);
     }
 
     public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() { return onAction; }
+
     public final void setOnAction(EventHandler<ActionEvent> value) { onActionProperty().set(value); }
 }

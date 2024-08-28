@@ -31,6 +31,7 @@ import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
+import lombok.Setter;
 import lombok.extern.java.Log;
 
 import java.util.LinkedList;
@@ -52,21 +53,22 @@ public class PlaybackPane extends Pane {
     private ScheduledFuture<?> future;
     private int frameIndex = -1;
     private AnimationFrame lastFrame;
+    @Setter
     private PlaybackDelegate delegate;
 
     public PlaybackPane() {
         executor = Executors.newSingleThreadScheduledExecutor(Objects.requireNonNull(createThreadFactory("Playback")));
 
-        setOnMouseClicked(e -> {
+        setOnMouseClicked(_ -> {
             if (delegate != null) {
                 delegate.playbackStopped();
             }
         });
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, _) -> {
         });
 
-        heightProperty().addListener((observable, oldValue, newValue) -> {
+        heightProperty().addListener((_, _, _) -> {
         });
     }
 
@@ -78,7 +80,7 @@ public class PlaybackPane extends Pane {
         try {
             frameIndex += 1;
             if (frameIndex < frames.size()) {
-                AnimationFrame frame = frames.get(frameIndex);
+                final AnimationFrame frame = frames.get(frameIndex);
                 if (delegate != null) {
                     if (lastFrame == null || !lastFrame.pluginId().equals(frame.pluginId()) || !lastFrame.script().equals(frame.script())) {
                         Command.of(tryFindFactory(frame.pluginId()))
@@ -110,10 +112,6 @@ public class PlaybackPane extends Pane {
         }
     }
 
-    public void setDelegate(PlaybackDelegate delegate) {
-        this.delegate = delegate;
-    }
-
     public void setClips(List<AnimationClip> clips) {
         if (future == null) {
             frames.clear();
@@ -135,6 +133,7 @@ public class PlaybackPane extends Pane {
             try {
                 future.get();
             } catch (Exception e) {
+                log.warning(e.getMessage());
             }
             future = null;
         }

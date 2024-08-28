@@ -35,11 +35,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.transform.Affine;
 
 public class BrowseListCell extends ListCell<Bitmap[]> {
-	private HBox pane;
-	private Canvas[] canvas;
-	private Size size;
-	private Tile tile;
-	private int numOfColumns;
+	private final HBox pane;
+	private final Canvas[] canvas;
+	private final Size size;
+	private final Tile tile;
+	private final int numOfColumns;
 
 	public BrowseListCell(int numOfColumns, Size size, Tile tile) {
 		this.size = size;

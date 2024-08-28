@@ -176,7 +176,7 @@ public class MainSidePane extends BorderPane {
         final StackPane rootPane = new StackPane();
         rootPane.getChildren().add(sourcePane);
 
-        rootPane.widthProperty().addListener((observable, oldValue, newValue) -> {
+        rootPane.widthProperty().addListener((_, _, newValue) -> {
             double width = newValue.doubleValue();
             sourceButtons.setPrefWidth(width);
             editorPane.setPrefWidth(width);
@@ -188,7 +188,7 @@ public class MainSidePane extends BorderPane {
             statusPane.setLayoutX(0);
         });
 
-        rootPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+        rootPane.heightProperty().addListener((_, _, newValue) -> {
             double height = newValue.doubleValue();
             sourceButtons.setPrefHeight(height * 0.07);
             editorPane.setPrefHeight(height * 0.78);
@@ -200,7 +200,7 @@ public class MainSidePane extends BorderPane {
             statusPane.setLayoutY(height * 0.85);
         });
 
-        sidebarPane.widthProperty().addListener((observable, oldValue, newValue) -> {
+        sidebarPane.widthProperty().addListener((_, _, newValue) -> {
             double width = newValue.doubleValue();
             historyPane.setPrefWidth(width);
             paramsPane.setPrefWidth(width);
@@ -212,7 +212,7 @@ public class MainSidePane extends BorderPane {
             jobsPane.setMaxWidth(width);
         });
 
-        sidebarPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+        sidebarPane.heightProperty().addListener((_, _, newValue) -> {
             double height = newValue.doubleValue();
             historyPane.setPrefHeight(height);
             paramsPane.setPrefHeight(height);
@@ -224,67 +224,67 @@ public class MainSidePane extends BorderPane {
             jobsPane.setMaxHeight(height);
         });
 
-        errorProperty.addListener((source, oldValue, newValue) -> {
+        errorProperty.addListener((_, _, newValue) -> {
             storeButton.setDisable(newValue != null);
             saveButton.setDisable(newValue != null);
             exportPane.setDisable(newValue != null);
             paramsPane.setParamsDisable(newValue != null);
         });
 
-        historyButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        historyButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(historyPane);
                 sidebarPane.getChildren().add(historyPane);
             }
         });
 
-        paramsButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        paramsButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(paramsPane);
                 sidebarPane.getChildren().add(paramsPane);
             }
         });
 
-        jobsButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        jobsButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(jobsPane);
                 sidebarPane.getChildren().add(jobsPane);
             }
         });
 
-        exportButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        exportButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(exportPane);
                 sidebarPane.getChildren().add(exportPane);
             }
         });
 
-        viewGroup.selectedToggleProperty().addListener((source, oldValue, newValue) -> {
+        viewGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
             if (newValue != null) {
-                showSidebar(sidebarTransition, a -> {
+                showSidebar(sidebarTransition, _ -> {
                 });
             } else {
-                hideSidebar(sidebarTransition, a -> {
+                hideSidebar(sidebarTransition, _ -> {
                 });
             }
         });
 
-        statusButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        statusButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
-                showStatus(statusTransition, a -> {
+                showStatus(statusTransition, _ -> {
                 });
             } else {
-                hideStatus(statusTransition, a -> {
+                hideStatus(statusTransition, _ -> {
                 });
             }
         });
 
-        sidebarPane.translateXProperty().addListener((source, oldValue, newValue) -> {
+        sidebarPane.translateXProperty().addListener((_, _, newValue) -> {
             final double width = rootPane.getWidth() + newValue.doubleValue();
             editorPane.prefWidthProperty().setValue(width);
         });
 
-        statusPane.translateYProperty().addListener((source, oldValue, newValue) -> {
+        statusPane.translateYProperty().addListener((_, _, newValue) -> {
             final double height = rootPane.getHeight() - statusPane.getHeight() - sourceButtons.getHeight() + newValue.doubleValue();
             editorPane.prefHeightProperty().setValue(height);
             sidebarPane.prefHeightProperty().setValue(height);
@@ -365,7 +365,7 @@ public class MainSidePane extends BorderPane {
 
         eventBus.subscribe(HistorySessionAdded.class.getSimpleName(), event -> historyPane.appendSession(((HistorySessionAdded) event).session()));
 
-        eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), event -> jobsButton.setSelected(true));
+        eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), _ -> jobsButton.setSelected(true));
         eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), event -> jobsPane.appendSession(((ExportSessionCreated) event).session()));
 
         eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> handleSessionStarted(exportPane, exportButton, ((CaptureSessionStarted) event).clip()));
@@ -376,20 +376,20 @@ public class MainSidePane extends BorderPane {
 
         eventBus.subscribe(CaptureClipsMerged.class.getSimpleName(), event -> exportPane.mergeClips(((CaptureClipsMerged) event).clips()));
 
-        eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> errorProperty.setValue(null));
+        eventBus.subscribe(SessionDataChanged.class.getSimpleName(), _ -> errorProperty.setValue(null));
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> jobsPane.dispose());
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> historyPane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> jobsPane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> historyPane.dispose());
 
         eventBus.subscribe(ExportSessionStateChanged.class.getSimpleName(), event -> handleExportSessionStateChanged(jobsPane, ((ExportSessionStateChanged) event).session(), ((ExportSessionStateChanged) event).state(), ((ExportSessionStateChanged) event).progress()));
 
-        eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> exportPane.setCaptureSelected(true));
+        eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), _ -> exportPane.setCaptureSelected(true));
 
-        eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), event -> exportPane.setCaptureSelected(false));
+        eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), _ -> exportPane.setCaptureSelected(false));
 
-        eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> handlePlaybackClipsStart(rootPane));
+        eventBus.subscribe(PlaybackStarted.class.getSimpleName(), _ -> handlePlaybackClipsStart(rootPane));
 
-        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> handlePlaybackClipsStop(rootPane));
+        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> handlePlaybackClipsStop(rootPane));
 
         eventBus.subscribe(HistorySessionSelected.class.getSimpleName(), event -> handleHistorySessionSelected(eventBus, (HistorySessionSelected) event));
 

@@ -131,18 +131,18 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
 
     @Override
     public void updateCoordinators(Session session, boolean continuous, boolean timeAnimation) {
-        MandelbrotMetadata metadata = (MandelbrotMetadata) session.metadata();
-        Double4D translation = metadata.getTranslation();
-        Double4D rotation = metadata.getRotation();
-        Double4D scale = metadata.getScale();
-        Double2D point = metadata.getPoint();
-        Time time = metadata.time();
-        boolean julia = metadata.isJulia();
+        final MandelbrotMetadata metadata = (MandelbrotMetadata) session.metadata();
+        final Double4D translation = metadata.getTranslation();
+        final Double4D rotation = metadata.getRotation();
+        final Double4D scale = metadata.getScale();
+        final Double2D point = metadata.getPoint();
+        final Time time = metadata.time();
+        final boolean julia = metadata.isJulia();
         abortCoordinators();
         joinCoordinators();
         for (Coordinator coordinator : coordinators) {
             if (coordinator != null) {
-                View view = new View();
+                final View view = new View();
                 view.setTranslation(translation);
                 view.setRotation(rotation);
                 view.setScale(scale);
@@ -159,7 +159,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         if (metadata.getOptions().isShowPreview() && !julia && juliaCoordinator != null) {
             juliaCoordinator.abort();
             juliaCoordinator.waitFor();
-            View view = new View();
+            final View view = new View();
             view.setTranslation(new Double4D(new double[]{0, 0, 1, 0}));
             view.setRotation(new Double4D(new double[]{0, 0, 0, 0}));
             view.setScale(new Double4D(new double[]{1, 1, 1, 1}));
@@ -195,9 +195,9 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
                 this.colorFactory = null;
                 return List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, "Can't render image"));
             }
-            boolean[] changed = createOrbitAndColor(result);
-            boolean orbitChanged = changed[0];
-            boolean colorChanged = changed[1];
+            final boolean[] changed = createOrbitAndColor(result);
+            final boolean orbitChanged = changed[0];
+            final boolean colorChanged = changed[1];
             if (orbitChanged) {
                 if (log.isLoggable(Level.FINE)) {
                     log.fine("Orbit algorithm is changed");
@@ -212,13 +212,13 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
 //				log.info("Orbit or color algorithms are not changed");
 //				return;
 //			}
-            MandelbrotMetadata oldMetadata = (MandelbrotMetadata) delegate.getMetadata();
-            Double4D translation = oldMetadata.getTranslation();
-            Double4D rotation = oldMetadata.getRotation();
-            Double4D scale = oldMetadata.getScale();
-            Double2D point = oldMetadata.getPoint();
-            Time time = oldMetadata.time();
-            boolean julia = oldMetadata.isJulia();
+            final MandelbrotMetadata oldMetadata = (MandelbrotMetadata) delegate.getMetadata();
+            final Double4D translation = oldMetadata.getTranslation();
+            final Double4D rotation = oldMetadata.getRotation();
+            final Double4D scale = oldMetadata.getScale();
+            final Double2D point = oldMetadata.getPoint();
+            final Time time = oldMetadata.time();
+            final boolean julia = oldMetadata.isJulia();
             abortCoordinators();
             if (juliaCoordinator != null) {
                 juliaCoordinator.abort();
@@ -230,21 +230,21 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             for (Coordinator coordinator : coordinators) {
                 if (coordinator != null) {
                     if (Boolean.getBoolean("com.nextbreakpoint.nextfractal.mandelbrot.javafx.smart-render-disabled")) {
-                        Orbit orbit = orbitFactory.create();
-                        Color color = colorFactory.create();
+                        final Orbit orbit = orbitFactory.create();
+                        final Color color = colorFactory.create();
                         coordinator.setOrbitAndColor(orbit, color);
                     } else {
                         if (orbitChanged) {
-                            Orbit orbit = orbitFactory.create();
-                            Color color = colorFactory.create();
+                            final Orbit orbit = orbitFactory.create();
+                            final Color color = colorFactory.create();
                             coordinator.setOrbitAndColor(orbit, color);
                         } else if (colorChanged) {
-                            Color color = colorFactory.create();
+                            final Color color = colorFactory.create();
                             coordinator.setColor(color);
                         }
                     }
                     coordinator.init();
-                    View view = new View();
+                    final View view = new View();
                     view.setTranslation(translation);
                     view.setRotation(rotation);
                     view.setScale(scale);
@@ -257,21 +257,21 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             }
             if (juliaCoordinator != null) {
                 if (Boolean.getBoolean("com.nextbreakpoint.nextfractal.mandelbrot.javafx.smart-render-disabled")) {
-                    Orbit orbit = orbitFactory.create();
-                    Color color = colorFactory.create();
+                    final Orbit orbit = orbitFactory.create();
+                    final Color color = colorFactory.create();
                     juliaCoordinator.setOrbitAndColor(orbit, color);
                 } else {
                     if (orbitChanged) {
-                        Orbit orbit = orbitFactory.create();
-                        Color color = colorFactory.create();
+                        final Orbit orbit = orbitFactory.create();
+                        final Color color = colorFactory.create();
                         juliaCoordinator.setOrbitAndColor(orbit, color);
                     } else if (colorChanged) {
-                        Color color = colorFactory.create();
+                        final Color color = colorFactory.create();
                         juliaCoordinator.setColor(color);
                     }
                 }
                 juliaCoordinator.init();
-                View view = new View();
+                final View view = new View();
                 view.setTranslation(translation);
                 view.setRotation(rotation);
                 view.setScale(scale);
@@ -348,15 +348,15 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     private void abortCoordinators() {
-        visitCoordinators(coordinator -> true, Coordinator::abort);
+        visitCoordinators(_ -> true, Coordinator::abort);
     }
 
     private void joinCoordinators() {
-        visitCoordinators(coordinator -> true, Coordinator::waitFor);
+        visitCoordinators(_ -> true, Coordinator::waitFor);
     }
 
     private void startCoordinators() {
-        visitCoordinators(coordinator -> true, Coordinator::run);
+        visitCoordinators(_ -> true, Coordinator::run);
     }
 
     private void visitCoordinators(Predicate<Coordinator> predicate, Consumer<Coordinator> consumer) {
@@ -376,12 +376,12 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
 
     private boolean[] createOrbitAndColor(ParserResult result) {
         try {
-            DSLParserResult compilerResult = (DSLParserResult) result.result();
-            boolean[] changed = new boolean[]{false, false};
-            String newASTOrbit = compilerResult.orbitDSL();
+            final DSLParserResult compilerResult = (DSLParserResult) result.result();
+            final boolean[] changed = new boolean[]{false, false};
+            final String newASTOrbit = compilerResult.orbitDSL();
             changed[0] = !newASTOrbit.equals(astOrbit);
             astOrbit = newASTOrbit;
-            String newASTColor = compilerResult.colorDSL();
+            final String newASTColor = compilerResult.colorDSL();
             changed[1] = !newASTColor.equals(astColor);
             astColor = newASTColor;
             orbitFactory = compilerResult.orbitClassFactory();
@@ -397,12 +397,12 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     private List<ComplexNumber[]> renderOrbit(Double2D point) {
-        List<ComplexNumber[]> states = new ArrayList<>();
+        final List<ComplexNumber[]> states = new ArrayList<>();
         try {
             if (orbitFactory != null) {
-                Orbit orbit = orbitFactory.create();
+                final Orbit orbit = orbitFactory.create();
                 if (orbit != null) {
-                    Scope scope = new Scope();
+                    final Scope scope = new Scope();
                     orbit.setScope(scope);
                     orbit.init();
                     orbit.setW(new ComplexNumber(point.x(), point.y()));
@@ -417,16 +417,16 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     }
 
     private void redrawIfPixelsChanged(Canvas canvas) {
-        GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+        final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
         visitCoordinators(Coordinator::isPixelsChanged, coordinator -> coordinator.drawImage(gc, 0, 0));
     }
 
     private void redrawIfJuliaPixelsChanged(Canvas canvas) {
-        MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
+        final MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
         if (!metadata.isJulia() && juliaCoordinator != null && juliaCoordinator.isPixelsChanged()) {
-            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
-            double dw = canvas.getWidth();
-            double dh = canvas.getHeight();
+            final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            final double dw = canvas.getWidth();
+            final double dh = canvas.getHeight();
             gc.clearRect(0, 0, (int) dw, (int) dh);
             juliaCoordinator.drawImage(gc, 0, 0);
 //			Number size = juliaCoordinator.getInitialSize();
@@ -438,33 +438,33 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     private void redrawIfPointChanged(Canvas canvas) {
         if (redrawPoint) {
             redrawPoint = false;
-            ComplexNumber size = coordinators[0].getInitialSize();
-            ComplexNumber center = coordinators[0].getInitialCenter();
-            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            final ComplexNumber size = coordinators[0].getInitialSize();
+            final ComplexNumber center = coordinators[0].getInitialCenter();
+            final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
-                MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
-                double[] t = metadata.getTranslation().toArray();
-                double[] r = metadata.getRotation().toArray();
-                double tx = t[0];
-                double ty = t[1];
-                double tz = t[2];
-                double a = -r[2] * Math.PI / 180;
-                double dw = canvas.getWidth();
-                double dh = canvas.getHeight();
+                final MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
+                final double[] t = metadata.getTranslation().toArray();
+                final double[] r = metadata.getRotation().toArray();
+                final double tx = t[0];
+                final double ty = t[1];
+                final double tz = t[2];
+                final double a = -r[2] * Math.PI / 180;
+                final double dw = canvas.getWidth();
+                final double dh = canvas.getHeight();
                 gc.clearRect(0, 0, (int) dw, (int) dh);
-                double cx = dw / 2;
-                double cy = dh / 2;
+                final double cx = dw / 2;
+                final double cy = dh / 2;
                 gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 1, 0, 1));
-                double[] point = metadata.getPoint().toArray();
-                double zx = point[0];
-                double zy = point[1];
-                double px = (zx - tx - center.r()) / (tz * size.r());
-                double py = (zy - ty - center.i()) / (tz * size.r());
-                double qx = Math.cos(a) * px + Math.sin(a) * py;
-                double qy = Math.cos(a) * py - Math.sin(a) * px;
-                int x = (int) Math.rint(qx * dw + cx);
-                int y = (int) Math.rint(cy - qy * dh);
+                final double[] point = metadata.getPoint().toArray();
+                final double zx = point[0];
+                final double zy = point[1];
+                final double px = (zx - tx - center.r()) / (tz * size.r());
+                final double py = (zy - ty - center.i()) / (tz * size.r());
+                final double qx = Math.cos(a) * px + Math.sin(a) * py;
+                final double qy = Math.cos(a) * py - Math.sin(a) * px;
+                final int x = (int) Math.rint(qx * dw + cx);
+                final int y = (int) Math.rint(cy - qy * dh);
                 gc.beginPath();
                 gc.moveTo(x - 2, y - 2);
                 gc.lineTo(x + 2, y - 2);
@@ -483,18 +483,18 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             ComplexNumber center = coordinators[0].getInitialCenter();
             GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
-                MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
-                double[] t = metadata.getTranslation().toArray();
-                double[] r = metadata.getRotation().toArray();
-                double tx = t[0];
-                double ty = t[1];
-                double tz = t[2];
-                double a = -r[2] * Math.PI / 180;
-                double dw = canvas.getWidth();
-                double dh = canvas.getHeight();
+                final MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
+                final double[] t = metadata.getTranslation().toArray();
+                final double[] r = metadata.getRotation().toArray();
+                final double tx = t[0];
+                final double ty = t[1];
+                final double tz = t[2];
+                final double a = -r[2] * Math.PI / 180;
+                final double dw = canvas.getWidth();
+                final double dh = canvas.getHeight();
                 gc.clearRect(0, 0, (int) dw, (int) dh);
-                double cx = dw / 2;
-                double cy = dh / 2;
+                final double cx = dw / 2;
+                final double cy = dh / 2;
                 gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
                 ComplexNumber[] state = states.getFirst();
@@ -528,25 +528,25 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
     private void redrawIfTrapChanged(Canvas canvas) {
         if (redrawTraps) {
             redrawTraps = false;
-            ComplexNumber size = coordinators[0].getInitialSize();
-            ComplexNumber center = coordinators[0].getInitialCenter();
-            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            final ComplexNumber size = coordinators[0].getInitialSize();
+            final ComplexNumber center = coordinators[0].getInitialCenter();
+            final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             if (states.size() > 1) {
-                MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
-                double[] t = metadata.getTranslation().toArray();
-                double[] r = metadata.getRotation().toArray();
-                double tx = t[0];
-                double ty = t[1];
-                double tz = t[2];
-                double a = -r[2] * Math.PI / 180;
-                double dw = canvas.getWidth();
-                double dh = canvas.getHeight();
+                final MandelbrotMetadata metadata = (MandelbrotMetadata) delegate.getMetadata();
+                final double[] t = metadata.getTranslation().toArray();
+                final double[] r = metadata.getRotation().toArray();
+                final double tx = t[0];
+                final double ty = t[1];
+                final double tz = t[2];
+                final double a = -r[2] * Math.PI / 180;
+                final double dw = canvas.getWidth();
+                final double dh = canvas.getHeight();
                 gc.clearRect(0, 0, (int) dw, (int) dh);
                 gc.setStrokeLine(((float) dw) * 0.002f, GraphicsContext.CAP_BUTT, GraphicsContext.JOIN_MITER, 1f);
                 gc.setStroke(renderFactory.createColor(1, 1, 0, 1));
-                List<Trap> traps = coordinators[0].getTraps();
+                final List<Trap> traps = coordinators[0].getTraps();
                 for (Trap trap : traps) {
-                    List<ComplexNumber> points = trap.toPoints();
+                    final List<ComplexNumber> points = trap.toPoints();
                     if (!points.isEmpty()) {
                         double zx = points.getFirst().r();
                         double zy = points.getFirst().i();

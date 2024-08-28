@@ -23,11 +23,11 @@ public class AlgorithmAttributeEditor extends AttributeEditor {
 
         setCenter(comboBox);
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, newValue) -> {
             comboBox.setPrefWidth(newValue.doubleValue());
         });
 
-        comboBox.setOnAction(e -> {
+        comboBox.setOnAction(_ -> {
             if (getDelegate() != null) {
                 getDelegate().onEditorChanged(this);
             }

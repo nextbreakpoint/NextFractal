@@ -36,10 +36,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.transform.Affine;
 
 public class JobsListCell extends ListCell<Bitmap> {
-	private BorderPane pane;
-	private Label label;
-	private Canvas canvas;
-	private Tile tile;
+	private final BorderPane pane;
+	private final Label label;
+	private final Canvas canvas;
+	private final Tile tile;
 
 	public JobsListCell(Tile tile) {
 		this.tile = tile;
@@ -59,12 +59,12 @@ public class JobsListCell extends ListCell<Bitmap> {
 			setGraphic(null);
 		} else {
 			if (bitmap.getPixels() != null) {
-				WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
+				final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
 				image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
-				GraphicsContext g2d = canvas.getGraphicsContext2D();
-				Affine affine = new Affine();
-				int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
-				int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
+				final GraphicsContext g2d = canvas.getGraphicsContext2D();
+				final Affine affine = new Affine();
+				final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+				final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
 				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 				affine.append(Affine.scale(1, -1));
 				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));

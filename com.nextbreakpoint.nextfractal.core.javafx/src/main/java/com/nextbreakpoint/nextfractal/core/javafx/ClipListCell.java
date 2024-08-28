@@ -41,6 +41,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.transform.Affine;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,38 +49,38 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ClipListCell extends ListCell<Bitmap> {
-	private BorderPane pane;
-	private Canvas canvas;
+	private final BorderPane pane;
+	private final Canvas canvas;
+	private final Label label;
+	private final Tile tile;
+	@Setter
 	private ClipListCellDelegate delegate;
-	private Label label;
-	private Tile tile;
 
-	public ClipListCell(Tile tile, ClipListCellDelegate delegate) {
+	public ClipListCell(Tile tile) {
 		this.tile = tile;
-		this.delegate = delegate;
 		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 		label = new Label();
 		label.getStyleClass().add("text-small");
 		pane = new BorderPane();
-		VBox image = new VBox(4);
+		final VBox image = new VBox(4);
 		image.setAlignment(Pos.CENTER);
 		image.getChildren().add(canvas);
 		pane.setLeft(image);
-		VBox labels = new VBox(4);
+		final VBox labels = new VBox(4);
 		labels.setAlignment(Pos.CENTER_RIGHT);
 		labels.getChildren().add(label);
 		pane.setCenter(labels);
 
-		ClipListCell thisCell = this;
+		final ClipListCell thisCell = this;
 
 		setOnDragDetected(event -> {
 			if (getItem() == null) {
 				return;
 			}
 
-			Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+			final Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
 			dragboard.setDragView(getWritableImage(getItem()));
-			ClipboardContent content = new ClipboardContent();
+			final ClipboardContent content = new ClipboardContent();
 			content.put(DataFormat.PLAIN_TEXT, getItem().getId().toString());
 			dragboard.setContent(content);
 
@@ -110,18 +111,18 @@ public class ClipListCell extends ListCell<Bitmap> {
 				return;
 			}
 
-			Dragboard db = event.getDragboard();
+			final Dragboard db = event.getDragboard();
 
 			boolean success = false;
 
 			if (db.hasString()) {
-				Map<String, Bitmap> itemsMap = getListView().getItems().stream().collect(Collectors.toMap(bitmap -> bitmap.getId().toString(), bitmap -> bitmap));
-				List<String> itemsIds = getListView().getItems().stream().map(bitmap -> bitmap.getId().toString()).collect(Collectors.toList());
-				int draggedIdx = itemsIds.indexOf(db.getString());
-				int thisIdx = itemsIds.indexOf(getItem().getId().toString());
+				final Map<String, Bitmap> itemsMap = getListView().getItems().stream().collect(Collectors.toMap(bitmap -> bitmap.getId().toString(), bitmap -> bitmap));
+				final List<String> itemsIds = getListView().getItems().stream().map(bitmap -> bitmap.getId().toString()).collect(Collectors.toList());
+				final int draggedIdx = itemsIds.indexOf(db.getString());
+				final int thisIdx = itemsIds.indexOf(getItem().getId().toString());
 				itemsIds.remove(draggedIdx);
 				itemsIds.add(thisIdx, db.getString());
-				List<Bitmap> newItems = new ArrayList();
+				final List<Bitmap> newItems = new ArrayList();
 				itemsIds.forEach(itemId -> newItems.add(itemsMap.get(itemId)));
 				getListView().getItems().setAll(newItems);
 				success = true;
@@ -145,31 +146,31 @@ public class ClipListCell extends ListCell<Bitmap> {
 			setGraphic(null);
 		} else {
 			if (bitmap.getPixels() != null) {
-				WritableImage image = getWritableImage(bitmap);
-				GraphicsContext g2d = canvas.getGraphicsContext2D();
-				Affine affine = new Affine();
-				int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
-				int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
+				final WritableImage image = getWritableImage(bitmap);
+				final GraphicsContext g2d = canvas.getGraphicsContext2D();
+				final Affine affine = new Affine();
+				final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+				final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
 				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 				affine.append(Affine.scale(1, -1));
 				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
 				g2d.setTransform(affine);
 				g2d.drawImage(image, x, y);
 			}
-			AnimationClip clip = (AnimationClip)bitmap.getProperty("clip");
-			long durationInSeconds = clip.duration() / 1000;
-			long minutes = (long)Math.rint(durationInSeconds / 60.0);
+			final AnimationClip clip = (AnimationClip)bitmap.getProperty("clip");
+			final long durationInSeconds = clip.duration() / 1000;
+			final long minutes = (long) Math.rint(durationInSeconds / 60.0);
 			if (minutes <= 2) {
 				label.setText(durationInSeconds == 0 ? clip.duration() + " millis" : durationInSeconds == 1 ? "1 second" : durationInSeconds + " seconds");
 			} else {
-				label.setText(minutes == 1 ? "1 minute" : minutes + " minutes");
+				label.setText(minutes + " minutes");
 			}
 			this.setGraphic(pane);
 		}
 	}
 
 	private WritableImage getWritableImage(Bitmap bitmap) {
-		WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
+		final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
 		image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
 		return image;
 	}

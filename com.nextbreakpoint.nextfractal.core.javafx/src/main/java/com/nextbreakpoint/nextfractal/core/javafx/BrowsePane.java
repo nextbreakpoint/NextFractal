@@ -42,6 +42,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
+import lombok.Setter;
+import lombok.extern.java.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,23 +71,25 @@ import java.util.stream.Stream;
 
 import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
 
+@Log
 public class BrowsePane extends BorderPane {
-    private static final Logger logger = Logger.getLogger(BrowsePane.class.getName());
     private static final int FRAME_LENGTH_IN_MILLIS = 50;
     private static final int SCROLL_BOUNCE_DELAY = 500;
-    private final ExecutorService browserExecutor;
+
+    private final List<GridItem> items = new ArrayList<>();
+    private final List<String> filter = new LinkedList<>();
     private final StringObservableValue sourcePathProperty;
     private final StringObservableValue importPathProperty;
+    private final ExecutorService browserExecutor;
     private final int numRows = 3;
     private final int numCols = 3;
-    private final LinkedList<String> filter = new LinkedList<>();
     private final File workspace;
     private final File examples;
-    private List<GridItem> items = new ArrayList<>();
-    private BrowseDelegate delegate;
-    private Tile tile;
-    private AnimationTimer timer;
+    private final Tile tile;
     private Thread thread;
+    private AnimationTimer timer;
+    @Setter
+    private BrowseDelegate delegate;
 
     public BrowsePane(int width, int height, File workspace, File examples) {
         this.workspace = workspace;
@@ -108,31 +112,31 @@ public class BrowsePane extends BorderPane {
 
         importPathProperty.setValue(null);
 
-        int size = width / numCols;
+        final int size = width / numCols;
 
-        int maxThreads = numCols;
+        final int maxThreads = numCols;
 
         tile = createSingleTile(size, size);
 
-        HBox toolbar1 = new HBox(2);
+        final HBox toolbar1 = new HBox(2);
         toolbar1.setAlignment(Pos.CENTER_LEFT);
 
-        HBox toolbar2 = new HBox(2);
+        final HBox toolbar2 = new HBox(2);
         toolbar2.setAlignment(Pos.CENTER);
 
-        HBox toolbar3 = new HBox(2);
+        final HBox toolbar3 = new HBox(2);
         toolbar3.setAlignment(Pos.CENTER_RIGHT);
 
-        Button closeButton = new Button("", Icons.createIconImage("/icon-close.png"));
-        Button deleteButton = new Button("", Icons.createIconImage("/icon-delete.png"));
-        Button reloadButton = new Button("", Icons.createIconImage("/icon-reload.png"));
-        Button importButton = new Button("", Icons.createIconImage("/icon-import.png"));
+        final Button closeButton = new Button("", Icons.createIconImage("/icon-close.png"));
+        final Button deleteButton = new Button("", Icons.createIconImage("/icon-delete.png"));
+        final Button reloadButton = new Button("", Icons.createIconImage("/icon-reload.png"));
+        final Button importButton = new Button("", Icons.createIconImage("/icon-import.png"));
         closeButton.setTooltip(new Tooltip("Hide projects"));
         deleteButton.setTooltip(new Tooltip("Delete projects"));
         reloadButton.setTooltip(new Tooltip("Reload projects"));
         importButton.setTooltip(new Tooltip("Import projects from directory"));
 
-        Label statusLabel = new Label("");
+        final Label statusLabel = new Label("");
 
         toolbar1.getChildren().add(statusLabel);
         toolbar3.getChildren().add(importButton);
@@ -140,7 +144,7 @@ public class BrowsePane extends BorderPane {
         toolbar3.getChildren().add(reloadButton);
         toolbar3.getChildren().add(closeButton);
 
-        BorderPane toolbar = new BorderPane();
+        final BorderPane toolbar = new BorderPane();
         toolbar.getStyleClass().add("toolbar");
         toolbar.getStyleClass().add("translucent");
         toolbar.setPrefHeight(height * 0.07);
@@ -150,7 +154,7 @@ public class BrowsePane extends BorderPane {
 
         deleteButton.setDisable(true);
 
-        GridView grid = new GridView(numRows, numCols, size);
+        final GridView grid = new GridView(numRows, numCols, size);
 
         grid.setDelegate(new GridViewDelegate() {
             @Override
@@ -165,10 +169,10 @@ public class BrowsePane extends BorderPane {
 
             @Override
             public void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks) {
-                int index = selectedRow * numCols + selectedCol;
+                final int index = selectedRow * numCols + selectedCol;
                 if (index >= 0 && index < items.size()) {
-                    GridItem item = items.get(index);
-                    File file = item.getFile();
+                    final GridItem item = items.get(index);
+                    final File file = item.getFile();
                     if (file != null) {
                         if (clicks == 1) {
                             item.setSelected(!item.isSelected());
@@ -188,40 +192,40 @@ public class BrowsePane extends BorderPane {
             }
         });
 
-        BorderPane box = new BorderPane();
+        final BorderPane box = new BorderPane();
         box.setCenter(grid);
         box.setBottom(toolbar);
         box.getStyleClass().add("browse");
 
         setCenter(box);
 
-        closeButton.setOnMouseClicked(e -> doClose());
+        closeButton.setOnMouseClicked(_ -> doClose());
 
-        importButton.setOnMouseClicked(e -> doChooseImportFolder());
+        importButton.setOnMouseClicked(_ -> doChooseImportFolder());
 
-        reloadButton.setOnMouseClicked(e -> {
+        reloadButton.setOnMouseClicked(_ -> {
             final File path = getCurrentSourceFolder();
             deleteButton.setDisable(true);
             loadFiles(statusLabel, grid, path);
         });
 
-        deleteButton.setOnMouseClicked(e -> deleteSelected(items));
+        deleteButton.setOnMouseClicked(_ -> deleteSelected(items));
 
-        sourcePathProperty.addListener((observable, oldValue, newValue) -> {
+        sourcePathProperty.addListener((_, _, newValue) -> {
             if (newValue != null) {
                 File path = new File(newValue);
                 reloadFiles(deleteButton, statusLabel, grid, path);
             }
         });
 
-        importPathProperty.addListener((observable, oldValue, newValue) -> {
+        importPathProperty.addListener((_, _, newValue) -> {
             if (newValue != null) {
                 File path = new File(newValue);
                 importFiles(deleteButton, statusLabel, grid, path);
             }
         });
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, newValue) -> {
             toolbar1.setPrefWidth(newValue.doubleValue() / 3);
             toolbar2.setPrefWidth(newValue.doubleValue() / 3);
             toolbar3.setPrefWidth(newValue.doubleValue() / 3);
@@ -250,7 +254,7 @@ public class BrowsePane extends BorderPane {
 
     public void reload() {
         if (listFiles(workspace).isEmpty()) {
-            logger.log(Level.INFO, "Workspace is empty");
+            log.log(Level.INFO, "Workspace is empty");
             importPathProperty.setValue(null);
             Platform.runLater(this::doChooseImportFolder);
         } else {
@@ -265,16 +269,12 @@ public class BrowsePane extends BorderPane {
     }
 
     private void deleteSelected(List<GridItem> items) {
-        List<File> files = items.stream().filter(GridItem::isSelected).map(GridItem::getFile).toList();
+        final List<File> files = items.stream().filter(GridItem::isSelected).map(GridItem::getFile).toList();
         delegate.didDeleteFiles(files);
     }
 
-    public void setDelegate(BrowseDelegate delegate) {
-        this.delegate = delegate;
-    }
-
     public void dispose() {
-        List<ExecutorService> executors = List.of(browserExecutor);
+        final List<ExecutorService> executors = List.of(browserExecutor);
         executors.forEach(ExecutorService::shutdownNow);
         executors.forEach(this::await);
         stopWatching();
@@ -285,7 +285,7 @@ public class BrowsePane extends BorderPane {
         Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
                 .execute()
                 .observe()
-                .onFailure(e -> logger.warning("Await termination timeout"))
+                .onFailure(e -> log.warning("Await termination timeout"))
                 .get();
     }
 
@@ -294,11 +294,11 @@ public class BrowsePane extends BorderPane {
     }
 
     private void doChooseSourceFolder() {
-        Block.begin(a -> doSelectSourceFolder(prepareSourceDirectoryChooser())).end().execute();
+        Block.begin(_ -> doSelectSourceFolder(prepareSourceDirectoryChooser())).end().execute();
     }
 
     private void doChooseImportFolder() {
-        Block.begin(a -> doSelectImportFolder(prepareImportDirectoryChooser())).end().execute();
+        Block.begin(_ -> doSelectImportFolder(prepareImportDirectoryChooser())).end().execute();
     }
 
     private void doSelectSourceFolder(DirectoryChooser sourceDirectoryChooser) {
@@ -307,7 +307,7 @@ public class BrowsePane extends BorderPane {
     }
 
     private DirectoryChooser prepareSourceDirectoryChooser() {
-        DirectoryChooser sourceDirectoryChooser = new DirectoryChooser();
+        final DirectoryChooser sourceDirectoryChooser = new DirectoryChooser();
         sourceDirectoryChooser.setInitialDirectory(getDefaultSourceFolder());
         sourceDirectoryChooser.setTitle("Choose source folder");
         return sourceDirectoryChooser;
@@ -319,24 +319,24 @@ public class BrowsePane extends BorderPane {
     }
 
     private DirectoryChooser prepareImportDirectoryChooser() {
-        DirectoryChooser importDirectoryChooser = new DirectoryChooser();
+        final DirectoryChooser importDirectoryChooser = new DirectoryChooser();
         importDirectoryChooser.setInitialDirectory(getDefaultImportFolder());
         importDirectoryChooser.setTitle("Choose import folder");
         return importDirectoryChooser;
     }
 
     private Tile createSingleTile(int width, int height) {
-        Size imageSize = new Size(width, height);
-        Size tileSize = new Size(width, height);
-        Size tileBorder = new Size(0, 0);
-        Point tileOffset = new Point(0, 0);
+        final Size imageSize = new Size(width, height);
+        final Size tileSize = new Size(width, height);
+        final Size tileBorder = new Size(0, 0);
+        final Point tileOffset = new Point(0, 0);
         return new Tile(imageSize, tileSize, tileOffset, tileBorder);
     }
 
     private void loadFiles(Label statusLabel, GridView grid, File folder) {
         removeItems();
         grid.setData(new GridItem[0]);
-        List<File> files = listFiles(folder);
+        final List<File> files = listFiles(folder);
         if (!files.isEmpty()) {
             statusLabel.setText(files.size() + " project file" + (files.size() > 1 ? "s" : "") + " found");
             loadItems(grid, files);
@@ -346,7 +346,7 @@ public class BrowsePane extends BorderPane {
     }
 
     private void importFiles(Button deleteButton, Label statusLabel, GridView grid, File folder) {
-        List<File> files = listFiles(folder);
+        final List<File> files = listFiles(folder);
         if (!files.isEmpty()) {
             copyFilesAsync(deleteButton, statusLabel, grid, files, getCurrentSourceFolder());
         }
@@ -386,7 +386,7 @@ public class BrowsePane extends BorderPane {
     private void saveFile(Bundle session, File name) {
         FileManager.saveBundle(name, session)
                 .observe()
-                .onFailure(e -> logger.log(Level.WARNING, "Can't save file " + name, e))
+                .onFailure(e -> log.log(Level.WARNING, "Can't save file " + name, e))
                 .get();
     }
 
@@ -400,7 +400,7 @@ public class BrowsePane extends BorderPane {
     }
 
     private void loadItems(GridView grid, List<File> files) {
-        GridItem[] items = new GridItem[files.size()];
+        final GridItem[] items = new GridItem[files.size()];
         for (int i = 0; i < files.size(); i++) {
             items[i] = new GridItem();
             items[i].setFile(files.get(i));
@@ -425,30 +425,30 @@ public class BrowsePane extends BorderPane {
 
     private void removeItems() {
         for (int index = 0; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getLoadItemFuture() != null && !item.getLoadItemFuture().isDone()) {
                 item.getLoadItemFuture().cancel(true);
             }
         }
 
         for (int index = 0; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
                 item.getRenderer().abort();
             }
         }
 
 //		for (int index = 0; index < items.size(); index++) {
-//			GridItem item = items.get(index);
+//			final GridItem item = items.get(index);
 //			if (item.getRenderer() != null) {
 //				item.getRenderer().waitFor();
 //			}
 //		}
 
         for (int index = 0; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
-//				GridItemRenderer renderer = item.getRenderer();
+//				final GridItemRenderer renderer = item.getRenderer();
                 item.setRenderer(null);
 //				renderer.dispose();
             }
@@ -463,7 +463,7 @@ public class BrowsePane extends BorderPane {
 
             @Override
             public void handle(long now) {
-                long time = now / 1000000;
+                final long time = now / 1000000;
                 if (time - last > FRAME_LENGTH_IN_MILLIS) {
                     try {
                         updateCells(grid);
@@ -488,18 +488,18 @@ public class BrowsePane extends BorderPane {
         if (lastRow < grid.getData().length / numCols - 1) {
             lastRow += 1;
         }
-        int firstIndex = Math.min(firstRow * numCols, items.size());
-        int lastIndex = lastRow * numCols + numCols;
+        final int firstIndex = Math.min(firstRow * numCols, items.size());
+        final int lastIndex = lastRow * numCols + numCols;
         for (int index = 0; index < firstIndex; index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             item.setAborted(true);
         }
         for (int index = lastIndex; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             item.setAborted(true);
         }
         for (int index = 0; index < firstIndex; index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getLoadItemFuture() != null) {
                 item.getLoadItemFuture().get();
                 item.setLoadItemFuture(null);
@@ -510,7 +510,7 @@ public class BrowsePane extends BorderPane {
             }
         }
         for (int index = lastIndex; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getLoadItemFuture() != null) {
                 item.getLoadItemFuture().get();
                 item.setLoadItemFuture(null);
@@ -521,60 +521,60 @@ public class BrowsePane extends BorderPane {
             }
         }
         for (int index = 0; index < firstIndex; index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             item.setAborted(false);
         }
         for (int index = lastIndex; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             item.setAborted(false);
         }
         for (int index = 0; index < firstIndex; index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
                 item.getRenderer().abort();
             }
         }
         for (int index = lastIndex; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
                 item.getRenderer().abort();
             }
         }
         for (int index = 0; index < firstIndex; index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
                 item.getRenderer().waitFor();
             }
         }
         for (int index = lastIndex; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
                 item.getRenderer().waitFor();
             }
         }
         for (int index = 0; index < firstIndex; index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
-                GridItemRenderer renderer = item.getRenderer();
+                final GridItemRenderer renderer = item.getRenderer();
                 item.setRenderer(null);
                 item.setBitmap(null);
                 renderer.dispose();
             }
         }
         for (int index = lastIndex; index < items.size(); index++) {
-            GridItem item = items.get(index);
+            final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
-                GridItemRenderer renderer = item.getRenderer();
+                final GridItemRenderer renderer = item.getRenderer();
                 item.setRenderer(null);
                 item.setBitmap(null);
                 renderer.dispose();
             }
         }
         for (int index = firstIndex; index < Math.min(lastIndex, items.size()); index++) {
-            GridItem item = items.get(index);
-            BrowseBitmap bitmap = item.getBitmap();
-            GridItemRenderer renderer = item.getRenderer();
-            long time = System.currentTimeMillis();
+            final GridItem item = items.get(index);
+            final BrowseBitmap bitmap = item.getBitmap();
+            final GridItemRenderer renderer = item.getRenderer();
+            final long time = System.currentTimeMillis();
             if (bitmap == null && time - item.getLastChanged() > SCROLL_BOUNCE_DELAY && item.getLoadItemFuture() == null) {
                 loadItemAsync(item);
             }
@@ -597,12 +597,11 @@ public class BrowsePane extends BorderPane {
         try {
             if (!item.isAborted() && delegate != null) {
                 final BrowseBitmap bitmap = delegate.createBitmap(file, tile.tileSize());
-
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }
         } catch (Exception e) {
             item.setErrors(List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, e.getMessage())));
-            logger.log(Level.WARNING, "Can't create bitmap: " + e.getMessage());
+            log.log(Level.WARNING, "Can't create bitmap: " + e.getMessage());
         }
     }
 
@@ -617,13 +616,12 @@ public class BrowsePane extends BorderPane {
     private void initItem(GridItem item, BrowseBitmap bitmap) {
         try {
             if (!item.isAborted() && delegate != null) {
-                GridItemRenderer renderer = delegate.createRenderer(bitmap);
-
+                final GridItemRenderer renderer = delegate.createRenderer(bitmap);
                 Platform.runLater(() -> item.setRenderer(renderer));
             }
         } catch (Exception e) {
             item.setErrors(List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, e.getMessage())));
-            logger.log(Level.WARNING, "Can't initialize renderer", e);
+            log.log(Level.WARNING, "Can't initialize renderer", e);
         }
     }
 
@@ -649,48 +647,36 @@ public class BrowsePane extends BorderPane {
         try {
             for (; ; ) {
                 WatchService watcher = FileSystems.getDefault().newWatchService();
-
                 WatchKey watchKey = null;
-
-                logger.log(Level.INFO, "Watch loop starting...");
-
+                log.log(Level.INFO, "Watch loop starting...");
                 try {
                     watchKey = dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-
-                    logger.log(Level.INFO, "Watch loop started");
-
+                    log.log(Level.INFO, "Watch loop started");
                     for (; ; ) {
                         WatchKey key = watcher.take();
-
                         for (WatchEvent<?> event : key.pollEvents()) {
-                            logger.log(Level.INFO, "Watch loop events " + event.count());
-
+                            log.log(Level.INFO, "Watch loop events " + event.count());
                             consumer.accept(null);
                         }
-
                         boolean valid = key.reset();
-
                         if (!valid) {
                             break;
                         }
                     }
-
-                    logger.log(Level.INFO, "Watch loop exited");
+                    log.log(Level.INFO, "Watch loop exited");
                 } finally {
                     if (watchKey != null) {
                         watchKey.cancel();
                     }
-
                     watcher.close();
                 }
-
                 consumer.accept(null);
             }
         } catch (InterruptedException x) {
-            logger.log(Level.INFO, "Watch loop interrupted");
+            log.log(Level.INFO, "Watch loop interrupted");
             Thread.currentThread().interrupt();
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Can't watch directory " + getCurrentSourceFolder().getAbsolutePath(), e);
+            log.log(Level.WARNING, "Can't watch directory " + getCurrentSourceFolder().getAbsolutePath(), e);
         }
     }
 }

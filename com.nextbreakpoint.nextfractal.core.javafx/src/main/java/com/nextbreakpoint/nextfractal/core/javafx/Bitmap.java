@@ -29,21 +29,21 @@ import java.util.Date;
 import java.util.UUID;
 
 public interface Bitmap {
-	public IntBuffer getPixels();
+	IntBuffer getPixels();
 
-	public int getWidth();
+	int getWidth();
 
-	public int getHeight();
+	int getHeight();
 
-	public Object getProperty(String key);
+	Object getProperty(String key);
 
-	public void setProperty(String key, Object value);
+	void setProperty(String key, Object value);
 
-	public Date getTimestamp();
+	Date getTimestamp();
 
-	public double getProgress();
+	double getProgress();
 
-	public void setProgress(double progress);
+	void setProgress(double progress);
 
-	public UUID getId();
+	UUID getId();
 }

@@ -52,7 +52,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
 
         renderFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 
-        Map<String, Integer> hints = new HashMap<>();
+        final Map<String, Integer> hints = new HashMap<>();
         coordinator = createRendererCoordinator(hints, GraphicsUtils.createTile(width, height));
     }
 
@@ -89,8 +89,8 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     public List<ScriptError> updateCoordinators(ParserResult result) {
         try {
             hasError = !result.errors().isEmpty();
-            boolean[] changed = createCFDG(result);
-            boolean cfdgChanged = changed[0];
+            final boolean[] changed = createCFDG(result);
+            final boolean cfdgChanged = changed[0];
             if (cfdgChanged) {
                 if (log.isLoggable(Level.FINE)) {
                     log.fine("CFDG is changed");
@@ -138,9 +138,9 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
             cfdgSource = null;
             throw new CFParserException("Failed to compile source", result.errors());
         }
-        boolean[] changed = new boolean[] { false, false };
-        CFParserResult parserResult = (CFParserResult) result.result();
-        String source = parserResult.source();
+        final boolean[] changed = new boolean[] { false, false };
+        final CFParserResult parserResult = (CFParserResult) result.result();
+        final String source = parserResult.source();
         changed[0] = !source.equals(cfdgSource);
         cfdgSource = source;
         cfdgImage = parserResult.classFactory().create();
@@ -149,7 +149,7 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
 
     private void redrawIfPixelsChanged(Canvas canvas) {
         if (coordinator.isPixelsChanged()) {
-            GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
+            final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
             coordinator.drawImage(gc, 0, 0);
         }
     }

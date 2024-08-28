@@ -34,7 +34,7 @@ public class Icons {
     private Icons() {}
 
     public static ImageView createIconImage(String name, double percentage) {
-        InputStream stream = Icons.class.getResourceAsStream(name);
+        final InputStream stream = Icons.class.getResourceAsStream(name);
         return createIconImage(stream, percentage);
     }
 
@@ -43,8 +43,8 @@ public class Icons {
     }
 
     public static ImageView createIconImage(InputStream stream, double percentage) {
-        int size = (int)Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
-        ImageView image = new ImageView(new Image(stream));
+        final int size = (int)Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
+        final ImageView image = new ImageView(new Image(stream));
         image.setSmooth(true);
         image.setFitWidth(size);
         image.setFitHeight(size);
@@ -58,7 +58,7 @@ public class Icons {
     public static double computeOptimalIconPercentage() {
         double size = 0.019;
 
-        Screen screen = Screen.getPrimary();
+        final Screen screen = Screen.getPrimary();
 
         if (screen.getDpi() > 100 || screen.getVisualBounds().getWidth() > 1200) {
             size = 0.020;
@@ -74,7 +74,7 @@ public class Icons {
     public static double computeOptimalLargeIconPercentage() {
         double size = 0.021;
 
-        Screen screen = Screen.getPrimary();
+        final Screen screen = Screen.getPrimary();
 
         if (screen.getDpi() > 100 || screen.getVisualBounds().getWidth() > 1200) {
             size = 0.022;

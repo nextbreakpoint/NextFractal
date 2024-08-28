@@ -71,13 +71,13 @@ public class ContextFreeUIFactory implements UIFactory {
 
 	@Override
 	public GridItemRenderer createRenderer(Bitmap bitmap) {
-		Map<String, Integer> hints = new HashMap<>();
-		Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
-		DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
-		GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
-		Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
-		CFDGImage cfdgImage = (CFDGImage)bitmap.getProperty("image");
-		Session session = (Session)bitmap.getProperty("session");
+		final Map<String, Integer> hints = new HashMap<>();
+		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
+		final DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
+		final GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
+		final Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
+		final CFDGImage cfdgImage = (CFDGImage)bitmap.getProperty("image");
+		final Session session = (Session)bitmap.getProperty("session");
 		coordinator.setImage(cfdgImage);
 		coordinator.setSeed(((ContextFreeMetadata)session.metadata()).getSeed());
 		coordinator.init();
@@ -87,9 +87,9 @@ public class ContextFreeUIFactory implements UIFactory {
 
 	@Override
 	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
-		CFParser compiler = new CFParser();
-		CFParserResult report = compiler.parse(session.script());
-		BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
+		final CFParser compiler = new CFParser();
+		final CFParserResult report = compiler.parse(session.script());
+		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("image", report.classFactory().create());
 		bitmap.setProperty("session", session);
 		return bitmap;

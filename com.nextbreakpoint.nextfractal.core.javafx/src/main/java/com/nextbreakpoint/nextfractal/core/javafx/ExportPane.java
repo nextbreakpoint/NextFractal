@@ -48,6 +48,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
 import java.util.List;
@@ -59,8 +60,8 @@ import java.util.stream.Collectors;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
+@Log
 public class ExportPane extends BorderPane {
-	private static Logger logger = Logger.getLogger(ExportPane.class.getName());
 	private static final int PADDING = 8;
 
 	private final Tile tile;
@@ -81,57 +82,57 @@ public class ExportPane extends BorderPane {
 		videoProperty = new BooleanObservableValue();
 		videoProperty.setValue(false);
 
-		ComboBox<Integer[]> presetsCombobox = new ComboBox<>();
+		final ComboBox<Integer[]> presetsCombobox = new ComboBox<>();
 		presetsCombobox.getStyleClass().add("text-small");
 		presetsCombobox.setTooltip(new Tooltip("Select image or video size"));
 		loadImagePresets(presetsCombobox);
-		Integer[] item0 = presetsCombobox.getSelectionModel().getSelectedItem();
-		AdvancedTextField widthField = new AdvancedTextField();
+		final Integer[] item0 = presetsCombobox.getSelectionModel().getSelectedItem();
+		final AdvancedTextField widthField = new AdvancedTextField();
 		widthField.getStyleClass().add("text-small");
 		widthField.setRestrict(getRestriction());
 		widthField.setEditable(false);
 		widthField.setText(String.valueOf(item0[0]));
-		AdvancedTextField heightField = new AdvancedTextField();
+		final AdvancedTextField heightField = new AdvancedTextField();
 		heightField.setRestrict(getRestriction());
 		heightField.setEditable(false);
 		heightField.setText(String.valueOf(item0[1]));
 		heightField.getStyleClass().add("text-small");
 
-		ComboBox<String[]> formatCombobox = new ComboBox<>();
+		final ComboBox<String[]> formatCombobox = new ComboBox<>();
 		formatCombobox.getStyleClass().add("text-small");
 		formatCombobox.setTooltip(new Tooltip("Select format to export"));
 		formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
 		formatCombobox.getItems().add(new String[] { "JPEG image", "JPEG" });
 		formatCombobox.getSelectionModel().select(0);
 
-		VBox formatBox = new VBox(5);
+		final VBox formatBox = new VBox(5);
 		formatBox.setAlignment(Pos.CENTER);
 		formatBox.getChildren().add(formatCombobox);
 
 		captureButton = new ToggleButton("Capture");
-		Button exportButton = new Button("Export");
-		Button removeButton = new Button("Remove");
-		Button previewButton = new Button("Preview");
+		final Button exportButton = new Button("Export");
+		final Button removeButton = new Button("Remove");
+		final Button previewButton = new Button("Preview");
 		exportButton.setTooltip(new Tooltip("Export image or video"));
 		removeButton.setTooltip(new Tooltip("Remove selected clips"));
 		previewButton.setTooltip(new Tooltip("Preview selected clips"));
 		captureButton.setTooltip(new Tooltip("Enable/disable capture"));
 
-		VBox exportButtons = new VBox(4);
+		final VBox exportButtons = new VBox(4);
 		exportButtons.getChildren().add(exportButton);
 		exportButtons.getStyleClass().add("buttons");
 		exportButtons.getStyleClass().add("text-small");
 
-		VBox dimensionBox = new VBox(5);
+		final VBox dimensionBox = new VBox(5);
 		dimensionBox.setAlignment(Pos.CENTER);
 		dimensionBox.getChildren().add(presetsCombobox);
 
-		HBox sizeBox = new HBox(5);
+		final HBox sizeBox = new HBox(5);
 		sizeBox.setAlignment(Pos.CENTER);
 		sizeBox.getChildren().add(widthField);
 		sizeBox.getChildren().add(heightField);
 
-		VBox exportControls = new VBox(8);
+		final VBox exportControls = new VBox(8);
 		exportControls.setAlignment(Pos.CENTER_LEFT);
 		exportControls.getChildren().add(new Label("Exported format"));
 		exportControls.getChildren().add(formatBox);
@@ -139,7 +140,7 @@ public class ExportPane extends BorderPane {
 		exportControls.getChildren().add(dimensionBox);
 		exportControls.getChildren().add(sizeBox);
 
-		VBox clipButtons = new VBox(4);
+		final VBox clipButtons = new VBox(4);
 		clipButtons.getChildren().add(captureButton);
 		clipButtons.getChildren().add(removeButton);
 		clipButtons.getChildren().add(previewButton);
@@ -148,17 +149,22 @@ public class ExportPane extends BorderPane {
 
 		listView = new ListView<>();
 		listView.setFixedCellSize(tile.tileSize().height() + PADDING);
-		listView.setCellFactory(view -> new ClipListCell(tile, (fromIndex, toIndex) -> {
-            if (delegate != null) {
-                delegate.captureSessionMoved(fromIndex, toIndex);
-            }
-        }));
+		listView.setCellFactory(_ -> {
+			final ClipListCellDelegate cellDelegate = (fromIndex, toIndex) -> {
+				if (delegate != null) {
+					delegate.captureSessionMoved(fromIndex, toIndex);
+				}
+			};
+			final ClipListCell clipListCell = new ClipListCell(tile);
+			clipListCell.setDelegate(cellDelegate);
+			return clipListCell;
+		});
 		listView.setTooltip(new Tooltip("List of captured clips"));
 		listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> itemSelected(listView));
 
-		VBox exportPane = new VBox(8);
+		final VBox exportPane = new VBox(8);
 		exportPane.setAlignment(Pos.TOP_CENTER);
 		exportPane.getChildren().add(clipButtons);
 		exportPane.getChildren().add(exportControls);
@@ -173,7 +179,7 @@ public class ExportPane extends BorderPane {
 		getStyleClass().add("export");
 
 		Runnable updateButtonsAndPanels = () -> {
-			boolean selected = captureProperty.getValue();
+			final boolean selected = captureProperty.getValue();
 			removeButton.setDisable(listView.getItems().isEmpty() || selected);
 			previewButton.setDisable(listView.getItems().isEmpty() || selected);
 			exportButton.setDisable(selected);
@@ -183,89 +189,91 @@ public class ExportPane extends BorderPane {
 			heightField.setDisable(selected);
 		};
 
-		presetsCombobox.setConverter(new StringConverter<Integer[]>() {
-			@Override
-			public String toString(Integer[] item) {
-				if (item == null) {
-					return null;
-				} else {
-					if (item[0] == 0 || item[1] == 0) {
-						return "Custom";
-					} else {
-						return item[0] + "\u00D7" + item[1];
-					}
-				}
-			}
+		presetsCombobox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Integer[] item) {
+                if (item == null) {
+                    return null;
+                } else {
+                    if (item[0] == 0 || item[1] == 0) {
+                        return "Custom";
+                    } else {
+                        return item[0] + "\u00D7" + item[1];
+                    }
+                }
+            }
 
-			@Override
-			public Integer[] fromString(String preset) {
-				return null;
-			}
-		});
+            @Override
+            public Integer[] fromString(String preset) {
+                return null;
+            }
+        });
 
-		formatCombobox.setConverter(new StringConverter<String[]>() {
-			@Override
-			public String toString(String[] item) {
-				if (item == null) {
-					return null;
-				} else {
-					return item[0];
-				}
-			}
+		formatCombobox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(String[] item) {
+                if (item == null) {
+                    return null;
+                } else {
+                    return item[0];
+                }
+            }
 
-			@Override
-			public String[] fromString(String preset) {
-				return null;
-			}
-		});
+            @Override
+            public String[] fromString(String preset) {
+                return null;
+            }
+        });
 
-		presetsCombobox.setCellFactory(new Callback<ListView<Integer[]>, ListCell<Integer[]>>() {
-			@Override
-			public ListCell<Integer[]> call(ListView<Integer[]> p) {
-				return new ListCell<Integer[]>() {
-					private final Label label;
-					{
-						label = new Label();
-					}
-					
-					@Override
-					protected void updateItem(Integer[] item, boolean empty) {
-						super.updateItem(item, empty);
-						if (item == null || empty) {
-							setGraphic(null);
-						} else {
-							label.setText(presetsCombobox.getConverter().toString(item));
-							setGraphic(label);
-						}
-					}
-				};
-			}
-		});
+		presetsCombobox.setCellFactory(new Callback<>() {
+            @Override
+            public ListCell<Integer[]> call(ListView<Integer[]> p) {
+                return new ListCell<>() {
+                    private final Label label;
 
-		formatCombobox.setCellFactory(new Callback<ListView<String[]>, ListCell<String[]>>() {
-			@Override
-			public ListCell<String[]> call(ListView<String[]> p) {
-				return new ListCell<String[]>() {
-					private final Label label;
-					{
-						label = new Label();
-					}
+                    {
+                        label = new Label();
+                    }
 
-					@Override
-					protected void updateItem(String[] item, boolean empty) {
-						super.updateItem(item, empty);
-						if (item == null || empty) {
-							setGraphic(null);
-						} else {
-							label.setText(formatCombobox.getConverter().toString(item));
-							setGraphic(label);
-						}
-					}
-				};
-			}
-		});
+                    @Override
+                    protected void updateItem(Integer[] item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty) {
+                            setGraphic(null);
+                        } else {
+                            label.setText(presetsCombobox.getConverter().toString(item));
+                            setGraphic(label);
+                        }
+                    }
+                };
+            }
+        });
 
-		presetsCombobox.valueProperty().addListener((value, oldItem, newItem) -> {
+		formatCombobox.setCellFactory(new Callback<>() {
+            @Override
+            public ListCell<String[]> call(ListView<String[]> p) {
+                return new ListCell<>() {
+                    private final Label label;
+
+                    {
+                        label = new Label();
+                    }
+
+                    @Override
+                    protected void updateItem(String[] item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty) {
+                            setGraphic(null);
+                        } else {
+                            label.setText(formatCombobox.getConverter().toString(item));
+                            setGraphic(label);
+                        }
+                    }
+                };
+            }
+        });
+
+		presetsCombobox.valueProperty().addListener((_, _, newItem) -> {
             if (newItem != null && (newItem[0] == 0 || newItem[1] == 0)) {
                 widthField.setEditable(true);
                 heightField.setEditable(true);
@@ -289,7 +297,7 @@ public class ExportPane extends BorderPane {
             }
         });
 
-		formatCombobox.valueProperty().addListener((value, oldItem, newItem) -> {
+		formatCombobox.valueProperty().addListener((_, _, newItem) -> {
 			if (newItem != null && newItem[1].equals("PNG")) {
 				loadImagePresets(presetsCombobox);
 			} else {
@@ -297,16 +305,16 @@ public class ExportPane extends BorderPane {
 			}
 		});
 
-		exportButton.setOnMouseClicked(e -> {
+		exportButton.setOnMouseClicked(_ -> {
 			if (delegate != null) {
-				int renderWidth = Integer.parseInt(widthField.getText());
-				int renderHeight = Integer.parseInt(heightField.getText());
-				String format = formatCombobox.getSelectionModel().getSelectedItem()[1];
+				final int renderWidth = Integer.parseInt(widthField.getText());
+				final int renderHeight = Integer.parseInt(heightField.getText());
+				final String format = formatCombobox.getSelectionModel().getSelectedItem()[1];
 				delegate.createSession(new Size(renderWidth, renderHeight), format);
 			}
 		});
 
-		captureButton.setOnAction(e -> {
+		captureButton.setOnAction(_ -> {
 			captureProperty.setValue(captureButton.isSelected());
 			if (delegate != null) {
 				if (captureProperty.getValue()) {
@@ -317,15 +325,15 @@ public class ExportPane extends BorderPane {
 			}
 		});
 
-		captureProperty.addListener((observable, oldValue, newValue) -> {
+		captureProperty.addListener((_, _, newValue) -> {
 			Platform.runLater(() -> {
 				captureButton.setSelected(newValue);
 				updateButtonsAndPanels.run();
 			});
 		});
 
-		removeButton.setOnMouseClicked(e -> {
-			List<Integer> selectedIndices = listView.getSelectionModel().getSelectedIndices().stream().collect(Collectors.toList());
+		removeButton.setOnMouseClicked(_ -> {
+			final List<Integer> selectedIndices = listView.getSelectionModel().getSelectedIndices().stream().collect(Collectors.toList());
 			if (!selectedIndices.isEmpty()) {
 				for (int i = selectedIndices.size() - 1; i >= 0; i--) {
 					removeItem(listView, selectedIndices.get(i));
@@ -341,7 +349,7 @@ public class ExportPane extends BorderPane {
 //			}
 		});
 
-		previewButton.setOnMouseClicked(e -> {
+		previewButton.setOnMouseClicked(_ -> {
 			if (!listView.getItems().isEmpty() && delegate != null) {
 				if (!listView.getSelectionModel().getSelectedItems().isEmpty()) {
 					delegate.playbackStart(listView.getSelectionModel().getSelectedItems().stream()
@@ -353,7 +361,7 @@ public class ExportPane extends BorderPane {
 			}
 		});
 
-		videoProperty.addListener((observable, oldValue, newValue) -> {
+		videoProperty.addListener((_, _, newValue) -> {
 			if (newValue) {
 				formatCombobox.getItems().clear();
 				formatCombobox.getItems().add(new String[] { "PNG image", "PNG" });
@@ -371,7 +379,7 @@ public class ExportPane extends BorderPane {
 			updateButtonsAndPanels.run();
 		});
 
-		widthProperty().addListener((observable, oldValue, newValue) -> {
+		widthProperty().addListener((_, _, newValue) -> {
 			double width = newValue.doubleValue() - getInsets().getLeft() - getInsets().getRight();
 			formatCombobox.setPrefWidth(width);
 			presetsCombobox.setPrefWidth(width);
@@ -444,7 +452,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void removeItem(ListView<Bitmap> listView, int index) {
-		Bitmap bitmap = listView.getItems().remove(index);
+		final Bitmap bitmap = listView.getItems().remove(index);
 		if (bitmap == null) {
 			return;
 		}
@@ -466,7 +474,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	public void dispose() {
-		List<ExecutorService> executors = List.of(executor);
+		final List<ExecutorService> executors = List.of(executor);
 		executors.forEach(ExecutorService::shutdownNow);
 		executors.forEach(this::await);
 	}
@@ -475,7 +483,7 @@ public class ExportPane extends BorderPane {
 		Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
 				.execute()
 				.observe()
-				.onFailure(e -> logger.warning("Await termination timeout"))
+				.onFailure(e -> log.warning("Await termination timeout"))
 				.get();
 	}
 

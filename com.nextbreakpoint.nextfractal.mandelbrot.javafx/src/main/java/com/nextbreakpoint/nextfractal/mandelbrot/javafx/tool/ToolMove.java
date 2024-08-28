@@ -82,7 +82,7 @@ public class ToolMove implements Tool {
 
 	@Override
 	public void update(long timeInMillis, boolean timeAnimation) {
-		MandelbrotMetadata oldMetadata = context.getMetadata();
+		final MandelbrotMetadata oldMetadata = context.getMetadata();
 		Time time = oldMetadata.time();
 		if (timeAnimation || lastTimeInMillis == null) {
 			if (lastTimeInMillis == null) {
@@ -94,27 +94,25 @@ public class ToolMove implements Tool {
 			lastTimeInMillis = null;
 		}
 		if (changed) {
-			double[] t = oldMetadata.getTranslation().toArray();
-			double[] r = oldMetadata.getRotation().toArray();
-			double[] s = oldMetadata.getScale().toArray();
-			double[] p = oldMetadata.getPoint().toArray();
-			boolean j = oldMetadata.isJulia();
-			double x = t[0];
-			double y = t[1];
-			double z = t[2];
-			double a = r[2] * Math.PI / 180;
-			ComplexNumber size = context.getInitialSize();
-			double dx = x1 - x0;
-			double dy = y1 - y0;
-			x -= z * size.r() * (Math.cos(a) * dx + Math.sin(a) * dy);
-			y -= z * size.i() * (Math.cos(a) * dy - Math.sin(a) * dx);
+			final double[] t = oldMetadata.getTranslation().toArray();
+			final double[] r = oldMetadata.getRotation().toArray();
+			final double[] s = oldMetadata.getScale().toArray();
+			final double[] p = oldMetadata.getPoint().toArray();
+			final boolean j = oldMetadata.isJulia();
+			final ComplexNumber size = context.getInitialSize();
+			final double dx = x1 - x0;
+			final double dy = y1 - y0;
+			final double z = t[2];
+			final double a = r[2] * Math.PI / 180;
+			final double x = t[0] - z * size.r() * (Math.cos(a) * dx + Math.sin(a) * dy);
+			final double y = t[1] - z * size.i() * (Math.cos(a) * dy - Math.sin(a) * dx);
 			x0 = x1;
 			y0 = y1;
-			MandelbrotMetadata newMetadata = new MandelbrotMetadata(new double[] { x, y, z, t[3] }, new double[] { 0, 0, r[2], r[3] }, s, p, time, j, oldMetadata.getOptions());
+			final MandelbrotMetadata newMetadata = new MandelbrotMetadata(new double[] { x, y, z, t[3] }, new double[] { 0, 0, r[2], r[3] }, s, p, time, j, oldMetadata.getOptions());
 			context.setView(newMetadata, pressed, !pressed);
 			changed = false;
 		} else if (timeAnimation) {
-			MandelbrotMetadata newMetadata = new MandelbrotMetadata(oldMetadata.getTranslation(), oldMetadata.getRotation(), oldMetadata.getScale(), oldMetadata.getPoint(), time, oldMetadata.isJulia(), oldMetadata.getOptions());
+			final MandelbrotMetadata newMetadata = new MandelbrotMetadata(oldMetadata.getTranslation(), oldMetadata.getRotation(), oldMetadata.getScale(), oldMetadata.getPoint(), time, oldMetadata.isJulia(), oldMetadata.getOptions());
 			context.setTime(newMetadata, true, false);
 		}
 	}
@@ -133,15 +131,15 @@ public class ToolMove implements Tool {
 
 	@Override
 	public void draw(GraphicsContext gc) {
-		double dw = context.getWidth();
-		double dh = context.getHeight();
+		final double dw = context.getWidth();
+		final double dh = context.getHeight();
 		gc.clearRect(0, 0, (int)dw, (int)dh);
 		if (pressed) {
 			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
-			double cx = dw / 2;
-			double cy = dh / 2;
-			int qx = (int) Math.rint(cx + x1 * dw);
-			int qy = (int) Math.rint(cy - y1 * dh);
+			final double cx = dw / 2;
+			final double cy = dh / 2;
+			final int qx = (int) Math.rint(cx + x1 * dw);
+			final int qy = (int) Math.rint(cy - y1 * dh);
 			gc.beginPath();
 			gc.moveTo(qx - 4, qy - 4);
 			gc.lineTo(qx + 4, qy + 4);

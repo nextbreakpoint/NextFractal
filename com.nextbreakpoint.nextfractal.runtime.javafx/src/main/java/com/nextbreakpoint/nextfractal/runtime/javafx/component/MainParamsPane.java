@@ -93,7 +93,7 @@ public class MainParamsPane extends Pane {
 		scrollPane.setFitToHeight(true);
 		getChildren().add(scrollPane);
 
-		widthProperty().addListener((observable, oldValue, newValue) -> {
+		widthProperty().addListener((_, _, newValue) -> {
 			double width = newValue.doubleValue() - getInsets().getLeft() - getInsets().getRight();
 			box.setPrefWidth(width);
 			grammarCombobox.setPrefWidth(width);
@@ -102,12 +102,12 @@ public class MainParamsPane extends Pane {
 			scrollPane.setPrefWidth(newValue.doubleValue());
         });
 
-		heightProperty().addListener((observable, oldValue, newValue) -> {
+		heightProperty().addListener((_, _, newValue) -> {
 			box.setPrefHeight(newValue.doubleValue() - getInsets().getTop() - getInsets().getBottom());
 			scrollPane.setPrefHeight(newValue.doubleValue());
 		});
 
-		grammarCombobox.setOnAction(e -> {
+		grammarCombobox.setOnAction(_ -> {
 			final SingleSelectionModel<String> selectionModel = grammarCombobox.getSelectionModel();
 			if (session != null && !selectionModel.getSelectedItem().equals(session.grammar())) {
 				eventBus.postEvent(EditorGrammarSelected.builder().grammar(selectionModel.getSelectedItem()).build());
