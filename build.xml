@@ -551,8 +551,6 @@
 		<changecopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.contextfree.javafx/src/main/java" file="copyright.txt"/>
 		<changecopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.runtime/src/main/java" file="copyright.txt"/>
 		<changecopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.runtime.javafx/src/main/java" file="copyright.txt"/>
-		<changecopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.mandelbrot/src/test/java" file="copyright.txt"/>
-		<changecopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.mandelbrot/src/main/java/com/nextbreakpoint/nextfractal/mandelbrot/renderer/xaos/XaosRenderer.java" file="copyright-xaos.txt"/>
 	</target>
 	<target name="add-copyright">
 		<addcopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.core/src/main/java" file="copyright.txt"/>
@@ -563,8 +561,6 @@
 		<addcopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.contextfree.javafx/src/main/java" file="copyright.txt"/>
 		<addcopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.runtime/src/main/java" file="copyright.txt"/>
 		<addcopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.runtime.javafx/src/main/java" file="copyright.txt"/>
-		<addcopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.mandelbrot/src/test/java" file="copyright.txt"/>
-		<addcopyright basedir="${basedir}" path="com.nextbreakpoint.nextfractal.mandelbrot/src/main/java/com/nextbreakpoint/nextfractal/mandelbrot/renderer/xaos/XaosRenderer.java" file="copyright-xaos.txt"/>
 	</target>
 	<target name="update-copyright">
 		<replaceregexp match="Copyright 2015-[0-9]{4}" replace="Copyright 2015-${nextfractal.year}" flags="g" byline="true">
