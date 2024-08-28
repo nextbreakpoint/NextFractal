@@ -49,10 +49,10 @@ public class SimpleCanvas implements CFCanvas {
     public SimpleCanvas(Graphics2D g2d, Tile tile) {
         this.g2d = g2d;
         this.tile = tile;
-        final Size tileSize = tile.tileSize();
+        final Size imageSize = tile.imageSize();
         final Size borderSize = tile.borderSize();
-        final int width = tileSize.width() + borderSize.width() * 2;
-        final int height = tileSize.height() + borderSize.height() * 2;
+        final int width = imageSize.width() + borderSize.width() * 2;
+        final int height = imageSize.height() + borderSize.height() * 2;
         size = new Size(width, height);
     }
 

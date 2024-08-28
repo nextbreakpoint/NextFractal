@@ -25,7 +25,7 @@ public class V3ShapeTest extends BaseTest {
 	@Test
 	public void shouldHaveTwoShapes() {
 		CFDG cfdg = parseSource(RESOURCE_NAME);
-		assertThat(cfdg.tryEncodeShapeName("Foo")).isEqualTo(4);
+		assertThat(cfdg.tryEncodeShapeName("Foo")).isEqualTo(14);
 		assertThat(cfdg.tryEncodeShapeName("CIRCLE")).isEqualTo(0);
 		assertThat(cfdg.tryEncodeShapeName("SQUARE")).isEqualTo(1);
 		assertThat(cfdg.tryEncodeShapeName("TRIANGLE")).isEqualTo(2);
@@ -34,7 +34,7 @@ public class V3ShapeTest extends BaseTest {
 	@Test
 	public void shouldReloadRules() {
 		CFDG cfdg = parseSource(RESOURCE_NAME);
-		assertThat(cfdg.getContents().getBody()).hasSize(2);
+		assertThat(cfdg.getContents().getBody()).hasSize(12);
 		assertThat(cfdg.numRules()).isEqualTo(1);
 		assertThat(cfdg.getRule(0).getWeight()).isEqualTo(1.0);
 		cfdg.rulesLoaded();
