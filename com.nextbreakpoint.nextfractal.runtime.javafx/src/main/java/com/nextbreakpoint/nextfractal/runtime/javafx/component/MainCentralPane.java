@@ -35,6 +35,7 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackStarted;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
@@ -45,7 +46,6 @@ import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.PlaybackDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.PlaybackPane;
 import com.nextbreakpoint.nextfractal.core.javafx.RecordingPane;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
@@ -169,6 +169,8 @@ public class MainCentralPane extends BorderPane {
         });
 
         eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> browsePane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> playbackPane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> recordingPane.dispose());
 
         eventBus.subscribe(ToggleBrowserRequested.class.getSimpleName(), _ -> toggleProperty.setValue(!toggleProperty.getValue()));
 

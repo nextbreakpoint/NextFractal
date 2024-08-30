@@ -26,8 +26,9 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
@@ -46,7 +47,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
@@ -58,8 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
@@ -119,12 +117,12 @@ public class JobsPane extends BorderPane {
         getStyleClass().add("jobs");
 
         final List<Button> buttonsList = Arrays.asList(suspendButton, resumeButton, removeButton);
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> updateButtons(buttonsList, c.getList().size() == 0));
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> updateButtons(buttonsList, c.getList().isEmpty()));
 
         suspendButton.setOnAction(e -> selectedItems(listView).filter(bitmap -> !isExportSessionSuspended(bitmap))
             .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionSuspended((ExportSession) bitmap.getProperty("exportSession")))));
 
-        resumeButton.setOnAction(e -> selectedItems(listView).filter(bitmap -> isExportSessionSuspended(bitmap))
+        resumeButton.setOnAction(e -> selectedItems(listView).filter(this::isExportSessionSuspended)
             .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionResumed((ExportSession) bitmap.getProperty("exportSession")))));
 
         removeButton.setOnAction(e -> selectedItems(listView)
@@ -132,17 +130,13 @@ public class JobsPane extends BorderPane {
 
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> itemSelected(listView, sizeLabel, formatLabel, durationLabel));
 
-        executor = Executors.newSingleThreadExecutor(createThreadFactory("Jobs"));
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Jobs Panel"));
     }
 
     private boolean isExportSessionSuspended(Bitmap bitmap) {
         final ExportSession exportSession = (ExportSession) bitmap.getProperty("exportSession");
         final JobEntry exportEntry = exportEntries.get(exportSession.getSessionId());
         return exportEntry != null && exportEntry.state() == ExportSessionState.SUSPENDED;
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
     }
 
     private void updateButtons(List<Button> buttons, boolean disabled) {
@@ -246,17 +240,7 @@ public class JobsPane extends BorderPane {
     }
 
     public void dispose() {
-        final List<ExecutorService> executors = List.of(executor);
-        executors.forEach(ExecutorService::shutdownNow);
-        executors.forEach(this::await);
-    }
-
-    private void await(ExecutorService executor) {
-        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
-                .execute()
-                .observe()
-                .onFailure(e -> log.warning("Await termination timeout"))
-                .get();
+        ExecutorUtils.shutdown(executor);
     }
 
     public void appendSession(ExportSession session) {
@@ -268,7 +252,7 @@ public class JobsPane extends BorderPane {
     }
 
     private ImageComposer createImageComposer(CoreFactory factory) {
-        return factory.createImageComposer(createThreadFactory("Jobs Composer"), tile, true);
+        return factory.createImageComposer(ThreadUtils.createPlatformThreadFactory("Jobs Image Composer"), tile, true);
     }
 
     public void updateSession(ExportSession exportSession, ExportSessionState state, Float progress) {

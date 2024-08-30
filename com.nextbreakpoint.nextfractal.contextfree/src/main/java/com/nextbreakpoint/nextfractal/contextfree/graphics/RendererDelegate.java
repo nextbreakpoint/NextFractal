@@ -24,7 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+
+import java.util.List;
+
 @FunctionalInterface
 public interface RendererDelegate {
-	void updateImageInBackground(float progress);
+	void onImageUpdated(float progress, List<ScriptError> errors);
 }

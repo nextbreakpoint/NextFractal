@@ -30,4 +30,6 @@ import java.util.concurrent.Future;
 
 public interface ExportRenderer {
 	Future<ExportJobHandle> dispatch(ExportJobHandle job, AnimationFrame frame);
+
+	void dispose();
 }

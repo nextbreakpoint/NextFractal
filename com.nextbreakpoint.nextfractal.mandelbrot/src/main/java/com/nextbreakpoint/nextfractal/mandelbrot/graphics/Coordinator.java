@@ -35,6 +35,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.xaos.XaosRenderer;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,10 +50,13 @@ public class Coordinator implements RendererDelegate {
 	public static final Integer VALUE_SINGLE_PASS = 1;
 	public static final String KEY_MULTITHREAD = "MULTITHREAD";
 	public static final Integer VALUE_SINGLE_THREAD = 1;
+
 	private final HashMap<String, Integer> hints = new HashMap<>();
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
-	private volatile boolean pixelsChanged;
+	@Getter
+	private volatile List<ScriptError> errors;
+	private volatile boolean imageChanged;
 	private Renderer renderer;
 
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
@@ -62,6 +66,7 @@ public class Coordinator implements RendererDelegate {
 		renderer = createRenderer(tile);
 		renderer.setRendererDelegate(this);
 		renderer.setMultiThread(true);
+		errors = new ArrayList<>();
 		if (hints.get(KEY_PROGRESS) != null && hints.get(KEY_PROGRESS) == VALUE_SINGLE_PASS) {
 			renderer.setSinglePass(true);
 		}
@@ -78,7 +83,7 @@ public class Coordinator implements RendererDelegate {
 		renderer.abortTasks();
 	}
 	
-	public void waitFor() {
+	public void waitFor() throws InterruptedException {
 		renderer.waitForTasks();
 	}
 	
@@ -87,13 +92,14 @@ public class Coordinator implements RendererDelegate {
 	}
 
 	@Override
-	public void updateImageInBackground(float progress) {
-		this.pixelsChanged = true;
+	public void onImageUpdated(float progress, List<ScriptError> errors) {
+		this.errors = errors;
+		this.imageChanged = true;
 	}
 
-	public boolean isPixelsChanged() {
-		boolean result = pixelsChanged;
-		pixelsChanged = false;
+	public boolean hasImageChanged() {
+		boolean result = imageChanged;
+		imageChanged = false;
 		return result;
 	}
 
@@ -146,7 +152,7 @@ public class Coordinator implements RendererDelegate {
 		renderer.drawImage(gc, x, y);
 	}
 
-//	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
+//	public void drawImage(final GraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		renderer.drawImage(gc, x, y, w, h);
 //	}
 
@@ -168,14 +174,6 @@ public class Coordinator implements RendererDelegate {
 
 	public List<Trap> getTraps() {
 		return renderer.getTraps();
-	}
-
-	public void getPixels(int[] pixels) {
-		renderer.getPixels(pixels);
-	}
-
-	public List<ScriptError> getErrors() {
-		return renderer.getErrors();
 	}
 
 	public boolean isInitialized() {

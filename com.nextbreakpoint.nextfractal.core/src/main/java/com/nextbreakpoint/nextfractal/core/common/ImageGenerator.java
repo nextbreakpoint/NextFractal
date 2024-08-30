@@ -44,5 +44,5 @@ public interface ImageGenerator {
 	/**
 	 * @return
 	 */
-    boolean isInterrupted();
+    boolean isAborted();
 }

@@ -22,16 +22,13 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.params;
+package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.ToString;
 
-import java.util.List;
-
-@Getter
-@Builder(setterPrefix = "with")
-public class Group {
-    private String name;
-    private List<Attribute> attributes;
+@ToString
+public class CFVersionException extends Exception {
+	public CFVersionException(String message) {
+		super(message);
+	}
 }

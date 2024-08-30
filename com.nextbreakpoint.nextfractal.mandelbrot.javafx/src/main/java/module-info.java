@@ -22,8 +22,9 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors.AlgorithmAttributeEditorFactory;
+
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotUIFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors.AlgorithmAttributeEditorFactory;
 
 module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires static lombok;

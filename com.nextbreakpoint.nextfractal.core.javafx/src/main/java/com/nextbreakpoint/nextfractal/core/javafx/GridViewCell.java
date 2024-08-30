@@ -60,7 +60,7 @@ public class GridViewCell extends BorderPane {
 			}
 			final GridItemRenderer renderer = item.getRenderer();
 			if (renderer != null) {
-				if (redraw || renderer.isPixelsChanged()) {
+				if (redraw || renderer.hasImageChanged()) {
 					final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
 					renderer.drawImage(gc, 0, 0);
 					redraw = false;

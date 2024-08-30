@@ -96,7 +96,7 @@ public class DSLParser {
 			}
 			return fractal;
 		} catch (DSLParserException e) {
-			log.log(Level.INFO, "Can't parse script", e);
+			log.log(Level.WARNING, "Can't parse script", e);
 			throw e;
 		} catch (ASTException e) {
 			final long line = e.getLocation().getLine();
@@ -104,11 +104,11 @@ public class DSLParser {
 			final long index = e.getLocation().getStartIndex();
 			final long length = e.getLocation().getStopIndex() - e.getLocation().getStartIndex();
 			final ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
-			log.log(Level.INFO, "Can't parse script", e);
+			log.log(Level.WARNING, "Can't parse script", e);
             throw new DSLParserException("Can't parse script", List.of(error));
 		} catch (Exception e) {
 			final ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
-			log.log(Level.INFO, "Can't parse script", e);
+			log.log(Level.WARNING, "Can't parse script", e);
             throw new DSLParserException("Can't parse script", List.of(error));
 		}
 	}

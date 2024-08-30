@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Color;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 
 public class Java2DGraphicsFactory implements GraphicsFactory {
 	@Override

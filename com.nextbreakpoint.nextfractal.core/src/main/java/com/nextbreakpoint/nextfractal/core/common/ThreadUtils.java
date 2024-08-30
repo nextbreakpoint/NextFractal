@@ -27,13 +27,23 @@ package com.nextbreakpoint.nextfractal.core.common;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.concurrent.ThreadFactory;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ThreadUtils {
-    public static DefaultThreadFactory createThreadFactory(String name) {
-        return createThreadFactory(name, Thread.MIN_PRIORITY);
+    public static ThreadFactory createPlatformThreadFactory(String name) {
+        return createPlatformThreadFactory(name, Thread.MIN_PRIORITY);
     }
 
-    public static DefaultThreadFactory createThreadFactory(String name, int priority) {
-        return new DefaultThreadFactory(name, true, priority);
+    public static ThreadFactory createPlatformThreadFactory(String name, int priority) {
+        return new PlatformThreadFactory(name, true, priority);
+    }
+
+    public static ThreadFactory createVirtualThreadFactory(String name) {
+        return createVirtualThreadFactory(name, Thread.MIN_PRIORITY);
+    }
+
+    public static ThreadFactory createVirtualThreadFactory(String name, int priority) {
+        return new VirtualThreadFactory(name, true, priority);
     }
 }

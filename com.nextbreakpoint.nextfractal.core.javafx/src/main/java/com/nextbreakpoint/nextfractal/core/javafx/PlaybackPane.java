@@ -27,8 +27,9 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Animation;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import lombok.Setter;
@@ -36,10 +37,9 @@ import lombok.extern.java.Log;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -57,7 +57,8 @@ public class PlaybackPane extends Pane {
     private PlaybackDelegate delegate;
 
     public PlaybackPane() {
-        executor = Executors.newSingleThreadScheduledExecutor(Objects.requireNonNull(createThreadFactory("Playback")));
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Playback", Thread.MIN_PRIORITY + 1);
+        executor = ExecutorUtils.newSingleThreadScheduledExecutor(threadFactory);
 
         setOnMouseClicked(_ -> {
             if (delegate != null) {
@@ -70,10 +71,6 @@ public class PlaybackPane extends Pane {
 
         heightProperty().addListener((_, _, _) -> {
         });
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
     }
 
     private void playNextFrame() {
@@ -137,5 +134,9 @@ public class PlaybackPane extends Pane {
             }
             future = null;
         }
+    }
+
+    public void dispose() {
+        ExecutorUtils.shutdown(executor);
     }
 }

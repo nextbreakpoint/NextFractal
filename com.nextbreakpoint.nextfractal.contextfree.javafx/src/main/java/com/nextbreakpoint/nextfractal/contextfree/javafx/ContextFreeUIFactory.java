@@ -33,11 +33,11 @@ import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParamsStrategy;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParserStrategy;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
@@ -59,6 +59,7 @@ import javafx.scene.layout.Pane;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Supplier;
 
 public class ContextFreeUIFactory implements UIFactory {
@@ -73,13 +74,12 @@ public class ContextFreeUIFactory implements UIFactory {
 	public GridItemRenderer createRenderer(Bitmap bitmap) {
 		final Map<String, Integer> hints = new HashMap<>();
 		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
-		final DefaultThreadFactory threadFactory = new DefaultThreadFactory("ContextFree Browser", true, Thread.MIN_PRIORITY);
+		final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("ContextFree Browser");
 		final GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 		final Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
 		final CFDGImage cfdgImage = (CFDGImage)bitmap.getProperty("image");
 		final Session session = (Session)bitmap.getProperty("session");
-		coordinator.setImage(cfdgImage);
-		coordinator.setSeed(((ContextFreeMetadata)session.metadata()).getSeed());
+		coordinator.setImage(cfdgImage, ((ContextFreeMetadata)session.metadata()).getSeed());
 		coordinator.init();
 		coordinator.run();
 		return new GridItemRendererAdapter(coordinator);
@@ -160,7 +160,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		}
 
 		@Override
-		public void waitFor() {
+		public void waitFor() throws InterruptedException {
 			coordinator.waitFor();
 		}
 
@@ -170,8 +170,8 @@ public class ContextFreeUIFactory implements UIFactory {
 		}
 
 		@Override
-		public boolean isPixelsChanged() {
-			return coordinator.isPixelsChanged();
+		public boolean hasImageChanged() {
+			return coordinator.hasImageChanged();
 		}
 
 		@Override

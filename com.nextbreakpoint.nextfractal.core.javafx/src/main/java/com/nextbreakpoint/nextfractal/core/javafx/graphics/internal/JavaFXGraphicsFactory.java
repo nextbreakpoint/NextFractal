@@ -27,8 +27,8 @@ package com.nextbreakpoint.nextfractal.core.javafx.graphics.internal;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.Buffer;
 import com.nextbreakpoint.nextfractal.core.graphics.Color;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.MatrixType;
 

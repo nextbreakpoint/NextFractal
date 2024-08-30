@@ -97,12 +97,17 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			renderer.setTime(time);
 			renderer.runTask();
 			renderer.waitForTasks();
+			if (renderer.isAborted()) {
+				aborted = true;
+				return buffer;
+			}
 			renderer.getPixels(pixels);
-			aborted = renderer.isInterrupted();
 		} catch (DSLParserException e) {
 			log.log(Level.WARNING, e.getMessage(), e);
+			aborted = true;
 		} catch (Throwable e) {
 			log.severe(e.getMessage());
+			aborted = true;
 		}
 		return buffer;
 	}
@@ -113,7 +118,7 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 	}
 	
 	@Override
-	public boolean isInterrupted() {
+	public boolean isAborted() {
 		return aborted;
 	}
 }

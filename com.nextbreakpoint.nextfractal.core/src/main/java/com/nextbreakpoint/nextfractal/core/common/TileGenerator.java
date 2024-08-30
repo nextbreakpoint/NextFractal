@@ -42,7 +42,7 @@ import java.util.concurrent.ThreadFactory;
 //TODO move to other package
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TileGenerator {
-    private static final ThreadFactory THREAD_FACTORY = ThreadUtils.createThreadFactory(TileGenerator.class.getName());
+    private static final ThreadFactory THREAD_FACTORY = ThreadUtils.createPlatformThreadFactory(TileGenerator.class.getName());
 
     public static TileRequest createTileRequest(int size, int rows, int cols, int row, int col, Bundle bundle) {
         validateParameters(size, cols, rows, row, col);

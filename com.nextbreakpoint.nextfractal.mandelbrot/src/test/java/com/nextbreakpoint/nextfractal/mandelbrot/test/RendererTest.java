@@ -1,6 +1,6 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.test;
 
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.PlatformThreadFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Fail.fail;
 public class RendererTest {
 	@Test
 	public void testProgress() {
-		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Test", false, Thread.MIN_PRIORITY);
+		PlatformThreadFactory threadFactory = new PlatformThreadFactory("Test", false, Thread.MIN_PRIORITY);
 		GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
 		Point tileOffest = new Point(0, 0);
 		Size borderSize = new Size(0, 0);
@@ -42,7 +42,7 @@ public class RendererTest {
 			renderer.init();
 			renderer.setContentRegion(renderer.getInitialRegion());
 			List<Float> output = new ArrayList<>(); 
-			renderer.setRendererDelegate(progress -> {
+			renderer.setRendererDelegate((progress, errors) -> {
 				System.out.println(progress);
 				output.add(progress);
 			});

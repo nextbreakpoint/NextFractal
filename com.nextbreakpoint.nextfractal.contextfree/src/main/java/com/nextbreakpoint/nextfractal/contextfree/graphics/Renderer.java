@@ -25,8 +25,9 @@
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFHandle;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -47,181 +48,241 @@ import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @Log
 public class Renderer {
-	protected final ThreadFactory threadFactory;
-	protected final GraphicsFactory renderFactory;
-	protected Surface buffer;
-	protected boolean aborted;
+	private final Lock lock = new Lock();
+	private final GraphicsFactory renderFactory;
+	private final ExecutorService executor;
+	private final Tile tile;
+	private Surface buffer;
+	private int[] pixels;
+	private BufferedImage image;
+	private CFRenderer renderer;
+	private Future<?> future;
 	@Getter
-    protected volatile boolean interrupted;
+	private volatile boolean aborted;
 	@Getter
-	protected float progress;
+	private volatile boolean interrupted;
 	@Getter
 	private boolean initialized;
-	protected boolean cfdgChanged;
-	@Setter
-    protected boolean opaque;
-	@Setter
-	protected RendererDelegate rendererDelegate;
 	@Getter
-    protected Size size;
-	protected Tile tile;
-	protected List<ScriptError> errors = new ArrayList<>();
-	private Future<?> future;
-	private CFDGImage cfdgImage;
-	private CFHandle cfdgHandle;
-	private String cfdgSeed;
-	private final RenderRunnable renderTask = new RenderRunnable();
-	private final ExecutorService executor;
-	private final Lock lock = new Lock();
+	private Size size;
+	@Setter
+	private boolean opaque;
+	@Setter
+	private RendererDelegate delegate;
 
 	public Renderer(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile) {
-		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
 		this.tile = tile;
-		this.opaque = true;
-		buffer = new Surface();
-		buffer.setTile(tile);
+		opaque = true;
+		executor = ExecutorUtils.newSingleThreadExecutor(threadFactory);
 		ensureBufferAndSize();
-		buffer.setAffine(createTransform(0));
-		executor = Executors.newSingleThreadExecutor(threadFactory);
+	}
+
+	public void init() {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		ensureBufferAndSize();
+		initialized = true;
 	}
 
 	public void dispose() {
-		shutdown();
-		free();
+		ExecutorUtils.shutdown(executor);
+		image = null;
+		pixels = null;
+		future = null;
+		renderer = null;
+		if (buffer != null) {
+			buffer.dispose();
+			buffer = null;
+		}
+		initialized = false;
+	}
+
+	public void runTask() {
+		if (!initialized) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		interrupted = false;
+		future = executor.submit(this::render);
 	}
 
     public void abortTasks() {
 		interrupted = true;
-		if (cfdgHandle != null) {
-			cfdgHandle.stop();
+		if (future != null) {
+			if (renderer != null) {
+				renderer.stop();
+			}
 		}
-//		if (future != null) {
-//			future.cancel(true);
-//		}
 	}
 
-	public void waitForTasks() {
+	public void waitForTasks() throws InterruptedException {
 		try {
 			if (future != null) {
 				future.get();
 				future = null;
 			}
-		} catch (Exception e) {
-			interrupted = true;
-			if (cfdgHandle != null) {
-				cfdgHandle.stop();
+		} catch (InterruptedException e) {
+			log.warning("Interrupted while awaiting for task");
+			throw e;
+		} catch (ExecutionException e) {
+			log.log(Level.WARNING, "Cannot execute task", e);
+			aborted = true;
+		}
+	}
+
+	public void setImage(CFDGImage image, String seed) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		renderer = image.open(size.width(), size.height(), seed);
+		//TODO propagate progress from CF renderer
+		renderer.setListener(() -> update(0, pixels));
+	}
+
+	//TODO is getPixels required?
+    public void getPixels(int[] pixels) {
+		lock.lock();
+		try {
+			final int bufferWidth = buffer.getSize().width();
+			final int bufferHeight = buffer.getSize().height();
+			final int[] bufferPixels = new int[bufferWidth * bufferHeight];
+			final IntBuffer tmpBuffer = IntBuffer.wrap(bufferPixels);
+			buffer.getBuffer().getImage().getPixels(tmpBuffer);
+			final int tileWidth = tile.tileSize().width();
+			final int tileHeight = tile.tileSize().height();
+			final int borderWidth = tile.borderSize().width();
+			final int borderHeight = tile.borderSize().height();
+			final int offsetX = (bufferWidth - tileWidth - borderWidth * 2) / 2;
+			final int offsetY = (bufferHeight - tileHeight - borderHeight * 2) / 2;
+			int offset = offsetY * bufferWidth + offsetX;
+			int tileOffset = 0;
+			for (int y = 0; y < tileHeight; y++) {
+				System.arraycopy(bufferPixels, offset, pixels, tileOffset, tileWidth);
+				offset += bufferWidth;
+				tileOffset += tileWidth + borderWidth * 2;
 			}
-//			e.printStackTrace();
+		} finally {
+			lock.unlock();
 		}
 	}
 
-	public void runTask() {
-		if (future == null) {
-			interrupted = false;
-			future = executor.submit(renderTask);
-		}
-	}
-
-    public void init() {
-		initialized = true;
-//		rendererFractal.initialize();
-	}
-
-	public void setImage(CFDGImage cfdgImage) {
-		this.cfdgImage = cfdgImage;
-		cfdgChanged = true;
-	}
-
-	public void setSeed(String cfdgSeed) {
-		this.cfdgSeed = cfdgSeed;
-		cfdgChanged = true;
-	}
-
-	public void getPixels(int[] pixels) {
-		final int bufferWidth = buffer.getSize().width();
-		final int bufferHeight = buffer.getSize().height();
-		final int[] bufferPixels = new int[bufferWidth * bufferHeight];
-		final IntBuffer tmpBuffer = IntBuffer.wrap(bufferPixels);
-		buffer.getBuffer().getImage().getPixels(tmpBuffer);
-		final int tileWidth = tile.tileSize().width();
-		final int tileHeight = tile.tileSize().height();
-		final int borderWidth = tile.borderSize().width();
-		final int borderHeight = tile.borderSize().height();
-		final int offsetX = (bufferWidth - tileWidth - borderWidth * 2) / 2;
-		final int offsetY = (bufferHeight - tileHeight - borderHeight * 2) / 2;
-		int offset = offsetY * bufferWidth + offsetX;
-		int tileOffset = 0;
-		for (int y = 0; y < tileHeight; y++) {
-			System.arraycopy(bufferPixels, offset, pixels, tileOffset, tileWidth);
-			offset += bufferWidth;
-			tileOffset += tileWidth + borderWidth * 2;
-		}
-	}
-	
 	public void drawImage(final GraphicsContext gc, final int x, final int y) {
 		lock.lock();
-		if (buffer != null) {
-			gc.save();
-//			RendererSize borderSize = buffer.getTile().borderSize();
-			final Size imageSize = buffer.getTile().imageSize();
-			final Size tileSize = buffer.getTile().tileSize();
-			gc.setAffineTransform(buffer.getAffine());
-			gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height());
-//			gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
-//			gc.strokeRect(x + borderSize.width(), y + getSize().height() - imageSize.height() - borderSize.height(), tileSize.width(), tileSize.height());
-			gc.restore();
+		try {
+			if (buffer != null) {
+				gc.save();
+				// final Size borderSize = buffer.getTile().borderSize();
+				final Size imageSize = buffer.getTile().imageSize();
+				final Size tileSize = buffer.getTile().tileSize();
+				gc.setAffineTransform(buffer.getAffine());
+				gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height());
+				// gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
+				// gc.strokeRect(x + borderSize.width(), y + getSize().height() - imageSize.height() - borderSize.height(), tileSize.width(), tileSize.height());
+				gc.restore();
+			}
+		} finally {
+			lock.unlock();
 		}
-		lock.unlock();
 	}
+
+//	public void drawImage(final GraphicsContext gc, final int x, final int y, final int w, final int h) {
+//		lock.lock();
+//		try {
+//			if (buffer != null) {
+//				gc.save();
+//				final Size imageSize = buffer.getTile().imageSize();
+//				final Size tileSize = buffer.getTile().tileSize();
+//				gc.setAffineTransform(buffer.getAffine());
+//				final double sx = w / (double) buffer.getTile().tileSize().width();
+//				final double sy = h / (double) buffer.getTile().tileSize().height();
+//				final int dw = (int) Math.rint(buffer.getSize().width() * sx);
+//				final int dh = (int) Math.rint(buffer.getSize().height() * sy);
+//				gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height(), dw, dh);
+//				gc.restore();
+//			}
+//		} finally {
+//			lock.unlock();
+//		}
+//	}
 
 	public void copyImage(final GraphicsContext gc) {
 		lock.lock();
-		if (buffer != null) {
-			gc.save();
-			gc.drawImage(buffer.getBuffer().getImage(), 0, 0);
-			gc.restore();
+		try {
+			if (buffer != null) {
+				gc.save();
+				gc.drawImage(buffer.getBuffer().getImage(), 0, 0);
+				gc.restore();
+			}
+		} finally {
+			lock.unlock();
 		}
-		lock.unlock();
 	}
-
-//	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
-//		lock.lock();
-//		if (buffer != null) {
-//			gc.save();
-//			final RendererSize imageSize = buffer.getTile().imageSize();
-//			final RendererSize tileSize = buffer.getTile().tileSize();
-//			gc.setAffine(buffer.getAffine());
-//			final double sx = w / (double) buffer.getTile().tileSize().width();
-//			final double sy = h / (double) buffer.getTile().tileSize().height();
-//			final int dw = (int) Math.rint(buffer.getSize().width() * sx);
-//			final int dh = (int) Math.rint(buffer.getSize().height() * sy);
-//			gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height(), dw, dh);
-//			gc.restore();
-//		}
-//		lock.unlock();
-//	}
 
 	private void ensureBufferAndSize() {
 		final Tile newTile = computeOptimalBufferSize(tile, 0);
 		final int width = newTile.tileSize().width() + newTile.borderSize().width() * 2;
 		final int height = newTile.tileSize().height() + newTile.borderSize().height() * 2;
+		if (buffer != null) {
+			buffer.dispose();
+		}
 		size = new Size(width, height);
+		buffer = new Surface();
 		buffer.setSize(size);
-		buffer.setTile(newTile);
+		buffer.setTile(computeOptimalBufferSize(tile, 0));
 		buffer.setBuffer(renderFactory.createBuffer(size.width(), size.height()));
+		buffer.setAffine(createTransform(0));
+		image = new BufferedImage(size.width(), size.height(), BufferedImage.TYPE_INT_ARGB);
+		pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 	}
 
-	protected Tile computeOptimalBufferSize(Tile tile, double rotation) {
+	// this method is executed in a worker thread.
+	private void render() {
+		final List<ScriptError> errors = new ArrayList<>();
+		Graphics2D g2d = null;
+		try {
+			aborted = false;
+			g2d = image.createGraphics();
+			g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+			g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			if (renderer != null) {
+                renderer.run(new SimpleCanvas(g2d, buffer.getTile()), true);
+				//TODO what errors are being collected?
+				errors.addAll(renderer.errors());
+			}
+			if (interrupted) {
+				aborted = true;
+				update(1, pixels);
+			}
+		} catch (Exception e) {
+			log.log(Level.WARNING, "Can't render image", e);
+			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
+			aborted = true;
+		} finally {
+			if (g2d != null) {
+				g2d.dispose();
+			}
+		}
+		if (!errors.isEmpty()) {
+			update(1, errors);
+		}
+	}
+
+	private static Tile computeOptimalBufferSize(Tile tile, double rotation) {
 		final Size tileSize = tile.tileSize();
 		final Size imageSize = tile.imageSize();
 		final Size borderSize = tile.borderSize();
@@ -229,46 +290,7 @@ public class Renderer {
 		return new Tile(imageSize, tileSize, tileOffset, borderSize);
 	}
 
-	protected void doRender() {
-		Graphics2D g2d = null;
-		try {
-			if (cfdgChanged) {
-				cfdgHandle = null;
-				cfdgChanged = false;
-			}
-			progress = 0;
-			final int width = getSize().width();
-			final int height = getSize().height();
-			final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-			g2d = image.createGraphics();
-			g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-			g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-			if (cfdgImage != null) {
-				final SimpleCanvas canvas = new SimpleCanvas(g2d, buffer.getTile());
-				cfdgImage.setListener(() -> didChanged(progress, pixels));
-				cfdgHandle = cfdgImage.render(canvas, cfdgSeed, true);
-				//TODO what errors are being collected?
-				errors.addAll(cfdgHandle.errors());
-			}
-			if (!isInterrupted()) {
-				progress = 1f;
-				didChanged(progress, pixels);
-			}
-		} catch (Throwable e) {
-			log.log(Level.WARNING, "Can't render image", e);
-			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
-		} finally {
-			if (g2d != null) {
-				g2d.dispose();
-			}
-		}
-	}
-
-	protected AffineTransform createTransform(double rotation) {
+	private AffineTransform createTransform(double rotation) {
 		final Size tileSize = buffer.getTile().tileSize();
 		final Size borderSize = buffer.getTile().borderSize();
 		final Point tileOffset = buffer.getTile().tileOffset();
@@ -283,57 +305,36 @@ public class Renderer {
 		return affine;
 	}
 
-//	protected AffineTransform createTileTransform() {
-//		final RendererSize tileSize = buffer.getTile().tileSize();
-//		final RendererSize imageSize = buffer.getTile().imageSize();
-//		final RendererSize borderSize = buffer.getTile().borderSize();
-//		final RendererPoint tileOffset = buffer.getTile().tileOffset();
+//	private AffineTransform createTransform() {
+//		final Size tileSize = buffer.getTile().tileSize();
+//		final Size imageSize = buffer.getTile().imageSize();
+//		final Size borderSize = buffer.getTile().borderSize();
+//		final Point tileOffset = buffer.getTile().tileOffset();
 //		final int offsetX = borderSize.width();
 //		final int offsetY = borderSize.height();
-//		final AffineTransform affine = new AffineTransform();
-//		affine.translate(-tileOffset.x() + offsetX, -tileOffset.y() + offsetY);
-//		affine.scale(imageSize.width() / tileSize.width(), imageSize.height() / tileSize.height());
+//		final AffineTransform affine = renderFactory.createAffineTransform();
+//		affine.append(renderFactory.createTranslateAffineTransform(-tileOffset.x() + offsetX, -tileOffset.y() + offsetY));
+//		affine.append(renderFactory.createScaleAffineTransform((double) imageSize.width() / tileSize.width(), (double) imageSize.height() / tileSize.height()));
 //		return affine;
 //	}
 
-	protected void didChanged(float progress, int[] pixels) {
+	private void update(float progress, int[] pixels) {
 		lock.lock();
-		if (buffer != null) {
-			buffer.getBuffer().update(pixels);
-		}
-		lock.unlock();
-		if (rendererDelegate != null) {
-			rendererDelegate.updateImageInBackground(progress);
-		}
-	}
-
-	protected void free() {
-		if (buffer != null) {
-			buffer.dispose();
-			buffer = null;
-		}
-	}
-
-	protected void shutdown() {
-		executor.shutdownNow();
 		try {
-			executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-		}
-	}
-
-	private class RenderRunnable implements Runnable {
-		@Override
-		public void run() {
-			if (initialized) {
-				doRender();
+			if (buffer != null) {
+				buffer.getBuffer().update(pixels);
 			}
+		} finally {
+			lock.unlock();
+		}
+		if (delegate != null) {
+			delegate.onImageUpdated(progress, List.of());
 		}
 	}
 
-	public List<ScriptError> getErrors() {
-		final List<ScriptError> result = new ArrayList<>(errors);
-		errors.clear();
-		return result;
+	private void update(float progress, List<ScriptError> errors) {
+		if (delegate != null) {
+			delegate.onImageUpdated(progress, errors);
+		}
 	}
 }

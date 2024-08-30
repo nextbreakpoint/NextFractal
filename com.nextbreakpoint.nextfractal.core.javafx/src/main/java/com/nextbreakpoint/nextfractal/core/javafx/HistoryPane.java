@@ -26,9 +26,10 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.application.Platform;
@@ -40,11 +41,7 @@ import lombok.Setter;
 import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
@@ -75,11 +72,7 @@ public class HistoryPane extends BorderPane {
 
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> _) -> itemSelected(listView));
 
-        executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("History", true, Thread.MIN_PRIORITY));
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("History Panel"));
     }
 
     private void itemSelected(ListView<Bitmap> listView) {
@@ -113,20 +106,10 @@ public class HistoryPane extends BorderPane {
     }
 
     private ImageComposer createImageComposer(CoreFactory factory) {
-        return factory.createImageComposer(createThreadFactory("History Composer"), tile, true);
+        return factory.createImageComposer(ThreadUtils.createPlatformThreadFactory("History Image Composer"), tile, true);
     }
 
     public void dispose() {
-        final List<ExecutorService> executors = List.of(executor);
-        executors.forEach(ExecutorService::shutdownNow);
-        executors.forEach(this::await);
-    }
-
-    private void await(ExecutorService executor) {
-        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
-                .execute()
-                .observe()
-                .onFailure(e -> log.warning("Await termination timeout"))
-                .get();
+        ExecutorUtils.shutdown(executor);
     }
 }

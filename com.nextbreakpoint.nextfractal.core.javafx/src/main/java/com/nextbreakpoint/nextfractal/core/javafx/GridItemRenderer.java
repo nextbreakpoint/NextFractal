@@ -29,11 +29,11 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 public interface GridItemRenderer {
     void abort();
 
-    void waitFor();
+    void waitFor() throws InterruptedException;
 
     void dispose();
 
-    boolean isPixelsChanged();
+    boolean hasImageChanged();
 
     void drawImage(GraphicsContext gc, int x, int y);
 }

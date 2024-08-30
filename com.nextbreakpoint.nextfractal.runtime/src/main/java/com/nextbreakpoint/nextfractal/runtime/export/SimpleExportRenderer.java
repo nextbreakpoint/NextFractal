@@ -26,7 +26,9 @@ package com.nextbreakpoint.nextfractal.runtime.export;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobState;
 import com.nextbreakpoint.nextfractal.core.export.ExportProfile;
@@ -37,9 +39,7 @@ import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
@@ -48,22 +48,24 @@ import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
 @Log
 public class SimpleExportRenderer implements ExportRenderer {
+	private static final int MAX_PARALLEL_JOBS = 4;
+
 	private final ThreadFactory threadFactory;
+	private final ExecutorService executor;
 
-	private final ExecutorCompletionService<ExportJobHandle> service;
-
-	public SimpleExportRenderer(ThreadFactory threadFactory) {
-		this.threadFactory = Objects.requireNonNull(threadFactory);
-		service = new ExecutorCompletionService<>(createExecutorService(threadFactory));
+	public SimpleExportRenderer() {
+		threadFactory = ThreadUtils.createVirtualThreadFactory("Export Renderer");
+		executor = ExecutorUtils.newFixedThreadPool(MAX_PARALLEL_JOBS, threadFactory);
 	}
 
 	@Override
 	public Future<ExportJobHandle> dispatch(ExportJobHandle job, AnimationFrame frame) {
-		return service.submit(new ProcessExportJob(job, frame));
+		return executor.submit(new ProcessExportJob(job, frame));
 	}
 
-	private ExecutorService createExecutorService(ThreadFactory threadFactory) {
-		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
+	@Override
+	public void dispose() {
+		ExecutorUtils.shutdown(executor);
 	}
 
 	private ImageComposer createImageComposer(ExportProfile profile, AnimationFrame frame) {
@@ -102,7 +104,7 @@ public class SimpleExportRenderer implements ExportRenderer {
 			log.fine(job.toString());
 			ImageComposer composer = createImageComposer(job.getJob().getProfile(), frame);
 			IntBuffer pixels = composer.renderImage(frame.script(), frame.metadata());
-			if (composer.isInterrupted()) {
+			if (composer.isAborted()) {
                 job.setState(ExportJobState.INTERRUPTED);
             } else {
                 job.getJob().writePixels(composer.getSize(), pixels);

@@ -25,10 +25,13 @@
 package com.nextbreakpoint.nextfractal.core.graphics.internal;
 
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
-import com.nextbreakpoint.nextfractal.core.graphics.Image;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.Image;
 
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;

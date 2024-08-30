@@ -31,7 +31,7 @@ public interface ToolContext<T> {
 
 	double getHeight();
 
-	GraphicsFactory getRendererFactory();
+	GraphicsFactory getGraphicsFactory();
 
 	T getMetadata();
 

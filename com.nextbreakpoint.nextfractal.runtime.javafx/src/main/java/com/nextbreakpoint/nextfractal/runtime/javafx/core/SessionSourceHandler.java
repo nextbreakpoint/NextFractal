@@ -26,9 +26,11 @@ package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.event.EditorReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.EditorSourceChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataLoaded;
@@ -40,7 +42,6 @@ import lombok.extern.java.Log;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
@@ -55,22 +56,19 @@ public class SessionSourceHandler {
     private ParserStrategy parserStrategy;
 
     public SessionSourceHandler(PlatformEventBus eventBus) {
-        this.eventBus = eventBus;
+        this.eventBus = Objects.requireNonNull(eventBus);
 
-        executor = Executors.newSingleThreadExecutor();
-//        Cleaner.create().register(this, executor::shutdown);
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createPlatformThreadFactory("Session Parser"));
 
         eventBus.subscribe(EditorSourceChanged.class.getSimpleName(), event -> handleSourceChanged(((EditorSourceChanged) event).source()));
 
         eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionLoaded((SessionDataLoaded) event));
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> executor.shutdown());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> handleSessionTerminate());
     }
 
-    public void handleSessionTerminate() {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
+    private void handleSessionTerminate() {
+        ExecutorUtils.shutdown(executor);
     }
 
     private void handleSourceChanged(String source) {

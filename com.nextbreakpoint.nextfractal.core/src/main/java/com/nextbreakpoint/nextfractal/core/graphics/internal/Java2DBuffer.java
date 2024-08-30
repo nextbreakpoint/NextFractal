@@ -27,7 +27,7 @@ package com.nextbreakpoint.nextfractal.core.graphics.internal;
 import com.nextbreakpoint.nextfractal.core.graphics.Buffer;
 import com.nextbreakpoint.nextfractal.core.graphics.Image;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.DataBufferInt;
 
 public class Java2DBuffer implements Buffer {

@@ -25,10 +25,10 @@
 package com.nextbreakpoint.nextfractal.contextfree.javafx;
 
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 public class ContextFreeToolContext implements ToolContext<ContextFreeMetadata> {
     private final RenderingContext renderingContext;
@@ -56,8 +56,8 @@ public class ContextFreeToolContext implements ToolContext<ContextFreeMetadata> 
     }
 
     @Override
-    public GraphicsFactory getRendererFactory() {
-        return renderingStrategy.getRenderFactory();
+    public GraphicsFactory getGraphicsFactory() {
+        return renderingStrategy.getGraphicsFactory();
     }
 
     @Override

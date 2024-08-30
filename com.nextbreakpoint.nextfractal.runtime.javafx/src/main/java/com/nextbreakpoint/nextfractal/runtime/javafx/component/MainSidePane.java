@@ -54,6 +54,9 @@ import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportPane;
 import com.nextbreakpoint.nextfractal.core.javafx.HistoryPane;
@@ -63,9 +66,6 @@ import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.StatusPane;
 import com.nextbreakpoint.nextfractal.core.javafx.StringObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.editor.ScriptEditor;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -422,7 +422,7 @@ public class MainSidePane extends BorderPane {
 
     private void handleExportSessionStateChanged(JobsPane jobsPane, ExportSession exportSession, ExportSessionState state, Float progress) {
         log.info("Session " + exportSession.getSessionId() + " state " + state.name());
-        if (state == ExportSessionState.FINISHED) {
+        if (state == ExportSessionState.TERMINATED) {
             jobsPane.removeSession(exportSession);
         } else {
             jobsPane.updateSession(exportSession, state, progress);

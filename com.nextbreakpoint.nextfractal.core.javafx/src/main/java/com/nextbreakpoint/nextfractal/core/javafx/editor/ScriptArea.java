@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.editor;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
 import com.nextbreakpoint.nextfractal.core.event.EditorReportChanged;

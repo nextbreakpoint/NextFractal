@@ -68,18 +68,22 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 			final CFParserResult parserResult = parser.parse(script);
 			final CFDGImage cfdgImage = parserResult.classFactory().create();
 			final Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
-			renderer.setImage(cfdgImage);
-			renderer.setSeed(metadata.getSeed());
+			renderer.setImage(cfdgImage, metadata.getSeed());
 			renderer.setOpaque(opaque);
 			renderer.init();
 			renderer.runTask();
 			renderer.waitForTasks();
 			renderer.getPixels(pixels);
-			aborted = renderer.isInterrupted();
+			if (renderer.isAborted()) {
+				aborted = true;
+				return buffer;
+			}
 		} catch (CFParserException e) {
 			log.log(Level.WARNING, e.getMessage(), e);
+			aborted = true;
 		} catch (Throwable e) {
 			log.severe(e.getMessage());
+			aborted = true;
 		}
 		return buffer;
 	}
@@ -90,7 +94,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 	}
 	
 	@Override
-	public boolean isInterrupted() {
+	public boolean isAborted() {
 		return aborted;
 	}
 }

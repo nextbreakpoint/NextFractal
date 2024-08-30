@@ -24,10 +24,10 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx;
 
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
 
@@ -73,8 +73,8 @@ public class MandelbrotToolContext implements ToolContext<MandelbrotMetadata> {
     }
 
     @Override
-    public GraphicsFactory getRendererFactory() {
-        return renderingStrategy.getRenderFactory();
+    public GraphicsFactory getGraphicsFactory() {
+        return renderingStrategy.getGraphicsFactory();
     }
 
     @Override

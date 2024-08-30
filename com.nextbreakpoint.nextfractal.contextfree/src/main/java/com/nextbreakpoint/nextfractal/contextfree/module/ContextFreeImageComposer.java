@@ -78,18 +78,22 @@ public class ContextFreeImageComposer implements ImageComposer {
             final CFDGImage cfdgImage = parserResult.classFactory().create();
             final GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
             final Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
-            renderer.setImage(cfdgImage);
-            renderer.setSeed(metadata.getSeed());
+            renderer.setImage(cfdgImage, metadata.getSeed());
             renderer.setOpaque(opaque);
             renderer.init();
             renderer.runTask();
             renderer.waitForTasks();
+            if (renderer.isAborted()) {
+                aborted = true;
+                return buffer;
+            }
             renderer.copyImage(renderFactory.createGraphicsContext(g2d));
-            aborted = renderer.isInterrupted();
         } catch (CFParserException e) {
             log.log(Level.WARNING, e.getMessage(), e);
+            aborted = true;
         } catch (Throwable e) {
             log.severe(e.getMessage());
+            aborted = true;
         } finally {
             if (g2d != null) {
                 g2d.dispose();
@@ -104,7 +108,7 @@ public class ContextFreeImageComposer implements ImageComposer {
     }
 
     @Override
-    public boolean isInterrupted() {
+    public boolean isAborted() {
         return aborted;
     }
 }

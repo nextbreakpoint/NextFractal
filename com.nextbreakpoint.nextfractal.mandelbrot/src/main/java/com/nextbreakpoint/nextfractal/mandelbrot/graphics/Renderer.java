@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
@@ -49,11 +50,10 @@ import lombok.extern.java.Log;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @Log
@@ -68,7 +68,8 @@ public class Renderer {
 	protected RendererStrategy previewRendererStrategy;
 	protected Transform transform;
 	protected Surface buffer;
-	protected boolean aborted;
+	@Getter
+	protected volatile boolean aborted;
     @Getter
     protected volatile boolean interrupted;
 	@Getter
@@ -90,7 +91,6 @@ public class Renderer {
 	protected ComplexNumber point;
 	@Setter
 	protected RendererDelegate rendererDelegate;
-	protected List<ScriptError> errors = new ArrayList<>();
     @Setter
     protected boolean multiThread;
     @Setter
@@ -108,7 +108,6 @@ public class Renderer {
 	protected View view;
 	protected Tile tile;
 	private Future<?> future;
-	private final RenderRunnable renderTask = new RenderRunnable();
 	private final ExecutorService executor;
 	private final Lock lock = new Lock();
 
@@ -120,50 +119,19 @@ public class Renderer {
 		this.contentRendererFractal = new Fractal();
 		this.previewRendererFractal = new Fractal();
 		this.tile = tile;
-		this.opaque = true;
-		this.time = new Time(0, 1);
 		transform = new Transform();
+		time = new Time(0, 1);
 		view = new View();
-		buffer = new Surface();
-		buffer.setTile(tile);
+		opaque = true;
+		executor = ExecutorUtils.newSingleThreadExecutor(threadFactory);
 		ensureBufferAndSize();
-		buffer.setAffine(createTransform(0));
-		executor = Executors.newSingleThreadExecutor(threadFactory);
-	}
-
-	public void dispose() {
-		shutdown();
-		free();
-	}
-
-	public void abortTasks() {
-		interrupted = true;
-//		if (future != null) {
-//			future.cancel(true);
-//		}
-	}
-
-	public void waitForTasks() {
-		try {
-			if (future != null) {
-				future.get();
-				future = null;
-			}
-		} catch (Exception e) {
-			interrupted = true;
-//			e.printStackTrace();
-		}
-	}
-
-	public void runTask() {
-		if (future == null) {
-			interrupted = false;
-			future = executor.submit(renderTask);
-		}
 	}
 
 	public void init() {
-		initialized = true;
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		ensureBufferAndSize();
 		contentRendererFractal.initialize();
 		previewRendererFractal.initialize();
 		if (contentRendererFractal.getOrbit() != null) {
@@ -171,21 +139,74 @@ public class Renderer {
 		} else {
 			initialRegion = new Region();
 		}
+		initialized = true;
+	}
+
+	public void dispose() {
+		ExecutorUtils.shutdown(executor);
+		contentRendererData.free();
+		if (previewTile != null) {
+			previewRendererData.free();
+		}
+		if (buffer != null) {
+			buffer.dispose();
+			buffer = null;
+		}
+		future = null;
+	}
+
+	public void runTask() {
+		if (!initialized) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
+		interrupted = false;
+		future = executor.submit(this::render);
+	}
+
+	public void abortTasks() {
+		interrupted = true;
+	}
+
+	public void waitForTasks() throws InterruptedException {
+		try {
+			if (future != null) {
+				future.get();
+				future = null;
+			}
+		} catch (InterruptedException e) {
+			log.warning("Interrupted while awaiting for task");
+			throw e;
+		} catch (ExecutionException e) {
+			log.log(Level.WARNING, "Cannot execute task", e);
+			aborted = true;
+		}
 	}
 
 	public void setOrbit(Orbit orbit) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		contentRendererFractal.setOrbit(orbit);
 		previewRendererFractal.setOrbit(orbit);
 		orbitChanged = true;
 	}
 
 	public void setColor(Color color) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		contentRendererFractal.setColor(color);
 		previewRendererFractal.setColor(color);
 		colorChanged = true;
 	}
 
 	public void setJulia(boolean julia) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		if (this.julia != julia) {
 			this.julia = julia;
 			juliaChanged = true;
@@ -193,6 +214,9 @@ public class Renderer {
 	}
 
 	public void setPoint(ComplexNumber point) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		if (this.point == null || !this.point.equals(point)) {
 			this.point = point;
 			pointChanged = true;
@@ -200,6 +224,9 @@ public class Renderer {
 	}
 
 	public void setTime(Time time) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		if (this.time == null || !this.time.equals(time)) {
 			this.time = time;
 			timeChanged = true;
@@ -207,6 +234,9 @@ public class Renderer {
 	}
 
 	public void setContentRegion(Region contentRegion) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		if (this.contentRegion == null || !this.contentRegion.equals(contentRegion)) {
 			this.contentRegion = contentRegion;
 			regionChanged = true; 
@@ -214,102 +244,132 @@ public class Renderer {
 	}
 
 	public void setView(View view) {
+		if (future != null) {
+			throw new IllegalStateException("Operation not permitted");
+		}
 		this.view = view;
 		lock.lock();
-		if ((rotation == 0 && view.getRotation().z() != 0) || (rotation != 0 && view.getRotation().z() == 0)) {
-			rotation = view.getRotation().z();
-			ensureBufferAndSize();
-			orbitChanged = true;
-		} else {
-			rotation = view.getRotation().z();
+		try {
+			if ((rotation == 0 && view.getRotation().z() != 0) || (rotation != 0 && view.getRotation().z() == 0)) {
+				rotation = view.getRotation().z();
+				ensureBufferAndSize();
+				orbitChanged = true;
+			} else {
+				rotation = view.getRotation().z();
+			}
+			final Region region = getInitialRegion();
+			final ComplexNumber center = region.getCenter();
+			transform = new Transform();
+			transform.translate(view.getTranslation().x() + center.r(), view.getTranslation().y() + center.i());
+			transform.rotate(-rotation * Math.PI / 180);
+			transform.translate(-view.getTranslation().x() - center.r(), -view.getTranslation().y() - center.i());
+			buffer.setAffine(createTransform(rotation));
+			setContentRegion(computeContentRegion());
+			setJulia(view.isJulia());
+			setPoint(view.getPoint());
+			setContinuous(view.getState().z() == 1);
+			setTimeAnimation(view.getState().w() == 1);
+		} finally {
+			lock.unlock();
 		}
-		final Region region = getInitialRegion();
-		final ComplexNumber center = region.getCenter();
-		transform = new Transform();
-		transform.translate(view.getTranslation().x() + center.r(), view.getTranslation().y() + center.i());
-		transform.rotate(-rotation * Math.PI / 180);
-		transform.translate(-view.getTranslation().x() - center.r(), -view.getTranslation().y() - center.i());
-		buffer.setAffine(createTransform(rotation));
-		setContentRegion(computeContentRegion());
-		setJulia(view.isJulia());
-		setPoint(view.getPoint());
-		setContinuous(view.getState().z() == 1);
-		setTimeAnimation(view.getState().w() == 1);
-		lock.unlock();
 	}
 
+	//TODO is getPixels required?
 	public void getPixels(int[] pixels) {
-		final int bufferWidth = buffer.getSize().width();
-		final int bufferHeight = buffer.getSize().height();
-		final int[] bufferPixels = new int[bufferWidth * bufferHeight];
-		final IntBuffer tmpBuffer = IntBuffer.wrap(bufferPixels);
-		buffer.getBuffer().getImage().getPixels(tmpBuffer);
-		final int tileWidth = tile.tileSize().width();
-		final int tileHeight = tile.tileSize().height();
-		final int borderWidth = tile.borderSize().width();
-		final int borderHeight = tile.borderSize().height();
-		final int offsetX = (bufferWidth - tileWidth - borderWidth * 2) / 2;
-		final int offsetY = (bufferHeight - tileHeight - borderHeight * 2) / 2;
-		int offset = offsetY * bufferWidth + offsetX;
-		int tileOffset = 0;
-		for (int y = 0; y < tileHeight; y++) {
-			System.arraycopy(bufferPixels, offset, pixels, tileOffset, tileWidth);
-			offset += bufferWidth;
-			tileOffset += tileWidth + borderWidth * 2;
+		lock.lock();
+		try {
+			final int bufferWidth = buffer.getSize().width();
+			final int bufferHeight = buffer.getSize().height();
+			final int[] bufferPixels = new int[bufferWidth * bufferHeight];
+			final IntBuffer tmpBuffer = IntBuffer.wrap(bufferPixels);
+			buffer.getBuffer().getImage().getPixels(tmpBuffer);
+			final int tileWidth = tile.tileSize().width();
+			final int tileHeight = tile.tileSize().height();
+			final int borderWidth = tile.borderSize().width();
+			final int borderHeight = tile.borderSize().height();
+			final int offsetX = (bufferWidth - tileWidth - borderWidth * 2) / 2;
+			final int offsetY = (bufferHeight - tileHeight - borderHeight * 2) / 2;
+			int offset = offsetY * bufferWidth + offsetX;
+			int tileOffset = 0;
+			for (int y = 0; y < tileHeight; y++) {
+				System.arraycopy(bufferPixels, offset, pixels, tileOffset, tileWidth);
+				offset += bufferWidth;
+				tileOffset += tileWidth + borderWidth * 2;
+			}
+		} finally {
+			lock.unlock();
 		}
 	}
 	
 	public void drawImage(final GraphicsContext gc, final int x, final int y) {
 		lock.lock();
-		if (buffer != null) {
-			gc.save();
-//			RendererSize borderSize = buffer.getTile().borderSize();
-			final Size imageSize = buffer.getTile().imageSize();
-			final Size tileSize = buffer.getTile().tileSize();
-			gc.setAffineTransform(buffer.getAffine());
-			gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height());
-//			gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
-//			gc.strokeRect(x + borderSize.width(), y + getSize().height() - imageSize.height() - borderSize.height(), tileSize.width(), tileSize.height());
-			gc.restore();
+		try {
+			if (buffer != null) {
+				gc.save();
+				// Size borderSize = buffer.getTile().borderSize();
+				final Size imageSize = buffer.getTile().imageSize();
+				final Size tileSize = buffer.getTile().tileSize();
+				gc.setAffineTransform(buffer.getAffine());
+				gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height());
+				// gc.setStroke(renderFactory.createColor(1, 0, 0, 1));
+				// gc.strokeRect(x + borderSize.width(), y + getSize().height() - imageSize.height() - borderSize.height(), tileSize.width(), tileSize.height());
+				gc.restore();
+			}
+		} finally {
+			lock.unlock();
 		}
-		lock.unlock();
 	}
+
+//	public void drawImage(final GraphicsContext gc, final int x, final int y, final int w, final int h) {
+//		lock.lock();
+//		try {
+//			if (buffer != null) {
+//				gc.save();
+//				final Size imageSize = buffer.getTile().imageSize();
+//				final Size tileSize = buffer.getTile().tileSize();
+//				gc.setAffineTransform(buffer.getAffine());
+//				final double sx = w / (double) buffer.getTile().tileSize().width();
+//				final double sy = h / (double) buffer.getTile().tileSize().height();
+//				final int dw = (int) Math.rint(buffer.getSize().width() * sx);
+//				final int dh = (int) Math.rint(buffer.getSize().height() * sy);
+//				gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height(), dw, dh);
+//				gc.restore();
+//			}
+//		} finally {
+//			lock.unlock();
+//		}
+//	}
 
 	public void copyImage(final GraphicsContext gc) {
 		lock.lock();
-		if (buffer != null) {
-			gc.save();
-			gc.drawImage(buffer.getBuffer().getImage(), 0, 0);
-			gc.restore();
+		try {
+			if (buffer != null) {
+				gc.save();
+				gc.drawImage(buffer.getBuffer().getImage(), 0, 0);
+				gc.restore();
+			}
+		} finally {
+			lock.unlock();
 		}
-		lock.unlock();
 	}
 
-//	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
-//		lock.lock();
-//		if (buffer != null) {
-//			gc.save();
-//			final RendererSize imageSize = buffer.getTile().imageSize();
-//			final RendererSize tileSize = buffer.getTile().tileSize();
-//			gc.setAffine(buffer.getAffine());
-//			final double sx = w / (double) buffer.getTile().tileSize().width();
-//			final double sy = h / (double) buffer.getTile().tileSize().height();
-//			final int dw = (int) Math.rint(buffer.getSize().width() * sx);
-//			final int dh = (int) Math.rint(buffer.getSize().height() * sy);
-//			gc.drawImage(buffer.getBuffer().getImage(), x, y + tileSize.height() - imageSize.height(), dw, dh);
-//			gc.restore();
-//		}
-//		lock.unlock();
-//	}
+	public List<Trap> getTraps() {
+		return contentRendererFractal.getOrbit().getTraps();
+	}
 
 	private void ensureBufferAndSize() {
 		final Tile newTile = computeOptimalBufferSize(tile, rotation);
 		final int width = newTile.tileSize().width() + newTile.borderSize().width() * 2;
 		final int height = newTile.tileSize().height() + newTile.borderSize().height() * 2;
 		size = new Size(width, height);
+		if (buffer != null) {
+			buffer.dispose();
+		}
+		buffer = new Surface();
 		buffer.setSize(size);
-		buffer.setTile(newTile);
+		buffer.setTile(computeOptimalBufferSize(tile, rotation));
 		buffer.setBuffer(renderFactory.createBuffer(size.width(), size.height()));
+		buffer.setAffine(createTransform(rotation));
 	}
 
 	protected Tile computeOptimalBufferSize(Tile tile, double rotation) {
@@ -336,7 +396,8 @@ public class Renderer {
 		return new Size(tw + bw * 2, th + bh * 2);
 	}
 
-	protected void doRender() {
+	protected void render() {
+		final List<ScriptError> errors = new ArrayList<>();
 		try {
 //			if (isInterrupted()) {
 //				progress = 0;
@@ -353,7 +414,7 @@ public class Renderer {
 					previewRendererData.swap();
 					previewRendererData.clearPixels();
 				}
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				return;
 			}
 			if (contentRendererFractal.getOrbit() == null) {
@@ -364,7 +425,7 @@ public class Renderer {
 					previewRendererData.swap();
 					previewRendererData.clearPixels();
 				}
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				return;
 			}
 			if (contentRendererFractal.getColor() == null) {
@@ -375,7 +436,7 @@ public class Renderer {
 					previewRendererData.swap();
 					previewRendererData.clearPixels();
 				}
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				return;
 			}
 			final boolean orbitTime = contentRendererFractal.getOrbit().useTime() && timeAnimation;
@@ -441,7 +502,7 @@ public class Renderer {
 			final float dy = height / 5.0f;
 			float ty = dy;
 			if (!singlePass) {
-				didChanged(0, contentRendererData.getPixels());
+				update(0, contentRendererData.getPixels());
 			}
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
@@ -490,7 +551,7 @@ public class Renderer {
 				if (y >= ty) {
 					progress = y / (float)(height - 1);
 					if (!singlePass) {
-						didChanged(progress, contentRendererData.getPixels());
+						update(progress, contentRendererData.getPixels());
 					}
 					ty += dy;
 				}
@@ -498,12 +559,16 @@ public class Renderer {
 			}
 			if (!aborted) {
 				progress = 1f;
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 			}
 			Thread.yield();
 		} catch (Throwable e) {
 			log.log(Level.WARNING, "Can't render fractal", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
+			aborted = true;
+		}
+		if (!errors.isEmpty()) {
+			update(progress, errors);
 		}
 	}
 
@@ -555,9 +620,7 @@ public class Renderer {
 		final double sx = dx * (getSize().width() / (double)baseImageSize.width());
 		final double sy = dy * (getSize().height() / (double)baseImageSize.width());
 
-		final Region newRegion = new Region(new ComplexNumber(fx - sx, fy - sy), new ComplexNumber(fx + sx, fy + sy));
-//		logger.info(newRegion.toString());
-		return newRegion;
+		return new Region(new ComplexNumber(fx - sx, fy - sy), new ComplexNumber(fx + sx, fy + sy));
 	}
 
 	private Region computePreviewRegion() {
@@ -588,9 +651,7 @@ public class Renderer {
 		final double sx = dx * (getSize().width() / (double)baseImageSize.width());
 		final double sy = dy * (getSize().height() / (double)baseImageSize.width());
 
-		final Region newRegion = new Region(new ComplexNumber(fx - sx, fy - sy), new ComplexNumber(fx + sx, fy + sy));
-//		logger.info(newRegion.toString());
-		return newRegion;
+        return new Region(new ComplexNumber(fx - sx, fy - sy), new ComplexNumber(fx + sx, fy + sy));
 	}
 
 	protected AffineTransform createTransform(double rotation) {
@@ -608,56 +669,24 @@ public class Renderer {
 		return affine;
 	}
 	
-	protected void didChanged(float progress, int[] pixels) {
+	protected void update(float progress, int[] pixels) {
 		lock.lock();
 		if (buffer != null) {
 			buffer.getBuffer().update(pixels);
 		}
 		lock.unlock();
 		if (rendererDelegate != null) {
-			rendererDelegate.updateImageInBackground(progress);
+			rendererDelegate.onImageUpdated(progress, List.of());
+		}
+	}
+
+	protected void update(float progress, List<ScriptError> errors) {
+		if (rendererDelegate != null) {
+			rendererDelegate.onImageUpdated(progress, errors);
 		}
 	}
 
 	protected RendererData createRendererData() {
 		return new RendererData();
-	}
-
-	protected void free() {
-		contentRendererData.free();
-		if (previewTile != null) {
-			previewRendererData.free();
-		}
-		if (buffer != null) {
-			buffer.dispose();
-			buffer = null;
-		}
-	}
-
-	protected void shutdown() {
-		executor.shutdownNow();
-		try {
-			executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-		}
-	}
-
-	private class RenderRunnable implements Runnable {
-		@Override
-		public void run() {
-			if (initialized) {
-				doRender();
-			}
-		}
-	}
-
-	public List<Trap> getTraps() {
-		return contentRendererFractal.getOrbit().getTraps();
-	}
-
-	public List<ScriptError> getErrors() {
-		final List<ScriptError> result = new ArrayList<>(errors);
-		errors.clear();
-		return result;
 	}
 }

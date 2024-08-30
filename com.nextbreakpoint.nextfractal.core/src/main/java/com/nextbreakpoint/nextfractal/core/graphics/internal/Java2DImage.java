@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.graphics.internal;
 
-import com.nextbreakpoint.nextfractal.core.graphics.Image;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.Image;
 
 import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;

@@ -25,9 +25,9 @@
 package com.nextbreakpoint.nextfractal.core.export;
 
 import com.nextbreakpoint.nextfractal.core.common.Animation;
-import com.nextbreakpoint.nextfractal.core.common.Constants;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+import com.nextbreakpoint.nextfractal.core.common.Constants;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;

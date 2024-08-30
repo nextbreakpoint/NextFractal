@@ -24,8 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGException;
@@ -56,15 +54,19 @@ public class CFParser {
 	public CFParserResult parse(String source) throws CFParserException {
 		//TODO use variation from metadata
 		final int variation = 0;
-		//TODO all errors should be reported correctly
-		return Command.of(() -> parse(source, "CFDG3", variation, ContextFreeParser::cfdg3)).execute()
-				.or(() -> Command.of(() -> parse(source, "CFDG2", variation, ContextFreeParser::cfdg2)).execute())
-				.orThrow(e -> e instanceof CFParserException ? (CFParserException) e : new CFParserException("Failed to parse source", List.of()))
-				.optional()
-				.orElseThrow();
+		try {
+			return parse(source, "CFDG3", variation, ContextFreeParser::cfdg3);
+		} catch (CFVersionException e) {
+			try {
+				return parse(source, "CFDG2", variation, ContextFreeParser::cfdg2);
+			} catch (CFVersionException x) {
+				final ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
+				throw new CFParserException("Failed to parse source", List.of(error));
+			}
+		}
 	}
 
-	private CFParserResult parse(String source, String version, int variation, Consumer<ContextFreeParser> callback) throws CFParserException {
+	private CFParserResult parse(String source, String version, int variation, Consumer<ContextFreeParser> callback) throws CFParserException, CFVersionException {
 		try {
 			final List<ScriptError> errors = new ArrayList<>();
 			final CharStream is = CharStreams.fromReader(new StringReader(source));
@@ -79,15 +81,17 @@ public class CFParser {
 			parser.setBuilder(builder);
 			callback.accept(parser);
 			if (builder.getMaybeVersion() != null && !version.equals(builder.getMaybeVersion())) {
-				throw new RuntimeException("Can't parse script using version " + version);
+				throw new CFVersionException("Can't parse script using version " + version);
 			}
 			errors.addAll(cfdg.getSystem().getErrors());
 			if (!errors.isEmpty()) {
 				throw new CFParserException("Script syntax error", errors);
 			}
 			return new CFParserResult(source, () -> new CFDGSimpleImage(cfdg));
+		} catch (CFVersionException e) {
+			throw e;
 		} catch (CFParserException e) {
-			log.log(Level.INFO, "Can't parse script using version " + version, e);
+			log.log(Level.WARNING, "Can't parse script using version " + version, e);
 			throw e;
 		} catch (CFDGException e) {
 			final long line = e.getWhere().getLine();
@@ -95,11 +99,11 @@ public class CFParser {
 			final long index = e.getWhere().getStartIndex();
 			final long length = e.getWhere().getStopIndex() - e.getWhere().getStartIndex();
 			final ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
-			log.log(Level.INFO, "Can't parse script using version " + version, e);
+			log.log(Level.WARNING, "Can't parse script using version " + version, e);
             throw new CFParserException("Can't parse script using version " + version, List.of(error));
 		} catch (Exception e) {
             final ScriptError error = new ScriptError(PARSE, 0L, 0L, 0L, 0L, e.getMessage());
-            log.log(Level.INFO, "Can't parse script using version " + version, e);
+            log.log(Level.WARNING, "Can't parse script using version " + version, e);
 			throw new CFParserException("Can't parse script using version " + version, List.of(error));
 		}
 	}

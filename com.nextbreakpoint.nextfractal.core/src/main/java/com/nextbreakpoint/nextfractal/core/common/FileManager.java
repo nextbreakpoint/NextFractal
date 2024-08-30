@@ -167,7 +167,7 @@ public class FileManager {
         return entries.stream()
                 .filter(entry -> entry.name().equals("clips"))
                 .findFirst()
-                .map(entry -> decodeClips(entry.data()))
+                .map(entry -> decodeClipData(entry.data()))
                 .orElse(Command.value(List.of()));
     }
 
@@ -183,7 +183,7 @@ public class FileManager {
         return decodeMetadata(pluginId, new String(data));
     }
 
-    private static Command<List<AnimationClip>> decodeClips(byte[] data) {
+    private static Command<List<AnimationClip>> decodeClipData(byte[] data) {
         return Command.of(() -> MAPPER.readTree(data)).flatMap(FileManager::decodeClips);
     }
 
@@ -255,7 +255,7 @@ public class FileManager {
     }
 
     private static Command<FileEntry> encodeClips(Bundle bundle) {
-        return encodeClips(bundle.session(), bundle.clips()).map(entry -> new FileEntry("clips", entry));
+        return encodeClipsData(bundle.clips()).map(entry -> new FileEntry("clips", entry));
     }
 
     private static Command<byte[]> encodeManifest(Session session) {
@@ -270,7 +270,7 @@ public class FileManager {
         return encodeMetadata(session.pluginId(), session.metadata()).map(String::getBytes);
     }
 
-    private static Command<byte[]> encodeClips(Session session, List<AnimationClip> clips) {
+    private static Command<byte[]> encodeClipsData(List<AnimationClip> clips) {
         return encodeClips(clips).flatMap(data -> Command.of(() -> MAPPER.writeValueAsBytes(data)));
     }
 

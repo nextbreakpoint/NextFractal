@@ -3,7 +3,7 @@ package com.nextbreakpoint.nextfractal.contextfree.test;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSimpleImage;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,12 +71,12 @@ public class V3RenderTest extends BaseTest {
 
 	@ParameterizedTest
 	@MethodSource("parameters")
-	public void shouldRenderImage(String sourceName, String imageName) throws IOException {
+	public void shouldRenderImage(String sourceName, String imageName) throws IOException, InterruptedException {
 		System.out.println(sourceName);
 
 		BufferedImage actualImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
 
-		DefaultThreadFactory threadFactory = new DefaultThreadFactory("Generator", true, Thread.MIN_PRIORITY);
+		ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Generator");
 		GraphicsFactory rendererFactory = GraphicsUtils.findGraphicsFactory("Java2D");
 
 		Tile tile = new Tile(new Size(200, 200), new Size(200, 200), new Point(0, 0), new Size(0, 0));
@@ -84,8 +85,7 @@ public class V3RenderTest extends BaseTest {
 		CFDG cfdg = parseSource(sourceName);
 
 		renderer.setOpaque(true);
-		renderer.setImage(new CFDGSimpleImage(cfdg));
-		renderer.setSeed("ABCD");
+		renderer.setImage(new CFDGSimpleImage(cfdg), "ABCD");
 		renderer.init();
 		renderer.runTask();
 		renderer.waitForTasks();

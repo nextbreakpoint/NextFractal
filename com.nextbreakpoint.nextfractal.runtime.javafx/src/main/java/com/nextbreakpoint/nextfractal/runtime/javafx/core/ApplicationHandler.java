@@ -24,26 +24,36 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
-import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
-import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
+import com.nextbreakpoint.nextfractal.core.event.CaptureClipAdded;
+import com.nextbreakpoint.nextfractal.core.event.CaptureClipMoved;
+import com.nextbreakpoint.nextfractal.core.event.CaptureClipRemoved;
+import com.nextbreakpoint.nextfractal.core.event.CaptureClipRestored;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsLoaded;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipsMerged;
+import com.nextbreakpoint.nextfractal.core.event.CaptureSessionActionFired;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStarted;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStopped;
 import com.nextbreakpoint.nextfractal.core.event.CurrentFileChanged;
 import com.nextbreakpoint.nextfractal.core.event.EditorActionFired;
 import com.nextbreakpoint.nextfractal.core.event.EditorDataChanged;
+import com.nextbreakpoint.nextfractal.core.event.EditorDeleteFilesRequested;
+import com.nextbreakpoint.nextfractal.core.event.EditorGrammarSelected;
 import com.nextbreakpoint.nextfractal.core.event.EditorLoadFileRequested;
 import com.nextbreakpoint.nextfractal.core.event.EditorReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.EditorSaveFileRequested;
 import com.nextbreakpoint.nextfractal.core.event.EditorStoreFileRequested;
 import com.nextbreakpoint.nextfractal.core.event.ExportSessionCreated;
+import com.nextbreakpoint.nextfractal.core.event.ExportSessionResumed;
+import com.nextbreakpoint.nextfractal.core.event.ExportSessionStopped;
+import com.nextbreakpoint.nextfractal.core.event.ExportSessionSuspended;
 import com.nextbreakpoint.nextfractal.core.event.HistorySessionAdded;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackDataChanged;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackDataLoaded;
@@ -61,13 +71,15 @@ import com.nextbreakpoint.nextfractal.core.event.TimeAnimationActionFired;
 import com.nextbreakpoint.nextfractal.core.event.WorkspaceChanged;
 import com.nextbreakpoint.nextfractal.core.export.ExportService;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
-import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.FileUtils;
+import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import lombok.extern.java.Log;
 
@@ -77,11 +89,14 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactoryByGrammar;
+import static com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils.PROPERTY_GRAMMAR_DEFAULT;
+import static com.nextbreakpoint.nextfractal.runtime.javafx.utils.Constants.DEFAULT_PLUGIN_ID;
 import static com.nextbreakpoint.nextfractal.runtime.javafx.utils.Constants.PROJECT_EXTENSION;
 
 @Log
@@ -100,8 +115,8 @@ public class ApplicationHandler {
     private File exportCurrentFile;
     private File bundleCurrentFile;
 
-    public ApplicationHandler(PlatformEventBus eventBus) {
-        this.eventBus = eventBus;
+    public ApplicationHandler(PlatformEventBus eventBus, ExportService exportService, Stage primaryStage) {
+        this.eventBus = Objects.requireNonNull(eventBus);
 
         eventBus.subscribe(WorkspaceChanged.class.getSimpleName(), event -> workspace = ((WorkspaceChanged) event).file());
 
@@ -113,7 +128,7 @@ public class ApplicationHandler {
         eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), event -> session = ((PlaybackDataLoaded) event).session());
         eventBus.subscribe(PlaybackDataChanged.class.getSimpleName(), event -> session = ((PlaybackDataChanged) event).session());
 
-        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> handlePlaybackStopped());
+        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> handlePlaybackStopped());
 
         eventBus.subscribe(EditorActionFired.class.getSimpleName(), event -> handleEditorActionFired(((EditorActionFired) event).action()));
 
@@ -143,7 +158,56 @@ public class ApplicationHandler {
             }
         });
 
+        eventBus.subscribe(EditorGrammarSelected.class.getSimpleName(), event -> handleGrammarSelected(((EditorGrammarSelected) event).grammar()));
+
+        eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> handleSessionChanged(((SessionDataChanged) event).session()));
+
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> handleSessionTerminate(exportService));
+
+        eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), event -> handleExportSessionCreated(exportService, ((ExportSessionCreated) event).session()));
+
+        eventBus.subscribe(ExportSessionStopped.class.getSimpleName(), event -> handleExportSessionStopped(exportService, ((ExportSessionStopped) event).session()));
+
+        eventBus.subscribe(ExportSessionResumed.class.getSimpleName(), event -> handleExportSessionResumed(exportService, ((ExportSessionResumed) event).session()));
+
+        eventBus.subscribe(ExportSessionSuspended.class.getSimpleName(), event -> handleExportSessionSuspended(exportService, ((ExportSessionSuspended) event).session()));
+
+        eventBus.subscribe(EditorLoadFileRequested.class.getSimpleName(), event -> handleLoadFile(((EditorLoadFileRequested) event).file()));
+
+        eventBus.subscribe(EditorSaveFileRequested.class.getSimpleName(), event -> handleSaveFile(((EditorSaveFileRequested) event).file()));
+
+        eventBus.subscribe(EditorStoreFileRequested.class.getSimpleName(), event -> handleStoreFile(((EditorStoreFileRequested) event).file()));
+
+        eventBus.subscribe(EditorDeleteFilesRequested.class.getSimpleName(), event -> handleDeleteFiles(((EditorDeleteFilesRequested) event).files()));
+
+        eventBus.subscribe(SessionErrorChanged.class.getSimpleName(), event -> handleErrorChanged(((SessionErrorChanged) event).error()));
+
+        eventBus.subscribe(CaptureSessionActionFired.class.getSimpleName(), event -> handleCaptureSession(((CaptureSessionActionFired) event).action()));
+
+        eventBus.subscribe(CaptureClipRestored.class.getSimpleName(), event -> handleClipRestored(((CaptureClipRestored) event).clip()));
+
+        eventBus.subscribe(CaptureClipRemoved.class.getSimpleName(), event -> handleClipRemoved(((CaptureClipRemoved) event).clip()));
+
+        eventBus.subscribe(CaptureClipAdded.class.getSimpleName(), event -> handleClipAdded(((CaptureClipAdded) event).clip()));
+
+        eventBus.subscribe(CaptureClipMoved.class.getSimpleName(), event -> handleClipMoved(((CaptureClipMoved) event).fromIndex(), ((CaptureClipMoved) event).toIndex()));
+
+        eventBus.subscribe(SessionBundleLoaded.class.getSimpleName(), event -> handleBundleLoaded((SessionBundleLoaded) event));
+
+        eventBus.subscribe(SessionExportRequested.class.getSimpleName(), event -> handleExportSession(primaryStage, (SessionExportRequested) event));
+
+        eventBus.subscribe(EditorActionFired.class.getSimpleName(), event -> handleEditorAction(primaryStage, ((EditorActionFired) event).action()));
+
         eventBus.subscribe(TimeAnimationActionFired.class.getSimpleName(), event -> handleTimeAnimationAction(((TimeAnimationActionFired)event).action()));
+
+        primaryStage.setOnCloseRequest(e -> {
+            if (!handleConfirmTerminate(exportService)) {
+                e.consume();
+            }
+        });
+
+        // the following events are required to initialise the application
+        Platform.runLater(() -> handleGrammarSelected(System.getProperty(PROPERTY_GRAMMAR_DEFAULT, DEFAULT_PLUGIN_ID)));
     }
 
 	private String formatErrors(List<ScriptError> errors) {
@@ -190,7 +254,7 @@ public class ApplicationHandler {
         }
     }
 
-    public void handleEditorActionFired(String action) {
+    private void handleEditorActionFired(String action) {
         if (session != null && action.equals("reload"))
             eventBus.postEvent(SessionDataLoaded.builder().session(session).continuous(false).appendToHistory(false).build());
     }
@@ -199,13 +263,13 @@ public class ApplicationHandler {
         eventBus.postEvent(SessionDataLoaded.builder().session(session).continuous(false).appendToHistory(true).build());
     }
 
-    public void handleGrammarSelected(String grammar) {
+    private void handleGrammarSelected(String grammar) {
         tryFindFactoryByGrammar(grammar)
                 .optional()
                 .ifPresent(this::createSession);
     }
 
-    public void handleDeleteFiles(List<File> files) {
+    private void handleDeleteFiles(List<File> files) {
         final Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setContentText("Do you want to delete the selected %s?".formatted(files.size() > 1 ? files.size() + " projects" : "project"));
         dialog.setTitle("Action required");
@@ -224,7 +288,7 @@ public class ApplicationHandler {
         }
     }
 
-    public void handleEditorAction(Window window, String action) {
+    private void handleEditorAction(Window window, String action) {
         if (action.equals("load")) Optional.ofNullable(showLoadBundleFileChooser())
                 .map(fileChooser -> fileChooser.showOpenDialog(window))
                 .ifPresent(file -> eventBus.postEvent(EditorLoadFileRequested.builder().file(file).build()));
@@ -235,7 +299,7 @@ public class ApplicationHandler {
                 .ifPresent(file -> eventBus.postEvent(EditorStoreFileRequested.builder().file(file).build()));
     }
 
-    public void handleBundleLoaded(SessionBundleLoaded sessionBundleLoaded) {
+    private void handleBundleLoaded(SessionBundleLoaded sessionBundleLoaded) {
         final Bundle bundle = sessionBundleLoaded.bundle();
         if (edited && !clips.isEmpty() && !bundle.clips().isEmpty()) {
             final Dialog<ButtonType> dialog = new Dialog<>();
@@ -259,43 +323,43 @@ public class ApplicationHandler {
         eventBus.postEvent(SessionDataLoaded.builder().session(bundle.session()).continuous(sessionBundleLoaded.continuous()).appendToHistory(sessionBundleLoaded.appendToHistory()).build());
     }
 
-    public void handleClipAdded(AnimationClip clip) {
+    private void handleClipAdded(AnimationClip clip) {
         clips.add(clip);
         edited = true;
     }
 
-    public void handleClipRemoved(AnimationClip clip) {
+    private void handleClipRemoved(AnimationClip clip) {
         clips.remove(clip);
         edited = true;
     }
 
-    public void handleClipRestored(AnimationClip clip) {
+    private void handleClipRestored(AnimationClip clip) {
         clips.add(clip);
         edited = false;
     }
 
-    public void handleClipMoved(int fromIndex, int toIndex) {
+    private void handleClipMoved(int fromIndex, int toIndex) {
         final AnimationClip clip = clips.get(fromIndex);
         clips.remove(fromIndex);
         clips.add(toIndex, clip);
         edited = true;
     }
 
-    public void handleCaptureSession(String action) {
+    private void handleCaptureSession(String action) {
         if (action.equals("start")) startCapture();
         if (action.equals("stop")) stopCapture();
     }
 
-    public void handleSessionChanged(Session session) {
+    private void handleSessionChanged(Session session) {
         if (capture) {
             clip = clip.appendEvent(new Date(), session.pluginId(), session.script(), session.metadata());
         }
     }
 
-    public void handleErrorChanged(String error) {
+    private void handleErrorChanged(String error) {
     }
 
-    public void handleLoadFile(File file) {
+    private void handleLoadFile(File file) {
         FileManager.loadBundle(file)
                 .observe()
                 .onSuccess(bundle -> eventBus.postEvent(CurrentFileChanged.builder().file(file).build()))
@@ -305,7 +369,7 @@ public class ApplicationHandler {
                 .ifPresent(bundle -> eventBus.postEvent(SessionBundleLoaded.builder().bundle(bundle).continuous(false).appendToHistory(true).build()));
     }
 
-    public void handleSaveFile(File file) {
+    private void handleSaveFile(File file) {
         FileManager.saveBundle(file, new Bundle(session, clips))
                 .observe()
                 .onFailure(e -> showSaveError(file, e))
@@ -315,7 +379,7 @@ public class ApplicationHandler {
                 .ifPresent(bundle -> eventBus.postEvent(CurrentFileChanged.builder().file(file).build()));
     }
 
-    public void handleStoreFile(File file) {
+    private void handleStoreFile(File file) {
         FileManager.saveBundle(file, new Bundle(session, clips))
                 .observe()
                 .onFailure(e -> showSaveError(file, e))
@@ -323,7 +387,7 @@ public class ApplicationHandler {
                 .get();
     }
 
-    public void handleExportSession(Window window, SessionExportRequested request) {
+    private void handleExportSession(Window window, SessionExportRequested request) {
         ApplicationUtils.createEncoder(request.format()).ifPresent(encoder -> {
             final Consumer<File> fileConsumer = file -> createExportSession(encoder, request.size(), file);
             Optional.ofNullable(prepareExportFileChooser(encoder.getSuffix()).showSaveDialog(window))
@@ -331,28 +395,28 @@ public class ApplicationHandler {
         });
     }
 
-    public void handleSessionTerminate(ExportService exportService) {
-        log.info("Terminating services...");
+    private void handleSessionTerminate(ExportService exportService) {
+        log.info("Terminating application...");
         exportService.shutdown();
     }
 
-    public void handleExportSessionCreated(ExportService exportService, ExportSession exportSession) {
+    private void handleExportSessionCreated(ExportService exportService, ExportSession exportSession) {
         exportService.startSession(exportSession);
     }
 
-    public void handleExportSessionStopped(ExportService exportService, ExportSession exportSession) {
+    private void handleExportSessionStopped(ExportService exportService, ExportSession exportSession) {
         exportService.stopSession(exportSession);
     }
 
-    public void handleExportSessionResumed(ExportService exportService, ExportSession exportSession) {
+    private void handleExportSessionResumed(ExportService exportService, ExportSession exportSession) {
         exportService.resumeSession(exportSession);
     }
 
-    public void handleExportSessionSuspended(ExportService exportService, ExportSession exportSession) {
+    private void handleExportSessionSuspended(ExportService exportService, ExportSession exportSession) {
         exportService.suspendSession(exportSession);
     }
 
-    public boolean handleConfirmTerminate(ExportService exportService) {
+    private boolean handleConfirmTerminate(ExportService exportService) {
         if (confirmTerminate(exportService.getSessionCount())) {
             eventBus.postEvent(SessionTerminated.builder().build());
             return true;

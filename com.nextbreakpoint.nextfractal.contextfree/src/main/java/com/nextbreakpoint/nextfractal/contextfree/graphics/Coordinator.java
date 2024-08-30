@@ -30,25 +30,27 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import lombok.Getter;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
 public class Coordinator implements RendererDelegate {
-	private final HashMap<String, Integer> hints = new HashMap<>();
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
-	private volatile boolean pixelsChanged;
+	@Getter
+	private volatile List<ScriptError> errors;
+	private volatile boolean imageChanged;
 	private Renderer renderer;
-	
+
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
-		this.hints.putAll(hints);
+		errors = new ArrayList<>();
 		renderer = createRenderer(tile);
-		renderer.setRendererDelegate(this);
+		renderer.setDelegate(this);
 	}
 
 	public final void dispose() {
@@ -59,7 +61,7 @@ public class Coordinator implements RendererDelegate {
 		renderer.abortTasks();
 	}
 	
-	public void waitFor() {
+	public void waitFor() throws InterruptedException {
 		renderer.waitForTasks();
 	}
 
@@ -68,13 +70,14 @@ public class Coordinator implements RendererDelegate {
 	}
 
 	@Override
-	public void updateImageInBackground(float progress) {
-		this.pixelsChanged = true;
+	public void onImageUpdated(float progress, List<ScriptError> errors) {
+		this.errors = errors;
+		this.imageChanged = true;
 	}
 
-	public boolean isPixelsChanged() {
-		final boolean result = pixelsChanged;
-		pixelsChanged = false;
+	public boolean hasImageChanged() {
+		final boolean result = imageChanged;
+		imageChanged = false;
 		return result;
 	}
 
@@ -82,12 +85,8 @@ public class Coordinator implements RendererDelegate {
 		return renderer.getSize();
 	}
 
-	public void setImage(CFDGImage cfdgImage) {
-		renderer.setImage(cfdgImage);
-	}
-
-	public void setSeed(String cfdgSeed) {
-		renderer.setSeed(cfdgSeed);
+	public void setImage(CFDGImage cfdgImage, String cfdgSeed) {
+		renderer.setImage(cfdgImage, cfdgSeed);
 	}
 
 	public void init() {
@@ -102,27 +101,19 @@ public class Coordinator implements RendererDelegate {
 		renderer.drawImage(gc, x, y);
 	}
 
-//	public void drawImage(final RendererGraphicsContext gc, final int x, final int y, final int w, final int h) {
+//	public void drawImage(final GraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		renderer.drawImage(gc, x, y, w, h);
 //	}
 
-	protected void free() {
+	private void free() {
 		if (renderer != null) {
 			renderer.dispose();
 			renderer = null;
 		}
 	}
 
-	protected Renderer createRenderer(Tile tile) {
+	private Renderer createRenderer(Tile tile) {
 		return new Renderer(threadFactory, renderFactory, tile);
-	}
-
-	public void getPixels(int[] pixels) {
-		renderer.getPixels(pixels);
-	}
-
-	public List<ScriptError> getErrors() {
-		return renderer.getErrors();
 	}
 
     public boolean isInitialized() {

@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.core.AffineTransformTime;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.AST;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTDefine;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTExpression;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTModTerm;
@@ -36,7 +37,6 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTReplacement;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTRule;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTRuleSpecifier;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTStartSpecifier;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.AST;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTWhere;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.ArgSource;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.enums.CFG;

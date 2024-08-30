@@ -47,11 +47,11 @@ import static org.apache.batik.ext.awt.geom.ExtendedPathIterator.SEG_QUADTO;
 public class Canvas implements CFCanvas {
     private final GraphicsContext context;
     private final GraphicsFactory factory;
+    private AffineTransform normTransform;
     @Getter
     private final int width;
     @Getter
     private final int height;
-    private AffineTransform normTransform;
 
     public Canvas(GraphicsFactory factory, Object context, int width, int height) {
         this.context = factory.createGraphicsContext(context);

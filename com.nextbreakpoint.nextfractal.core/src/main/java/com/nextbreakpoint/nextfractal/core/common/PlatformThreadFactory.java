@@ -26,26 +26,21 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.concurrent.ThreadFactory;
 
-public class DefaultThreadFactory implements ThreadFactory {
+public class PlatformThreadFactory implements ThreadFactory {
 	private final boolean isDaemon;
 	private final int priority;
 	private final String name;
 	private int ordinal;
 
-	/**
-	 * @param name
-	 * @param isDaemon
-	 * @param priority
-	 */
-	public DefaultThreadFactory(final String name, final boolean isDaemon, final int priority) {
+	public PlatformThreadFactory(final String name, final boolean isDaemon, final int priority) {
 		this.name = name;
 		this.isDaemon = isDaemon;
 		this.priority = priority;
 	}
 
 	@Override
-	public Thread newThread(final Runnable r) {
-		final Thread thread = new Thread(r);
+	public Thread newThread(final Runnable runnable) {
+		final Thread thread = Thread.ofPlatform().factory().newThread(runnable);
 		thread.setPriority(priority);
 		thread.setDaemon(isDaemon);
 		thread.setName(name + "-" + (ordinal++));

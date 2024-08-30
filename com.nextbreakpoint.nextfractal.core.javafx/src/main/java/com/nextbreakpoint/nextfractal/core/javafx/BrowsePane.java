@@ -24,12 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
@@ -60,12 +60,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,6 +71,7 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
 
 @Log
 public class BrowsePane extends BorderPane {
+    private static final String FILE_EXTENSION = ".nf.zip";
     private static final int FRAME_LENGTH_IN_MILLIS = 50;
     private static final int SCROLL_BOUNCE_DELAY = 500;
 
@@ -80,7 +79,7 @@ public class BrowsePane extends BorderPane {
     private final List<String> filter = new LinkedList<>();
     private final StringObservableValue sourcePathProperty;
     private final StringObservableValue importPathProperty;
-    private final ExecutorService browserExecutor;
+    private final ExecutorService executor;
     private final int numRows = 3;
     private final int numCols = 3;
     private final File workspace;
@@ -102,7 +101,7 @@ public class BrowsePane extends BorderPane {
         setMaxHeight(height);
         setPrefHeight(height);
 
-        filter.add(".nf.zip");
+        filter.add(FILE_EXTENSION);
 
         sourcePathProperty = new StringObservableValue();
 
@@ -113,8 +112,6 @@ public class BrowsePane extends BorderPane {
         importPathProperty.setValue(null);
 
         final int size = width / numCols;
-
-        final int maxThreads = numCols;
 
         tile = createSingleTile(size, size);
 
@@ -231,7 +228,7 @@ public class BrowsePane extends BorderPane {
             toolbar3.setPrefWidth(newValue.doubleValue() / 3);
         });
 
-        browserExecutor = Executors.newFixedThreadPool(maxThreads, createThreadFactory("Browser"));
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Browser Panel"));
 
         runTimer(grid);
     }
@@ -246,10 +243,6 @@ public class BrowsePane extends BorderPane {
 
     private File getDefaultImportFolder() {
         return examples;
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
     }
 
     public void reload() {
@@ -274,19 +267,9 @@ public class BrowsePane extends BorderPane {
     }
 
     public void dispose() {
-        final List<ExecutorService> executors = List.of(browserExecutor);
-        executors.forEach(ExecutorService::shutdownNow);
-        executors.forEach(this::await);
+        ExecutorUtils.shutdown(executor);
         stopWatching();
         removeItems();
-    }
-
-    private void await(ExecutorService executor) {
-        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
-                .execute()
-                .observe()
-                .onFailure(e -> log.warning("Await termination timeout"))
-                .get();
     }
 
     private void doClose() {
@@ -353,7 +336,7 @@ public class BrowsePane extends BorderPane {
     }
 
     private Future<?> copyFilesAsync(Button deleteButton, Label statusLabel, GridView grid, List<File> files, File dest) {
-        return browserExecutor.submit(() -> copyFiles(deleteButton, statusLabel, grid, files, dest));
+        return executor.submit(() -> copyFiles(deleteButton, statusLabel, grid, files, dest));
     }
 
     private void copyFiles(Button deleteButton, Label statusLabel, GridView grid, List<File> files, File dest) {
@@ -391,10 +374,10 @@ public class BrowsePane extends BorderPane {
     }
 
     private File createFileName(File file, File location) {
-        File tmpFile = new File(location, file.getName().substring(0, file.getName().indexOf(".")) + ".nf.zip");
+        File tmpFile = new File(location, file.getName().substring(0, file.getName().indexOf(".")) + FILE_EXTENSION);
         int i = 0;
         while (tmpFile.exists()) {
-            tmpFile = new File(location, file.getName().substring(0, file.getName().indexOf(".")) + "-" + (i++) + ".nf.zip");
+            tmpFile = new File(location, file.getName().substring(0, file.getName().indexOf(".")) + "-" + (i++) + FILE_EXTENSION);
         }
         return tmpFile;
     }
@@ -468,6 +451,7 @@ public class BrowsePane extends BorderPane {
                     try {
                         updateCells(grid);
                     } catch (ExecutionException | InterruptedException e) {
+                        log.log(Level.WARNING, "Can't update cells", e);
                     }
                     last = time;
                 }
@@ -587,7 +571,7 @@ public class BrowsePane extends BorderPane {
 
     private void loadItemAsync(GridItem item) {
         final File file = item.getFile();
-        item.setLoadItemFuture(browserExecutor.submit(() -> {
+        item.setLoadItemFuture(executor.submit(() -> {
             loadItem(item, file);
             return null;
         }));
@@ -607,7 +591,7 @@ public class BrowsePane extends BorderPane {
 
     private void initItemAsync(GridItem item) {
         final BrowseBitmap bitmap = item.getBitmap();
-        item.setInitItemFuture(browserExecutor.submit(() -> {
+        item.setInitItemFuture(executor.submit(() -> {
             initItem(item, bitmap);
             return null;
         }));
@@ -638,7 +622,9 @@ public class BrowsePane extends BorderPane {
 
     private void startWatching(Button deleteButton, Label statusLabel, GridView grid) {
         if (thread == null) {
-            thread = createThreadFactory("Watcher").newThread(() -> watchLoop(getCurrentSourceFolder().toPath(), a -> Platform.runLater(() -> this.reload(deleteButton, statusLabel, grid))));
+            final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Watcher");
+            final Path path = getCurrentSourceFolder().toPath();
+            thread = threadFactory.newThread(() -> watchLoop(path, _ -> reload(deleteButton, statusLabel, grid)));
             thread.start();
         }
     }
@@ -656,7 +642,7 @@ public class BrowsePane extends BorderPane {
                         WatchKey key = watcher.take();
                         for (WatchEvent<?> event : key.pollEvents()) {
                             log.log(Level.INFO, "Watch loop events " + event.count());
-                            consumer.accept(null);
+                            Platform.runLater(() -> consumer.accept(null));
                         }
                         boolean valid = key.reset();
                         if (!valid) {
@@ -670,7 +656,7 @@ public class BrowsePane extends BorderPane {
                     }
                     watcher.close();
                 }
-                consumer.accept(null);
+                Platform.runLater(() -> consumer.accept(null));
             }
         } catch (InterruptedException x) {
             log.log(Level.INFO, "Watch loop interrupted");

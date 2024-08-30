@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.javafx.viewer;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
-import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStarted;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStopped;
 import com.nextbreakpoint.nextfractal.core.event.EditorLoadFileRequested;
@@ -72,7 +72,7 @@ public class Viewer extends BorderPane {
 	private final int height;
 	private final BorderPane controls;
 	private final BorderPane viewer;
-	private final BorderPane errors;
+	private final BorderPane error;
 	private AnimationTimer animationTimer;
 	private RenderingContext renderingContext;
 	private RenderingStrategy renderingStrategy;
@@ -81,6 +81,7 @@ public class Viewer extends BorderPane {
 	private UIFactory factory;
 	private MetadataDelegate delegate;
 	private KeyHandler keyHandler;
+	private List<ScriptError> errors;
 
 	public Viewer(PlatformEventBus eventBus, int width, int height) {
 		this.eventBus = eventBus;
@@ -108,20 +109,20 @@ public class Viewer extends BorderPane {
 		viewer.setMaxHeight(height);
 		viewer.setPrefHeight(height);
 
-		errors = new BorderPane();
-		errors.setMinWidth(width);
-		errors.setMaxWidth(width);
-		errors.setPrefWidth(width);
-		errors.setMinHeight(height);
-		errors.setMaxHeight(height);
-		errors.setPrefHeight(height);
-		errors.getStyleClass().add("errors");
-		errors.setVisible(false);
+		error = new BorderPane();
+		error.setMinWidth(width);
+		error.setMaxWidth(width);
+		error.setPrefWidth(width);
+		error.setMinHeight(height);
+		error.setMaxHeight(height);
+		error.setPrefHeight(height);
+		error.getStyleClass().add("errors");
+		error.setVisible(false);
 
 		final Pane stackPane = new Pane();
 		stackPane.getChildren().add(viewer);
 		stackPane.getChildren().add(controls);
-		stackPane.getChildren().add(errors);
+		stackPane.getChildren().add(error);
 		setCenter(stackPane);
 
 		final FadeTransition toolsTransition = createFadeTransition(controls);
@@ -180,7 +181,7 @@ public class Viewer extends BorderPane {
 				.filter(e -> e.getDragboard().hasFiles()).ifPresent(e -> e.acceptTransferModes(TransferMode.COPY_OR_MOVE)));
 
 		errorProperty.addListener((_, _, newValue) -> {
-			errors.setVisible(newValue);
+			error.setVisible(newValue);
 		});
 
 		eventBus.subscribe(ActiveToolChanged.class.getSimpleName(), event -> {
@@ -263,10 +264,10 @@ public class Viewer extends BorderPane {
 		}
 
 		if (renderingStrategy != null) {
-			final List<ScriptError> errorList = renderingStrategy.updateCoordinators(result);
-
-			errorProperty.setValue(!errorList.isEmpty());
+			renderingStrategy.updateCoordinators(result);
 		}
+
+		errorProperty.setValue(!result.errors().isEmpty());
 	}
 
 	private void handleSessionChanged(Session session, Boolean continuous) {
@@ -421,6 +422,12 @@ public class Viewer extends BorderPane {
 			if (timestamp - lastTimestamp > FRAME_LENGTH_IN_NANOS) {
 				if (renderingStrategy != null) {
 					renderingStrategy.updateAndRedraw(timestamp / 1000000L);
+					final List<ScriptError> newErrors = renderingStrategy.getErrors();
+					if (newErrors != errors) {
+						errors = newErrors;
+						//TODO show errors in console
+						errorProperty.setValue(!errors.isEmpty());
+					}
 				}
 				lastTimestamp = timestamp;
 			}

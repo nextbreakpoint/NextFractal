@@ -28,8 +28,12 @@ import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 
 import java.util.List;
 
-public interface CFHandle {
+public interface CFRenderer {
+    void run(CFCanvas canvas, boolean partialDraw);
+
     void stop();
+
+    void setListener(CFListener listener);
 
     List<ScriptError> errors();
 }

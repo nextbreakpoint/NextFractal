@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl.compiler;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.ClassFactory;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ClassType;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;

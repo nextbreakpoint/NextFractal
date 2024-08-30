@@ -26,8 +26,8 @@ package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFCanvas;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFHandle;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFListener;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFRenderer;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.Setter;
 
@@ -36,36 +36,35 @@ import java.util.List;
 public class CFDGSimpleImage implements CFDGImage {
     private final CFDG cfdg;
 
-    @Setter
-    private CFListener listener;
-
     public CFDGSimpleImage(CFDG cfdg) {
         this.cfdg = cfdg;
     }
 
-    public CFHandle render(CFCanvas canvas, String seed, boolean partialDraw) {
+    @Override
+    public CFRenderer open(int width, int height, String seed) {
         cfdg.rulesLoaded();
-        final CFDGRenderer renderer = cfdg.createRenderer(canvas.getWidth(), canvas.getHeight(), 1, seed.hashCode(), 0.1);
-        if (renderer != null) {
-            renderer.setListener(this::draw);
-            renderer.run(canvas, partialDraw);
-        }
-        return new DefaultHandle(renderer, cfdg);
+        final CFDGRenderer renderer = cfdg.createRenderer(width, height, 1, seed.hashCode(), 0.1);
+        return new DefaultRenderer(cfdg, renderer);
     }
 
-    private void draw() {
-        if (listener != null) {
-            listener.draw();
-        }
-    }
-
-    private static class DefaultHandle implements CFHandle {
-        private final CFDGRenderer renderer;
+    private static class DefaultRenderer implements CFRenderer {
         private final CFDG cfdg;
+        private final CFDGRenderer renderer;
 
-        public DefaultHandle(CFDGRenderer renderer, CFDG cfdg) {
+        @Setter
+        private CFListener listener;
+
+        public DefaultRenderer(CFDG cfdg, CFDGRenderer renderer) {
             this.renderer = renderer;
             this.cfdg = cfdg;
+            renderer.setListener(this::draw);
+        }
+
+        @Override
+        public void run(CFCanvas canvas, boolean partialDraw) {
+            if (renderer != null) {
+                renderer.run(canvas, partialDraw);
+            }
         }
 
         @Override
@@ -78,6 +77,12 @@ public class CFDGSimpleImage implements CFDGImage {
         @Override
         public List<ScriptError> errors() {
             return cfdg.getSystem().getErrors();
+        }
+
+        private void draw() {
+            if (listener != null) {
+                listener.draw();
+            }
         }
     }
 }

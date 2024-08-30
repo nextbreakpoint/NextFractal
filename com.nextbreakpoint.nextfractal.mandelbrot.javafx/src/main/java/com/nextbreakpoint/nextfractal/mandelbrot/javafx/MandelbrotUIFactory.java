@@ -26,12 +26,12 @@ package com.nextbreakpoint.nextfractal.mandelbrot.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
@@ -64,7 +64,11 @@ import javafx.scene.layout.Pane;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Supplier;
+
+import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_RENDERING_COLS;
+import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_RENDERING_ROWS;
 
 public class MandelbrotUIFactory implements UIFactory {
 	public static final String PLUGIN_ID = "Mandelbrot";
@@ -81,7 +85,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		hints.put(Coordinator.KEY_TYPE, Coordinator.VALUE_REALTIME);
 		hints.put(Coordinator.KEY_MULTITHREAD, Coordinator.VALUE_SINGLE_THREAD);
 		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
-		final DefaultThreadFactory threadFactory = new DefaultThreadFactory("Mandelbrot Browser", true, Thread.MIN_PRIORITY);
+		final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Mandelbrot Browser");
 		final GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 		final Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
 		final Orbit orbit = (Orbit)bitmap.getProperty("orbit");
@@ -143,8 +147,7 @@ public class MandelbrotUIFactory implements UIFactory {
 
 	@Override
 	public RenderingStrategy createRenderingStrategy(RenderingContext renderingContext, MetadataDelegate delegate, int width, int height) {
-		final int[] cells = optimalRowsAndCols(Runtime.getRuntime().availableProcessors());
-
+		final int[] cells = optimalRowsAndCols(width, height, Runtime.getRuntime().availableProcessors());
 		return new MandelbrotRenderingStrategy(renderingContext, delegate, width, height, getRows(cells), getCols(cells));
 	}
 
@@ -169,18 +172,20 @@ public class MandelbrotUIFactory implements UIFactory {
 	}
 
 	private static Integer getRows(int[] cells) {
-		return Integer.getInteger("mandelbrot.renderer.rows", cells[0]);
+		return Integer.getInteger(PROPERTY_MANDELBROT_RENDERING_ROWS, cells[0]);
 	}
 
 	private static Integer getCols(int[] cells) {
-		return Integer.getInteger("mandelbrot.renderer.cols", cells[1]);
+		return Integer.getInteger(PROPERTY_MANDELBROT_RENDERING_COLS, cells[1]);
 	}
 
-	private static int[] optimalRowsAndCols(int processors) {
-		if (processors > 8) {
-			return new int[] { 3, 3 };
-		} else if (processors >= 4) {
-			return new int[] { 2, 2 };
+	private static int[] optimalRowsAndCols(int width, int height, int processors) {
+		final int nRows = width / 512;
+		final int nCols = height / 512;
+		if (processors >= 16) {
+			return new int[]{Math.min(3, nRows), Math.min(3, nCols)};
+		} else if (processors >= 8) {
+			return new int[] { Math.min(2, nRows), Math.min(2, nCols) };
 		} else {
 			return new int[] { 1, 1 };
 		}
@@ -199,7 +204,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		}
 
 		@Override
-		public void waitFor() {
+		public void waitFor() throws InterruptedException {
 			coordinator.waitFor();
 		}
 
@@ -209,8 +214,8 @@ public class MandelbrotUIFactory implements UIFactory {
 		}
 
 		@Override
-		public boolean isPixelsChanged() {
-			return coordinator.isPixelsChanged();
+		public boolean hasImageChanged() {
+			return coordinator.hasImageChanged();
 		}
 
 		@Override

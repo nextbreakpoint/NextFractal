@@ -124,6 +124,10 @@ public class MandelbrotImageComposer implements ImageComposer {
             renderer.setTime(time);
             renderer.runTask();
             renderer.waitForTasks();
+            if (renderer.isAborted()) {
+                aborted = true;
+                return buffer;
+            }
             GraphicsContext renderContext = renderFactory.createGraphicsContext(g2d);
             renderer.copyImage(renderContext);
             Region region = new Region(orbit.getInitialRegion());
@@ -139,11 +143,12 @@ public class MandelbrotImageComposer implements ImageComposer {
             if (metadata.getOptions().isShowPoint()) {
                 drawPoint(renderFactory, renderContext, tile.imageSize(), region, metadata);
             }
-            aborted = renderer.isInterrupted();
         } catch (DSLParserException e) {
             log.log(Level.WARNING, e.getMessage(), e);
+            aborted = true;
         } catch (Throwable e) {
             log.severe(e.getMessage());
+            aborted = true;
         } finally {
             if (g2d != null) {
                 g2d.dispose();
@@ -185,7 +190,8 @@ public class MandelbrotImageComposer implements ImageComposer {
         return tile.tileSize();
     }
 
-    public boolean isInterrupted() {
+    @Override
+    public boolean isAborted() {
         return aborted;
     }
 

@@ -44,5 +44,5 @@ public interface ImageComposer {
 	/**
 	 * @return
 	 */
-    boolean isInterrupted();
+    boolean isAborted();
 }

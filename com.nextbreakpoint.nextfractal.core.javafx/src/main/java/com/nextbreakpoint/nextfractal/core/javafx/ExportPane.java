@@ -26,10 +26,11 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
-import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.AnimationEvent;
+import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.application.Platform;
@@ -53,9 +54,6 @@ import lombok.extern.java.Log;
 import java.nio.IntBuffer;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
@@ -393,7 +391,7 @@ public class ExportPane extends BorderPane {
 
 		updateButtonsAndPanels.run();
 
-		executor = Executors.newSingleThreadExecutor(createThreadFactory("Export"));
+		executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Export Panel"));
 	}
 
 	private void loadImagePresets(ComboBox<Integer[]> presetsCombobox) {
@@ -429,10 +427,6 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void itemSelected(ListView<Bitmap> listView) {
-	}
-
-	private DefaultThreadFactory createThreadFactory(String name) {
-		return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
 	}
 
 	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, Size size, boolean notifyAddClip) {
@@ -474,17 +468,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	public void dispose() {
-		final List<ExecutorService> executors = List.of(executor);
-		executors.forEach(ExecutorService::shutdownNow);
-		executors.forEach(this::await);
-	}
-
-	private void await(ExecutorService executor) {
-		Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
-				.execute()
-				.observe()
-				.onFailure(e -> log.warning("Await termination timeout"))
-				.get();
+		ExecutorUtils.shutdown(executor);
 	}
 
 	public void appendClip(AnimationClip clip) {
@@ -510,7 +494,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	private ImageComposer createImageComposer(CoreFactory factory) {
-		return factory.createImageComposer(createThreadFactory("Export Composer"), tile, true);
+		return factory.createImageComposer(ThreadUtils.createPlatformThreadFactory("Export Image Composer"), tile, true);
 	}
 
 	public void loadClips(List<AnimationClip> clips) {
@@ -520,7 +504,10 @@ public class ExportPane extends BorderPane {
 
 	private void removeAllItems() {
 		if (delegate != null) {
-			listView.getItems().stream().map(bitmap -> (AnimationClip)bitmap.getProperty("clip")).forEach(clip -> delegate.captureSessionRemoved(clip));
+			listView.getItems()
+					.stream()
+					.map(bitmap -> (AnimationClip)bitmap.getProperty("clip"))
+					.forEach(clip -> delegate.captureSessionRemoved(clip));
 		}
 		listView.getItems().clear();
 	}

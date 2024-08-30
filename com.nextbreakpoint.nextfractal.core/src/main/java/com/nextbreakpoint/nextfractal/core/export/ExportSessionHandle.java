@@ -106,16 +106,20 @@ public final class ExportSessionHandle {
 		return state == ExportSessionState.COMPLETED;
 	}
 
-	public synchronized boolean isFinished() {
-		return state == ExportSessionState.FINISHED;
+	public synchronized boolean isTerminated() {
+		return state == ExportSessionState.TERMINATED;
 	}
 
 	public synchronized boolean isFailed() {
 		return state == ExportSessionState.FAILED;
 	}
 
+	public synchronized boolean isExpired() {
+		return System.currentTimeMillis() - timestamp > 5000;
+	}
+
 	public synchronized void updateProgress() {
-		progress = getFrameCount() > 0 ? ((getFrameNumber() + 1f) / (float)getFrameCount()) : (getCompletedJobsCount() / (float)getJobsCount());
+		progress = getFrameCount() > 1 ? ((getFrameNumber() + 1f) / (float)getFrameCount()) : (getCompletedJobsCount() / (float)getJobsCount());
 	}
 
 	public synchronized AnimationFrame getCurrentFrame() {

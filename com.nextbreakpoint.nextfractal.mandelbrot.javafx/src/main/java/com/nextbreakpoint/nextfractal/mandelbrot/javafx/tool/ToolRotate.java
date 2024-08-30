@@ -24,12 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx.tool;
 
-import com.nextbreakpoint.nextfractal.core.javafx.Tool;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.javafx.Tool;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import javafx.scene.input.MouseEvent;
 
 public class ToolRotate implements Tool {
@@ -163,7 +163,7 @@ public class ToolRotate implements Tool {
 		final double dh = context.getHeight();
 		gc.clearRect(0, 0, (int)dw, (int)dh);
 		if (active) {
-			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
+			gc.setStroke(context.getGraphicsFactory().createColor(1, 1, 0, 1));
 			final double cx = dw / 2;
 			final double cy = dh / 2;
 			final int px = (int) Math.rint(cx + x0 * dw);
@@ -174,7 +174,7 @@ public class ToolRotate implements Tool {
 			gc.moveTo(px - 4, py + 4);
 			gc.lineTo(px + 4, py - 4);
 			gc.stroke();
-			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
+			gc.setStroke(context.getGraphicsFactory().createColor(1, 1, 0, 1));
 			final int qx = (int) Math.rint(cx + x1 * dw);
 			final int qy = (int) Math.rint(cy - y1 * dh);
 			gc.beginPath();

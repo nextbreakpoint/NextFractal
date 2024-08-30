@@ -25,7 +25,6 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;

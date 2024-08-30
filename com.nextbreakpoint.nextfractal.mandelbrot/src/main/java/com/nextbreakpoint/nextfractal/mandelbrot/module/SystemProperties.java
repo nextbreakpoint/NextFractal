@@ -27,4 +27,9 @@ package com.nextbreakpoint.nextfractal.mandelbrot.module;
 public interface SystemProperties {
     String PROPERTY_MANDELBROT_COMPILER_DISABLED = "com.nextbreakpoint.nextfractal.mandelbrot.module.compiler.disabled";
     String PROPERTY_MANDELBROT_EXPRESSION_OPTIMISATION_ENABLED = "com.nextbreakpoint.nextfractal.mandelbrot.module.expression.optimisation.enabled";
+    String PROPERTY_MANDELBROT_RENDERING_STRATEGY_OPTIMISATION_DISABLED = "com.nextbreakpoint.nextfractal.mandelbrot.module.rendering.strategy.optimisation.disabled";
+    String PROPERTY_MANDELBROT_RENDERING_STRATEGY_VIRTUAL_THREADS_ENABLED = "com.nextbreakpoint.nextfractal.mandelbrot.module.rendering.strategy.virtual.threads.enabled";
+    String PROPERTY_MANDELBROT_RENDERING_XAOS_OVERLAPPING_ENABLED = "com.nextbreakpoint.nextfractal.mandelbrot.module.rendering.xaos.overlapping.enabled";
+    String PROPERTY_MANDELBROT_RENDERING_ROWS = "com.nextbreakpoint.nextfractal.mandelbrot.module.rendering.rows";
+    String PROPERTY_MANDELBROT_RENDERING_COLS = "com.nextbreakpoint.nextfractal.mandelbrot.module.rendering.cols";
 }

@@ -25,6 +25,8 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics.xaos;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
@@ -39,12 +41,14 @@ import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.JuliaStrategy
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.strategy.MandelbrotStrategy;
 import lombok.extern.java.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import static com.nextbreakpoint.nextfractal.mandelbrot.module.SystemProperties.PROPERTY_MANDELBROT_RENDERING_XAOS_OVERLAPPING_ENABLED;
 
 /*
  *     XaoS, a fast portable realtime fractal zoomer
@@ -96,23 +100,17 @@ public final class XaosRenderer extends Renderer {
 	public XaosRenderer(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile) {
 		super(threadFactory, renderFactory, tile);
 		this.xaosRendererData = (XaosRendererData) contentRendererData;
-		if (multiThread && Runtime.getRuntime().availableProcessors() > 4) {
-			executor = Executors.newSingleThreadExecutor(threadFactory);
+		if (multiThread) {
+			executor = ExecutorUtils.newSingleThreadExecutor(threadFactory);
 		}
-		if (Boolean.getBoolean("mandelbrot.renderer.xaos.overlapping")) {
+		if (Boolean.getBoolean(PROPERTY_MANDELBROT_RENDERING_XAOS_OVERLAPPING_ENABLED)) {
 			overlapping = true;
 		}
 	}
 	
 	@Override
 	public void dispose() {
-		if (executor != null) {
-			executor.shutdownNow();
-			try {
-				executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-			}
-		}
+		ExecutorUtils.shutdown(executor);
 		super.dispose();
 	}
 
@@ -122,7 +120,8 @@ public final class XaosRenderer extends Renderer {
 	}
 
 	@Override
-	protected void doRender() {
+	protected void render() {
+		final List<ScriptError> errors = new ArrayList<>();
 		try {
 //			if (isInterrupted()) {
 //				progress = 0;
@@ -135,21 +134,21 @@ public final class XaosRenderer extends Renderer {
 				progress = 1;
 				contentRendererData.swap();
 				contentRendererData.clearPixels();
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				return;
 			}
 			if (contentRendererFractal.getOrbit() == null) {
 				progress = 1;
 				contentRendererData.swap();
 				contentRendererData.clearPixels();
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				return;
 			}
 			if (contentRendererFractal.getColor() == null) {
 				progress = 1;
 				contentRendererData.swap();
 				contentRendererData.clearPixels();
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				return;
 			}
 			boolean copyOfTimeChanged = timeChanged;
@@ -211,7 +210,7 @@ public final class XaosRenderer extends Renderer {
 //				prepareLines(redraw);
 			}
 			prepareLines(redraw);
-			if (XaosConstants.USE_MULTITHREAD && !XaosConstants.DUMP_XAOS) {
+			if (executor != null && XaosConstants.USE_MULTITHREAD && !XaosConstants.DUMP_XAOS) {
 				if (futureLines != null) {
 					futureLines.get();
 				}
@@ -239,6 +238,10 @@ public final class XaosRenderer extends Renderer {
 		} catch (Throwable e) {
 			log.log(Level.WARNING, "Rendering error", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
+			aborted = true;
+		}
+		if (!errors.isEmpty()) {
+			update(progress, errors);
 		}
 	}
 
@@ -1109,7 +1112,7 @@ public final class XaosRenderer extends Renderer {
 				}
 				progress = (s + 1f) / (float)XaosConstants.STEPS;
 				fill();
-				didChanged(progress, contentRendererData.getPixels());
+				update(progress, contentRendererData.getPixels());
 				tmpRealloc = xaosRendererData.reallocY();
 				for (i = 0; i < tmpRealloc.length; i++) {
 					tmpRealloc[i].dirty = tmpRealloc[i].changeDirty;
@@ -1132,7 +1135,7 @@ public final class XaosRenderer extends Renderer {
 			progress = 1f;
 		}
 		fill();
-		didChanged(progress, contentRendererData.getPixels());
+		update(progress, contentRendererData.getPixels());
 		Thread.yield();
 	}
 

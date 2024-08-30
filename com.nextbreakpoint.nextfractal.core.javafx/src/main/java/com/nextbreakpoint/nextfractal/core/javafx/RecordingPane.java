@@ -24,7 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -32,10 +33,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import lombok.extern.java.Log;
 
-import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 @Log
@@ -48,7 +48,8 @@ public class RecordingPane extends Pane {
     private int frame;
 
     public RecordingPane() {
-        executor = Executors.newSingleThreadScheduledExecutor(Objects.requireNonNull(createThreadFactory("Recording")));
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Recording", Thread.MIN_PRIORITY + 1);
+        executor = ExecutorUtils.newSingleThreadScheduledExecutor(threadFactory);
 
         canvas = new Canvas(50, 50);
 
@@ -61,10 +62,6 @@ public class RecordingPane extends Pane {
         heightProperty().addListener((_, _, _) -> {
             canvas.setLayoutY(30);
         });
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
     }
 
     private void updateUI() {
@@ -94,5 +91,9 @@ public class RecordingPane extends Pane {
             }
             future = null;
         }
+    }
+
+    public void dispose() {
+        ExecutorUtils.shutdown(executor);
     }
 }

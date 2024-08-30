@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx.utils;
 
-import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
@@ -33,12 +33,12 @@ import com.nextbreakpoint.nextfractal.core.common.Plugins;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonBar;
@@ -68,8 +68,10 @@ import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactor
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log
 public class ApplicationUtils {
-    private static final String PROPERTY_DIRECTORY_WORKSPACE = "com.nextbreakpoint.nextfractal.directory.workspace";
-    private static final String PROPERTY_DIRECTORY_EXAMPLES = "com.nextbreakpoint.nextfractal.directory.examples";
+    public static final String PROPERTY_DIRECTORY_WORKSPACE = "com.nextbreakpoint.nextfractal.directory.workspace";
+    public static final String PROPERTY_DIRECTORY_EXAMPLES = "com.nextbreakpoint.nextfractal.directory.examples";
+    public static final String PROPERTY_GRAMMAR_DEFAULT = "com.nextbreakpoint.nextfractal.grammar.default";
+
     private static final String WORKSPACE_DIRECTORY = ".nextfractal";
 
     public static void printPlugins() {

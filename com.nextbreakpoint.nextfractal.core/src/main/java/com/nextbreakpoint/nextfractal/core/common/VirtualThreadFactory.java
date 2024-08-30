@@ -22,16 +22,28 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.params;
+package com.nextbreakpoint.nextfractal.core.common;
 
-import lombok.Builder;
-import lombok.Getter;
+import java.util.concurrent.ThreadFactory;
 
-import java.util.List;
+public class VirtualThreadFactory implements ThreadFactory {
+	private final boolean isDaemon;
+	private final int priority;
+	private final String name;
+	private int ordinal;
 
-@Getter
-@Builder(setterPrefix = "with")
-public class Group {
-    private String name;
-    private List<Attribute> attributes;
+	public VirtualThreadFactory(final String name, final boolean isDaemon, final int priority) {
+		this.name = name;
+		this.isDaemon = isDaemon;
+		this.priority = priority;
+	}
+
+	@Override
+	public Thread newThread(final Runnable runnable) {
+		final Thread thread = Thread.ofVirtual().factory().newThread(runnable);
+		thread.setPriority(priority);
+		thread.setDaemon(isDaemon);
+		thread.setName(name + "-" + (ordinal++));
+		return thread;
+	}
 }

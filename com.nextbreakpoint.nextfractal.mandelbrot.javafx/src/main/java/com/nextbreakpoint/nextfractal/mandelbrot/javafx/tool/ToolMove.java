@@ -24,12 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx.tool;
 
-import com.nextbreakpoint.nextfractal.core.javafx.Tool;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.javafx.Tool;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import javafx.scene.input.MouseEvent;
 
 public class ToolMove implements Tool {
@@ -135,7 +135,7 @@ public class ToolMove implements Tool {
 		final double dh = context.getHeight();
 		gc.clearRect(0, 0, (int)dw, (int)dh);
 		if (pressed) {
-			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
+			gc.setStroke(context.getGraphicsFactory().createColor(1, 1, 0, 1));
 			final double cx = dw / 2;
 			final double cy = dh / 2;
 			final int qx = (int) Math.rint(cx + x1 * dw);
