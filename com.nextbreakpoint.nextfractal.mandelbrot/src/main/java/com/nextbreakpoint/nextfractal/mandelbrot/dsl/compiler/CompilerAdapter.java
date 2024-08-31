@@ -40,7 +40,6 @@ import javax.tools.StandardLocation;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -49,6 +48,9 @@ import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 
 @Log
 public class CompilerAdapter {
+	private static final String PROPERTY_NEXTFRACTAL_MODULE_PATH = "com.nextbreakpoint.nextfractal.module.path";
+	private static final String PROPERTY_NEXTFRACTAL_CLASS_PATH = "com.nextbreakpoint.nextfractal.class.path";
+
 	private final JavaCompiler javaCompiler;
 
 	public CompilerAdapter(JavaCompiler javaCompiler) {
@@ -96,12 +98,18 @@ public class CompilerAdapter {
 	}
 
 	private static List<String> getCompilerOptions() {
-		final String modulePath = System.getProperty("com.nextbreakpoint.nextfractal.module.path", System.getProperty("jdk.module.path"));
+		final String modulePath = System.getProperty(PROPERTY_NEXTFRACTAL_MODULE_PATH, System.getProperty("jdk.module.path"));
 		if (modulePath != null) {
 			log.info("Module path = " + modulePath);
-			return Arrays.asList("-source", "22", "-target", "22", "-proc:none", "--module-path", modulePath, "--add-modules", "com.nextbreakpoint.nextfractal.mandelbrot");
+			return List.of("-source", "22", "-target", "22", "-proc:none", "--module-path", modulePath, "--add-modules", "com.nextbreakpoint.nextfractal.mandelbrot");
 		} else {
-			return Arrays.asList("-source", "22", "-target", "22", "-proc:none");
+			final String classPath = System.getProperty(PROPERTY_NEXTFRACTAL_CLASS_PATH);
+			if (classPath != null) {
+				log.info("Class path = " + classPath);
+				return List.of("-source", "22", "-target", "22", "-proc:none", "--class-path", classPath);
+			} else {
+				return List.of("-source", "22", "-target", "22", "-proc:none");
+			}
 		}
 	}
 
