@@ -142,8 +142,7 @@ public class GridView extends Pane {
 
 	private void scrollCells(double deltaX, double deltaY) {
 		if (data != null) {
-			final double y = ((double) data.length / numCols) * cellSize - Math.min(numRows * cellSize, getHeight()) + (data.length % numCols > 0 ? cellSize : 0);
-			final double x = numCols * cellSize - Math.min(numCols * cellSize, getWidth());
+			final double y = Math.rint(((double) data.length / numCols)) * cellSize + (data.length % numCols > 0 ? cellSize : 0) - numRows * cellSize;
 			if (y > 0) {
 				offsetY += deltaY;
 				if (offsetY < -y) {
@@ -151,15 +150,6 @@ public class GridView extends Pane {
 				}
 				if (offsetY > 0) {
 					offsetY = 0;
-				}
-			}
-			if (x > 0) {
-				offsetX += deltaX;
-				if (offsetX < -x) {
-					offsetX = -x;
-				}
-				if (offsetX > 0) {
-					offsetX = 0;
 				}
 			}
 			if (prevOffsetX != offsetX || prevOffsetY != offsetY) {

@@ -631,7 +631,7 @@ public class BrowsePane extends BorderPane {
 
     private void watchLoop(Path dir, Consumer<Void> consumer) {
         try {
-            for (; ; ) {
+            for (;;) {
                 WatchService watcher = FileSystems.getDefault().newWatchService();
                 WatchKey watchKey = null;
                 log.log(Level.INFO, "Watch loop starting...");
