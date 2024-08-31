@@ -7,7 +7,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.model.DSLExpressionContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ public class DSLCompiler1Test extends BaseTest {
 		try {
 //			assertThat(Pattern.matches("([A-Z][a-z]*)-(\\d).(.jpg|.png)", "Andrea-10.png")).isTrue();
 			final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
-			final DSLExpressionContext expressionContext = new DSLExpressionContext();
 			final DSLParserResult parserResult = parser.parse(getSource("/source1.m"));
 			assertThat(parserResult.orbitDSL()).isNotNull();
 			System.out.println(parserResult.orbitDSL());
