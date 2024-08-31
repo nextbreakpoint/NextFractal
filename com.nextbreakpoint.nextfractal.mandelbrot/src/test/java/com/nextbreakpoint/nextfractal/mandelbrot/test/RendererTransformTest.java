@@ -17,7 +17,7 @@ public class RendererTransformTest {
 	}
 
 	@Test
-	public void given_new_transform_when_translate_should_return_traslated_point() {
+	public void given_new_transform_when_translate_should_return_translated_point() {
 		Transform t = new Transform();
 		t.translate(10, 20);
 		double[] p = makePoint(0, 0);
@@ -106,7 +106,7 @@ public class RendererTransformTest {
 	}
 
 	@Test
-	public void given_new_transform_when_concat_should_return_traslated_and_rotated_and_scaled_point() {
+	public void given_new_transform_when_concat_should_return_translated_and_rotated_and_scaled_point() {
 		Transform t = new Transform();
 		double a = Math.PI / 2;
 		Transform tt = Transform.newTranslate(1, 1);

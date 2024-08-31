@@ -26,10 +26,10 @@ public class RendererTest {
 	public void testProgress() {
 		PlatformThreadFactory threadFactory = new PlatformThreadFactory("Test", false, Thread.MIN_PRIORITY);
 		GraphicsFactory renderFactory = GraphicsUtils.findGraphicsFactory("Java2D");
-		Point tileOffest = new Point(0, 0);
+		Point tileOffset = new Point(0, 0);
 		Size borderSize = new Size(0, 0);
 		Size tileSize = new Size(100, 100);
-		Tile tile = new Tile(tileSize, tileSize, tileOffest, borderSize);
+		Tile tile = new Tile(tileSize, tileSize, tileOffset, borderSize);
 		Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 		try {
 			TestOrbit orbit = new TestOrbit();
