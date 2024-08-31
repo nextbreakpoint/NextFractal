@@ -37,6 +37,10 @@ import java.util.Objects;
 public class CompilerException extends DSLParserException {
 	private final String source;
 
+	public CompilerException(String message, String source, ScriptError error) {
+		this(message, source, List.of(error));
+	}
+
 	public CompilerException(String message, String source, List<ScriptError> errors) {
 		super(message, errors);
 		this.source = Objects.requireNonNull(source);

@@ -32,7 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JavaCompilerClassLoader extends ClassLoader {
 	private static final AtomicInteger count = new AtomicInteger();
 	
-	public JavaCompilerClassLoader() {
+	public JavaCompilerClassLoader(ClassLoader parent) {
+		super(parent);
 		log.fine("Create classloader (" + count.addAndGet(1) + ")");
 	}
 	

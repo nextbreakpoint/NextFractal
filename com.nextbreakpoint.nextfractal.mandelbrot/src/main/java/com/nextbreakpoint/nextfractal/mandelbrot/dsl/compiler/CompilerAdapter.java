@@ -40,7 +40,6 @@ import javax.tools.StandardLocation;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -59,61 +58,75 @@ public class CompilerAdapter {
 	@SuppressWarnings("unchecked")
     public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws CompilerException {
 		log.log(Level.FINE, "Compile Java source:\n" + javaSource);
-		final List<SimpleJavaFileObject> compilationUnits = new ArrayList<>();
-		compilationUnits.add(new JavaSourceFileObject(className, javaSource));
-		final List<String> options = getCompilerOptions();
-		final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+
 		final String fullClassName = packageName + "." + className;
+
+		final List<String> options = getCompilerOptions();
+
+		final List<SimpleJavaFileObject> compilationUnits = List.of(new JavaSourceFileObject(className, javaSource));
+
+		final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+
 		try (JavaFileManager fileManager = new JavaCompilerFileManager(javaCompiler.getStandardFileManager(diagnostics, null, null), fullClassName)) {
 			final JavaCompiler.CompilationTask task = javaCompiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
+
 			if (task.call()) {
-				final JavaCompilerClassLoader loader = new JavaCompilerClassLoader();
-				defineClasses(fileManager, loader, packageName, className);
-				final Class<?> compiledClazz = loader.loadClass(packageName + "." + className);
-				log.log(Level.FINE, compiledClazz.getCanonicalName());
+				final JavaCompilerClassLoader loader = new JavaCompilerClassLoader(clazz.getClassLoader());
+
+				defineClasses(fileManager, loader, fullClassName);
+
+				final Class<?> compiledClazz = loader.loadClass(fullClassName);
+
+				log.log(Level.FINE, "Generated class name: " + compiledClazz.getCanonicalName());
+
 				if (!clazz.isAssignableFrom(compiledClazz)) {
-					final ScriptError error = new ScriptError(COMPILE, 0, 0, 0, 0, "Incompatible class");
-					throw new CompilerException("Can't compile class", javaSource, List.of(error));
+                    throw new CompilerException("Can't compile class", javaSource, makeError("Incompatible class"));
 				}
+
 				return new JavaClassFactory<>((Class<T>) compiledClazz);
 			} else {
-				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-					final long line = diagnostic.getLineNumber();
-					final long charPositionInLine = diagnostic.getColumnNumber();
-					final long index = diagnostic.getStartPosition();
-					final long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
-					final String message = diagnostic.getMessage(null);
-					final ScriptError error = new ScriptError(COMPILE, line, charPositionInLine, index, length, message);
-					log.log(Level.WARNING, error.toString());
-					throw new CompilerException("Can't compile class", javaSource, List.of(error));
-				}
+				throw new CompilerException("Can't compile class", javaSource, makeErrors(diagnostics));
 			}
 		} catch (CompilerException e) {
 			throw e;
 		} catch (Throwable e) {
-			final ScriptError error = new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage());
-			throw new CompilerException("Can't compile class", javaSource, List.of(error));
+			log.log(Level.WARNING, "Can't compile class", e);
+            throw new CompilerException("Can't compile class", javaSource, makeError(e.getMessage()));
 		}
-		final ScriptError error = new ScriptError(COMPILE, 0, 0, 0, 0, "Generic error");
-		throw new CompilerException("Can't compile class", javaSource, List.of(error));
 	}
 
 	private static List<String> getCompilerOptions() {
-		//TODO is this still required?
-		final String modulePath = System.getProperty("nextfractal.module.path", System.getProperty("jdk.module.path"));
+		final String modulePath = System.getProperty("com.nextbreakpoint.nextfractal.module.path", System.getProperty("jdk.module.path"));
 		if (modulePath != null) {
-			return Arrays.asList("-source", "11", "-target", "11", "-proc:none", "-Xdiags:verbose", "--module-path", modulePath, "--add-modules", "com.nextbreakpoint.nextfractal.mandelbrot");
+			log.info("Module path = " + modulePath);
+			return Arrays.asList("-source", "22", "-target", "22", "-proc:none", "--module-path", modulePath, "--add-modules", "com.nextbreakpoint.nextfractal.mandelbrot");
 		} else {
-			return Arrays.asList("-source", "21", "-target", "21", "-proc:none", "-Xdiags:verbose");
+			return Arrays.asList("-source", "22", "-target", "22", "-proc:none");
 		}
 	}
 
-	private static void defineClasses(JavaFileManager fileManager, JavaCompilerClassLoader loader, String packageName, String className) throws IOException {
-		final String name = packageName + "." + className;
-		final JavaFileObject file = fileManager.getJavaFileForOutput(StandardLocation.locationFor(name), name, Kind.CLASS, null);
+	private static ScriptError makeError(String message) {
+		return new ScriptError(COMPILE, 0, 0, 0, 0, message);
+	}
+
+	private static ScriptError makeError(Diagnostic<? extends JavaFileObject> diagnostic) {
+		final long line = diagnostic.getLineNumber();
+		final long charPositionInLine = diagnostic.getColumnNumber();
+		final long index = diagnostic.getStartPosition();
+		final long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
+		final String message = diagnostic.getMessage(null);
+		return new ScriptError(COMPILE, line, charPositionInLine, index, length, message);
+	}
+
+	private static List<ScriptError> makeErrors(DiagnosticCollector<JavaFileObject> diagnostics) {
+		return diagnostics.getDiagnostics().stream().map(CompilerAdapter::makeError).toList();
+	}
+
+	private static void defineClasses(JavaFileManager fileManager, JavaCompilerClassLoader loader, String fullClassName) throws IOException {
+        final JavaFileObject file = fileManager.getJavaFileForOutput(StandardLocation.locationFor(fullClassName), fullClassName, Kind.CLASS, null);
 		final byte[] fileData = loadBytes(file);
 		log.log(Level.FINE, file.toUri().toString() + " (" + fileData.length + ")");
-		loader.defineClassFromData(name, fileData);
+		loader.defineClassFromData(fullClassName, fileData);
 	}
 
 	private static byte[] loadBytes(JavaFileObject file) throws IOException {
