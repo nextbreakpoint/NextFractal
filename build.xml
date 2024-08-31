@@ -106,7 +106,7 @@
 				<arg value="--module" />
 				<arg value="com.nextbreakpoint.nextfractal.runtime.javafx/com.nextbreakpoint.nextfractal.runtime.javafx.NextFractalApp" />
 				<arg value="--java-options" />
-				<arg value="-Xmx8g -Xms2g --enable-preview --enable-native-access=com.nextbreakpoint.freeimage4java,com.nextbreakpoint.ffmpeg4java -Djava.library.path=$APPDIR/libs -Dcom.nextbreakpoint.nextfractal.directory.examples=$APPDIR/../examples -Dcom.nextbreakpoint.nextfractal.mandelbrot.compiler.disabled=false -Djava.util.logging.config.class=com.nextbreakpoint.nextfractal.runtime.logging.LogConfig" />
+				<arg value="-Xmx8g -Xms2g --enable-preview --enable-native-access=com.nextbreakpoint.freeimage4java,com.nextbreakpoint.ffmpeg4java -Djava.library.path=$APPDIR/libs -Dcom.nextbreakpoint.nextfractal.directory.examples=$APPDIR/../examples -Dcom.nextbreakpoint.nextfractal.mandelbrot.compiler.disabled=false -Dcom.nextbreakpoint.nextfractal.mandelbrot.module.expression.optimisation.enabled=true -Dcom.nextbreakpoint.nextfractal.mandelbrot.module.rendering.strategy.virtual.threads.enabled=true -Djava.util.logging.config.class=com.nextbreakpoint.nextfractal.runtime.logging.LogConfig" />
 				<arg value="--jlink-options" />
 				<arg value="--strip-native-commands --strip-debug --no-man-pages --no-header-files --bind-services" />
 			</exec>
@@ -150,7 +150,7 @@
 				<arg value="--module" />
 				<arg value="com.nextbreakpoint.nextfractal.runtime.javafx/com.nextbreakpoint.nextfractal.runtime.javafx.NextFractalApp" />
 				<arg value="--java-options" />
-				<arg value="-Xmx8g -Xms2g --enable-preview --enable-native-access=com.nextbreakpoint.freeimage4java,com.nextbreakpoint.ffmpeg4java -Djava.library.path=$APPDIR/libs -Dcom.nextbreakpoint.nextfractal.directory.examples=$APPDIR/../examples -Dcom.nextbreakpoint.nextfractal.mandelbrot.compiler.disabled=false -Djava.util.logging.config.class=com.nextbreakpoint.nextfractal.runtime.logging.LogConfig" />
+				<arg value="-Xmx8g -Xms2g --enable-preview --enable-native-access=com.nextbreakpoint.freeimage4java,com.nextbreakpoint.ffmpeg4java -Djava.library.path=$APPDIR/libs -Dcom.nextbreakpoint.nextfractal.directory.examples=$APPDIR/../examples -Dcom.nextbreakpoint.nextfractal.mandelbrot.compiler.disabled=false -Dcom.nextbreakpoint.nextfractal.mandelbrot.module.expression.optimisation.enabled=true -Dcom.nextbreakpoint.nextfractal.mandelbrot.module.rendering.strategy.virtual.threads.enabled=true -Djava.util.logging.config.class=com.nextbreakpoint.nextfractal.runtime.logging.LogConfig" />
 				<arg value="--jlink-options" />
 				<arg value="--strip-native-commands --strip-debug --no-man-pages --no-header-files --bind-services" />
 				<arg value="--mac-sign" />
