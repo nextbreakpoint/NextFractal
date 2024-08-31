@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="NextFractal">
 	<property environment="env" />
-	<property name="openjfx.version" value="22.0.1" />
+	<property name="openjfx.version" value="22.0.2" />
 	<property name="nextfractal.version" value="2.3.2" />
 	<property name="nextfractal.year" value="2024" />
 	<property name="application" value="NextFractal" />
