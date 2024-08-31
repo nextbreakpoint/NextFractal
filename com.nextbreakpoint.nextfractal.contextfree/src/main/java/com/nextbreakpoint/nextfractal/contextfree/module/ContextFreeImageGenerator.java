@@ -78,11 +78,8 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 				aborted = true;
 				return buffer;
 			}
-		} catch (CFParserException e) {
-			log.log(Level.WARNING, e.getMessage(), e);
-			aborted = true;
 		} catch (Throwable e) {
-			log.severe(e.getMessage());
+			log.log(Level.WARNING, e.getMessage(), e);
 			aborted = true;
 		}
 		return buffer;

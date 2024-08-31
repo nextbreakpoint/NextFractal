@@ -143,11 +143,8 @@ public class MandelbrotImageComposer implements ImageComposer {
             if (metadata.getOptions().isShowPoint()) {
                 drawPoint(renderFactory, renderContext, tile.imageSize(), region, metadata);
             }
-        } catch (DSLParserException e) {
-            log.log(Level.WARNING, e.getMessage(), e);
-            aborted = true;
         } catch (Throwable e) {
-            log.severe(e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             aborted = true;
         } finally {
             if (g2d != null) {

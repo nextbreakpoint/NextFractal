@@ -88,11 +88,8 @@ public class ContextFreeImageComposer implements ImageComposer {
                 return buffer;
             }
             renderer.copyImage(renderFactory.createGraphicsContext(g2d));
-        } catch (CFParserException e) {
-            log.log(Level.WARNING, e.getMessage(), e);
-            aborted = true;
         } catch (Throwable e) {
-            log.severe(e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             aborted = true;
         } finally {
             if (g2d != null) {

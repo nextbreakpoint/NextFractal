@@ -102,11 +102,8 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 				return buffer;
 			}
 			renderer.getPixels(pixels);
-		} catch (DSLParserException e) {
-			log.log(Level.WARNING, e.getMessage(), e);
-			aborted = true;
 		} catch (Throwable e) {
-			log.severe(e.getMessage());
+			log.log(Level.WARNING, e.getMessage(), e);
 			aborted = true;
 		}
 		return buffer;

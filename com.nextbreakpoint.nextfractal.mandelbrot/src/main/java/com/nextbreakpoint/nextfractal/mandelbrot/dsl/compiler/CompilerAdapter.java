@@ -56,70 +56,46 @@ public class CompilerAdapter {
 		this.javaCompiler = Objects.requireNonNull(javaCompiler);
 	}
 
-	public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws CompilerException {
-		try {
-			return new JavaClassFactory<>(compile(javaSource, packageName, className, clazz));
+	@SuppressWarnings("unchecked")
+    public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws CompilerException {
+		log.log(Level.FINE, "Compile Java source:\n" + javaSource);
+		final List<SimpleJavaFileObject> compilationUnits = new ArrayList<>();
+		compilationUnits.add(new JavaSourceFileObject(className, javaSource));
+		final List<String> options = getCompilerOptions();
+		final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+		final String fullClassName = packageName + "." + className;
+		try (JavaFileManager fileManager = new JavaCompilerFileManager(javaCompiler.getStandardFileManager(diagnostics, null, null), fullClassName)) {
+			final JavaCompiler.CompilationTask task = javaCompiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
+			if (task.call()) {
+				final JavaCompilerClassLoader loader = new JavaCompilerClassLoader();
+				defineClasses(fileManager, loader, packageName, className);
+				final Class<?> compiledClazz = loader.loadClass(packageName + "." + className);
+				log.log(Level.FINE, compiledClazz.getCanonicalName());
+				if (!clazz.isAssignableFrom(compiledClazz)) {
+					final ScriptError error = new ScriptError(COMPILE, 0, 0, 0, 0, "Incompatible class");
+					throw new CompilerException("Can't compile class", javaSource, List.of(error));
+				}
+				return new JavaClassFactory<>((Class<T>) compiledClazz);
+			} else {
+				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+					final long line = diagnostic.getLineNumber();
+					final long charPositionInLine = diagnostic.getColumnNumber();
+					final long index = diagnostic.getStartPosition();
+					final long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
+					final String message = diagnostic.getMessage(null);
+					final ScriptError error = new ScriptError(COMPILE, line, charPositionInLine, index, length, message);
+					log.log(Level.WARNING, error.toString());
+					throw new CompilerException("Can't compile class", javaSource, List.of(error));
+				}
+			}
 		} catch (CompilerException e) {
 			throw e;
 		} catch (Throwable e) {
-            final List<ScriptError> errors = new ArrayList<>();
-			errors.add(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
-			throw new CompilerException("Can't compile class", javaSource, errors);
+			final ScriptError error = new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage());
+			throw new CompilerException("Can't compile class", javaSource, List.of(error));
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> Class<T> compile(String source, String packageName, String className, Class<T> clazz) throws Exception {
-		log.log(Level.FINE, "Compile Java source:\n" + source);
-		final List<ScriptError> errors = new ArrayList<>();
-		List<SimpleJavaFileObject> compilationUnits = new ArrayList<>();
-		compilationUnits.add(new JavaSourceFileObject(className, source));
-		final List<String> options = getCompilerOptions();
-		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-		String fullClassName = packageName + "." + className;
-		JavaFileManager fileManager = new JavaCompilerFileManager(javaCompiler.getStandardFileManager(diagnostics, null, null), fullClassName);
-		try {
-			final JavaCompiler.CompilationTask task = javaCompiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
-			if (task.call()) {
-				JavaCompilerClassLoader loader = new JavaCompilerClassLoader();
-				defineClasses(fileManager, loader, packageName, className);
-				Class<?> compiledClazz = loader.loadClass(packageName + "." + className);
-				log.log(Level.FINE, compiledClazz.getCanonicalName());
-				if (clazz.isAssignableFrom(compiledClazz)) {
-					return (Class<T>) compiledClazz;
-				}
-			} else {
-				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-//					if (diagnostic.getCode().equals("compiler.err.cant.access")) {
-//						// Not sure why it doesn't happen with Java 8, but only with Java 9.
-//						ParserErrorType type = ParserErrorType.JAVA_COMPILER;
-//						long line = diagnostic.getLineNumber();
-//						long charPositionInLine = diagnostic.getColumnNumber();
-//						long index = diagnostic.getStartPosition();
-//						long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
-//						String message = diagnostic.getMessage(null);
-//						ParserError error = new ParserError(type, line, charPositionInLine, index, length, message);
-//						log.log(Level.WARNING, error.toString());
-//						errors.add(error);
-//					} else {
-                    long line = diagnostic.getLineNumber();
-					long charPositionInLine = diagnostic.getColumnNumber();
-					long index = diagnostic.getStartPosition();
-					long length = diagnostic.getEndPosition() - diagnostic.getStartPosition();
-					String message = diagnostic.getMessage(null);
-					ScriptError error = new ScriptError(COMPILE, line, charPositionInLine, index, length, message);
-					log.log(Level.WARNING, error.toString());
-					errors.add(error);
-					throw new CompilerException("Can't compile class", source, errors);
-				}
-			}
-		} finally {
-			try {
-				fileManager.close();
-			} catch (IOException _) {
-			}
-		}
-		return null;
+		final ScriptError error = new ScriptError(COMPILE, 0, 0, 0, 0, "Generic error");
+		throw new CompilerException("Can't compile class", javaSource, List.of(error));
 	}
 
 	private static List<String> getCompilerOptions() {
@@ -133,9 +109,9 @@ public class CompilerAdapter {
 	}
 
 	private static void defineClasses(JavaFileManager fileManager, JavaCompilerClassLoader loader, String packageName, String className) throws IOException {
-		String name = packageName + "." + className;
-		JavaFileObject file = fileManager.getJavaFileForOutput(StandardLocation.locationFor(name), name, Kind.CLASS, null);
-		byte[] fileData = loadBytes(file);
+		final String name = packageName + "." + className;
+		final JavaFileObject file = fileManager.getJavaFileForOutput(StandardLocation.locationFor(name), name, Kind.CLASS, null);
+		final byte[] fileData = loadBytes(file);
 		log.log(Level.FINE, file.toUri().toString() + " (" + fileData.length + ")");
 		loader.defineClassFromData(name, fileData);
 	}
