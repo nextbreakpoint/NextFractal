@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DSLCompiler1Test extends BaseTest {
 	@Test
 	public void Compiler1() throws Exception {
-		System.setProperty("com.nextbreakpoint.nextfractal.class.path", System.getProperty("surefire.test.class.path"));
+		System.setProperty("com.nextbreakpoint.nextfractal.class.path", System.getProperty("surefire.test.class.path", ""));
 		final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
 		final DSLParserResult parserResult = parser.parse(getSource("/source1.m"));
 		assertThat(parserResult.orbitDSL()).isNotNull();
