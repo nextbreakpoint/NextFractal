@@ -56,14 +56,12 @@ public class RendererTest {
 			for (int i = 0; i < actual.length; i++) {
 				assertThat(actual[i]).isEqualTo(expected[i], Offset.offset(0.01f));
 			}
-		} catch (Exception e) {
-			fail(e.getMessage());
 		} finally {
 			renderer.dispose();
 		}
 	}
 	
-	private class TestOrbit extends Orbit {
+	private static class TestOrbit extends Orbit {
 		@Override
 		public void init() {
 		}
@@ -83,7 +81,7 @@ public class RendererTest {
 		}
 	}
 	
-	private class TestColor extends Color {
+	private static class TestColor extends Color {
 		@Override
 		public void init() {
 		}
