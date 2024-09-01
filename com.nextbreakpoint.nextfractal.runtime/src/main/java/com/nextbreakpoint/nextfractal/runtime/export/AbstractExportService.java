@@ -50,7 +50,7 @@ public abstract class AbstractExportService implements ExportService {
 	
 	public AbstractExportService(ThreadFactory threadFactory) {
 		executor = ExecutorUtils.newSingleThreadScheduledExecutor(Objects.requireNonNull(threadFactory));
-		executor.scheduleAtFixedRate(this::updateSessions, 1000, 100, TimeUnit.MILLISECONDS);
+		executor.scheduleAtFixedRate(this::updateSessions, 1000, 500, TimeUnit.MILLISECONDS);
 		executor.scheduleWithFixedDelay(this::removeCompletedSessions, 1000, 5000, TimeUnit.MILLISECONDS);
 	}
 
