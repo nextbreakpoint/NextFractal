@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,65 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.dsl;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.grammar.ASTFractal;
+import com.nextbreakpoint.nextfractal.core.common.ClassFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
+import lombok.Builder;
 
-import java.util.List;
-
-public class DSLParserResult {
-	private ASTFractal ast;
-	private Type type;
-	private String orbitSource;
-	private String colorSource;
-	private List<SourceError> errors;
-	private String source;
-	private String packageName;
-	private String className;
-
-	public DSLParserResult(ASTFractal ast, Type type, String source, String orbitSource, String colorSource, List<SourceError> errors, String packageName, String className) {
-		this.ast = ast;
-		this.type = type;
-		this.source = source;
-		this.orbitSource = orbitSource;
-		this.colorSource = colorSource;
-		this.errors = errors;
-		this.packageName = packageName;
-		this.className = className;
-	}
-
-	public ASTFractal getAST() {
-		return ast;
-	}
-
-	public String getOrbitSource() {
-		return orbitSource;
-	}
-
-	public String getColorSource() {
-		return colorSource;
-	}
-
-	public List<SourceError> getErrors() {
-		return errors;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
-	public enum Type {
-		JAVA, INTERPRETER
-	}
-}
+@Builder(setterPrefix = "with", toBuilder = true)
+public record DSLParserResult(
+        String source,
+        String orbitDSL,
+        String colorDSL,
+        ClassFactory<Orbit> orbitClassFactory,
+        ClassFactory<Color> colorClassFactory
+) {}

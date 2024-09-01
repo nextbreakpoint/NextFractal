@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -26,83 +26,79 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
+import lombok.Setter;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
+@Log
 public class HistoryPane extends BorderPane {
-    private static Logger logger = Logger.getLogger(HistoryPane.class.getName());
     private static final int PADDING = 8;
 
     private final ExecutorService executor;
-    private ListView<Bitmap> listView;
+    private final ListView<Bitmap> listView;
+    private final Tile tile;
+    @Setter
     private HistoryDelegate delegate;
-    private RendererTile tile;
 
-    public HistoryPane(RendererTile tile) {
+    public HistoryPane(Tile tile) {
         this.tile = tile;
 
         listView = new ListView<>();
-        listView.setFixedCellSize(tile.getTileSize().getHeight() + PADDING);
-        listView.setCellFactory(view -> new HistoryListCell(tile));
+        listView.setFixedCellSize(tile.tileSize().height() + PADDING);
+        listView.setCellFactory(_ -> new HistoryListCell(tile));
         listView.setTooltip(new Tooltip("Previous images"));
 
-        BorderPane historyPane = new BorderPane();
+        final BorderPane historyPane = new BorderPane();
         historyPane.setCenter(listView);
 
         getStyleClass().add("history");
 
         setCenter(historyPane);
 
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> itemSelected(listView));
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> _) -> itemSelected(listView));
 
-        executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("History", true, Thread.MIN_PRIORITY));
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("History Panel"));
     }
 
     private void itemSelected(ListView<Bitmap> listView) {
-        int index = listView.getSelectionModel().getSelectedIndex();
+        final int index = listView.getSelectionModel().getSelectedIndex();
         if (index >= 0) {
             if (delegate != null) {
-                Bitmap bitmap = listView.getItems().get(index);
-                Session session = (Session) bitmap.getProperty("session");
+                final Bitmap bitmap = listView.getItems().get(index);
+                final Session session = (Session) bitmap.getProperty("session");
                 Platform.runLater(() -> delegate.sessionChanged(session));
             }
         }
     }
 
     private void submitItem(Session session, ImageComposer composer) {
-        executor.submit(() -> Command.of(() -> composer.renderImage(session.getScript(), session.getMetadata()))
+        executor.submit(() -> Command.of(() -> composer.renderImage(session.script(), session.metadata()))
                 .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
     }
 
-    private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, RendererSize size) {
-        BrowseBitmap bitmap = new BrowseBitmap(size.getWidth(), size.getHeight(), pixels);
+    private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, Size size) {
+        final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
         bitmap.setProperty("session", session);
         listView.getItems().addFirst(bitmap);
     }
 
     public void appendSession(Session session) {
-        Command.of(tryFindFactory(session.getPluginId()))
+        Command.of(tryFindFactory(session.pluginId()))
                 .map(this::createImageComposer)
                 .execute()
                 .optional()
@@ -110,24 +106,10 @@ public class HistoryPane extends BorderPane {
     }
 
     private ImageComposer createImageComposer(CoreFactory factory) {
-        return factory.createImageComposer(createThreadFactory("History Composer"), tile, true);
-    }
-
-    public void setDelegate(HistoryDelegate delegate) {
-        this.delegate = delegate;
+        return factory.createImageComposer(ThreadUtils.createPlatformThreadFactory("History Image Composer"), tile, true);
     }
 
     public void dispose() {
-        List<ExecutorService> executors = List.of(executor);
-        executors.forEach(ExecutorService::shutdownNow);
-        executors.forEach(this::await);
-    }
-
-    private void await(ExecutorService executor) {
-        Command.of(() -> executor.awaitTermination(5000, TimeUnit.MILLISECONDS))
-                .execute()
-                .observe()
-                .onFailure(e -> logger.warning("Await termination timeout"))
-                .get();
+        ExecutorUtils.shutdown(executor);
     }
 }

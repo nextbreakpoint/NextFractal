@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx.component;
 
-import com.nextbreakpoint.nextfractal.core.common.Clip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipAdded;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipMoved;
 import com.nextbreakpoint.nextfractal.core.event.CaptureClipRemoved;
@@ -53,7 +53,10 @@ import com.nextbreakpoint.nextfractal.core.event.SessionStatusChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
-import com.nextbreakpoint.nextfractal.core.export.ExportState;
+import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportPane;
 import com.nextbreakpoint.nextfractal.core.javafx.HistoryPane;
@@ -63,9 +66,6 @@ import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.StatusPane;
 import com.nextbreakpoint.nextfractal.core.javafx.StringObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.editor.ScriptEditor;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.core.common.TileUtils;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -94,7 +94,7 @@ public class MainSidePane extends BorderPane {
     }
 
     private Pane createRootPane(PlatformEventBus eventBus) {
-        final RendererTile tile = createRendererTile();
+        final Tile tile = createRendererTile();
 
         final StringObservableValue errorProperty = new StringObservableValue();
 
@@ -176,7 +176,7 @@ public class MainSidePane extends BorderPane {
         final StackPane rootPane = new StackPane();
         rootPane.getChildren().add(sourcePane);
 
-        rootPane.widthProperty().addListener((observable, oldValue, newValue) -> {
+        rootPane.widthProperty().addListener((_, _, newValue) -> {
             double width = newValue.doubleValue();
             sourceButtons.setPrefWidth(width);
             editorPane.setPrefWidth(width);
@@ -188,7 +188,7 @@ public class MainSidePane extends BorderPane {
             statusPane.setLayoutX(0);
         });
 
-        rootPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+        rootPane.heightProperty().addListener((_, _, newValue) -> {
             double height = newValue.doubleValue();
             sourceButtons.setPrefHeight(height * 0.07);
             editorPane.setPrefHeight(height * 0.78);
@@ -200,7 +200,7 @@ public class MainSidePane extends BorderPane {
             statusPane.setLayoutY(height * 0.85);
         });
 
-        sidebarPane.widthProperty().addListener((observable, oldValue, newValue) -> {
+        sidebarPane.widthProperty().addListener((_, _, newValue) -> {
             double width = newValue.doubleValue();
             historyPane.setPrefWidth(width);
             paramsPane.setPrefWidth(width);
@@ -212,7 +212,7 @@ public class MainSidePane extends BorderPane {
             jobsPane.setMaxWidth(width);
         });
 
-        sidebarPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+        sidebarPane.heightProperty().addListener((_, _, newValue) -> {
             double height = newValue.doubleValue();
             historyPane.setPrefHeight(height);
             paramsPane.setPrefHeight(height);
@@ -224,67 +224,67 @@ public class MainSidePane extends BorderPane {
             jobsPane.setMaxHeight(height);
         });
 
-        errorProperty.addListener((source, oldValue, newValue) -> {
+        errorProperty.addListener((_, _, newValue) -> {
             storeButton.setDisable(newValue != null);
             saveButton.setDisable(newValue != null);
             exportPane.setDisable(newValue != null);
             paramsPane.setParamsDisable(newValue != null);
         });
 
-        historyButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        historyButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(historyPane);
                 sidebarPane.getChildren().add(historyPane);
             }
         });
 
-        paramsButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        paramsButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(paramsPane);
                 sidebarPane.getChildren().add(paramsPane);
             }
         });
 
-        jobsButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        jobsButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(jobsPane);
                 sidebarPane.getChildren().add(jobsPane);
             }
         });
 
-        exportButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        exportButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
                 sidebarPane.getChildren().remove(exportPane);
                 sidebarPane.getChildren().add(exportPane);
             }
         });
 
-        viewGroup.selectedToggleProperty().addListener((source, oldValue, newValue) -> {
+        viewGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
             if (newValue != null) {
-                showSidebar(sidebarTransition, a -> {
+                showSidebar(sidebarTransition, _ -> {
                 });
             } else {
-                hideSidebar(sidebarTransition, a -> {
+                hideSidebar(sidebarTransition, _ -> {
                 });
             }
         });
 
-        statusButton.selectedProperty().addListener((source, oldValue, newValue) -> {
+        statusButton.selectedProperty().addListener((_, _, newValue) -> {
             if (newValue) {
-                showStatus(statusTransition, a -> {
+                showStatus(statusTransition, _ -> {
                 });
             } else {
-                hideStatus(statusTransition, a -> {
+                hideStatus(statusTransition, _ -> {
                 });
             }
         });
 
-        sidebarPane.translateXProperty().addListener((source, oldValue, newValue) -> {
+        sidebarPane.translateXProperty().addListener((_, _, newValue) -> {
             final double width = rootPane.getWidth() + newValue.doubleValue();
             editorPane.prefWidthProperty().setValue(width);
         });
 
-        statusPane.translateYProperty().addListener((source, oldValue, newValue) -> {
+        statusPane.translateYProperty().addListener((_, _, newValue) -> {
             final double height = rootPane.getHeight() - statusPane.getHeight() - sourceButtons.getHeight() + newValue.doubleValue();
             editorPane.prefHeightProperty().setValue(height);
             sidebarPane.prefHeightProperty().setValue(height);
@@ -292,7 +292,7 @@ public class MainSidePane extends BorderPane {
 
         exportPane.setExportDelegate(new ExportDelegate() {
             @Override
-            public void createSession(RendererSize size, String format) {
+            public void createSession(Size size, String format) {
                 if (errorProperty.getValue() == null) {
                     eventBus.postEvent(SessionExportRequested.builder().size(size).format(format).build());
                 }
@@ -313,24 +313,24 @@ public class MainSidePane extends BorderPane {
             }
 
             @Override
-            public void playbackStart(List<Clip> clips) {
+            public void playbackStart(List<AnimationClip> clips) {
                 if (errorProperty.getValue() == null) {
                     eventBus.postEvent(PlaybackStarted.builder().clips(clips).build());
                 }
             }
 
             @Override
-            public void captureSessionAdded(Clip clip) {
+            public void captureSessionAdded(AnimationClip clip) {
                 eventBus.postEvent(CaptureClipAdded.builder().clip(clip).build());
             }
 
             @Override
-            public void captureSessionRemoved(Clip clip) {
+            public void captureSessionRemoved(AnimationClip clip) {
                 eventBus.postEvent(CaptureClipRemoved.builder().clip(clip).build());
             }
 
             @Override
-            public void captureSessionRestored(Clip clip) {
+            public void captureSessionRestored(AnimationClip clip) {
                 eventBus.postEvent(CaptureClipRestored.builder().clip(clip).build());
             }
 
@@ -365,7 +365,7 @@ public class MainSidePane extends BorderPane {
 
         eventBus.subscribe(HistorySessionAdded.class.getSimpleName(), event -> historyPane.appendSession(((HistorySessionAdded) event).session()));
 
-        eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), event -> jobsButton.setSelected(true));
+        eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), _ -> jobsButton.setSelected(true));
         eventBus.subscribe(ExportSessionCreated.class.getSimpleName(), event -> jobsPane.appendSession(((ExportSessionCreated) event).session()));
 
         eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> handleSessionStarted(exportPane, exportButton, ((CaptureSessionStarted) event).clip()));
@@ -376,20 +376,20 @@ public class MainSidePane extends BorderPane {
 
         eventBus.subscribe(CaptureClipsMerged.class.getSimpleName(), event -> exportPane.mergeClips(((CaptureClipsMerged) event).clips()));
 
-        eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> errorProperty.setValue(null));
+        eventBus.subscribe(SessionDataChanged.class.getSimpleName(), _ -> errorProperty.setValue(null));
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> jobsPane.dispose());
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> historyPane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> jobsPane.dispose());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> historyPane.dispose());
 
         eventBus.subscribe(ExportSessionStateChanged.class.getSimpleName(), event -> handleExportSessionStateChanged(jobsPane, ((ExportSessionStateChanged) event).session(), ((ExportSessionStateChanged) event).state(), ((ExportSessionStateChanged) event).progress()));
 
-        eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> exportPane.setCaptureSelected(true));
+        eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), _ -> exportPane.setCaptureSelected(true));
 
-        eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), event -> exportPane.setCaptureSelected(false));
+        eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), _ -> exportPane.setCaptureSelected(false));
 
-        eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> handlePlaybackClipsStart(rootPane));
+        eventBus.subscribe(PlaybackStarted.class.getSimpleName(), _ -> handlePlaybackClipsStart(rootPane));
 
-        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> handlePlaybackClipsStop(rootPane));
+        eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> handlePlaybackClipsStop(rootPane));
 
         eventBus.subscribe(HistorySessionSelected.class.getSimpleName(), event -> handleHistorySessionSelected(eventBus, (HistorySessionSelected) event));
 
@@ -420,20 +420,20 @@ public class MainSidePane extends BorderPane {
         rootPane.setDisable(false);
     }
 
-    private void handleExportSessionStateChanged(JobsPane jobsPane, ExportSession exportSession, ExportState state, Float progress) {
+    private void handleExportSessionStateChanged(JobsPane jobsPane, ExportSession exportSession, ExportSessionState state, Float progress) {
         log.info("Session " + exportSession.getSessionId() + " state " + state.name());
-        if (state == ExportState.FINISHED) {
+        if (state == ExportSessionState.TERMINATED) {
             jobsPane.removeSession(exportSession);
         } else {
             jobsPane.updateSession(exportSession, state, progress);
         }
     }
 
-    private void handleSessionStarted(ExportPane exportPane, ToggleButton exportButton, Clip clip) {
+    private void handleSessionStarted(ExportPane exportPane, ToggleButton exportButton, AnimationClip clip) {
         log.info("Session started");
     }
 
-    private void handleSessionStopped(ExportPane exportPane, ToggleButton exportButton, Clip clip) {
+    private void handleSessionStopped(ExportPane exportPane, ToggleButton exportButton, AnimationClip clip) {
         log.info("Session stopped: clip duration " + clip.duration() + "ms");
         if (!clip.isEmpty()) exportPane.appendClip(clip);
         exportButton.setSelected(true);
@@ -506,7 +506,7 @@ public class MainSidePane extends BorderPane {
 //        }
 //    }
 
-    private static RendererTile createRendererTile() {
-        return TileUtils.createRendererTile(Screen.getPrimary().getVisualBounds().getWidth());
+    private static Tile createRendererTile() {
+        return GraphicsUtils.createTile(Screen.getPrimary().getVisualBounds().getWidth());
     }
 }

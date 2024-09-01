@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -80,7 +80,7 @@ public class MetadataEditor extends BorderPane {
 	}
 
 	private void updateSession(Session session, boolean continuous) {
-		if (paramsStrategy == null || !this.activeSession.getPluginId().equals(session.getPluginId())) {
+		if (paramsStrategy == null || !this.activeSession.pluginId().equals(session.pluginId())) {
 			paramsStrategy = createParamsStrategy(session).orElse(null);
 
 			final Parameters parameters = paramsStrategy.create(this.activeSession);
@@ -98,7 +98,7 @@ public class MetadataEditor extends BorderPane {
 	}
 
 	private static Either<ParamsStrategy> createParamsStrategy(Session session) {
-		return Command.of(tryFindFactory(session.getPluginId()))
+		return Command.of(tryFindFactory(session.pluginId()))
 				.map(plugin -> Objects.requireNonNull(plugin.createParamsStrategy()))
 				.execute();
 	}

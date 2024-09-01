@@ -1,13 +1,36 @@
+/*
+ * NextFractal 2.3.2
+ * https://github.com/nextbreakpoint/nextfractal
+ *
+ * Copyright 2015-2024 Andrea Medeghini
+ *
+ * This file is part of NextFractal.
+ *
+ * NextFractal is an application for creating fractals and other graphics artifacts.
+ *
+ * NextFractal is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * NextFractal is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.contextfree.core.ParserException;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.core.common.Block;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserException;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
@@ -19,6 +42,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.PARSE;
 
 public class ContextFreeParserStrategy implements ParserStrategy {
     private static final Pattern HIGHLIGHTING_PATTERN = createHighlightingPattern();
@@ -34,12 +59,18 @@ public class ContextFreeParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser().parse(session.getScript()))
-                .map(ContextFreeParserStrategy::processResult)
-                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.getScript()), result))
-                .execute()
-                .orThrow(RuntimeException::new)
-                .get();
+        try {
+            final CFParser parser = new CFParser();
+            final CFParserResult parserResult = parser.parse(session.script());
+            return new ParserResult(session, List.of(), computeHighlighting(session.script()), parserResult);
+        } catch (CFParserException e) {
+            final CFParserResult parserResult = new CFParserResult(session.script(), null);
+            return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), parserResult);
+        } catch (Exception e) {
+            final List<ScriptError> errors = List.of(new ScriptError(PARSE, 0, 0, 0, 0, e.getMessage()));
+            final CFParserResult parserResult = new CFParserResult(session.script(), null);
+            return new ParserResult(session, errors, computeHighlighting(session.script()), parserResult);
+        }
     }
 
     private GenericStyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -54,12 +85,12 @@ public class ContextFreeParserStrategy implements ParserStrategy {
                     .group("BRACE") != null ? "contextfree-brace" : matcher
                     .group("OPERATOR") != null ? "contextfree-operator" : matcher
                     .group("PATHOP") != null ? "contextfree-pathop" : null;
-            spansBuilder.add(List.of("code"), matcher.start() - lastKeywordEnd);
-            spansBuilder.add(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
+            spansBuilder.addSpan(List.of("code"), matcher.start() - lastKeywordEnd);
+            spansBuilder.addSpan(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
             lastKeywordEnd = matcher.end();
         }
-        spansBuilder.add(List.of("code"), text.length() - lastKeywordEnd);
-        return spansBuilder.create();
+        spansBuilder.addSpan(List.of("code"), text.length() - lastKeywordEnd);
+        return spansBuilder.build();
     }
 
     private static Pattern createHighlightingPattern() {
@@ -90,22 +121,5 @@ public class ContextFreeParserStrategy implements ParserStrategy {
                         + "|(?<OPERATOR>" + OPERATOR_PATTERN + ")"
                         + "|(?<PATHOP>" + PATHOP_PATTERN + ")"
         );
-    }
-
-    public static DSLParserResult processResult(DSLParserResult parserResult) {
-        return Block.begin(DSLParserResult.class)
-                .end(parserResult)
-                .execute()
-                .observe()
-                .onFailure(e -> processCompilerErrors(parserResult, e))
-                .get()
-                .orThrow(RuntimeException::new)
-                .get();
-    }
-
-    private static void processCompilerErrors(DSLParserResult result, Exception e) {
-        if (e instanceof ParserException) {
-            result.getErrors().addAll(((ParserException) e).getErrors());
-        }
     }
 }

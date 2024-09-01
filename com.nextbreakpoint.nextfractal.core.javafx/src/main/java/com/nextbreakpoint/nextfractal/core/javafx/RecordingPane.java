@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,19 +24,21 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import lombok.extern.java.Log;
 
-import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+@Log
 public class RecordingPane extends Pane {
     private static final int FRAMES_PER_SECOND = 1;
 
@@ -46,28 +48,25 @@ public class RecordingPane extends Pane {
     private int frame;
 
     public RecordingPane() {
-        executor = Executors.newSingleThreadScheduledExecutor(Objects.requireNonNull(createThreadFactory("Recording")));
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Recording", Thread.MIN_PRIORITY + 1);
+        executor = ExecutorUtils.newSingleThreadScheduledExecutor(threadFactory);
 
         canvas = new Canvas(50, 50);
 
         getChildren().add(canvas);
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, newValue) -> {
           canvas.setLayoutX(newValue.doubleValue() - 50 - 30);
         });
 
-        heightProperty().addListener((observable, oldValue, newValue) -> {
+        heightProperty().addListener((_, _, _) -> {
             canvas.setLayoutY(30);
         });
     }
 
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
-    }
-
     private void updateUI() {
         frame += 1;
-        GraphicsContext g2d = canvas.getGraphicsContext2D();
+        final GraphicsContext g2d = canvas.getGraphicsContext2D();
         g2d.clearRect(0 ,0, canvas.getWidth(), canvas.getHeight());
         if (frame % 2 == 1) {
             g2d.setFill(Color.RED);
@@ -88,8 +87,13 @@ public class RecordingPane extends Pane {
             try {
                 future.get();
             } catch (Exception e) {
+                log.warning(e.getMessage());
             }
             future = null;
         }
+    }
+
+    public void dispose() {
+        ExecutorUtils.shutdown(executor);
     }
 }

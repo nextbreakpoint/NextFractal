@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.common.Session;
 public interface PlaybackDelegate {
     void playbackStopped();
 
-    void loadSessionData(Session session, boolean continuous, boolean imeAnimation);
+    void loadSessionData(Session session, boolean continuous, boolean appendToHistory);
 
-    void updateSessionData(Session session, boolean continuous, boolean timeAnimation);
+    void updateSessionData(Session session, boolean continuous, boolean appendToHistory);
 }

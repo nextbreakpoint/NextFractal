@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -26,9 +26,11 @@ package com.nextbreakpoint.nextfractal.runtime.javafx.core;
 
 import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.event.EditorReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.EditorSourceChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataLoaded;
@@ -40,7 +42,6 @@ import lombok.extern.java.Log;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
@@ -55,22 +56,19 @@ public class SessionSourceHandler {
     private ParserStrategy parserStrategy;
 
     public SessionSourceHandler(PlatformEventBus eventBus) {
-        this.eventBus = eventBus;
+        this.eventBus = Objects.requireNonNull(eventBus);
 
-        executor = Executors.newSingleThreadExecutor();
-//        Cleaner.create().register(this, executor::shutdown);
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createPlatformThreadFactory("Session Parser"));
 
         eventBus.subscribe(EditorSourceChanged.class.getSimpleName(), event -> handleSourceChanged(((EditorSourceChanged) event).source()));
 
         eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionLoaded((SessionDataLoaded) event));
 
-        eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> executor.shutdown());
+        eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> handleSessionTerminate());
     }
 
-    public void handleSessionTerminate() {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
+    private void handleSessionTerminate() {
+        ExecutorUtils.shutdown(executor);
     }
 
     private void handleSourceChanged(String source) {
@@ -82,16 +80,17 @@ public class SessionSourceHandler {
     }
 
     private CompletionStage<EditorReportChanged> computeEvent(String text, boolean continuous, boolean appendToHistory) {
-        return parserStrategy.compute(executor, createModifiedSession(text)).thenApply(result -> createReportChangedEvent(result, continuous, appendToHistory));
+        return parserStrategy.compute(executor, createModifiedSession(text))
+                .thenApply(result -> createReportChangedEvent(result, continuous, appendToHistory));
     }
 
     private Session createModifiedSession(String text) {
-        return parserStrategy.createSession(session.getMetadata(), text);
+        return parserStrategy.createSession(session.metadata(), text);
     }
 
     private void notifyEvent(EditorReportChanged event) {
         // we need to ignore the event if session has changed between creation and notification
-        if (Objects.equals(event.session().getMetadata(), session.getMetadata())) {
+        if (Objects.equals(event.session().metadata(), session.metadata())) {
             eventBus.postEvent(event);
         }
     }
@@ -99,7 +98,7 @@ public class SessionSourceHandler {
     private void onSessionChanged(Session session, boolean continuous, boolean appendToHistory) {
         updateSession(session);
 
-        computeEvent(session.getScript(), continuous, appendToHistory)
+        computeEvent(session.script(), continuous, appendToHistory)
                 .whenComplete((newEvent, throwable) -> {
                     if (throwable == null) {
                         Platform.runLater(() -> notifyEvent(newEvent));
@@ -110,7 +109,7 @@ public class SessionSourceHandler {
     }
 
     private void updateSession(Session session) {
-        if (parserStrategy == null || !this.session.getPluginId().equals(session.getPluginId())) {
+        if (parserStrategy == null || !this.session.pluginId().equals(session.pluginId())) {
             parserStrategy = createParserStrategy(session).orElse(null);
         }
 
@@ -118,7 +117,7 @@ public class SessionSourceHandler {
     }
 
     private static Either<ParserStrategy> createParserStrategy(Session session) {
-        return Command.of(tryFindFactory(session.getPluginId()))
+        return Command.of(tryFindFactory(session.pluginId()))
                 .map(plugin -> Objects.requireNonNull(plugin.createParserStrategy()))
                 .execute();
     }

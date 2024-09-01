@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -30,29 +30,32 @@ import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Time;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.Renderer;
-import com.nextbreakpoint.nextfractal.mandelbrot.renderer.RendererView;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
+import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
 
+@Log
 public class MandelbrotImageGenerator implements ImageGenerator {
 	private boolean aborted;
-	private boolean opaque;
-	private RendererTile tile;
-	private ThreadFactory threadFactory;
-	private RendererFactory renderFactory;
+	private final boolean opaque;
+	private final Tile tile;
+	private final ThreadFactory threadFactory;
+	private final GraphicsFactory renderFactory;
 
-	public MandelbrotImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
+	public MandelbrotImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		this.tile = tile;
 		this.opaque = opaque;
 		this.threadFactory = threadFactory;
@@ -62,52 +65,56 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 	@Override
 	public IntBuffer renderImage(String script, Metadata data) {
 		MandelbrotMetadata metadata = (MandelbrotMetadata) data;
-		RendererSize suggestedSize = tile.getTileSize();
-		int[] pixels = new int[suggestedSize.getWidth() * suggestedSize.getHeight()];
+		Size suggestedSize = tile.tileSize();
+		int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
+		Arrays.fill(pixels, 0xFF000000);
 		IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			DSLParser parser = new DSLParser(DSLParser.class.getPackage().getName() + ".generated", "Compile" + System.nanoTime());
-			DSLParserResult result = parser.parse(script);
-			DSLCompiler compiler = new DSLCompiler();
-			Orbit orbit = compiler.compileOrbit(result).create();
-			Color color = compiler.compileColor(result).create();
+			final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
+			final DSLParserResult parserResult = parser.parse(script);
+			Orbit orbit = parserResult.orbitClassFactory().create();
+			Color color = parserResult.colorClassFactory().create();
 			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
 			renderer.setOpaque(opaque);
 			Double4D translation = metadata.getTranslation();
 			Double4D rotation = metadata.getRotation();
 			Double4D scale = metadata.getScale();
 			Double2D constant = metadata.getPoint();
-			Time time = metadata.getTime();
+			Time time = metadata.time();
 			boolean julia = metadata.isJulia();
 			renderer.setOrbit(orbit);
 			renderer.setColor(color);
 			renderer.init();
-			RendererView view = new RendererView();
-			view .setTraslation(translation);
+			View view = new View();
+			view .setTranslation(translation);
 			view.setRotation(rotation);
 			view.setScale(scale);
 			view.setState(new Integer4D(0, 0, 0, 0));
 			view.setJulia(julia);
-			view.setPoint(new Number(constant.getX(), constant.getY()));
+			view.setPoint(new ComplexNumber(constant.x(), constant.y()));
 			renderer.setView(view);
 			renderer.setTime(time);
 			renderer.runTask();
-			renderer.waitForTasks();
+			renderer.waitForTask();
+			if (renderer.isAborted() || renderer.isInterrupted()) {
+				aborted = true;
+				return buffer;
+			}
 			renderer.getPixels(pixels);
-			aborted = renderer.isInterrupted();
-		} catch (Exception e) {
-			//TODO display errors
+		} catch (Throwable e) {
+			log.log(Level.WARNING, "Can't render image", e);
+			aborted = true;
 		}
 		return buffer;
 	}
 
 	@Override
-	public RendererSize getSize() {
-		return tile.getTileSize();
+	public Size getSize() {
+		return tile.tileSize();
 	}
 	
 	@Override
-	public boolean isInterrupted() {
+	public boolean isAborted() {
 		return aborted;
 	}
 }

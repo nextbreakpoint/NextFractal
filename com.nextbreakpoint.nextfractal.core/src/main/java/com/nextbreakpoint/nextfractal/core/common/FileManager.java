@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,11 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,7 +50,9 @@ import java.util.zip.ZipOutputStream;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
-public abstract class FileManager {
+//TODO move to other package
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class FileManager {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static Either<Bundle> loadBundle(File file) {
@@ -95,8 +98,8 @@ public abstract class FileManager {
     private static Command<Bundle> tryDecodeBundle(List<FileEntry> entries) {
         return decodeManifest(entries)
                 .flatMap(manifest -> decodeScript(entries)
-                        .flatMap(script -> decodeMetadata(entries, getPluginId(manifest))
-                                .flatMap(metadata -> createBundle(getPluginId(manifest), script, metadata)
+                        .flatMap(script -> decodeMetadata(entries, manifest.pluginId())
+                                .flatMap(metadata -> createBundle(manifest.pluginId(), script, metadata)
                                         .flatMap(bundle -> decodeClips(entries)
                                                 .flatMap(clips -> createBundle(bundle, clips))
                                         )
@@ -128,48 +131,48 @@ public abstract class FileManager {
         return Command.of(tryFindFactory(pluginId)).map(factory -> new Bundle(factory.createSession(script, metadata), List.of()));
     }
 
-    private static Command<Bundle> createBundle(Bundle bundle, List<Clip> clips) {
-        return Command.of(() -> new Bundle(bundle.getSession(), clips));
+    private static Command<Bundle> createBundle(Bundle bundle, List<AnimationClip> clips) {
+        return Command.of(() -> new Bundle(bundle.session(), clips));
     }
 
     private static Command<List<FileEntry>> createEntries(FileEntry manifest, FileEntry script, FileEntry metadata, FileEntry clips) {
         return Command.value(List.of(manifest, script, metadata, clips));
     }
 
-    private static Command<Map<String, String>> decodeManifest(List<FileEntry> entries) {
+    private static Command<FileManifest> decodeManifest(List<FileEntry> entries) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("manifest"))
+                .filter(entry -> entry.name().equals("manifest"))
                 .findFirst()
-                .map(entry -> decodeManifest(entry.getData()))
+                .map(entry -> decodeManifest(entry.data()))
                 .orElse(Command.error(new Exception("Manifest entry is required")));
     }
 
     private static Command<String> decodeScript(List<FileEntry> entries) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("script"))
+                .filter(entry -> entry.name().equals("script"))
                 .findFirst()
-                .map(entry -> decodeScript(entry.getData()))
+                .map(entry -> decodeScript(entry.data()))
                 .orElse(Command.error(new Exception("Script entry is required")));
     }
 
     private static Command<Metadata> decodeMetadata(List<FileEntry> entries, String pluginId) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("metadata"))
+                .filter(entry -> entry.name().equals("metadata"))
                 .findFirst()
-                .map(entry -> decodeMetadata(pluginId, entry.getData()))
+                .map(entry -> decodeMetadata(pluginId, entry.data()))
                 .orElse(Command.error(new Exception("Metadata entry is required")));
     }
 
-    private static Command<List<Clip>> decodeClips(List<FileEntry> entries) {
+    private static Command<List<AnimationClip>> decodeClips(List<FileEntry> entries) {
         return entries.stream()
-                .filter(entry -> entry.getName().equals("clips"))
+                .filter(entry -> entry.name().equals("clips"))
                 .findFirst()
-                .map(entry1 -> decodeClips(entry1.getData()))
+                .map(entry -> decodeClipData(entry.data()))
                 .orElse(Command.value(List.of()));
     }
 
-    private static Command<Map<String, String>> decodeManifest(byte[] data) {
-        return Command.of(() -> MAPPER.readValue(data, new TypeReference<>() {}));
+    private static Command<FileManifest> decodeManifest(byte[] data) {
+        return Command.of(() -> MAPPER.readValue(data, FileManifest.class));
     }
 
     private static Command<String> decodeScript(byte[] data) {
@@ -180,34 +183,35 @@ public abstract class FileManager {
         return decodeMetadata(pluginId, new String(data));
     }
 
-    private static Command<List<Clip>> decodeClips(byte[] data) {
+    private static Command<List<AnimationClip>> decodeClipData(byte[] data) {
         return Command.of(() -> MAPPER.readTree(data)).flatMap(FileManager::decodeClips);
     }
 
-    private static Command<List<Clip>> decodeClips(JsonNode clips) {
-        final List<Either<Clip>> results = JsonUtils.getClips(clips)
+    private static Command<List<AnimationClip>> decodeClips(JsonNode clips) {
+        final List<Either<AnimationClip>> results = JsonUtils.asStream(clips)
                 .map(FileManager::decodeClip)
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
                 .toList();
-        final Optional<Either<Clip>> error = results.stream().filter(Either::isFailure).findFirst();
-        return error.<Command<List<Clip>>>map(result -> createFailure("Can't decode clips", result))
+        final Optional<Either<AnimationClip>> error = results.stream().filter(Either::isFailure).findFirst();
+        return error.<Command<List<AnimationClip>>>map(result -> createFailure("Can't decode clips", result))
                 .orElseGet(() -> Command.value(results.stream().map(Either::get).toList()));
     }
 
-    private static Command<Clip> decodeClip(JsonNode clip) {
+    private static Command<AnimationClip> decodeClip(JsonNode clip) {
         final Map<String, Object> stateMap = new HashMap<>();
-        final List<Either<ClipEvent>> results = JsonUtils.getEvents(clip.get("events"))
+        final JsonNode events = clip.get("events");
+        final List<Either<AnimationEvent>> results = events != null ? JsonUtils.asStream(events)
                 .map(clipEvent -> decodeClipEvent(stateMap, clipEvent))
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
-                .toList();
-        final Optional<Either<ClipEvent>> error = results.stream().filter(Either::isFailure).findFirst();
-        return error.<Command<Clip>>map(result -> createFailure("Can't decode clip", result))
-                .orElseGet(() -> Command.value(new Clip(results.stream().map(Either::get).toList())));
+                .toList() : List.of();
+        final Optional<Either<AnimationEvent>> error = results.stream().filter(Either::isFailure).findFirst();
+        return error.<Command<AnimationClip>>map(result -> createFailure("Can't decode clip", result))
+                .orElseGet(() -> Command.value(new AnimationClip(results.stream().map(Either::get).toList())));
     }
 
-    private static Command<ClipEvent> decodeClipEvent(Map<String, Object> stateMap, JsonNode clipEvent) {
+    private static Command<AnimationEvent> decodeClipEvent(Map<String, Object> stateMap, JsonNode clipEvent) {
         try {
             final String pluginId = JsonUtils.getString(clipEvent, "pluginId");
             final String script = JsonUtils.getString(clipEvent, "script");
@@ -232,45 +236,45 @@ public abstract class FileManager {
                 stateMap.put("date", new Date(date));
             }
 
-            return Command.value(new ClipEvent((Date) stateMap.get("date"), (String) stateMap.get("pluginId"), (String) stateMap.get("script"), (Metadata) stateMap.get("metadata")));
+            return Command.value(new AnimationEvent((Date) stateMap.get("date"), (String) stateMap.get("pluginId"), (String) stateMap.get("script"), (Metadata) stateMap.get("metadata")));
         } catch (Exception e) {
             return Command.error(e);
         }
     }
 
     private static Command<FileEntry> encodeManifest(Bundle bundle) {
-        return encodeManifest(bundle.getSession()).map(entry -> new FileEntry("manifest", entry));
+        return encodeManifest(bundle.session()).map(entry -> new FileEntry("manifest", entry));
     }
 
     private static Command<FileEntry> encodeScript(Bundle bundle) {
-        return encodeScript(bundle.getSession()).map(entry -> new FileEntry("script", entry));
+        return encodeScript(bundle.session()).map(entry -> new FileEntry("script", entry));
     }
 
     private static Command<FileEntry> encodeMetadata(Bundle bundle) {
-        return encodeMetadata(bundle.getSession()).map(entry -> new FileEntry("metadata", entry));
+        return encodeMetadata(bundle.session()).map(entry -> new FileEntry("metadata", entry));
     }
 
     private static Command<FileEntry> encodeClips(Bundle bundle) {
-        return encodeClips(bundle.getSession(), bundle.getClips()).map(entry -> new FileEntry("clips", entry));
+        return encodeClipsData(bundle.clips()).map(entry -> new FileEntry("clips", entry));
     }
 
     private static Command<byte[]> encodeManifest(Session session) {
-        return Command.of(() -> MAPPER.writeValueAsBytes(new FileManifest(session.getPluginId())));
+        return Command.of(() -> MAPPER.writeValueAsBytes(new FileManifest(session.pluginId())));
     }
 
     private static Command<byte[]> encodeScript(Session session) {
-        return Command.of(() -> session.getScript().getBytes());
+        return Command.of(() -> session.script().getBytes());
     }
 
     private static Command<byte[]> encodeMetadata(Session session) {
-        return encodeMetadata(session.getPluginId(), session.getMetadata()).map(String::getBytes);
+        return encodeMetadata(session.pluginId(), session.metadata()).map(String::getBytes);
     }
 
-    private static Command<byte[]> encodeClips(Session session, List<Clip> clips) {
+    private static Command<byte[]> encodeClipsData(List<AnimationClip> clips) {
         return encodeClips(clips).flatMap(data -> Command.of(() -> MAPPER.writeValueAsBytes(data)));
     }
 
-    private static Command<Object> encodeClips(List<Clip> clips) {
+    private static Command<Object> encodeClips(List<AnimationClip> clips) {
         final List<Either<Object>> results = clips.stream()
                 .map(FileManager::encodeClip)
                 .map(Command::execute)
@@ -281,9 +285,9 @@ public abstract class FileManager {
                 .orElseGet(() -> Command.value(results.stream().map(Either::get).toList()));
     }
 
-    private static Command<Object> encodeClip(Clip clip) {
+    private static Command<Object> encodeClip(AnimationClip clip) {
         final Map<String, Object> stateMap = new HashMap<>();
-        final List<Either<Object>> results = clip.getEvents().stream()
+        final List<Either<Object>> results = clip.events().stream()
                 .map(clipEvent -> encodeClipEvent(stateMap, clipEvent))
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
@@ -293,25 +297,25 @@ public abstract class FileManager {
                 .orElseGet(() -> Command.value(Map.of("events", results.stream().map(Either::get).toList())));
     }
 
-    private static Command<Object> encodeClipEvent(Map<String, Object> stateMap, ClipEvent clipEvent) {
+    private static Command<Object> encodeClipEvent(Map<String, Object> stateMap, AnimationEvent clipEvent) {
         try {
             final Map<String, Object> eventMap = new HashMap<>();
 
-            if (!clipEvent.getPluginId().equals(stateMap.get("pluginId"))) {
-                eventMap.put("pluginId", clipEvent.getPluginId());
+            if (!clipEvent.pluginId().equals(stateMap.get("pluginId"))) {
+                eventMap.put("pluginId", clipEvent.pluginId());
             }
 
-            if (!clipEvent.getScript().equals(stateMap.get("script"))) {
-                eventMap.put("script", clipEvent.getScript());
+            if (!clipEvent.script().equals(stateMap.get("script"))) {
+                eventMap.put("script", clipEvent.script());
             }
 
-            final String metadata = encodeMetadata(clipEvent.getPluginId(), clipEvent.getMetadata()).execute().orThrow().get();
+            final String metadata = encodeMetadata(clipEvent.pluginId(), clipEvent.metadata()).execute().orThrow().get();
 
             if (!metadata.equals(stateMap.get("metadata"))) {
                 eventMap.put("metadata", metadata);
             }
 
-            final Long date = clipEvent.getDate().getTime();
+            final Long date = clipEvent.date().getTime();
 
             if (!date.equals(stateMap.get("date"))) {
                 eventMap.put("date", date);
@@ -362,15 +366,11 @@ public abstract class FileManager {
     }
 
     private static Void writeEntry(ZipOutputStream os, FileEntry entry) throws IOException {
-        final ZipEntry zipEntry = new ZipEntry(entry.getName());
+        final ZipEntry zipEntry = new ZipEntry(entry.name());
         os.putNextEntry(zipEntry);
-        os.write(entry.getData());
+        os.write(entry.data());
         os.closeEntry();
         return null;
-    }
-
-    private static String getPluginId(Map<String, String> manifest) {
-        return manifest.getOrDefault("pluginId", "");
     }
 
     private static <T> Command<T> createFailure(String message, Either<?> error) {

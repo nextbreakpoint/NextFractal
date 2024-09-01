@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.javafx.viewer;
 
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStarted;
 import com.nextbreakpoint.nextfractal.core.event.CaptureSessionStopped;
 import com.nextbreakpoint.nextfractal.core.event.EditorLoadFileRequested;
@@ -38,7 +38,6 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStarted;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataChanged;
-import com.nextbreakpoint.nextfractal.core.event.SessionReportChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
@@ -73,7 +72,7 @@ public class Viewer extends BorderPane {
 	private final int height;
 	private final BorderPane controls;
 	private final BorderPane viewer;
-	private final BorderPane errors;
+	private final BorderPane error;
 	private AnimationTimer animationTimer;
 	private RenderingContext renderingContext;
 	private RenderingStrategy renderingStrategy;
@@ -82,6 +81,7 @@ public class Viewer extends BorderPane {
 	private UIFactory factory;
 	private MetadataDelegate delegate;
 	private KeyHandler keyHandler;
+	private List<ScriptError> errors;
 
 	public Viewer(PlatformEventBus eventBus, int width, int height) {
 		this.eventBus = eventBus;
@@ -109,20 +109,20 @@ public class Viewer extends BorderPane {
 		viewer.setMaxHeight(height);
 		viewer.setPrefHeight(height);
 
-		errors = new BorderPane();
-		errors.setMinWidth(width);
-		errors.setMaxWidth(width);
-		errors.setPrefWidth(width);
-		errors.setMinHeight(height);
-		errors.setMaxHeight(height);
-		errors.setPrefHeight(height);
-		errors.getStyleClass().add("errors");
-		errors.setVisible(false);
+		error = new BorderPane();
+		error.setMinWidth(width);
+		error.setMaxWidth(width);
+		error.setPrefWidth(width);
+		error.setMinHeight(height);
+		error.setMaxHeight(height);
+		error.setPrefHeight(height);
+		error.getStyleClass().add("errors");
+		error.setVisible(false);
 
 		final Pane stackPane = new Pane();
 		stackPane.getChildren().add(viewer);
 		stackPane.getChildren().add(controls);
-		stackPane.getChildren().add(errors);
+		stackPane.getChildren().add(error);
 		setCenter(stackPane);
 
 		final FadeTransition toolsTransition = createFadeTransition(controls);
@@ -134,7 +134,7 @@ public class Viewer extends BorderPane {
 		});
 
 		controls.setOnMousePressed(e -> {
-			fadeOut(toolsTransition, x -> {
+			fadeOut(toolsTransition, _ -> {
 			});
 			eventBus.postEvent(HideControlsFired.builder().hide(true).build());
 			if (renderingContext != null && renderingContext.getTool() != null) {
@@ -143,7 +143,7 @@ public class Viewer extends BorderPane {
 		});
 
 		controls.setOnMouseReleased(e -> {
-			fadeIn(toolsTransition, x -> {
+			fadeIn(toolsTransition, _ -> {
 			});
 			eventBus.postEvent(HideControlsFired.builder().hide(false).build());
 			if (renderingContext != null && renderingContext.getTool() != null) {
@@ -163,14 +163,14 @@ public class Viewer extends BorderPane {
 			}
 		});
 
-		this.setOnMouseEntered(e -> {
-			fadeIn(toolsTransition, x -> {
+		this.setOnMouseEntered(_ -> {
+			fadeIn(toolsTransition, _ -> {
 			});
 			controls.requestFocus();
 		});
 
-		this.setOnMouseExited(e -> {
-			fadeOut(toolsTransition, x -> {
+		this.setOnMouseExited(_ -> {
+			fadeOut(toolsTransition, _ -> {
 			});
 		});
 
@@ -180,8 +180,8 @@ public class Viewer extends BorderPane {
 		stackPane.setOnDragOver(x -> Optional.of(x).filter(e -> e.getGestureSource() != stackPane)
 				.filter(e -> e.getDragboard().hasFiles()).ifPresent(e -> e.acceptTransferModes(TransferMode.COPY_OR_MOVE)));
 
-		errorProperty.addListener((observable, oldValue, newValue) -> {
-			errors.setVisible(newValue);
+		errorProperty.addListener((_, _, newValue) -> {
+			error.setVisible(newValue);
 		});
 
 		eventBus.subscribe(ActiveToolChanged.class.getSimpleName(), event -> {
@@ -196,13 +196,13 @@ public class Viewer extends BorderPane {
 			}
 		});
 
-		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> {
+		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), _ -> {
 			if (renderingContext != null) {
 				renderingContext.setPlayback(true);
 			}
 		});
 
-		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> {
+		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> {
 			if (renderingContext != null) {
 				renderingContext.setPlayback(false);
 			}
@@ -222,31 +222,31 @@ public class Viewer extends BorderPane {
 //            eventBus.postEvent(SessionStatusChanged.builder().status(message).build());
 		});
 
-		eventBus.subscribe(SessionTerminated.class.getSimpleName(), event -> handleSessionTerminated());
+		eventBus.subscribe(SessionTerminated.class.getSimpleName(), _ -> handleSessionTerminated());
 
 //		eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionLoaded(((SessionDataLoaded) event).session(), ((SessionDataLoaded) event).continuous()));
 		eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> handleSessionChanged(((SessionDataChanged) event).session(), ((SessionDataChanged) event).continuous()));
 
-		eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), event -> toolbar.setCaptureEnabled(true));
-		eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), event -> toolbar.setCaptureEnabled(false));
+		eventBus.subscribe(CaptureSessionStarted.class.getSimpleName(), _ -> toolbar.setCaptureEnabled(true));
+		eventBus.subscribe(CaptureSessionStopped.class.getSimpleName(), _ -> toolbar.setCaptureEnabled(false));
 
 		eventBus.subscribe(AnimationStateChanged.class.getSimpleName(), event -> toolbar.setAnimationEnabled(((AnimationStateChanged) event).enabled()));
 
-		eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), event -> toolbar.setAnimationEnabled(false));
+		eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), _ -> toolbar.setAnimationEnabled(false));
 
 //		eventBus.subscribe(PlaybackDataLoaded.class.getSimpleName(), event -> handleSessionLoaded(((PlaybackDataLoaded) event).session(), ((PlaybackDataLoaded) event).continuous()));
 		eventBus.subscribe(PlaybackDataChanged.class.getSimpleName(), event -> handleSessionChanged(((PlaybackDataChanged) event).session(), ((PlaybackDataChanged) event).continuous()));
 
-		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), event -> toolbar.setDisable(true));
-		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), event -> toolbar.setDisable(false));
+		eventBus.subscribe(PlaybackStarted.class.getSimpleName(), _ -> toolbar.setDisable(true));
+		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> toolbar.setDisable(false));
 
 		Platform.runLater(controls::requestFocus);
 
 		startAnimationTimer();
 	}
 
-	private void handleReportChanged(Session session, Boolean continuous, ParserResult report) {
-		if (factory == null || !this.session.getPluginId().equals(session.getPluginId())) {
+	private void handleReportChanged(Session session, Boolean continuous, ParserResult result) {
+		if (factory == null || !this.session.pluginId().equals(session.pluginId())) {
 			// session is being used in the constructors of the strategy classes
 			this.session = session;
 
@@ -264,14 +264,14 @@ public class Viewer extends BorderPane {
 		}
 
 		if (renderingStrategy != null) {
-			final List<SourceError> errorList = renderingStrategy.updateCoordinators(report.result());
-
-			errorProperty.setValue(!errorList.isEmpty());
+			renderingStrategy.updateCoordinators(result);
 		}
+
+		errorProperty.setValue(!result.errors().isEmpty());
 	}
 
 	private void handleSessionChanged(Session session, Boolean continuous) {
-		if (factory == null || !this.session.getPluginId().equals(session.getPluginId())) {
+		if (factory == null || !this.session.pluginId().equals(session.pluginId())) {
 			// session is being used in the constructors of the strategy classes
 			this.session = session;
 
@@ -315,7 +315,7 @@ public class Viewer extends BorderPane {
 
 		delegate = null;
 
-		factory = tryFindFactory(session.getPluginId()).optional().orElse(null);
+		factory = tryFindFactory(session.pluginId()).optional().orElse(null);
 
 		if (factory == null) {
 			return;
@@ -422,6 +422,12 @@ public class Viewer extends BorderPane {
 			if (timestamp - lastTimestamp > FRAME_LENGTH_IN_NANOS) {
 				if (renderingStrategy != null) {
 					renderingStrategy.updateAndRedraw(timestamp / 1000000L);
+					final List<ScriptError> newErrors = renderingStrategy.getErrors();
+					if (newErrors != errors) {
+						errors = newErrors;
+						//TODO show errors in console
+						errorProperty.setValue(!errors.isEmpty());
+					}
 				}
 				lastTimestamp = timestamp;
 			}

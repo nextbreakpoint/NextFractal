@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -51,7 +51,7 @@ public class Scope {
 	 * @param index
 	 * @param value
 	 */
-	public void setVariable(int index, Number value) {
+	public void setVariable(int index, ComplexNumber value) {
 		vars[index].set(value);
 	}
 
@@ -90,7 +90,7 @@ public class Scope {
 	/**
 	 * @param state
 	 */
-	public void setState(Number[] state) {
+	public void setState(ComplexNumber[] state) {
 		for (int i = 0; i < vars.length; i++) {
 			vars[i].set(state[i]);
 		}
@@ -100,9 +100,9 @@ public class Scope {
 	 * 
 	 */
 	public void clear() {
-		for (int i = 0; i < vars.length; i++) {
-			vars[i].set(0, 0);
-		}
+        for (MutableNumber var : vars) {
+            var.set(0, 0);
+        }
 	}
 
 	/**

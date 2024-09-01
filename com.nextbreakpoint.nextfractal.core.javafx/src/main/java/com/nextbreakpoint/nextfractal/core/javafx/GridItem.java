@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,109 +24,66 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.common.SourceError;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Future;
 
+@Getter
 public class GridItem {
-	private volatile long lastChanged;
+	private final List<ScriptError> errors = new LinkedList<>();
+	private File file;
+	private BrowseBitmap bitmap;
+	private GridItemRenderer renderer;
+	private Future<GridItem> loadItemFuture;
+	private Future<GridItem> initItemFuture;
+	private long lastChanged;
+	private boolean selected;
+	@Setter
 	private volatile boolean aborted;
-	private volatile boolean selected;
+	@Setter
 	private volatile boolean dirty;
-	private volatile File file;
-	private volatile BrowseBitmap bitmap;
-	private volatile GridItemRenderer renderer;
-	private volatile Future<GridItem> loadItemFuture;
-	private volatile Future<GridItem> initItemFuture;
-	private volatile List<SourceError> errors = new LinkedList<>();
 
-	public File getFile() {
-		return file;
-	}
-
-	public void setFile(File file) {
+    public synchronized void setFile(File file) {
 		lastChanged = System.currentTimeMillis();
 		this.file = file;
 		dirty = true;
 	}
 
-	public BrowseBitmap getBitmap() {
-		return bitmap;
-	}
-
-	public void setBitmap(BrowseBitmap bitmap) {
+    public synchronized void setBitmap(BrowseBitmap bitmap) {
 		lastChanged = System.currentTimeMillis();
 		this.bitmap = bitmap;
 		dirty = true;
 	}
 
-	public GridItemRenderer getRenderer() {
-		return renderer;
-	}
-
-	public void setRenderer(GridItemRenderer renderer) {
+    public synchronized void setRenderer(GridItemRenderer renderer) {
 		lastChanged = System.currentTimeMillis();
 		this.renderer = renderer;
 		dirty = true;
 	}
 
-	public Future<GridItem> getLoadItemFuture() {
-		return loadItemFuture;
-	}
-
-	public void setLoadItemFuture(Future<GridItem> loadItemFuture) {
+    public synchronized void setLoadItemFuture(Future<GridItem> loadItemFuture) {
 		lastChanged = System.currentTimeMillis();
 		this.loadItemFuture = loadItemFuture;
 	}
 
-	public Future<GridItem> getInitItemFuture() {
-		return initItemFuture;
-	}
-
-	public void setInitItemFuture(Future<GridItem> initItemFuture) {
+    public synchronized void setInitItemFuture(Future<GridItem> initItemFuture) {
 		lastChanged = System.currentTimeMillis();
 		this.initItemFuture = initItemFuture;
 	}
 
-	public long getLastChanged() {
-		return lastChanged;
-	}
-
-	public List<SourceError> getErrors() {
-		return errors;
-	}
-
-	public void setErrors(List<SourceError> errors) {
+    public synchronized void setErrors(List<ScriptError> errors) {
 		this.errors.clear();
 		this.errors.addAll(errors);
 		dirty = true;
 	}
 
-	public void setAborted(boolean aborted) {
-		this.aborted = aborted;
-	}
-
-	public boolean isAborted() {
-		return aborted;
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
+    public synchronized void setSelected(boolean selected) {
 		this.selected = selected;
 		dirty = true;
-	}
-
-	public boolean isDirty() {
-		return dirty;
-	}
-
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
 	}
 }

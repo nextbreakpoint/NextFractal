@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,6 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.core;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class AffineTransform1D implements Cloneable {
 	private double sz;
 	private double tz;
@@ -50,23 +55,7 @@ public class AffineTransform1D implements Cloneable {
 		this.tz = this.tz * t.sz + t.tz;
 	}
 
-	public double tz() {
-		return tz;
-	}
-
-	public void setTz(double tz) {
-		this.tz = tz;
-	}
-
-	public double sz() {
-		return sz;
-	}
-
-	public void setSz(double sz) {
-		this.sz = sz;
-	}
-
-	public Object clone() {
+    public Object clone() {
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException e) {

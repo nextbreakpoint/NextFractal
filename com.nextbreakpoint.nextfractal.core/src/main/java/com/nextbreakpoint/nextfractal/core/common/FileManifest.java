@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,17 +24,5 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-public class FileManifest {
-    private String pluginId;
-
-    public FileManifest() {
-    }
-
-    public FileManifest(String pluginId) {
-        this.pluginId = pluginId;
-    }
-
-    public String getPluginId() {
-        return pluginId;
-    }
-}
+//TODO move to other package
+public record FileManifest(String pluginId) {}

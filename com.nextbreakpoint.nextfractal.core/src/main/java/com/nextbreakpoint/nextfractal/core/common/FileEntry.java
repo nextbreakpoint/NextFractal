@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -26,21 +26,10 @@ package com.nextbreakpoint.nextfractal.core.common;
 
 import java.util.Objects;
 
-public class FileEntry {
-    private final String name;
-    private final byte[] data;
-
+//TODO move to other package
+public record FileEntry(String name, byte[] data) {
     public FileEntry(String name, byte[] data) {
         this.name = Objects.requireNonNull(name);
         this.data = Objects.requireNonNull(data);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    //TODO shall we return an immutable object?
-    public byte[] getData() {
-        return data;
     }
 }

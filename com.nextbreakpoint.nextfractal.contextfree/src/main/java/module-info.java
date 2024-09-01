@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -35,8 +35,7 @@ module com.nextbreakpoint.nextfractal.contextfree {
     exports com.nextbreakpoint.nextfractal.contextfree.module;
     exports com.nextbreakpoint.nextfractal.contextfree.core;
     exports com.nextbreakpoint.nextfractal.contextfree.dsl;
-    exports com.nextbreakpoint.nextfractal.contextfree.dsl.grammar;
-    exports com.nextbreakpoint.nextfractal.contextfree.renderer;
+    exports com.nextbreakpoint.nextfractal.contextfree.graphics;
     provides CoreFactory with ContextFreeFactory;
     provides MetadataCodec with ContextFreeMetadataCodec;
     opens com.nextbreakpoint.nextfractal.contextfree.module to com.fasterxml.jackson.databind;

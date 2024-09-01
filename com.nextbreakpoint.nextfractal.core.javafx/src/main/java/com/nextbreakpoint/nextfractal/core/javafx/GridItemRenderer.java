@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,16 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public interface GridItemRenderer {
     void abort();
 
-    void waitFor();
+    void waitFor() throws InterruptedException;
 
     void dispose();
 
-    boolean isPixelsChanged();
+    boolean hasImageChanged();
 
-    void drawImage(RendererGraphicsContext gc, int x, int y);
+    void drawImage(GraphicsContext gc, int x, int y);
 }

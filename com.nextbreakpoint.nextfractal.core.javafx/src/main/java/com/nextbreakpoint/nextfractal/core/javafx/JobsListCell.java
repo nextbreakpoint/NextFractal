@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -36,14 +36,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.transform.Affine;
 
 public class JobsListCell extends ListCell<Bitmap> {
-	private BorderPane pane;
-	private Label label;
-	private Canvas canvas;
-	private RendererTile tile;
+	private final BorderPane pane;
+	private final Label label;
+	private final Canvas canvas;
+	private final Tile tile;
 
-	public JobsListCell(RendererTile tile) {
+	public JobsListCell(Tile tile) {
 		this.tile = tile;
-		canvas = new Canvas(tile.getTileSize().getWidth(), tile.getTileSize().getHeight());
+		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 		label = new Label();
 		pane = new BorderPane();
 		pane.setLeft(canvas);
@@ -59,12 +59,12 @@ public class JobsListCell extends ListCell<Bitmap> {
 			setGraphic(null);
 		} else {
 			if (bitmap.getPixels() != null) {
-				WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
+				final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
 				image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
-				GraphicsContext g2d = canvas.getGraphicsContext2D();
-				Affine affine = new Affine();
-				int x = (tile.getTileSize().getWidth() - bitmap.getWidth()) / 2;
-				int y = (tile.getTileSize().getHeight() - bitmap.getHeight()) / 2;
+				final GraphicsContext g2d = canvas.getGraphicsContext2D();
+				final Affine affine = new Affine();
+				final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+				final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
 				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 				affine.append(Affine.scale(1, -1));
 				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));

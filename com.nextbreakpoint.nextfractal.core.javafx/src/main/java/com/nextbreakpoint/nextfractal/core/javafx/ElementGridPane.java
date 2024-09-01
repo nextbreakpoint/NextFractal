@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import javafx.event.EventHandler;
+import javafx.event.Event;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -41,12 +41,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class ElementGridPane<T extends Serializable> extends BorderPane {
-//	private SelectionDelegate<NodeObject> delegate;
-	private Pane container = new Pane();
+	private final Pane container = new Pane();
+	private final NodeObject listNode;
+	private final int maxElements;
 	private GridGroup sentinelGroup;
-	private NodeObject listNode;
-	private int maxElements;
-	
+
 	public ElementGridPane(NodeObject listNode, Dimension2D size) {
 		this(listNode, size, 7);
 	}
@@ -54,13 +53,13 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	public ElementGridPane(NodeObject listNode, Dimension2D size, int maxElements) {
 		setPrefWidth(size.getWidth());
 		setMinHeight(size.getHeight());
-		ScrollPane scrollPane = new ScrollPane(container);
+		final ScrollPane scrollPane = new ScrollPane(container);
 		scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 		scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
 		setCenter(scrollPane);
 		container.setPrefWidth(size.getWidth());
 		container.setMinHeight(size.getHeight());
-		int cells = getCellCount(size.getWidth(), size.getHeight());
+		final int cells = getCellCount(size.getWidth(), size.getHeight());
 		setMinWidth(cells * size.getHeight());
 		this.maxElements = maxElements;
 		this.listNode = listNode;
@@ -129,13 +128,14 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	}
 	
 	private void doLayout() {
-		int cells = getCellCount(getPrefWidth(), getMinHeight());
+		final int cells = getCellCount(getPrefWidth(), getMinHeight());
 		for (int i = 0; i < container.getChildren().size(); i++) {
-			Node child = container.getChildren().get(i);
+			final Node child = container.getChildren().get(i);
 			child.setLayoutX((i % cells) * (getMinHeight() + 10));
-			child.setLayoutY((i / cells) * (getMinHeight() + 10));
-			((Group) child).getChildren().get(0).setTranslateX(0);
-			((Group) child).getChildren().get(0).setTranslateY(0);
+			child.setLayoutY(((double) i / cells) * (getMinHeight() + 10));
+			final Node node = ((Group) child).getChildren().getFirst();
+			node.setTranslateX(0);
+			node.setTranslateY(0);
 		}
 	}
 
@@ -153,17 +153,15 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	}
 
 	private GridGroup createSentinel() {
-		GridSentinel sentinel = new GridSentinel();
+		final GridSentinel sentinel = new GridSentinel();
 		setCellSize(sentinel);
-		GridGroup node = createGroup(sentinel);
-		return node;
+        return createGroup(sentinel);
 	}
 
 	private GridGroup createItem(NodeObject nodeObject) {
-		GridItem item = new GridItem(nodeObject);
+		final GridItem item = new GridItem(nodeObject);
 		setCellSize(item);
-		GridGroup group = createGroup(item);
-		return group;
+        return createGroup(item);
 	}
 
 	private GridGroup createGroup(final GridItem node) {
@@ -181,46 +179,35 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	private void makeDraggable(final GridGroup sourceGroup) {
 		final DragContext dragContext = new DragContext();
 		
-		sourceGroup.addEventFilter(MouseEvent.ANY,
-			new EventHandler<MouseEvent>() {
-				public void handle(final MouseEvent mouseEvent) {
-					mouseEvent.consume();
-				}
-			});
+		sourceGroup.addEventFilter(MouseEvent.ANY, Event::consume);
 
 		sourceGroup.addEventFilter(MouseEvent.MOUSE_PRESSED,
-			new EventHandler<MouseEvent>() {
-				public void handle(final MouseEvent mouseEvent) {
-					Node node = unwrapNode(sourceGroup);
-					dragContext.mouseAnchorX = mouseEvent.getX();
-					dragContext.mouseAnchorY = mouseEvent.getY();
-					dragContext.initialTranslateX = node.getTranslateX();
-					dragContext.initialTranslateY = node.getTranslateY();
-					beginDrag(dragContext, sourceGroup);
-				}
-			});
+                mouseEvent -> {
+                    Node node = unwrapNode(sourceGroup);
+                    dragContext.mouseAnchorX = mouseEvent.getX();
+                    dragContext.mouseAnchorY = mouseEvent.getY();
+                    dragContext.initialTranslateX = node.getTranslateX();
+                    dragContext.initialTranslateY = node.getTranslateY();
+                    beginDrag(dragContext, sourceGroup);
+                });
 
 		sourceGroup.addEventFilter(MouseEvent.MOUSE_DRAGGED,
-			new EventHandler<MouseEvent>() {
-				public void handle(final MouseEvent mouseEvent) {
-					double x = computeX(dragContext, sourceGroup, mouseEvent);
-					double y = computeY(dragContext, sourceGroup, mouseEvent);
-					updateDrag(dragContext, sourceGroup, x, y);
-				}
-			});
+                mouseEvent -> {
+                    double x = computeX(dragContext, sourceGroup, mouseEvent);
+                    double y = computeY(dragContext, sourceGroup, mouseEvent);
+                    updateDrag(dragContext, sourceGroup, x, y);
+                });
 
 		sourceGroup.addEventFilter(MouseEvent.MOUSE_RELEASED,
-			new EventHandler<MouseEvent>() {
-				public void handle(final MouseEvent mouseEvent) {
-					double x = computeX(dragContext, sourceGroup, mouseEvent);
-					double y = computeY(dragContext, sourceGroup, mouseEvent);
-					endDrag(dragContext, sourceGroup, x, y);
-				}
-			});
+                mouseEvent -> {
+                    double x = computeX(dragContext, sourceGroup, mouseEvent);
+                    double y = computeY(dragContext, sourceGroup, mouseEvent);
+                    endDrag(dragContext, sourceGroup, x, y);
+                });
 	}
 
 	@SuppressWarnings("unchecked")
-	private ElementGridPane<T>.GridGroup getGroup(int i) {
+	private ElementGridPane.GridGroup getGroup(int i) {
 		return (GridGroup)container.getChildren().get(i);
 	}
 
@@ -230,7 +217,7 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	}
 
 	private double computeX(final DragContext dragContext, final GridGroup sourceGroup, final MouseEvent mouseEvent) {
-		Node node = unwrapNode(sourceGroup);
+		final Node node = unwrapNode(sourceGroup);
 		double x = dragContext.initialTranslateX + mouseEvent.getX() - dragContext.mouseAnchorX;
 		if (x < -sourceGroup.getLayoutX()) {
 			x = -sourceGroup.getLayoutX();
@@ -242,7 +229,7 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	}
 
 	private double computeY(final DragContext dragContext, final GridGroup sourceGroup, final MouseEvent mouseEvent) {
-		Node node = unwrapNode(sourceGroup);
+		final Node node = unwrapNode(sourceGroup);
 		double y = dragContext.initialTranslateY + mouseEvent.getY() - dragContext.mouseAnchorY;
 		if (y < -sourceGroup.getLayoutY()) {
 			y = -sourceGroup.getLayoutY();
@@ -255,13 +242,13 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 
 	private int findGroup(final GridGroup sourceGroup, double x, double y) {
 		int selectedIndex = -1;
-		double nx = sourceGroup.getLayoutX() + x;
-		double ny = sourceGroup.getLayoutY() + y;
-		Node node1 = unwrapNode(sourceGroup);
+		final double nx = sourceGroup.getLayoutX() + x;
+		final double ny = sourceGroup.getLayoutY() + y;
+		final Node node1 = unwrapNode(sourceGroup);
 		for (int i = 0; i < container.getChildren().size(); i++) {
-			GridGroup group = getGroup(i);
-			double tx = nx - group.getLayoutX();
-			double ty = ny - group.getLayoutY();
+			final GridGroup group = getGroup(i);
+			final double tx = nx - group.getLayoutX();
+			final double ty = ny - group.getLayoutY();
 			if (group != sourceGroup && group.contains(tx + node1.getBoundsInLocal().getWidth() / 2, ty + node1.getBoundsInLocal().getHeight() / 2)) {
 				selectedIndex = i;
 				break;
@@ -288,19 +275,19 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 
 	private void updateDrag(final DragContext dragContext, final GridGroup sourceGroup, double x, double y) {
 		if (sourceGroup.isSource()) {
-			Node node = unwrapNode(sourceGroup);
+			final Node node = unwrapNode(sourceGroup);
 			node.setTranslateX(x);
 			node.setTranslateY(y);
-			int selectedIndex = findGroup(sourceGroup, x, y);
+			final int selectedIndex = findGroup(sourceGroup, x, y);
 			if (dragContext.selectedIndex != selectedIndex) {
 				if (dragContext.selectedIndex != -1) {
-					GridGroup group = getGroup(dragContext.selectedIndex);
+					final GridGroup group = getGroup(dragContext.selectedIndex);
 					group.setSelected(false);
 					group.updateDrag();
 				}
 				dragContext.selectedIndex = selectedIndex;
 				if (selectedIndex != -1) {
-					GridGroup group = getGroup(dragContext.selectedIndex);
+					final GridGroup group = getGroup(dragContext.selectedIndex);
 					group.setSelected(true);
 					group.updateDrag();
 				}
@@ -314,19 +301,19 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 
 	private void endDrag(final DragContext dragContext,	final GridGroup sourceGroup, double x, double y) {
 		if (sourceGroup.isSource()) {
-			int sourceIndex = dragContext.index;
-			Node node = unwrapNode(sourceGroup);
+			final int sourceIndex = dragContext.index;
+			final Node node = unwrapNode(sourceGroup);
 			container.getChildren().remove(sourceGroup);
-			int targetIndex = findGroup(sourceGroup, x, y);
+			final int targetIndex = findGroup(sourceGroup, x, y);
 			GridGroup targetGroup = null;
 			if (targetIndex != -1) {
 				targetGroup = getGroup(targetIndex);
 			}
 			if (targetGroup != null) {
-				double tx = sourceGroup.getLayoutX() + x - targetGroup.getLayoutX();
+				final double tx = sourceGroup.getLayoutX() + x - targetGroup.getLayoutX();
 				if (sourceGroup instanceof ElementGridPane<?>.GroupItem) {
 					if (targetGroup instanceof ElementGridPane<?>.GroupItem) {
-						NodeObject nodeObject = getNode(sourceIndex);
+						final NodeObject nodeObject = getNode(sourceIndex);
 						removeNode(sourceIndex);
 						if (tx + node.getBoundsInLocal().getWidth() / 2 <= targetGroup.getBoundsInParent().getWidth() / 2) {
 							insertNodeBefore(targetIndex, nodeObject);
@@ -341,8 +328,8 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 					doLayout();
 				} else if (sourceGroup instanceof ElementGridPane<?>.GroupSentinel) {
 					if (targetGroup instanceof ElementGridPane<?>.GroupItem) {
-						NodeObject nodeObject = createNode(createElement());
-						Node newNode = createItem(nodeObject);
+						final NodeObject nodeObject = createNode(createElement());
+						final Node newNode = createItem(nodeObject);
 						if (tx + node.getBoundsInLocal().getWidth() / 2 <= targetGroup.getBoundsInParent().getWidth() / 2) {
 							insertNodeBefore(targetIndex, nodeObject);
 							container.getChildren().add(targetIndex, newNode);
@@ -355,8 +342,8 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 					doLayout();
 				}
 			} else if (sourceGroup instanceof ElementGridPane<?>.GroupSentinel) {
-				NodeObject nodeObject = createNode(createElement());
-				Node newNode = createItem(nodeObject);
+				final NodeObject nodeObject = createNode(createElement());
+				final Node newNode = createItem(nodeObject);
 				appendNode(nodeObject);
 				container.getChildren().add(newNode);
 				container.getChildren().add(sourceGroup);
@@ -382,7 +369,7 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 		}
 	}
 
-	private class DragContext {
+	private static class DragContext {
 		private double mouseAnchorX;
 		private double mouseAnchorY;
 		private double initialTranslateX;
@@ -392,22 +379,22 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 	}
 	
 	private class GridItem extends BorderPane {
-		private NodeObject nodeObject;
+		private final NodeObject nodeObject;
 		
 		public GridItem(NodeObject nodeObject) {
 			this.nodeObject = nodeObject;
 			getStyleClass().add("grid-item");
-			Label label = new Label(getName());
+			final Label label = new Label(getName());
 			label.setAlignment(Pos.CENTER);
 			setCenter(label);
 		}
 
 		public String getName() {
-			String name = getElementName(getElement(nodeObject));
+			final String name = getElementName(getElement(nodeObject));
 			if (name != null) {
-				Pattern pattern = Pattern.compile("([A-Z])[a-z ]*", 0);
-				Matcher matcher = pattern.matcher(name);
-				StringBuilder builder = new StringBuilder();
+				final Pattern pattern = Pattern.compile("([A-Z])[a-z ]*", 0);
+				final Matcher matcher = pattern.matcher(name);
+				final StringBuilder builder = new StringBuilder();
 				while (matcher.find()) {
 					builder.append(matcher.group(1));
 				}
@@ -421,10 +408,10 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 		}
 	}
 	
-	private class GridSentinel extends BorderPane {
+	private static class GridSentinel extends BorderPane {
 		public GridSentinel() {
 			getStyleClass().add("grid-sentinel");
-			Label label = new Label("+");
+			final Label label = new Label("+");
 			label.setAlignment(Pos.CENTER);
 			setCenter(label);
 		}
@@ -434,7 +421,7 @@ public abstract class ElementGridPane<T extends Serializable> extends BorderPane
 		}
 	}
 	
-	private class GridGroup extends Group {
+	private static class GridGroup extends Group {
 		private boolean selected = false;
 		private boolean source = false;
 		private boolean changed = false;

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -32,8 +32,8 @@ import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.MetadataCodec;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
@@ -42,9 +42,6 @@ public class ContextFreeFactory implements CoreFactory {
 	public static final String PLUGIN_ID = "ContextFree";
 	public static final String GRAMMAR = "ContextFree";
 
-	/**
-	 * @see CoreFactory#getId()
-	 */
 	public String getId() {
 		return PLUGIN_ID;
 	}
@@ -53,9 +50,6 @@ public class ContextFreeFactory implements CoreFactory {
 		return GRAMMAR;
 	}
 
-	/**
-	 * @see CoreFactory#createSession()
-	 */
 	@Override
 	public Session createSession() {
 		return new ContextFreeSession();
@@ -66,16 +60,13 @@ public class ContextFreeFactory implements CoreFactory {
 		return new ContextFreeSession(script, (ContextFreeMetadata) metadata);
 	}
 
-	/**
-	 * @see CoreFactory#createImageGenerator(java.util.concurrent.ThreadFactory, com.nextbreakpoint.nextfractal.core.render.RendererFactory, com.nextbreakpoint.nextfractal.core.render.RendererTile, boolean)
-	 */
 	@Override
-	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
+	public ImageGenerator createImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		return new ContextFreeImageGenerator(threadFactory, renderFactory, tile, opaque);
 	}
 
 	@Override
-	public ImageComposer createImageComposer(ThreadFactory threadFactory, RendererTile tile, boolean opaque) {
+	public ImageComposer createImageComposer(ThreadFactory threadFactory, Tile tile, boolean opaque) {
 		return new ContextFreeImageComposer(threadFactory, tile, opaque);
 	}
 

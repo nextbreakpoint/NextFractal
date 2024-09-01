@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,6 +24,11 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.core;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class AffineTransformTime implements Cloneable {
 	private double step;
 	private double begin;
@@ -53,31 +58,7 @@ public class AffineTransformTime implements Cloneable {
 		this.end = this.end * t.step + t.end;
 	}
 
-	public double getStep() {
-		return step;
-	}
-
-	public void setStep(double step) {
-		this.step = step;
-	}
-
-	public double getBegin() {
-		return begin;
-	}
-
-	public void setBegin(double begin) {
-		this.begin = begin;
-	}
-
-	public double getEnd() {
-		return end;
-	}
-
-	public void setEnd(double end) {
-		this.end = end;
-	}
-
-	public boolean overlaps(AffineTransformTime bounds) {
+    public boolean overlaps(AffineTransformTime bounds) {
 		return !(bounds.begin > end || bounds.end < begin);
 	}
 

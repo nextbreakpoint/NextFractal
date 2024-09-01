@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,18 +24,15 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
-import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParserResult;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpansBuilder;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.CompilerException;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.ParserException;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLCompiler;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
+import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 
 import java.util.Collection;
@@ -45,6 +42,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.nextbreakpoint.nextfractal.core.common.ErrorType.COMPILE;
 
 public class MandelbrotParserStrategy implements ParserStrategy {
     private static final Pattern HIGHLIGHTING_PATTERN = createHighlightingPattern();
@@ -60,20 +59,21 @@ public class MandelbrotParserStrategy implements ParserStrategy {
     }
 
     private ParserResult createParserResult(Session session) {
-        return Command.of(() -> new DSLParser(getPackageName(), getClassName()).parse(session.getScript()))
-                .map(MandelbrotParserStrategy::processResult)
-                .map(result -> new ParserResult(session, result.getErrors(), computeHighlighting(session.getScript()), result))
-                .execute()
-                .orThrow(RuntimeException::new)
-                .get();
-    }
-
-    private String getClassName() {
-        return "Compile" + System.nanoTime();
-    }
-
-    private String getPackageName() {
-        return DSLParser.class.getPackage().getName() + ".generated";
+        try {
+            final DSLParser parser = new DSLParser(DSLParser.getPackageName(), DSLParser.getClassName());
+            final DSLParserResult parserResult = parser.parse(session.script());
+            //TODO is create required here?
+            parserResult.colorClassFactory().create();
+            parserResult.orbitClassFactory().create();
+            return new ParserResult(session, List.of(), computeHighlighting(session.script()), parserResult);
+        } catch (DSLParserException e) {
+            final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
+            return new ParserResult(session, e.getErrors(), computeHighlighting(session.script()), result);
+        } catch (Exception e) {
+            final List<ScriptError> errors = List.of(new ScriptError(COMPILE, 0, 0, 0, 0, e.getMessage()));
+            final DSLParserResult result = DSLParserResult.builder().withSource(session.script()).build();
+            return new ParserResult(session, errors, computeHighlighting(session.script()), result);
+        }
     }
 
     private GenericStyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -88,12 +88,12 @@ public class MandelbrotParserStrategy implements ParserStrategy {
                 .group("BRACE") != null ? "mandelbrot-brace" : matcher
                 .group("OPERATOR") != null ? "mandelbrot-operator" : matcher
                 .group("PATHOP") != null ? "mandelbrot-pathop" : null;
-            spansBuilder.add(List.of("code"), matcher.start() - lastKeywordEnd);
-            spansBuilder.add(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
+            spansBuilder.addSpan(List.of("code"), matcher.start() - lastKeywordEnd);
+            spansBuilder.addSpan(List.of(styleClass != null ? styleClass : "code"), matcher.end() - matcher.start());
             lastKeywordEnd = matcher.end();
         }
-        spansBuilder.add(List.of("code"), text.length() - lastKeywordEnd);
-        return spansBuilder.create();
+        spansBuilder.addSpan(List.of("code"), text.length() - lastKeywordEnd);
+        return spansBuilder.build();
     }
 
     private static Pattern createHighlightingPattern() {
@@ -124,34 +124,5 @@ public class MandelbrotParserStrategy implements ParserStrategy {
             + "|(?<OPERATOR>" + OPERATOR_PATTERN + ")"
             + "|(?<PATHOP>" + PATHOP_PATTERN + ")"
         );
-    }
-
-    public static DSLParserResult processResult(DSLParserResult parserResult) {
-        return Block.begin(DSLParserResult.class)
-                .andThen(MandelbrotParserStrategy::compileOrbit)
-                .andThen(MandelbrotParserStrategy::compileColor)
-                .end(parserResult)
-                .execute()
-                .observe()
-                .onFailure(e -> processCompilerErrors(parserResult, e))
-                .get()
-                .orThrow(RuntimeException::new)
-                .get();
-    }
-
-    private static void compileOrbit(DSLParserResult result) {
-        Command.of(() -> new DSLCompiler().compileOrbit(result).create()).execute();
-    }
-
-    private static void compileColor(DSLParserResult result) {
-        Command.of(() -> new DSLCompiler().compileColor(result).create()).execute();
-    }
-
-    private static void processCompilerErrors(DSLParserResult result, Exception e) {
-        if (e instanceof CompilerException) {
-            result.getErrors().addAll(((CompilerException)e).getErrors());
-        } else if (e instanceof ParserException) {
-            result.getErrors().addAll(((ParserException)e).getErrors());
-        }
     }
 }

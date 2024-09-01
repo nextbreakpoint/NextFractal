@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,36 +25,29 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
 import com.nextbreakpoint.nextfractal.core.common.Time;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class Color {
-	protected final float[] color = new float[] { 1f, 0f, 0f, 0f };
 	protected MutableNumber[] numbers;
-	protected Scope scope;
-	protected boolean julia;
-	protected Time time = new Time(0, 1);;
+	@Getter
+    protected final float[] color = new float[] { 1f, 0f, 0f, 0f };
+	@Setter
+    @Getter
+    protected Scope scope;
+	@Setter
+    @Getter
+    protected boolean julia;
+	@Setter
+    @Getter
+    protected Time time = new Time(0, 1);;
 
 	public Color() {
-		initializeStack();
+		//TODO invoke init explicitly in generated code
+		initializeNumbersStack();
 	}
 
-	protected void initializeStack() {
-		numbers = createNumbers();
-		if (numbers != null) {
-			for (int i = 0; i < numbers.length; i++) {
-				numbers[i] = new MutableNumber();
-			}
-		}
-	}
-
-	public Scope getScope() {
-		return scope;
-	}
-
-	public void setScope(Scope scope) {
-		this.scope = scope;
-	}
-
-	public MutableNumber getVariable(int index) {
+    public MutableNumber getVariable(int index) {
 		return scope.getVariable(index);
 	}
 
@@ -64,7 +57,7 @@ public abstract class Color {
 
 	public float[] setColor(float[] color) {
 		for (int i = 0; i < 4; i++) {
-			this.color[i] = (float)Math.min(1, Math.max(0, color[i]));
+			this.color[i] = Math.min(1, Math.max(0, color[i]));
 		}
 		return this.color;
 	}
@@ -77,12 +70,8 @@ public abstract class Color {
 		}
 		return this.color;
 	}
-	
-	public float[] getColor() {
-		return color;
-	}
 
-	public Palette palette() {
+    public Palette palette() {
 		return new Palette();
 	}
 
@@ -102,7 +91,7 @@ public abstract class Color {
 		return new float[] { (float) a, (float) r, (float) g, (float) b };
 	}
 
-	public void setState(Number[] state) {
+	public void setState(ComplexNumber[] state) {
 		scope.setState(state);
 	}
 
@@ -113,27 +102,20 @@ public abstract class Color {
 	public void reset() {
 	}
 
-	public boolean isJulia() {
-		return julia;
-	}
-
-	public void setJulia(boolean julia) {
-		this.julia = julia;
-	}
-	
-	public abstract void init();
+    public abstract void init();
 
 	public abstract void render();
 
+	public abstract boolean useTime();
+
+	protected void initializeNumbersStack() {
+		numbers = createNumbers();
+		if (numbers != null) {
+			for (int i = 0; i < numbers.length; i++) {
+				numbers[i] = new MutableNumber();
+			}
+		}
+	}
+
 	protected abstract MutableNumber[] createNumbers();
-
-    public abstract boolean useTime();
-
-	public Time getTime() {
-		return time;
-	}
-
-	public void setTime(Time time) {
-		this.time = time;
-	}
 }

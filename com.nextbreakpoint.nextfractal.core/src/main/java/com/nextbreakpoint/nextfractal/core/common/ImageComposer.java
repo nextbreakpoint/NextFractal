@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 import java.nio.IntBuffer;
 
@@ -34,15 +34,15 @@ public interface ImageComposer {
 	 * @param metadata
 	 * @return
 	 */
-	public IntBuffer renderImage(String script, Metadata metadata);
+    IntBuffer renderImage(String script, Metadata metadata);
 
 	/**
 	 * @return
 	 */
-	public RendererSize getSize();
+    Size getSize();
 
 	/**
 	 * @return
 	 */
-	public boolean isInterrupted();
+    boolean isAborted();
 }

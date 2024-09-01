@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -31,36 +31,36 @@ import javafx.scene.layout.Pane;
 
 public class MandelbrotRenderingPanel extends Pane {
     public MandelbrotRenderingPanel(RenderingContext renderingContext, int width, int height) {
-        Canvas fractalCanvas = new Canvas(width, height);
-        GraphicsContext gcFractalCanvas = fractalCanvas.getGraphicsContext2D();
+        final Canvas fractalCanvas = new Canvas(width, height);
+        final GraphicsContext gcFractalCanvas = fractalCanvas.getGraphicsContext2D();
         gcFractalCanvas.setFill(javafx.scene.paint.Color.WHITESMOKE);
         gcFractalCanvas.fillRect(0, 0, width, height);
 
-        Canvas toolCanvas = new Canvas(width, height);
-        GraphicsContext gcToolCanvas = toolCanvas.getGraphicsContext2D();
+        final Canvas toolCanvas = new Canvas(width, height);
+        final GraphicsContext gcToolCanvas = toolCanvas.getGraphicsContext2D();
         gcToolCanvas.setFill(javafx.scene.paint.Color.TRANSPARENT);
         gcToolCanvas.fillRect(0, 0, width, height);
 
-        Canvas orbitCanvas = new Canvas(width, height);
-        GraphicsContext gcOrbitCanvas = orbitCanvas.getGraphicsContext2D();
+        final Canvas orbitCanvas = new Canvas(width, height);
+        final GraphicsContext gcOrbitCanvas = orbitCanvas.getGraphicsContext2D();
         gcOrbitCanvas.setFill(javafx.scene.paint.Color.TRANSPARENT);
         gcOrbitCanvas.fillRect(0, 0, width, height);
         orbitCanvas.setVisible(false);
 
-        Canvas trapCanvas = new Canvas(width, height);
-        GraphicsContext gcTrapCanvas = trapCanvas.getGraphicsContext2D();
+        final Canvas trapCanvas = new Canvas(width, height);
+        final GraphicsContext gcTrapCanvas = trapCanvas.getGraphicsContext2D();
         gcTrapCanvas.setFill(javafx.scene.paint.Color.TRANSPARENT);
         gcTrapCanvas.fillRect(0, 0, width, height);
         trapCanvas.setVisible(false);
 
-        Canvas pointCanvas = new Canvas(width, height);
-        GraphicsContext gcPointCanvas = pointCanvas.getGraphicsContext2D();
+        final Canvas pointCanvas = new Canvas(width, height);
+        final GraphicsContext gcPointCanvas = pointCanvas.getGraphicsContext2D();
         gcPointCanvas.setFill(javafx.scene.paint.Color.TRANSPARENT);
         gcPointCanvas.fillRect(0, 0, width, height);
         pointCanvas.setVisible(false);
 
-        Canvas juliaCanvas = new Canvas(width, height);
-        GraphicsContext gcJuliaCanvas = juliaCanvas.getGraphicsContext2D();
+        final Canvas juliaCanvas = new Canvas(width, height);
+        final GraphicsContext gcJuliaCanvas = juliaCanvas.getGraphicsContext2D();
         gcJuliaCanvas.setFill(javafx.scene.paint.Color.TRANSPARENT);
         gcJuliaCanvas.fillRect(0, 0, width, height);
         juliaCanvas.setOpacity(0.8);

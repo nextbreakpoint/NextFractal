@@ -1,4 +1,4 @@
-CF::Tile = [s 2 2]
+CF::Tile = [s 3 skew 15 15 r 15]
 
 CF::Symmetry = CF::p3, 0.3, 0.4
 

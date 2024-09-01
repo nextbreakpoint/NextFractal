@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,7 +25,10 @@
 package com.nextbreakpoint.nextfractal.runtime.export;
 
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobHandle;
 import com.nextbreakpoint.nextfractal.core.export.ExportJobState;
 import com.nextbreakpoint.nextfractal.core.export.ExportProfile;
@@ -36,9 +39,7 @@ import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
@@ -47,36 +48,40 @@ import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
 @Log
 public class SimpleExportRenderer implements ExportRenderer {
+	private static final int MAX_PARALLEL_JOBS = 4;
+
 	private final ThreadFactory threadFactory;
+	private final ExecutorService executor;
 
-	private final ExecutorCompletionService<ExportJobHandle> service;
-
-	public SimpleExportRenderer(ThreadFactory threadFactory) {
-		this.threadFactory = Objects.requireNonNull(threadFactory);
-		service = new ExecutorCompletionService<>(createExecutorService(threadFactory));
+	public SimpleExportRenderer() {
+		threadFactory = ThreadUtils.createVirtualThreadFactory("Export Renderer");
+		executor = ExecutorUtils.newFixedThreadPool(MAX_PARALLEL_JOBS, threadFactory);
 	}
 
 	@Override
-	public Future<ExportJobHandle> dispatch(ExportJobHandle job) {
-		return service.submit(new ProcessExportJob(job));
+	public Future<ExportJobHandle> dispatch(ExportJobHandle job, AnimationFrame frame) {
+		return executor.submit(new ProcessExportJob(job, frame));
 	}
 
-	private ExecutorService createExecutorService(ThreadFactory threadFactory) {
-		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
+	@Override
+	public void dispose() {
+		ExecutorUtils.shutdown(executor);
 	}
 
-	private ImageComposer createImageComposer(ExportJobHandle job) {
-		return Command.of(tryFindFactory(job.getProfile().getPluginId()))
-				.map(plugin -> plugin.createImageComposer(threadFactory, job.getJob().getTile(), false))
+	private ImageComposer createImageComposer(ExportProfile profile, AnimationFrame frame) {
+		return Command.of(tryFindFactory(frame.pluginId()))
+				.map(plugin -> plugin.createImageComposer(threadFactory, profile.createRenderTile(), false))
 				.execute()
 				.orElse(null);
 	}
 
 	private class ProcessExportJob implements Callable<ExportJobHandle> {
 		private final ExportJobHandle job;
-		
-		public ProcessExportJob(ExportJobHandle job) {
+		private final AnimationFrame frame;
+
+		public ProcessExportJob(ExportJobHandle job, AnimationFrame frame) {
 			this.job = Objects.requireNonNull(job);
+			this.frame = Objects.requireNonNull(frame);
 			job.setState(ExportJobState.READY);
 		}
 
@@ -92,16 +97,14 @@ public class SimpleExportRenderer implements ExportRenderer {
 
 		private void processError(Throwable e) {
 			log.log(Level.WARNING, "Failed to render tile", e);
-			job.setError(e);
-			job.setState(ExportJobState.FAILED);
+			job.setState(ExportJobState.FAILED, e);
 		}
 
 		private ExportJobHandle processJob(ExportJobHandle job) throws IOException {
 			log.fine(job.toString());
-			ExportProfile profile = job.getProfile();
-			ImageComposer composer = createImageComposer(job);
-			IntBuffer pixels = composer.renderImage(profile.getScript(), profile.getMetadata());
-			if (composer.isInterrupted()) {
+			ImageComposer composer = createImageComposer(job.getJob().getProfile(), frame);
+			IntBuffer pixels = composer.renderImage(frame.script(), frame.metadata());
+			if (composer.isAborted()) {
                 job.setState(ExportJobState.INTERRUPTED);
             } else {
                 job.getJob().writePixels(composer.getSize(), pixels);

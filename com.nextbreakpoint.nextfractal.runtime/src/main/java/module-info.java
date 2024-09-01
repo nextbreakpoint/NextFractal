@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.runtime.encoder.AVIVideoEncoder;
 import com.nextbreakpoint.nextfractal.runtime.encoder.JPEGImageEncoder;
 import com.nextbreakpoint.nextfractal.runtime.encoder.MP4VideoEncoder;

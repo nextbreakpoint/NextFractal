@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,13 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx.tool;
 
-import com.nextbreakpoint.nextfractal.core.javafx.Tool;
-import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
-import com.nextbreakpoint.nextfractal.core.render.RendererGraphicsContext;
 import com.nextbreakpoint.nextfractal.core.common.Time;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.javafx.Tool;
+import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotToolContext;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
-import com.nextbreakpoint.nextfractal.mandelbrot.core.Number;
 import javafx.scene.input.MouseEvent;
 
 public class ToolMove implements Tool {
@@ -83,39 +82,37 @@ public class ToolMove implements Tool {
 
 	@Override
 	public void update(long timeInMillis, boolean timeAnimation) {
-		MandelbrotMetadata oldMetadata = context.getMetadata();
-		Time time = oldMetadata.getTime();
+		final MandelbrotMetadata oldMetadata = context.getMetadata();
+		Time time = oldMetadata.time();
 		if (timeAnimation || lastTimeInMillis == null) {
 			if (lastTimeInMillis == null) {
 				lastTimeInMillis = timeInMillis;
 			}
-			time = new Time(time.getValue() + (timeInMillis - lastTimeInMillis) / 1000.0, time.getScale());
+			time = new Time(time.value() + (timeInMillis - lastTimeInMillis) / 1000.0, time.scale());
 			lastTimeInMillis = timeInMillis;
 		} else {
 			lastTimeInMillis = null;
 		}
 		if (changed) {
-			double[] t = oldMetadata.getTranslation().toArray();
-			double[] r = oldMetadata.getRotation().toArray();
-			double[] s = oldMetadata.getScale().toArray();
-			double[] p = oldMetadata.getPoint().toArray();
-			boolean j = oldMetadata.isJulia();
-			double x = t[0];
-			double y = t[1];
-			double z = t[2];
-			double a = r[2] * Math.PI / 180;
-			Number size = context.getInitialSize();
-			double dx = x1 - x0;
-			double dy = y1 - y0;
-			x -= z * size.r() * (Math.cos(a) * dx + Math.sin(a) * dy);
-			y -= z * size.i() * (Math.cos(a) * dy - Math.sin(a) * dx);
+			final double[] t = oldMetadata.getTranslation().toArray();
+			final double[] r = oldMetadata.getRotation().toArray();
+			final double[] s = oldMetadata.getScale().toArray();
+			final double[] p = oldMetadata.getPoint().toArray();
+			final boolean j = oldMetadata.isJulia();
+			final ComplexNumber size = context.getInitialSize();
+			final double dx = x1 - x0;
+			final double dy = y1 - y0;
+			final double z = t[2];
+			final double a = r[2] * Math.PI / 180;
+			final double x = t[0] - z * size.r() * (Math.cos(a) * dx + Math.sin(a) * dy);
+			final double y = t[1] - z * size.i() * (Math.cos(a) * dy - Math.sin(a) * dx);
 			x0 = x1;
 			y0 = y1;
-			MandelbrotMetadata newMetadata = new MandelbrotMetadata(new double[] { x, y, z, t[3] }, new double[] { 0, 0, r[2], r[3] }, s, p, time, j, oldMetadata.getOptions());
+			final MandelbrotMetadata newMetadata = new MandelbrotMetadata(new double[] { x, y, z, t[3] }, new double[] { 0, 0, r[2], r[3] }, s, p, time, j, oldMetadata.getOptions());
 			context.setView(newMetadata, pressed, !pressed);
 			changed = false;
 		} else if (timeAnimation) {
-			MandelbrotMetadata newMetadata = new MandelbrotMetadata(oldMetadata.getTranslation(), oldMetadata.getRotation(), oldMetadata.getScale(), oldMetadata.getPoint(), time, oldMetadata.isJulia(), oldMetadata.getOptions());
+			final MandelbrotMetadata newMetadata = new MandelbrotMetadata(oldMetadata.getTranslation(), oldMetadata.getRotation(), oldMetadata.getScale(), oldMetadata.getPoint(), time, oldMetadata.isJulia(), oldMetadata.getOptions());
 			context.setTime(newMetadata, true, false);
 		}
 	}
@@ -133,16 +130,16 @@ public class ToolMove implements Tool {
 	}
 
 	@Override
-	public void draw(RendererGraphicsContext gc) {
-		double dw = context.getWidth();
-		double dh = context.getHeight();
+	public void draw(GraphicsContext gc) {
+		final double dw = context.getWidth();
+		final double dh = context.getHeight();
 		gc.clearRect(0, 0, (int)dw, (int)dh);
 		if (pressed) {
-			gc.setStroke(context.getRendererFactory().createColor(1, 1, 0, 1));
-			double cx = dw / 2;
-			double cy = dh / 2;
-			int qx = (int) Math.rint(cx + x1 * dw);
-			int qy = (int) Math.rint(cy - y1 * dh);
+			gc.setStroke(context.getGraphicsFactory().createColor(1, 1, 0, 1));
+			final double cx = dw / 2;
+			final double cy = dh / 2;
+			final int qx = (int) Math.rint(cx + x1 * dw);
+			final int qy = (int) Math.rint(cy - y1 * dh);
 			gc.beginPath();
 			gc.moveTo(qx - 4, qy - 4);
 			gc.lineTo(qx + 4, qy + 4);

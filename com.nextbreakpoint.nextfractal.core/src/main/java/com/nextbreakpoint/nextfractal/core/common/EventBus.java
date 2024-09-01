@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -31,9 +31,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Not thread safe
+ */
 public abstract class EventBus {
     private static final Logger logger = Logger.getLogger(EventBus.class.getName());
-    private final Map<String, List<EventListener>> listeners = new HashMap<>();
+
+    private final Map<String, List<EventListener>> registeredListeners = new HashMap<>();
     private final String name;
 
     public EventBus(String name) {
@@ -41,20 +45,17 @@ public abstract class EventBus {
     }
 
     public final void subscribe(String channel, EventListener listener) {
-        List<EventListener> listeners = this.listeners.get(channel);
-        if (listeners == null) {
-            listeners = new ArrayList<>();
-        }
+        final List<EventListener> listeners = registeredListeners.getOrDefault(channel, new ArrayList<>());
         listeners.add(listener);
-        this.listeners.put(channel, listeners);
+        registeredListeners.put(channel, listeners);
     }
 
     public final void unsubscribe(String channel, EventListener listener) {
-        List<EventListener> listeners = this.listeners.get(channel);
+        final List<EventListener> listeners = registeredListeners.get(channel);
         if (listeners != null) {
             listeners.remove(listener);
             if (listeners.isEmpty()) {
-                this.listeners.remove(channel);
+                registeredListeners.remove(channel);
             }
         }
     }
@@ -63,6 +64,7 @@ public abstract class EventBus {
 
     protected final void postEvent(String channel, Object event) {
         try {
+            logger.log(Level.FINE, "Dispatching event: bus: " + name + ", channel: " + channel + ": " + event.toString());
             dispatchEvent(channel, event);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Can't process event", e);
@@ -70,8 +72,7 @@ public abstract class EventBus {
     }
 
     private void dispatchEvent(String channel, Object event) {
-        logger.log(Level.FINE, "Dispatching event: bus: " + name + ", channel: " + channel + ": " + event.toString());
-        List<EventListener> listeners = this.listeners.get(channel);
+        final List<EventListener> listeners = registeredListeners.get(channel);
         if (listeners != null) {
             listeners.forEach(listener -> listener.onEvent(event));
         }

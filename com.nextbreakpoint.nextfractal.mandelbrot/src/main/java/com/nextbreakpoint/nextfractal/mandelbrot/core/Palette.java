@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -29,11 +29,9 @@ import java.util.List;
 
 public class Palette {
 	private static final float[] DEFAULT = new float[] { 1, 0, 0, 0 };
-	private List<PaletteElement> elements = new ArrayList<>();
-	private float[][] table;
 	
-	public Palette() {
-	}
+	private final List<PaletteElement> elements = new ArrayList<>();
+	private float[][] table;
 	
 	public int getSize() {
 		return table.length;
@@ -49,17 +47,17 @@ public class Palette {
 	public Palette build() {
 		int size = 0;
 		for (PaletteElement element : elements) {
-			size += element.getSteps();
+			size += element.steps();
 		}
 		if (size > 0) {
 			table = new float[size][4];
 			int i = 0;
 			for (PaletteElement element : elements) {
-				int steps = element.getSteps();
+				int steps = element.steps();
 				for (int step = 0; step < steps; step++) {
-					float[] bc = element.getBeginColor();
-					float[] ec = element.getEndColor();
-					double vc = clamp(element.getExpression().evaluate(step / (double)(steps - 1)));
+					float[] bc = element.beginColor();
+					float[] ec = element.endColor();
+					double vc = clamp(element.expression().evaluate(step / (double)(steps - 1)));
 					float a = (float)((ec[0] - bc[0]) * vc + bc[0]);
 					float r = (float)((ec[1] - bc[1]) * vc + bc[1]);
 					float g = (float)((ec[2] - bc[2]) * vc + bc[2]);

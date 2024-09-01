@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,14 +24,14 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 public interface ToolContext<T> {
 	double getWidth();
 
 	double getHeight();
 
-	RendererFactory getRendererFactory();
+	GraphicsFactory getGraphicsFactory();
 
 	T getMetadata();
 

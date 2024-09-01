@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,28 +24,31 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.module;
 
-import com.nextbreakpoint.nextfractal.contextfree.dsl.grammar.CFDGInterpreter;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLCompiler;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.DSLParserResult;
-import com.nextbreakpoint.nextfractal.contextfree.renderer.Renderer;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
+import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
+import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageGenerator;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
-import com.nextbreakpoint.nextfractal.core.render.RendererFactory;
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import lombok.extern.java.Log;
 
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
 
+@Log
 public class ContextFreeImageGenerator implements ImageGenerator {
 	private boolean aborted;
-	private boolean opaque;
-	private RendererTile tile;
-	private ThreadFactory threadFactory;
-	private RendererFactory renderFactory;
+	private final boolean opaque;
+	private final Tile tile;
+	private final ThreadFactory threadFactory;
+	private final GraphicsFactory renderFactory;
 
-	public ContextFreeImageGenerator(ThreadFactory threadFactory, RendererFactory renderFactory, RendererTile tile, boolean opaque) {
+	public ContextFreeImageGenerator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, boolean opaque) {
 		this.tile = tile;
 		this.opaque = opaque;
 		this.threadFactory = threadFactory;
@@ -54,38 +57,40 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 
 	@Override
 	public IntBuffer renderImage(String script, Metadata data) {
-		ContextFreeMetadata metadata = (ContextFreeMetadata)data;
-		RendererSize suggestedSize = tile.getTileSize();
-		int[] pixels = new int[suggestedSize.getWidth() * suggestedSize.getHeight()];
-		for (int i = 0; i < pixels.length; i++) pixels[i] = 0xFF000000;
-		IntBuffer buffer = IntBuffer.wrap(pixels);
+		final ContextFreeMetadata metadata = (ContextFreeMetadata)data;
+		final Size suggestedSize = tile.tileSize();
+		final int[] pixels = new int[suggestedSize.width() * suggestedSize.height()];
+        Arrays.fill(pixels, 0xFF000000);
+		final IntBuffer buffer = IntBuffer.wrap(pixels);
 		try {
-			DSLParser parser = new DSLParser();
-			DSLParserResult report = parser.parse(script);
-			DSLCompiler compiler = new DSLCompiler();
-			CFDGInterpreter interpreter = compiler.compile(report);
-			Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
-			renderer.setInterpreter(interpreter);
-			renderer.setSeed(metadata.getSeed());
+			final CFParser parser = new CFParser();
+			final CFParserResult parserResult = parser.parse(script);
+			final CFDGImage cfdgImage = parserResult.classFactory().create();
+			final Renderer renderer = new Renderer(threadFactory, renderFactory, tile);
+			renderer.setImage(cfdgImage, metadata.getSeed());
 			renderer.setOpaque(opaque);
 			renderer.init();
 			renderer.runTask();
-			renderer.waitForTasks();
+			renderer.waitForTask();
 			renderer.getPixels(pixels);
-			aborted = renderer.isInterrupted();
-		} catch (Exception e) {
-			//TODO display errors
+			if (renderer.isAborted() || renderer.isInterrupted()) {
+				aborted = true;
+				return buffer;
+			}
+		} catch (Throwable e) {
+			log.log(Level.WARNING, "Can't render image", e);
+			aborted = true;
 		}
 		return buffer;
 	}
 
 	@Override
-	public RendererSize getSize() {
-		return tile.getTileSize();
+	public Size getSize() {
+		return tile.tileSize();
 	}
 	
 	@Override
-	public boolean isInterrupted() {
+	public boolean isAborted() {
 		return aborted;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,8 +24,8 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ListCell;
@@ -35,20 +35,20 @@ import javafx.scene.layout.HBox;
 import javafx.scene.transform.Affine;
 
 public class BrowseListCell extends ListCell<Bitmap[]> {
-	private HBox pane;
-	private Canvas[] canvas;
-	private RendererSize size;
-	private RendererTile tile;
-	private int numOfColumns;
+	private final HBox pane;
+	private final Canvas[] canvas;
+	private final Size size;
+	private final Tile tile;
+	private final int numOfColumns;
 
-	public BrowseListCell(int numOfColumns, RendererSize size, RendererTile tile) {
+	public BrowseListCell(int numOfColumns, Size size, Tile tile) {
 		this.size = size;
 		this.tile = tile;
 		this.numOfColumns = numOfColumns;
 		pane = new HBox(0);
 		canvas = new Canvas[numOfColumns];
 		for (int i = 0 ; i < numOfColumns; i++) {
-			canvas[i] = new Canvas(tile.getTileSize().getWidth(), tile.getTileSize().getHeight());
+			canvas[i] = new Canvas(tile.tileSize().width(), tile.tileSize().height());
 			pane.getChildren().add(canvas[i]);
 		}
 	}
@@ -70,11 +70,11 @@ public class BrowseListCell extends ListCell<Bitmap[]> {
 	}
 
 	private void renderFractal(GraphicsContext g2d, Bitmap bitmap) {
-		WritableImage image = new WritableImage(size.getWidth(), size.getHeight());
+		WritableImage image = new WritableImage(size.width(), size.height());
 		image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
 		Affine affine = new Affine();
-		int x = (tile.getTileSize().getWidth() - size.getWidth()) / 2;
-		int y = (tile.getTileSize().getHeight() - size.getHeight()) / 2;
+		int x = (tile.tileSize().width() - size.width()) / 2;
+		int y = (tile.tileSize().height() - size.height()) / 2;
 		affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
 		affine.append(Affine.scale(1, -1));
 		affine.append(Affine.translate(0, -image.getHeight() / 2 - y));

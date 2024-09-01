@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -29,4 +29,9 @@ import com.nextbreakpoint.nextfractal.core.editor.GenericStyleSpans;
 import java.util.Collection;
 import java.util.List;
 
-public record ParserResult(Session session, List<SourceError> errors, GenericStyleSpans<Collection<String>> highlighting, Object result) {}
+public record ParserResult(
+        Session session,
+        List<ScriptError> errors,
+        GenericStyleSpans<Collection<String>> highlighting,
+        Object result
+) {}

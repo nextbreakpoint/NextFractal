@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -93,7 +93,7 @@ public class MainParamsPane extends Pane {
 		scrollPane.setFitToHeight(true);
 		getChildren().add(scrollPane);
 
-		widthProperty().addListener((observable, oldValue, newValue) -> {
+		widthProperty().addListener((_, _, newValue) -> {
 			double width = newValue.doubleValue() - getInsets().getLeft() - getInsets().getRight();
 			box.setPrefWidth(width);
 			grammarCombobox.setPrefWidth(width);
@@ -102,14 +102,14 @@ public class MainParamsPane extends Pane {
 			scrollPane.setPrefWidth(newValue.doubleValue());
         });
 
-		heightProperty().addListener((observable, oldValue, newValue) -> {
+		heightProperty().addListener((_, _, newValue) -> {
 			box.setPrefHeight(newValue.doubleValue() - getInsets().getTop() - getInsets().getBottom());
 			scrollPane.setPrefHeight(newValue.doubleValue());
 		});
 
-		grammarCombobox.setOnAction(e -> {
+		grammarCombobox.setOnAction(_ -> {
 			final SingleSelectionModel<String> selectionModel = grammarCombobox.getSelectionModel();
-			if (session != null && !selectionModel.getSelectedItem().equals(session.getGrammar())) {
+			if (session != null && !selectionModel.getSelectedItem().equals(session.grammar())) {
 				eventBus.postEvent(EditorGrammarSelected.builder().grammar(selectionModel.getSelectedItem()).build());
 			}
 		});
@@ -123,7 +123,7 @@ public class MainParamsPane extends Pane {
 
 	private void handleSessionDataLoaded(ComboBox<String> grammarCombobox, SessionDataLoaded event) {
 		session = event.session();
-		grammarCombobox.getSelectionModel().select(event.session().getGrammar());
+		grammarCombobox.getSelectionModel().select(event.session().grammar());
 	}
 
 	public void setParamsDisable(boolean disabled) {

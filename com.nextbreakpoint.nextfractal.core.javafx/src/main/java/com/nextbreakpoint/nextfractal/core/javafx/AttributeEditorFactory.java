@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -27,13 +27,7 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 
 public interface AttributeEditorFactory {
-	/**
-	 * @return
-	 */
 	String getId();
 
-	/**
-	 * @return
-	 */
 	AttributeEditor createAttributeEditor(Attribute attribute);
 }

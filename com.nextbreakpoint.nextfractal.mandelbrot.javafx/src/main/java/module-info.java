@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -22,8 +22,9 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors.AlgorithmAttributeEditorFactory;
+
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotUIFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors.AlgorithmAttributeEditorFactory;
 
 module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires static lombok;

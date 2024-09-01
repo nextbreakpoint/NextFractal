@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.params;
 
-import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditor;

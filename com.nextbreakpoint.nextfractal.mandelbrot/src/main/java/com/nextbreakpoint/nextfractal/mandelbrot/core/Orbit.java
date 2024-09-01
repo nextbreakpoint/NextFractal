@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,6 +25,8 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.core;
 
 import com.nextbreakpoint.nextfractal.core.common.Time;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,51 +38,42 @@ public abstract class Orbit {
 	protected MutableNumber w = new MutableNumber(0, 0);
 	protected double n = 0.0;
 	protected MutableNumber[] numbers;
-	protected List<Trap> traps = new ArrayList<>();
-	protected Scope scope;
-	protected boolean julia;
-	protected Time time = new Time(0, 1);
+	@Getter
+    protected List<Trap> traps = new ArrayList<>();
+	@Setter
+    @Getter
+    protected Scope scope;
+	@Setter
+    @Getter
+    protected boolean julia;
+	@Setter
+    @Getter
+    protected Time time = new Time(0, 1);
 
 	public Orbit() {
 		region[0] = new MutableNumber();
 		region[1] = new MutableNumber();
-		initializeStack();
+		//TODO invoke init explicitly in generated code
+		initializeNumbersStack();
 	}
 
-	protected void initializeStack() {
-		numbers = createNumbers();
-		if (numbers != null) {
-			for (int i = 0; i < numbers.length; i++) {
-				numbers[i] = new MutableNumber();
-			}
-		}
-	}
-
-	public Scope getScope() {
-		return scope;
-	}
-
-	public void setScope(Scope scope) {
-		this.scope = scope;
-	}
-
-	public void setX(Number x) {
+    public void setX(ComplexNumber x) {
 		this.x.set(x);
 	}
 
-	public void setW(Number w) {
+	public void setW(ComplexNumber w) {
 		this.w.set(w);
 	}
 
-	public Number getX() {
+	public ComplexNumber getX() {
 		return x;
 	}
 
-	public Number getW() {
+	public ComplexNumber getW() {
 		return w;
 	}
 
-	protected Trap trap(Number center) {
+	protected Trap trap(ComplexNumber center) {
 		return new Trap(center);
 	}
 
@@ -116,28 +109,20 @@ public abstract class Orbit {
 		scope.addVariable(value);
 	}
 
-	public Number[] getInitialRegion() {
+	public ComplexNumber[] getInitialRegion() {
 		return region;
 	}
 
-	public Number getInitialPoint() {
+	public ComplexNumber getInitialPoint() {
 		return point;
 	}
 
-	public void setInitialRegion(Number a, Number b) {
+	public void setInitialRegion(ComplexNumber a, ComplexNumber b) {
 		this.region[0].set(a);
 		this.region[1].set(b);
 	}
 
-	public boolean isJulia() {
-		return julia;
-	}
-
-	public void setJulia(boolean julia) {
-		this.julia = julia;
-	}
-
-	public MutableNumber getNumber(int index) {
+    public MutableNumber getNumber(int index) {
 		return numbers[index];
 	}
 	
@@ -151,24 +136,21 @@ public abstract class Orbit {
 	public void addTrap(Trap trap) {
 		traps.add(trap);
 	}
-	
-	public List<Trap> getTraps() {
-		return traps;
-	}
-	
-	public abstract void init();
 
-	public abstract void render(List<Number[]> states);
-	
-	protected abstract MutableNumber[] createNumbers();
+    public abstract void init();
 
+	public abstract void render(List<ComplexNumber[]> states);
+	
     public abstract boolean useTime();
 
-	public Time getTime() {
-		return time;
+	protected void initializeNumbersStack() {
+		numbers = createNumbers();
+		if (numbers != null) {
+			for (int i = 0; i < numbers.length; i++) {
+				numbers[i] = new MutableNumber();
+			}
+		}
 	}
 
-	public void setTime(Time time) {
-		this.time = time;
-	}
+	protected abstract MutableNumber[] createNumbers();
 }

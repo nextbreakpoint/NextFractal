@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,10 +24,9 @@
  */
 package com.nextbreakpoint.nextfractal.core.export;
 
-import com.nextbreakpoint.nextfractal.core.render.RendererSize;
-import com.nextbreakpoint.nextfractal.core.render.RendererTile;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import lombok.Getter;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.IntBuffer;
@@ -35,69 +34,60 @@ import java.util.Objects;
 
 public class ExportJob {
 	private final ExportSession session;
-	private final ExportProfile profile;
+
+	@Getter
+    private final ExportProfile profile;
 
 	public ExportJob(ExportSession session, ExportProfile profile) {
 		this.session = Objects.requireNonNull(session);
 		this.profile = Objects.requireNonNull(profile);
 	}
 
-	public ExportProfile getProfile() {
-		return profile;
-	}
-
-	public RendererTile getTile() {
-		return profile.createTile();
-	}
-
-	public File getFile() {
-		return session.getFile();
-	}
-
-	public File getTmpFile() {
-		return session.getTmpFile();
-	}
-
-	public void writePixels(RendererSize size, IntBuffer pixels) throws IOException {
-		try (RandomAccessFile raf = new RandomAccessFile(this.getTmpFile(), "rw")) {
+	//TODO extract code to separate class
+	public void writePixels(Size size, IntBuffer pixels) throws IOException {
+		try (RandomAccessFile raf = new RandomAccessFile(session.getTmpFile(), "rw")) {
 			writeFrame(raf, size, convertToBytes(size, pixels));
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return "[sessionId = " + session.getSessionId() + ", profile=" + profile + "]";
 	}
 
-	private void writeFrame(RandomAccessFile raf, RendererSize size, byte[] data) throws IOException {
-		final int sw = size.getWidth();
-		final int sh = size.getHeight();
-		final int tx = this.getProfile().getTileOffsetX();
-		final int ty = this.getProfile().getTileOffsetY();
-		final int tw = this.getProfile().getTileWidth();
-		final int th = this.getProfile().getTileHeight();
-		final int iw = this.getProfile().getFrameWidth();
-		final int ih = this.getProfile().getFrameHeight();
+	//TODO extract code to separate class
+	private void writeFrame(RandomAccessFile raf, Size size, byte[] data) throws IOException {
+		final int sw = size.width();
+		final int sh = size.height();
+		final int tx = profile.tileOffsetX();
+		final int ty = profile.tileOffsetY();
+		final int tw = profile.tileWidth();
+		final int th = profile.tileHeight();
+		final int iw = profile.frameWidth();
+		final int ih = profile.frameHeight();
 		final int ly = Math.min(th, ih - ty);
 		final int lx = Math.min(tw, iw - tx);
-		long pos = (ty * iw + tx) * 4;
+		long pos = ((long)ty * (long)iw + tx) * 4L;
 		for (int j = ((sw * (sh - th) + (sw - tw)) / 2) * 4, k = 0; k < ly; k++) {
 			raf.seek(pos);
 			raf.write(data, j, lx * 4);
 			j += sw * 4;
-			pos += iw * 4;
+			pos += iw * 4L;
 			Thread.yield();
 		}
 	}
 
-	private byte[] convertToBytes(RendererSize size, IntBuffer pixels) {
-		byte[] data = new byte[size.getWidth() * size.getHeight() * 4];
+	//TODO extract code to separate class
+	private byte[] convertToBytes(Size size, IntBuffer pixels) {
+		final int sw = size.width();
+		final int sh = size.height();
+		final byte[] data = new byte[sw * sh * 4];
 		for (int j = 0, i = 0; i < data.length; i += 4) {
 			int pixel = pixels.get(j++);
-			data[i + 3] = (byte)((pixel >> 24) & 0xFF);
-			data[i + 0] = (byte)((pixel >> 16) & 0xFF);
+			data[i] = (byte)((pixel >> 16) & 0xFF);
 			data[i + 1] = (byte)((pixel >> 8) & 0xFF);
-			data[i + 2] = (byte)((pixel >> 0) & 0xFF);
+			data[i + 2] = (byte)((pixel) & 0xFF);
+			data[i + 3] = (byte)((pixel >> 24) & 0xFF);
 		}
 		return data;
 	}

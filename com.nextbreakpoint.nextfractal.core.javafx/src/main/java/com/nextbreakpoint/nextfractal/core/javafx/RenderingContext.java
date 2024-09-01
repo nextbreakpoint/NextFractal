@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -37,15 +37,12 @@ public class RenderingContext {
 	@Getter
 	@Setter
 	private boolean timeAnimation;
-
 	@Getter
 	@Setter
 	private boolean playback;
-
 	@Getter
 	@Setter
 	private double zoomSpeed;
-
 	@Getter
 	@Setter
 	private Tool tool;

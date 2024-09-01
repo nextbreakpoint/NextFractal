@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,24 +24,12 @@
  */
 package com.nextbreakpoint.nextfractal.core.common;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Bundle {
-    private Session session;
-    private List<Clip> clips;
-
-    public Bundle(Session session, List<Clip> clips) {
+public record Bundle(Session session, List<AnimationClip> clips) {
+    public Bundle(Session session, List<AnimationClip> clips) {
         this.session = Objects.requireNonNull(session);
         this.clips = Objects.requireNonNull(clips);
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public List<Clip> getClips() {
-        return new ArrayList<>(clips);
     }
 }

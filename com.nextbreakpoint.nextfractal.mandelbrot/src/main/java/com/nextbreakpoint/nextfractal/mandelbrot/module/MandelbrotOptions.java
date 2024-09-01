@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -27,7 +27,9 @@ package com.nextbreakpoint.nextfractal.mandelbrot.module;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
+@Getter
 @EqualsAndHashCode
 @Builder(setterPrefix = "with", toBuilder = true)
 public class MandelbrotOptions {
@@ -37,32 +39,6 @@ public class MandelbrotOptions {
 	private final boolean showPoint;
 	private final Double2D previewOrigin;
 	private final Double2D previewSize;
-
-//	@Override
-//	public boolean equals(Object o) {
-//		if (this == o) return true;
-//		if (o == null || getClass() != o.getClass()) return false;
-//
-//		MandelbrotOptions that = (MandelbrotOptions) o;
-//
-//		if (showPreview != that.showPreview) return false;
-//		if (showTraps != that.showTraps) return false;
-//		if (showOrbit != that.showOrbit) return false;
-//		if (showPoint != that.showPoint) return false;
-//		if (previewOrigin != null ? !previewOrigin.equals(that.previewOrigin) : that.previewOrigin != null) return false;
-//		return previewSize != null ? previewSize.equals(that.previewSize) : that.previewSize == null;
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		int result = (showPreview ? 1 : 0);
-//		result = 31 * result + (showTraps ? 1 : 0);
-//		result = 31 * result + (showOrbit ? 1 : 0);
-//		result = 31 * result + (showPoint ? 1 : 0);
-//		result = 31 * result + (previewOrigin != null ? previewOrigin.hashCode() : 0);
-//		result = 31 * result + (previewSize != null ? previewSize.hashCode() : 0);
-//		return result;
-//	}
 
 	public MandelbrotOptions() {
 		this.showPreview = false;
@@ -82,31 +58,7 @@ public class MandelbrotOptions {
 		this.previewSize = previewSize;
 	}
 
-	public boolean isShowPreview() {
-		return showPreview;
-	}
-
-	public boolean isShowTraps() {
-		return showTraps;
-	}
-
-	public boolean isShowOrbit() {
-		return showOrbit;
-	}
-
-	public boolean isShowPoint() {
-		return showPoint;
-	}
-
-	public Double2D getPreviewOrigin() {
-		return previewOrigin;
-	}
-
-	public Double2D getPreviewSize() {
-		return previewSize;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		return "[showJulia=" + showPreview + ", showTraps=" + showTraps +	", showOrbit=" + showOrbit + ", showPoint=" + showPoint + ", previewOrigin=" + previewOrigin + ", previewSize=" + previewSize +	"]";
 	}

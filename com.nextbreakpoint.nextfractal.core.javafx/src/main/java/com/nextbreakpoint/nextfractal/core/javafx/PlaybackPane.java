@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,76 +25,78 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.Clip;
-import com.nextbreakpoint.nextfractal.core.common.ClipProcessor;
-import com.nextbreakpoint.nextfractal.core.common.DefaultThreadFactory;
-import com.nextbreakpoint.nextfractal.core.common.Frame;
+import com.nextbreakpoint.nextfractal.core.common.Animation;
+import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
+import lombok.Setter;
+import lombok.extern.java.Log;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
-import static com.nextbreakpoint.nextfractal.core.common.ClipProcessor.FRAMES_PER_SECOND;
+import static com.nextbreakpoint.nextfractal.core.common.Constants.FRAMES_PER_SECOND;
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
+@Log
 public class PlaybackPane extends Pane {
-    private final List<Frame> frames = new LinkedList<>();
+    private final List<AnimationFrame> frames = new LinkedList<>();
     private final ScheduledExecutorService executor;
     private ScheduledFuture<?> future;
     private int frameIndex = -1;
-    private Frame lastFrame;
+    private AnimationFrame lastFrame;
+    @Setter
     private PlaybackDelegate delegate;
 
     public PlaybackPane() {
-        executor = Executors.newSingleThreadScheduledExecutor(Objects.requireNonNull(createThreadFactory("Playback")));
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Playback", Thread.MIN_PRIORITY + 1);
+        executor = ExecutorUtils.newSingleThreadScheduledExecutor(threadFactory);
 
-        setOnMouseClicked(e -> {
+        setOnMouseClicked(_ -> {
             if (delegate != null) {
                 delegate.playbackStopped();
             }
         });
 
-        widthProperty().addListener((observable, oldValue, newValue) -> {
+        widthProperty().addListener((_, _, _) -> {
         });
 
-        heightProperty().addListener((observable, oldValue, newValue) -> {
+        heightProperty().addListener((_, _, _) -> {
         });
-    }
-
-    private DefaultThreadFactory createThreadFactory(String name) {
-        return new DefaultThreadFactory(name, true, Thread.MIN_PRIORITY);
     }
 
     private void playNextFrame() {
         try {
             frameIndex += 1;
             if (frameIndex < frames.size()) {
-                Frame frame = frames.get(frameIndex);
+                final AnimationFrame frame = frames.get(frameIndex);
                 if (delegate != null) {
-                    if (lastFrame == null || !lastFrame.getPluginId().equals(frame.getPluginId()) || !lastFrame.getScript().equals(frame.getScript())) {
-                        Command.of(tryFindFactory(frame.getPluginId()))
-                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                    if (lastFrame == null || !lastFrame.pluginId().equals(frame.pluginId()) || !lastFrame.script().equals(frame.script())) {
+                        Command.of(tryFindFactory(frame.pluginId()))
+                                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
-                    } else if (!lastFrame.getMetadata().equals(frame.getMetadata())) {
-                        Command.of(tryFindFactory(frame.getPluginId()))
-                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .ifPresent(session -> Platform.runLater(() -> delegate.loadSessionData(session, false, false)));
+                    } else if (!lastFrame.metadata().equals(frame.metadata())) {
+                        Command.of(tryFindFactory(frame.pluginId()))
+                                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, frame.isKeyFrame(), !frame.isKeyFrame() && frame.isTimeAnimation())));
-                    } else if (!lastFrame.getMetadata().getTime().equals(frame.getMetadata().getTime())) {
-                        Command.of(tryFindFactory(frame.getPluginId()))
-                                .map(factory -> factory.createSession(frame.getScript(), frame.getMetadata()))
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, false)));
+                    } else if (!lastFrame.metadata().time().equals(frame.metadata().time())) {
+                        Command.of(tryFindFactory(frame.pluginId()))
+                                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
                                 .execute()
                                 .optional()
-                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, true)));
+                                .ifPresent(session -> Platform.runLater(() -> delegate.updateSessionData(session, true, false)));
                     }
                 }
                 lastFrame = frame;
@@ -103,18 +105,15 @@ public class PlaybackPane extends Pane {
                 lastFrame = null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "Can't playback frame", e);
         }
     }
 
-    public void setDelegate(PlaybackDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    public void setClips(List<Clip> clips) {
+    public void setClips(List<AnimationClip> clips) {
         if (future == null) {
             frames.clear();
-            frames.addAll(new ClipProcessor(clips, FRAMES_PER_SECOND).generateFrames());
+            final Animation animation = new Animation(clips, FRAMES_PER_SECOND);
+            frames.addAll(animation.generateFrames());
         }
     }
 
@@ -131,8 +130,13 @@ public class PlaybackPane extends Pane {
             try {
                 future.get();
             } catch (Exception e) {
+                log.warning(e.getMessage());
             }
             future = null;
         }
+    }
+
+    public void dispose() {
+        ExecutorUtils.shutdown(executor);
     }
 }

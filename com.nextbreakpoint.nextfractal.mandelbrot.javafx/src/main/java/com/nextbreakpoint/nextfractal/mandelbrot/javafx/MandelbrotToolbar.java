@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -80,22 +80,22 @@ public class MandelbrotToolbar extends Toolbar {
         toolProperty = new ToolObservableValue();
         toolProperty.setValue(new ToolZoom(toolContext, true));
 
-        ToggleButton zoomButton = new ToggleButton("", createIconImage("/icon-zoomin.png", computeOptimalLargeIconPercentage()));
-        ToggleButton moveButton = new ToggleButton("", createIconImage("/icon-move.png", computeOptimalLargeIconPercentage()));
-        ToggleButton rotateButton = new ToggleButton("", createIconImage("/icon-rotate.png", computeOptimalLargeIconPercentage()));
-        ToggleButton pickButton = new ToggleButton("", createIconImage("/icon-pick.png", computeOptimalLargeIconPercentage()));
-        ToggleButton juliaButton = new ToggleButton("", createIconImage("/icon-julia.png", computeOptimalLargeIconPercentage()));
-        ToggleButton orbitButton = new ToggleButton("", createIconImage("/icon-orbit.png", computeOptimalLargeIconPercentage()));
-        ToggleButton captureButton = new ToggleButton("", createIconImage("/icon-capture.png", computeOptimalLargeIconPercentage()));
-        ToggleButton animationButton = new ToggleButton("", createIconImage("/icon-cron.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton zoomButton = new ToggleButton("", createIconImage("/icon-zoomin.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton moveButton = new ToggleButton("", createIconImage("/icon-move.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton rotateButton = new ToggleButton("", createIconImage("/icon-rotate.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton pickButton = new ToggleButton("", createIconImage("/icon-pick.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton juliaButton = new ToggleButton("", createIconImage("/icon-julia.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton orbitButton = new ToggleButton("", createIconImage("/icon-orbit.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton captureButton = new ToggleButton("", createIconImage("/icon-capture.png", computeOptimalLargeIconPercentage()));
+        final ToggleButton animationButton = new ToggleButton("", createIconImage("/icon-cron.png", computeOptimalLargeIconPercentage()));
 
-        ToggleGroup toolsGroup = new ToggleGroup();
+        final ToggleGroup toolsGroup = new ToggleGroup();
         toolsGroup.getToggles().add(zoomButton);
         toolsGroup.getToggles().add(moveButton);
         toolsGroup.getToggles().add(rotateButton);
         toolsGroup.getToggles().add(pickButton);
 
-        Button homeButton = new Button("", createIconImage("/icon-home.png", computeOptimalLargeIconPercentage()));
+        final Button homeButton = new Button("", createIconImage("/icon-home.png", computeOptimalLargeIconPercentage()));
 
         zoomButton.setTooltip(new Tooltip("Select zoom in tool"));
         moveButton.setTooltip(new Tooltip("Select move tool"));
@@ -188,7 +188,7 @@ public class MandelbrotToolbar extends Toolbar {
     }
 
     public void bindSession(Session session) {
-        final MandelbrotMetadata metadata = (MandelbrotMetadata) session.getMetadata();
+        final MandelbrotMetadata metadata = (MandelbrotMetadata) session.metadata();
 
         showPreviewProperty.setValue(metadata.getOptions().isShowPreview());
         showOrbitProperty.setValue(metadata.getOptions().isShowOrbit());

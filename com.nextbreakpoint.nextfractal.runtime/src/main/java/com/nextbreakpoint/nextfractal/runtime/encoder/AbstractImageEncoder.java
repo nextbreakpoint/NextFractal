@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,11 +25,11 @@
 package com.nextbreakpoint.nextfractal.runtime.encoder;
 
 import com.nextbreakpoint.freeimage4java.tagRGBQUAD;
-import com.nextbreakpoint.nextfractal.core.encode.Encoder;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderContext;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderDelegate;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderException;
-import com.nextbreakpoint.nextfractal.core.encode.EncoderHandle;
+import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderContext;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderDelegate;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderException;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderHandle;
 import lombok.extern.java.Log;
 
 import java.io.File;
@@ -46,9 +46,6 @@ import static com.nextbreakpoint.freeimage4java.Libfreeimage.FreeImage_Unload;
 import static com.nextbreakpoint.freeimage4java.Libfreeimage.TRUE;
 import static java.lang.foreign.MemorySegment.NULL;
 
-/**
- * @author Andrea Medeghini
- */
 @Log
 public abstract class AbstractImageEncoder implements Encoder {
 	private EncoderDelegate delegate;
@@ -57,9 +54,6 @@ public abstract class AbstractImageEncoder implements Encoder {
 		FreeImage_Initialise(TRUE());
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isVideoSupported() {
 		return false;
 	}
@@ -79,18 +73,12 @@ public abstract class AbstractImageEncoder implements Encoder {
 	}
 
 	@Override
-	public void encode(EncoderHandle handle, int frame, int count) throws EncoderException {
+	public void encode(EncoderHandle handle, int frameIndex, int repeatFrameCount, int totalFrameCount) throws EncoderException {
 		((ImageEncoderHandle) handle).encode();
 	}
 
-	/**
-	 * @return
-	 */
 	protected abstract int getFormat();
 
-	/**
-	 * @return
-	 */
 	protected boolean isAlphaSupported() {
 		return false;
 	}
@@ -105,15 +93,13 @@ public abstract class AbstractImageEncoder implements Encoder {
 			if (delegate != null) {
 				delegate.didProgressChanged(0f);
 			}
-			if (log.isLoggable(Level.FINE)) {
-				log.fine("Encoding image...");
-			}
+			log.info("Session %s: Encoding image...".formatted(context.getSessionId()));
 		}
 
 		public void encode() throws EncoderException {
 			try (var arena = Arena.ofConfined()) {
+				final int channels = isAlphaSupported() ? 4 : 3;
 				long time = System.currentTimeMillis();
-				int channels = isAlphaSupported() ? 4 : 3;
 				var pBitmap = NULL;
 				try {
 					pBitmap = FreeImage_Allocate(context.getImageWidth(), context.getImageHeight(), channels * 8, 0x00FF0000, 0x0000FF00, 0x000000FF);
@@ -123,7 +109,7 @@ public abstract class AbstractImageEncoder implements Encoder {
 						int j = y * context.getImageWidth();
 						for (int x = 0; x < context.getImageWidth(); x++) {
 							int i = (j + x) * channels;
-							tagRGBQUAD.rgbRed(value, (data[i + 0]));
+							tagRGBQUAD.rgbRed(value, (data[i]));
 							tagRGBQUAD.rgbGreen(value, (data[i + 1]));
 							tagRGBQUAD.rgbBlue(value, (data[i + 2]));
 							if (isAlphaSupported()) {
@@ -136,8 +122,11 @@ public abstract class AbstractImageEncoder implements Encoder {
 								break;
 							}
 						}
+						if (y % 100 == 0) {
+							log.info("Session %s: Completed %.0f%%".formatted(context.getSessionId(), ((y + 1f) / context.getImageHeight()) * 100f));
+						}
 						if (delegate != null && (y % 10 == 0)) {
-							delegate.didProgressChanged((context.getImageHeight() * 100f) / (y + 1f));
+							delegate.didProgressChanged(((y + 1f) / context.getImageHeight()) * 100f);
 						}
 						Thread.yield();
 					}
@@ -145,16 +134,18 @@ public abstract class AbstractImageEncoder implements Encoder {
 						final var fileName = arena.allocateFrom(path.getAbsolutePath());
 						FreeImage_Save(getFormat(), pBitmap, fileName, 0);
 						time = System.currentTimeMillis() - time;
-						if (log.isLoggable(Level.INFO)) {
-							log.info("Image exported: elapsed time " + String.format("%3.2f", time / 1000.0d) + "s");
-						}
+						log.info("Session %s: Completed %.0f%%".formatted(context.getSessionId(), 100f));
 						if (delegate != null) {
 							delegate.didProgressChanged(100f);
+						}
+						if (log.isLoggable(Level.INFO)) {
+							log.info("Session %s: Image exported (total time %3.2fs)".formatted(context.getSessionId(), time / 1000.0d));
 						}
 					}
 				}
 				catch (final Exception e) {
-					throw new EncoderException(e);
+					log.log(Level.WARNING, "Session %s: Failed to encode image".formatted(context.getSessionId()), e);
+					throw new EncoderException("Failed to encode image", e);
 				}
 				finally {
 					if (!pBitmap.equals(NULL)) {

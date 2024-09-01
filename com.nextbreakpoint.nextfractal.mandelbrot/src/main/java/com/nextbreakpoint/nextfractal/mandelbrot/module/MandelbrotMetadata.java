@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.1
+ * NextFractal 2.3.2
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,23 +24,31 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.module;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nextbreakpoint.nextfractal.core.common.Double2D;
 import com.nextbreakpoint.nextfractal.core.common.Double4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 @EqualsAndHashCode(exclude = "time")
 @Builder(setterPrefix = "with", toBuilder = true)
 public class MandelbrotMetadata implements Metadata {
-	private final Double4D translation;
-	private final Double4D rotation;
-	private final Double4D scale;
-	private final Double2D point;
+	@Getter
+    private final Double4D translation;
+	@Getter
+    private final Double4D rotation;
+	@Getter
+    private final Double4D scale;
+	@Getter
+    private final Double2D point;
 	private final Time time;
-	private final boolean julia;
-	private final MandelbrotOptions options;
+	@Getter
+    private final boolean julia;
+	@Getter
+    private final MandelbrotOptions options;
 
 	public MandelbrotMetadata() {
 		this(new Double4D(0,0,1,0), new Double4D(0,0,0,0), new Double4D(1,1,1,1), new Double2D(0, 0), new Time(0, 1), false, new MandelbrotOptions());
@@ -65,71 +73,21 @@ public class MandelbrotMetadata implements Metadata {
 	}
 
 	public MandelbrotMetadata(MandelbrotMetadata other) {
-		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.getTime(), other.isJulia(), other.getOptions());
+		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.time(), other.isJulia(), other.getOptions());
 	}
 
 	public MandelbrotMetadata(MandelbrotMetadata other, MandelbrotOptions options) {
-		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.getTime(), other.isJulia(), options);
+		this(other.getTranslation(), other.getRotation(), other.getScale(), other.getPoint(), other.time(), other.isJulia(), options);
 	}
 
-	public Double4D getTranslation() {
-		return translation;
-	}
-
-	public Double4D getRotation() {
-		return rotation;
-	}
-
-	public Double4D getScale() {
-		return scale;
-	}
-
-	public Time getTime() {
+    @JsonProperty("time")
+	@Override
+	public Time time() {
 		return time;
 	}
 
-	public Double2D getPoint() {
-		return point;
-	}
-
-	public boolean isJulia() {
-		return julia;
-	}
-
-	public MandelbrotOptions getOptions() {
-		return options;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		return "[translation=" + translation + ", rotation=" + rotation + ", scale=" + scale + ", point=" + point + ", time=" + time + ", julia=" + julia + ", options=" + options + "]";
 	}
-//
-//	@Override
-//	public boolean equals(Object o) {
-//		if (this == o) return true;
-//		if (o == null || getClass() != o.getClass()) return false;
-//
-//		MandelbrotMetadata that = (MandelbrotMetadata) o;
-//
-//		if (julia != that.julia) return false;
-//		if (translation != null ? !translation.equals(that.translation) : that.translation != null) return false;
-//		if (rotation != null ? !rotation.equals(that.rotation) : that.rotation != null) return false;
-//		if (scale != null ? !scale.equals(that.scale) : that.scale != null) return false;
-//		if (point != null ? !point.equals(that.point) : that.point != null) return false;
-////		if (time != null ? !time.equals(that.time) : that.time != null) return false;
-//		return options != null ? options.equals(that.options) : that.options == null;
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		int result = translation != null ? translation.hashCode() : 0;
-//		result = 31 * result + (rotation != null ? rotation.hashCode() : 0);
-//		result = 31 * result + (scale != null ? scale.hashCode() : 0);
-//		result = 31 * result + (point != null ? point.hashCode() : 0);
-////		result = 31 * result + (time != null ? time.hashCode() : 0);
-//		result = 31 * result + (julia ? 1 : 0);
-//		result = 31 * result + (options != null ? options.hashCode() : 0);
-//		return result;
-//	}
 }
