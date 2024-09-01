@@ -26,7 +26,6 @@ package com.nextbreakpoint.nextfractal.contextfree.module;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParser;
-import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserException;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFParserResult;
 import com.nextbreakpoint.nextfractal.contextfree.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
@@ -82,14 +81,14 @@ public class ContextFreeImageComposer implements ImageComposer {
             renderer.setOpaque(opaque);
             renderer.init();
             renderer.runTask();
-            renderer.waitForTasks();
-            if (renderer.isAborted()) {
+            renderer.waitForTask();
+            if (renderer.isAborted() || renderer.isInterrupted()) {
                 aborted = true;
                 return buffer;
             }
             renderer.copyImage(renderFactory.createGraphicsContext(g2d));
         } catch (Throwable e) {
-            log.log(Level.WARNING, e.getMessage(), e);
+            log.log(Level.WARNING, "Can't render image", e);
             aborted = true;
         } finally {
             if (g2d != null) {

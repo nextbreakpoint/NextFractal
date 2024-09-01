@@ -24,9 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
-import lombok.ToString;
-
-@ToString
 public class CFVersionException extends Exception {
 	public CFVersionException(String message) {
 		super(message);

@@ -43,7 +43,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Scope;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Region;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
@@ -123,8 +122,8 @@ public class MandelbrotImageComposer implements ImageComposer {
             renderer.setView(view);
             renderer.setTime(time);
             renderer.runTask();
-            renderer.waitForTasks();
-            if (renderer.isAborted()) {
+            renderer.waitForTask();
+            if (renderer.isAborted() || renderer.isInterrupted()) {
                 aborted = true;
                 return buffer;
             }
@@ -144,7 +143,7 @@ public class MandelbrotImageComposer implements ImageComposer {
                 drawPoint(renderFactory, renderContext, tile.imageSize(), region, metadata);
             }
         } catch (Throwable e) {
-            log.log(Level.WARNING, e.getMessage(), e);
+            log.log(Level.WARNING, "Can't render image", e);
             aborted = true;
         } finally {
             if (g2d != null) {

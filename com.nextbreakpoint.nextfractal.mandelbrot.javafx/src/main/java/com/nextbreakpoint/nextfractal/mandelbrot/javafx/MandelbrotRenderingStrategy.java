@@ -183,7 +183,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
             }
         } catch (Exception e) {
             if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE, "Can't update coordinators", e);
+                log.log(Level.FINE, "Can't render image", e);
             }
         }
     }
@@ -302,35 +302,29 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
 
     @Override
     public void disposeCoordinators() {
-        try {
-            if (coordinators != null) {
-                for (Coordinator coordinator : coordinators) {
-                    if (coordinator != null) {
-                        coordinator.abort();
-                    }
+        if (coordinators != null) {
+            for (Coordinator coordinator : coordinators) {
+                if (coordinator != null) {
+                    coordinator.abort();
                 }
             }
-            if (juliaCoordinator != null) {
-                juliaCoordinator.abort();
-            }
-            if (coordinators != null) {
-                for (int i = 0; i < coordinators.length; i++) {
-                    if (coordinators[i] != null) {
-                        coordinators[i].waitFor();
-                        coordinators[i].dispose();
-                        coordinators[i] = null;
-                    }
+        }
+        if (juliaCoordinator != null) {
+            juliaCoordinator.abort();
+        }
+        if (coordinators != null) {
+            for (int i = 0; i < coordinators.length; i++) {
+                if (coordinators[i] != null) {
+                    coordinators[i].waitFor();
+                    coordinators[i].dispose();
+                    coordinators[i] = null;
                 }
             }
-            if (juliaCoordinator != null) {
-                juliaCoordinator.waitFor();
-                juliaCoordinator.dispose();
-                juliaCoordinator = null;
-            }
-        } catch (Exception e) {
-            if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE, "Can't dispose coordinators", e);
-            }
+        }
+        if (juliaCoordinator != null) {
+            juliaCoordinator.waitFor();
+            juliaCoordinator.dispose();
+            juliaCoordinator = null;
         }
     }
 
@@ -380,7 +374,7 @@ public class MandelbrotRenderingStrategy implements RenderingStrategy {
         }
     }
 
-    private void joinCoordinators() throws InterruptedException {
+    private void joinCoordinators() {
         if (coordinators != null) {
             for (Coordinator coordinator : coordinators) {
                 coordinator.waitFor();

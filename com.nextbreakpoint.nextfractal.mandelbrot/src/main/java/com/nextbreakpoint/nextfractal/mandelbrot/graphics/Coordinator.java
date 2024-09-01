@@ -80,11 +80,11 @@ public class Coordinator implements RendererDelegate {
 	}
 	
 	public void abort() {
-		renderer.abortTasks();
+		renderer.abortTask();
 	}
 	
-	public void waitFor() throws InterruptedException {
-		renderer.waitForTasks();
+	public void waitFor() {
+		renderer.waitForTask();
 	}
 	
 	public void run() {

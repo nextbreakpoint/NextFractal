@@ -120,7 +120,6 @@ public class Compiler {
 			final ClassFactory<Orbit> classFactory = compilerAdapter.compile(Orbit.class, javaSource, packageName, className + "Orbit");
 			return new CompilerResult<>(classFactory);
 		} catch (CompilerException e) {
-			log.log(Level.INFO, "Can't compile orbit class", e);
 			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();
@@ -151,7 +150,6 @@ public class Compiler {
 			final ClassFactory<Color> classFactory = compilerAdapter.compile(Color.class, javaSource, packageName, className + "Color");
 			return new CompilerResult<>(classFactory);
 		} catch (CompilerException e) {
-			log.log(Level.INFO, "Can't compile color class", e);
 			throw e;
 		} catch (ASTException e) {
 			long line = e.getLocation().getLine();

@@ -37,7 +37,6 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Color;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.ComplexNumber;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParser;
-import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserException;
 import com.nextbreakpoint.nextfractal.mandelbrot.dsl.DSLParserResult;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.Renderer;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.View;
@@ -96,14 +95,14 @@ public class MandelbrotImageGenerator implements ImageGenerator {
 			renderer.setView(view);
 			renderer.setTime(time);
 			renderer.runTask();
-			renderer.waitForTasks();
-			if (renderer.isAborted()) {
+			renderer.waitForTask();
+			if (renderer.isAborted() || renderer.isInterrupted()) {
 				aborted = true;
 				return buffer;
 			}
 			renderer.getPixels(pixels);
 		} catch (Throwable e) {
-			log.log(Level.WARNING, e.getMessage(), e);
+			log.log(Level.WARNING, "Can't render image", e);
 			aborted = true;
 		}
 		return buffer;

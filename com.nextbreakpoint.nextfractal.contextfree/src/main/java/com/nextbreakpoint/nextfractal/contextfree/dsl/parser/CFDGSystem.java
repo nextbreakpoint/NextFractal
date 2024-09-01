@@ -42,18 +42,18 @@ public class CFDGSystem {
 	private boolean errorOccurred;
 
 	public void info(String message, ASTWhere where) {
-		log.log(Level.INFO, message + (where != null ? " [" + where.getLine() + ":" + where.getCharPositionInLine() + "]" : ""));
+		log.log(Level.INFO, message + (where != null ? " [" + where.line() + ":" + where.charPositionInLine() + "]" : ""));
 	}
 
 	public void warning(String message, ASTWhere where) {
-		log.log(Level.WARNING, message + (where != null ? " [" + where.getLine() + ":" + where.getCharPositionInLine() + "]" : ""));
+		log.log(Level.WARNING, message + (where != null ? " [" + where.line() + ":" + where.charPositionInLine() + "]" : ""));
 	}
 
 	public void error(String message, ASTWhere where) {
 		errorOccurred = true;
-		log.log(Level.WARNING, message + (where != null ? " [" + where.getLine() + ":" + where.getCharPositionInLine() + "]" : ""));
+		log.log(Level.WARNING, message + (where != null ? " [" + where.line() + ":" + where.charPositionInLine() + "]" : ""));
 		if (where != null) {
-			errors.add(makeError(where.getLine(), where.getCharPositionInLine(), where.getStartIndex(), where.getStopIndex() - where.getStartIndex(), message));
+			errors.add(makeError(where.line(), where.charPositionInLine(), where.startIndex(), where.stopIndex() - where.startIndex(), message));
 		} else {
 			errors.add(makeError(0, 0, 0, 0, message));
 		}

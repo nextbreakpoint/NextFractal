@@ -134,6 +134,8 @@ public class ContextFreeRenderingStrategy implements RenderingStrategy {
     @Override
     public void disposeCoordinators() {
         if (coordinator != null) {
+            coordinator.abort();
+            coordinator.waitFor();
             coordinator.dispose();
             coordinator = null;
         }

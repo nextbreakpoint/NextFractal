@@ -25,16 +25,22 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl.parser;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.ast.ASTWhere;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import lombok.Getter;
-import lombok.ToString;
+
+import java.util.stream.Collectors;
 
 @Getter
-@ToString
 public class CFDGException extends RuntimeException {
 	private final ASTWhere where;
 
 	public CFDGException(String message, ASTWhere where) {
 		super(message);
 		this.where = where;
+	}
+
+	@Override
+	public String toString() {
+		return "%s (%s)".formatted(getMessage(), where.toString());
 	}
 }

@@ -83,7 +83,7 @@ public class DSLParser {
 			final ASTBuilder builder = parser.getBuilder();
 			final ASTFractal fractal = builder.getFractal();
 			if (!errors.isEmpty()) {
-				throw new DSLParserException("Script syntax error", errors);
+				throw new DSLParserException("Parser returned errors", errors);
 			}
 			if (fractal == null) {
 				throw new DSLParserException("Fractal not defined", errors);

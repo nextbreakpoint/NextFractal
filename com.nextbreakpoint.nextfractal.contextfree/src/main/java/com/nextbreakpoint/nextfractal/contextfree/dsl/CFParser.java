@@ -85,7 +85,7 @@ public class CFParser {
 			}
 			errors.addAll(cfdg.getSystem().getErrors());
 			if (!errors.isEmpty()) {
-				throw new CFParserException("Script syntax error", errors);
+				throw new CFParserException("Parser returned errors", errors);
 			}
 			return new CFParserResult(source, () -> new CFDGSimpleImage(cfdg));
 		} catch (CFVersionException e) {
@@ -94,10 +94,10 @@ public class CFParser {
 			log.log(Level.WARNING, "Can't parse script using version " + version, e);
 			throw e;
 		} catch (CFDGException e) {
-			final long line = e.getWhere().getLine();
-			final long charPositionInLine = e.getWhere().getCharPositionInLine();
-			final long index = e.getWhere().getStartIndex();
-			final long length = e.getWhere().getStopIndex() - e.getWhere().getStartIndex();
+			final long line = e.getWhere().line();
+			final long charPositionInLine = e.getWhere().charPositionInLine();
+			final long index = e.getWhere().startIndex();
+			final long length = e.getWhere().stopIndex() - e.getWhere().startIndex();
 			final ScriptError error = new ScriptError(PARSE, line, charPositionInLine, index, length, e.getMessage());
 			log.log(Level.WARNING, "Can't parse script using version " + version, e);
             throw new CFParserException("Can't parse script using version " + version, List.of(error));

@@ -48,6 +48,7 @@ import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -118,7 +119,7 @@ public class Renderer {
 		future = executor.submit(this::render);
 	}
 
-    public void abortTasks() {
+    public void abortTask() {
 		interrupted = true;
 		if (future != null) {
 			if (renderer != null) {
@@ -127,7 +128,7 @@ public class Renderer {
 		}
 	}
 
-	public void waitForTasks() throws InterruptedException {
+	public void waitForTask() {
 		try {
 			if (future != null) {
 				future.get();
@@ -135,9 +136,13 @@ public class Renderer {
 			}
 		} catch (InterruptedException e) {
 			log.warning("Interrupted while awaiting for task");
-			throw e;
+			Thread.currentThread().interrupt();
+			aborted = true;
+		} catch (CancellationException e) {
+			log.log(Level.WARNING, "Task was cancelled", e);
+			aborted = true;
 		} catch (ExecutionException e) {
-			log.log(Level.WARNING, "Cannot execute task", e);
+			log.log(Level.WARNING, "Task has failed", e);
 			aborted = true;
 		}
 	}
@@ -264,8 +269,7 @@ public class Renderer {
 				//TODO what errors are being collected?
 				errors.addAll(renderer.errors());
 			}
-			if (interrupted) {
-				aborted = true;
+			if (!interrupted && !aborted) {
 				update(1, pixels);
 			}
 		} catch (Exception e) {

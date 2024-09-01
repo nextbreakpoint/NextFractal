@@ -47,7 +47,7 @@ public class RendererTest {
 				output.add(progress);
 			});
 			renderer.runTask();
-			renderer.waitForTasks();
+			renderer.waitForTask();
 			float[] actual = new float[output.size()];
 			for (int i = 0; i < actual.length; i++) {
 				actual[i] = output.get(i);

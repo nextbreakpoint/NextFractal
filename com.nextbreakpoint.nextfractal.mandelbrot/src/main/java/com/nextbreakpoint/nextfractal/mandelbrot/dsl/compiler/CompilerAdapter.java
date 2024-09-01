@@ -59,7 +59,7 @@ public class CompilerAdapter {
 
 	@SuppressWarnings("unchecked")
     public <T> ClassFactory<T> compile(Class<T> clazz, String javaSource, String packageName, String className) throws CompilerException {
-		log.log(Level.FINE, "Compile Java source:\n" + javaSource);
+		log.log(Level.FINE, "Compiling class: {0}\n", javaSource);
 
 		final String fullClassName = packageName + "." + className;
 
@@ -78,8 +78,6 @@ public class CompilerAdapter {
 				defineClasses(fileManager, loader, fullClassName);
 
 				final Class<?> compiledClazz = loader.loadClass(fullClassName);
-
-				log.log(Level.FINE, "Generated class name: " + compiledClazz.getCanonicalName());
 
 				if (!clazz.isAssignableFrom(compiledClazz)) {
                     throw new CompilerException("Can't compile class", javaSource, makeError("Incompatible class"));
@@ -100,12 +98,13 @@ public class CompilerAdapter {
 	private static List<String> getCompilerOptions() {
 		final String modulePath = System.getProperty(PROPERTY_NEXTFRACTAL_MODULE_PATH, System.getProperty("jdk.module.path"));
 		if (modulePath != null) {
-			log.info("Module path = " + modulePath);
+			log.log(Level.FINE, "Module path = {0}", modulePath);
 			return List.of("-source", "22", "-target", "22", "-proc:none", "--module-path", modulePath, "--add-modules", "com.nextbreakpoint.nextfractal.mandelbrot");
 		} else {
+			// class-path is requited in case the compiler is not invoked using the modules system (for instance in unit tests)
 			final String classPath = System.getProperty(PROPERTY_NEXTFRACTAL_CLASS_PATH);
 			if (classPath != null) {
-				log.info("Class path = " + classPath);
+				log.log(Level.FINE, "Class path = {0}", classPath);
 				return List.of("-source", "22", "-target", "22", "-proc:none", "--class-path", classPath);
 			} else {
 				return List.of("-source", "22", "-target", "22", "-proc:none");

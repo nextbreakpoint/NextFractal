@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
-@ToString
 public class CompilerException extends DSLParserException {
 	private final String source;
 
@@ -44,5 +43,10 @@ public class CompilerException extends DSLParserException {
 	public CompilerException(String message, String source, List<ScriptError> errors) {
 		super(message, errors);
 		this.source = Objects.requireNonNull(source);
+	}
+
+	@Override
+	public String toString() {
+		return "%s:\n%s\n".formatted(getMessage(), source);
 	}
 }

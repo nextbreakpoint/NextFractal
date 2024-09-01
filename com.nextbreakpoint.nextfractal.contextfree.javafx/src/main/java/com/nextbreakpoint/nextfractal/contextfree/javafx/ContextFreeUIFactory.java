@@ -160,7 +160,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		}
 
 		@Override
-		public void waitFor() throws InterruptedException {
+		public void waitFor() {
 			coordinator.waitFor();
 		}
 

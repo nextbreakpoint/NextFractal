@@ -136,7 +136,7 @@ public abstract class AbstractExportService implements ExportService {
 				lock.lock();
 				final LinkedList<ExportSessionHandle> removedHandles = new LinkedList<>();
 				exportHandles.values().forEach(session -> {
-					if ((session.isFailed() || session.isTerminated()) && session.isExpired()) {
+					if (session.isTerminated() && session.isExpired()) {
 						removedHandles.add(session);
 					}
 				});

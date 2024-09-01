@@ -49,7 +49,7 @@ public class ErrorStrategy extends DefaultErrorStrategy {
 
 	@Override
 	public void reportError(Parser recognizer, RecognitionException e) {
-		String message = generateErrorMessage("Parse failed", recognizer);
+		String message = generateErrorMessage("Syntax error", recognizer);
         long line = e.getOffendingToken().getLine();
 		long charPositionInLine = e.getOffendingToken().getCharPositionInLine();
 		long index = e.getOffendingToken().getStartIndex();

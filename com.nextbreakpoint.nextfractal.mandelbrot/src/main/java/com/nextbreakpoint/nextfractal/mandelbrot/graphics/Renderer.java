@@ -50,6 +50,7 @@ import lombok.extern.java.Log;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -166,11 +167,11 @@ public class Renderer {
 		future = executor.submit(this::render);
 	}
 
-	public void abortTasks() {
+	public void abortTask() {
 		interrupted = true;
 	}
 
-	public void waitForTasks() throws InterruptedException {
+	public void waitForTask() {
 		try {
 			if (future != null) {
 				future.get();
@@ -178,12 +179,16 @@ public class Renderer {
 			}
 		} catch (InterruptedException e) {
 			log.warning("Interrupted while awaiting for task");
-			throw e;
+			Thread.currentThread().interrupt();
+			aborted = true;
+		} catch (CancellationException e) {
+			log.log(Level.WARNING, "Task was cancelled", e);
+			aborted = true;
 		} catch (ExecutionException e) {
-			log.log(Level.WARNING, "Cannot execute task", e);
+			log.log(Level.WARNING, "Task has failed", e);
 			aborted = true;
 		}
-	}
+    }
 
 	public void setOrbit(Orbit orbit) {
 		if (future != null) {
@@ -399,7 +404,7 @@ public class Renderer {
 	protected void render() {
 		final List<ScriptError> errors = new ArrayList<>();
 		try {
-//			if (isInterrupted()) {
+//			if (interrupted) {
 //				progress = 0;
 //				contentRendererData.swap();
 //				contentRendererData.clearPixels();
@@ -544,8 +549,7 @@ public class Renderer {
 					}
 					Thread.yield();
 				}
-				if (isInterrupted()) {
-					aborted = true;
+				if (interrupted) {
 					break;
 				}
 				if (y >= ty) {
@@ -557,7 +561,7 @@ public class Renderer {
 				}
 				Thread.yield();
 			}
-			if (!aborted) {
+			if (!interrupted && !aborted) {
 				progress = 1f;
 				update(progress, contentRendererData.getPixels());
 			}

@@ -123,7 +123,7 @@ public final class XaosRenderer extends Renderer {
 	protected void render() {
 		final List<ScriptError> errors = new ArrayList<>();
 		try {
-//			if (isInterrupted()) {
+//			if (interrupted) {
 //				progress = 0;
 //				contentRendererData.swap();
 //				contentRendererData.clearPixels();
@@ -1035,7 +1035,7 @@ public final class XaosRenderer extends Renderer {
 //            for (i = offset[s]; i < tmpRealloc.length; i += XaosConstants.STEPS) {
 //                refreshColumn(tmpRealloc[i], xaosRendererData.reallocX(), xaosRendererData.reallocY());
 //            }
-//			if (isInterrupted()) {
+//			if (interrupted) {
 //				break;
 //			}
 //        }
@@ -1071,31 +1071,29 @@ public final class XaosRenderer extends Renderer {
 			}
 		}
 		long oldTime = System.currentTimeMillis();
-		for (s = 0; !aborted && s < XaosConstants.STEPS; s++) {
+		for (s = 0; !interrupted && s < XaosConstants.STEPS; s++) {
 			tmpRealloc = xaosRendererData.reallocY();
-			for (i = offset[s]; !aborted && i < tmpRealloc.length; i += XaosConstants.STEPS) {
+			for (i = offset[s]; !interrupted && i < tmpRealloc.length; i += XaosConstants.STEPS) {
 				if (tmpRealloc[i].calculate || !tmpRealloc[i].isCached || tmpRealloc[i].isFilled) {
 					renderLine(tmpRealloc[i], xaosRendererData.reallocX(), xaosRendererData.reallocY());
 					tocalcy -= 1;
 				}
-				if (isInterrupted()) {
-					aborted = true;
+				if (interrupted) {
 					break;
 				}
 			}
 			tmpRealloc = xaosRendererData.reallocX();
-			for (i = offset[s]; !aborted && i < tmpRealloc.length; i += XaosConstants.STEPS) {
+			for (i = offset[s]; !interrupted && i < tmpRealloc.length; i += XaosConstants.STEPS) {
 				if (tmpRealloc[i].calculate || !tmpRealloc[i].isCached || tmpRealloc[i].isFilled) {
 					renderColumn(tmpRealloc[i], xaosRendererData.reallocX(), xaosRendererData.reallocY());
 					tocalcx -= 1;
 				}
-				if (isInterrupted()) {
-					aborted = true;
+				if (interrupted) {
 					break;
 				}
 			}
 			long newTime = System.currentTimeMillis();
-			if (!aborted && (continuous || newTime - oldTime > 500)) {
+			if (!interrupted && (continuous || newTime - oldTime > 500)) {
 				tmpRealloc = xaosRendererData.reallocY();
 				for (i = 0; i < tmpRealloc.length; i++) {
 					tmpRealloc[i].changeDirty = tmpRealloc[i].dirty;
@@ -1237,8 +1235,7 @@ public final class XaosRenderer extends Renderer {
 			else {
 				renderColumn(xaosRendererData.queue()[i], xaosRendererData.reallocX(), xaosRendererData.reallocY());
 			}
-			if (isInterrupted()) {
-				aborted = true;
+			if (interrupted) {
 				break;
 			}
 			Thread.yield();

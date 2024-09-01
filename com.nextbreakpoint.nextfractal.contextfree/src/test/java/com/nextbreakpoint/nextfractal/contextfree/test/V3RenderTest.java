@@ -88,7 +88,7 @@ public class V3RenderTest extends BaseTest {
 		renderer.setImage(new CFDGSimpleImage(cfdg), "ABCD");
 		renderer.init();
 		renderer.runTask();
-		renderer.waitForTasks();
+		renderer.waitForTask();
 
 		renderer.drawImage(rendererFactory.createGraphicsContext(actualImage.createGraphics()), 0, 0);
 
