@@ -42,6 +42,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Screen;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
@@ -124,10 +125,14 @@ public class BrowsePane extends BorderPane {
         final HBox toolbar3 = new HBox(2);
         toolbar3.setAlignment(Pos.CENTER_RIGHT);
 
-        final Button closeButton = new Button("", Icons.createIconImage("/icon-close.png"));
-        final Button deleteButton = new Button("", Icons.createIconImage("/icon-delete.png"));
-        final Button reloadButton = new Button("", Icons.createIconImage("/icon-reload.png"));
-        final Button importButton = new Button("", Icons.createIconImage("/icon-import.png"));
+        final double percentage = Icons.computeOptimalIconPercentage();
+        final int buttonSize = (int) Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
+
+        final Button closeButton = new Button("", Icons.createSVGIcon("/close.svg", buttonSize));
+        final Button deleteButton = new Button("", Icons.createSVGIcon("/remove.svg", buttonSize));
+        final Button reloadButton = new Button("", Icons.createSVGIcon("/reload.svg", buttonSize));
+        final Button importButton = new Button("", Icons.createSVGIcon("/import.svg", buttonSize));
+
         closeButton.setTooltip(new Tooltip("Hide projects"));
         deleteButton.setTooltip(new Tooltip("Delete projects"));
         reloadButton.setTooltip(new Tooltip("Reload projects"));

@@ -41,8 +41,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -50,7 +48,6 @@ import javafx.stage.Screen;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
-import java.io.InputStream;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -80,11 +77,14 @@ public class JobsPane extends BorderPane {
         listView.setFixedCellSize(tile.tileSize().height() + PADDING);
         listView.setCellFactory(_ -> new JobsListCell(tile));
 
+        final double percentage = Icons.computeOptimalIconPercentage();
+        final int buttonSize = (int) Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
+
         final HBox exportControls = new HBox(0);
         exportControls.setAlignment(Pos.CENTER);
-        final Button suspendButton = new Button("", createIconImage("/icon-suspend.png", 0.015));
-        final Button resumeButton = new Button("", createIconImage("/icon-resume.png", 0.015));
-        final Button removeButton = new Button("", createIconImage("/icon-remove.png", 0.015));
+        final Button suspendButton = new Button("", Icons.createSVGIcon("/pause.svg", buttonSize));
+        final Button resumeButton = new Button("", Icons.createSVGIcon("/play.svg", buttonSize));
+        final Button removeButton = new Button("", Icons.createSVGIcon("/stop.svg", buttonSize));
         suspendButton.setTooltip(new Tooltip("Suspend selected jobs"));
         resumeButton.setTooltip(new Tooltip("Resume selected jobs"));
         removeButton.setTooltip(new Tooltip("Remove selected jobs"));
@@ -151,23 +151,23 @@ public class JobsPane extends BorderPane {
         return (int) Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
     }
 
-    private ImageView createIconImage(String name, double percentage) {
-        final int size = computePercentage(percentage);
-        final InputStream stream = getClass().getResourceAsStream(name);
-        if (stream != null) {
-            final ImageView image = new ImageView(new Image(stream));
-            image.setSmooth(true);
-            image.setFitWidth(size);
-            image.setFitHeight(size);
-            return image;
-        } else {
-            final ImageView image = new ImageView();
-            image.setSmooth(true);
-            image.setFitWidth(size);
-            image.setFitHeight(size);
-            return image;
-        }
-    }
+//    private ImageView createIconImage(String name, double percentage) {
+//        final int size = computePercentage(percentage);
+//        final InputStream stream = getClass().getResourceAsStream(name);
+//        if (stream != null) {
+//            final ImageView image = new ImageView(new Image(stream));
+//            image.setSmooth(true);
+//            image.setFitWidth(size);
+//            image.setFitHeight(size);
+//            return image;
+//        } else {
+//            final ImageView image = new ImageView();
+//            image.setSmooth(true);
+//            image.setFitWidth(size);
+//            image.setFitHeight(size);
+//            return image;
+//        }
+//    }
 
     private void updateJobList(ListView<Bitmap> jobsList) {
         final ObservableList<Bitmap> bitmaps = jobsList.getItems();

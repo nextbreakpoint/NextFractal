@@ -60,6 +60,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.ExportPane;
 import com.nextbreakpoint.nextfractal.core.javafx.HistoryPane;
+import com.nextbreakpoint.nextfractal.core.javafx.Icons;
 import com.nextbreakpoint.nextfractal.core.javafx.JobsDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.JobsPane;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
@@ -84,8 +85,6 @@ import javafx.stage.Screen;
 import lombok.extern.java.Log;
 
 import java.util.List;
-
-import static com.nextbreakpoint.nextfractal.core.javafx.Icons.createIconImage;
 
 @Log
 public class MainSidePane extends BorderPane {
@@ -117,19 +116,20 @@ public class MainSidePane extends BorderPane {
         sidebarPane.getChildren().add(exportPane);
         sidebarPane.getChildren().add(paramsPane);
 
-        final Pane sourcePane = new Pane();
-        final HBox sourceButtons = new HBox(0);
-        sourceButtons.setAlignment(Pos.CENTER);
-        final Button browseButton = new Button("", createIconImage("/icon-grid.png"));
-        final Button storeButton = new Button("", createIconImage("/icon-store.png"));
-        final Button renderButton = new Button("", createIconImage("/icon-run.png"));
-        final Button loadButton = new Button("", createIconImage("/icon-load.png"));
-        final Button saveButton = new Button("", createIconImage("/icon-save.png"));
-        final ToggleButton jobsButton = new ToggleButton("", createIconImage("/icon-tool.png"));
-        final ToggleButton paramsButton = new ToggleButton("", createIconImage("/icon-edit.png"));
-        final ToggleButton exportButton = new ToggleButton("", createIconImage("/icon-export.png"));
-        final ToggleButton historyButton = new ToggleButton("", createIconImage("/icon-time.png"));
-        final ToggleButton statusButton = new ToggleButton("", createIconImage("/icon-warn.png"));
+        final double percentage = Icons.computeOptimalIconPercentage();
+        final int size = (int)Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
+
+        final Button browseButton = new Button("", Icons.createSVGIcon("/browse.svg", size));
+        final Button storeButton = new Button("", Icons.createSVGIcon("/store.svg", size));
+        final Button renderButton = new Button("", Icons.createSVGIcon("/redraw.svg", size));
+        final Button loadButton = new Button("", Icons.createSVGIcon("/import.svg", size));
+        final Button saveButton = new Button("", Icons.createSVGIcon("/export.svg", size));
+        final ToggleButton jobsButton = new ToggleButton("", Icons.createSVGIcon("/tasks.svg", size));
+        final ToggleButton paramsButton = new ToggleButton("", Icons.createSVGIcon("/edit.svg", size));
+        final ToggleButton exportButton = new ToggleButton("", Icons.createSVGIcon("/render.svg", size));
+        final ToggleButton historyButton = new ToggleButton("", Icons.createSVGIcon("/clock.svg", size));
+        final ToggleButton statusButton = new ToggleButton("", Icons.createSVGIcon("/errors.svg", size));
+
         browseButton.setTooltip(new Tooltip("Show/hide projects"));
         storeButton.setTooltip(new Tooltip("Save project"));
         renderButton.setTooltip(new Tooltip("Render image"));
@@ -140,6 +140,9 @@ public class MainSidePane extends BorderPane {
         exportButton.setTooltip(new Tooltip("Show/hide capture and export controls"));
         historyButton.setTooltip(new Tooltip("Show/hide changes history"));
         statusButton.setTooltip(new Tooltip("Show/hide errors console"));
+
+        final HBox sourceButtons = new HBox(0);
+        sourceButtons.setAlignment(Pos.CENTER);
         sourceButtons.getChildren().add(browseButton);
         sourceButtons.getChildren().add(storeButton);
         sourceButtons.getChildren().add(loadButton);
@@ -152,10 +155,13 @@ public class MainSidePane extends BorderPane {
         sourceButtons.getChildren().add(statusButton);
         sourceButtons.getStyleClass().add("toolbar");
         sourceButtons.getStyleClass().add("menubar");
+
+        final Pane sourcePane = new Pane();
         sourcePane.getChildren().add(editorPane);
         sourcePane.getChildren().add(sourceButtons);
         sourcePane.getChildren().add(statusPane);
         sourcePane.getChildren().add(sidebarPane);
+
         browseButton.setOnAction(e -> eventBus.postEvent(ToggleBrowserRequested.builder().build()));
         storeButton.setOnAction(e -> eventBus.postEvent(EditorActionFired.builder().action("store").build()));
         renderButton.setOnAction(e -> eventBus.postEvent(EditorActionFired.builder().action("reload").build()));

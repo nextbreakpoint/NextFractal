@@ -49,9 +49,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.stage.Screen;
 
 import static com.nextbreakpoint.nextfractal.core.javafx.Icons.computeOptimalLargeIconPercentage;
-import static com.nextbreakpoint.nextfractal.core.javafx.Icons.createIconImage;
+import static com.nextbreakpoint.nextfractal.core.javafx.Icons.createSVGIcon;
 
 public class MandelbrotToolbar extends Toolbar {
     private final BooleanObservableValue juliaProperty;
@@ -80,14 +81,17 @@ public class MandelbrotToolbar extends Toolbar {
         toolProperty = new ToolObservableValue();
         toolProperty.setValue(new ToolZoom(toolContext, true));
 
-        final ToggleButton zoomButton = new ToggleButton("", createIconImage("/icon-zoomin.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton moveButton = new ToggleButton("", createIconImage("/icon-move.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton rotateButton = new ToggleButton("", createIconImage("/icon-rotate.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton pickButton = new ToggleButton("", createIconImage("/icon-pick.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton juliaButton = new ToggleButton("", createIconImage("/icon-julia.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton orbitButton = new ToggleButton("", createIconImage("/icon-orbit.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton captureButton = new ToggleButton("", createIconImage("/icon-capture.png", computeOptimalLargeIconPercentage()));
-        final ToggleButton animationButton = new ToggleButton("", createIconImage("/icon-cron.png", computeOptimalLargeIconPercentage()));
+        final double percentage = computeOptimalLargeIconPercentage();
+        final int size = (int)Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
+
+        final ToggleButton zoomButton = new ToggleButton("", createSVGIcon("/magnifier.svg", size));
+        final ToggleButton moveButton = new ToggleButton("", createSVGIcon("/move.svg", size));
+        final ToggleButton rotateButton = new ToggleButton("", createSVGIcon("/rotate.svg", size));
+        final ToggleButton pickButton = new ToggleButton("", createSVGIcon("/pin.svg", size));
+        final ToggleButton juliaButton = new ToggleButton("", createSVGIcon("/julia.svg", size));
+        final ToggleButton orbitButton = new ToggleButton("", createSVGIcon("/orbit.svg", size));
+        final ToggleButton captureButton = new ToggleButton("", createSVGIcon("/capture.svg", size));
+        final ToggleButton animationButton = new ToggleButton("", createSVGIcon("/chronometer.svg", size));
 
         final ToggleGroup toolsGroup = new ToggleGroup();
         toolsGroup.getToggles().add(zoomButton);
@@ -95,7 +99,7 @@ public class MandelbrotToolbar extends Toolbar {
         toolsGroup.getToggles().add(rotateButton);
         toolsGroup.getToggles().add(pickButton);
 
-        final Button homeButton = new Button("", createIconImage("/icon-home.png", computeOptimalLargeIconPercentage()));
+        final Button homeButton = new Button("", createSVGIcon("/center.svg", size));
 
         zoomButton.setTooltip(new Tooltip("Select zoom in tool"));
         moveButton.setTooltip(new Tooltip("Select move tool"));
@@ -121,7 +125,7 @@ public class MandelbrotToolbar extends Toolbar {
 
         zoomButton.setSelected(true);
 
-//        toolsGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+//        toolsGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
 //            if (oldValue != null) {
 //                ((ToggleButton) oldValue).setDisable(false);
 //            }
@@ -130,49 +134,49 @@ public class MandelbrotToolbar extends Toolbar {
 //            }
 //        });
 
-        homeButton.setOnAction(e -> handleSessionReset());
+        homeButton.setOnAction(_ -> handleSessionReset());
 
-        zoomButton.setOnAction(e -> handleToolSelected(new ToolZoom(toolContext, true)));
+        zoomButton.setOnAction(_ -> handleToolSelected(new ToolZoom(toolContext, true)));
 
-        moveButton.setOnAction(e -> handleToolSelected(new ToolMove(toolContext)));
+        moveButton.setOnAction(_ -> handleToolSelected(new ToolMove(toolContext)));
 
-        rotateButton.setOnAction(e -> handleToolSelected(new ToolRotate(toolContext)));
+        rotateButton.setOnAction(_ -> handleToolSelected(new ToolRotate(toolContext)));
 
-        pickButton.setOnAction(e -> handleToolSelected(new ToolPick(toolContext)));
+        pickButton.setOnAction(_ -> handleToolSelected(new ToolPick(toolContext)));
 
-        orbitButton.setOnAction(e -> handleShowOrbitSelected(orbitButton.isSelected()));
+        orbitButton.setOnAction(_ -> handleShowOrbitSelected(orbitButton.isSelected()));
 
-        juliaButton.setOnAction(e -> handleJuliaSelected(juliaButton.isSelected()));
+        juliaButton.setOnAction(_ -> handleJuliaSelected(juliaButton.isSelected()));
 
-        captureButton.setOnAction(e -> handleCaptureSelected(captureButton.isSelected()));
+        captureButton.setOnAction(_ -> handleCaptureSelected(captureButton.isSelected()));
 
         animationButton.setOnAction(e -> handleAnimationSelected(animationButton.isSelected()));
 
-        captureProperty.addListener((observable, oldValue, newValue) -> {
+        captureProperty.addListener((_, _, newValue) -> {
             captureButton.setSelected(newValue);
         });
 
-        animationProperty.addListener((observable, oldValue, newValue) -> {
+        animationProperty.addListener((_, _, newValue) -> {
             animationButton.setSelected(newValue);
         });
 
-        juliaProperty.addListener((observable, oldValue, newValue) -> {
+        juliaProperty.addListener((_, _, newValue) -> {
             juliaButton.setSelected(newValue);
         });
 
-        showOrbitProperty.addListener((observable, oldValue, newValue) -> {
+        showOrbitProperty.addListener((_, _, newValue) -> {
             orbitButton.setSelected(newValue);
         });
 
-        showTrapsProperty.addListener((observable, oldValue, newValue) -> {
+        showTrapsProperty.addListener((_, _, newValue) -> {
 //            trapsButton.setSelected(newValue);
         });
 
-        showPreviewProperty.addListener((observable, oldValue, newValue) -> {
+        showPreviewProperty.addListener((_, _, newValue) -> {
 //            previewButton.setSelected(newValue);
         });
 
-        toolProperty.addListener((observable, oldValue, newValue) -> {
+        toolProperty.addListener((_, _, newValue) -> {
             if (newValue instanceof ToolPick) {
                 pickButton.setSelected(true);
             } else if (newValue instanceof ToolZoom) {
