@@ -122,6 +122,7 @@ public class Renderer {
     public void abortTask() {
 		interrupted = true;
 		if (future != null) {
+			//TODO cancel future?
 			if (renderer != null) {
 				renderer.stop();
 			}

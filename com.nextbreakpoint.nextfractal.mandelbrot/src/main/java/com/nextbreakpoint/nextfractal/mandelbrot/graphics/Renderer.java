@@ -169,6 +169,7 @@ public class Renderer {
 
 	public void abortTask() {
 		interrupted = true;
+		//TODO cancel future?
 	}
 
 	public void waitForTask() {

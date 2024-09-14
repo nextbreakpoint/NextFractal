@@ -72,7 +72,7 @@ public class HistoryPane extends BorderPane {
 
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> _) -> itemSelected(listView));
 
-        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("History Panel"));
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("History"));
     }
 
     private void itemSelected(ListView<Bitmap> listView) {

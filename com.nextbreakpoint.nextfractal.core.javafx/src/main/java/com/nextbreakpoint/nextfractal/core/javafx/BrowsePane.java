@@ -233,8 +233,9 @@ public class BrowsePane extends BorderPane {
             toolbar3.setPrefWidth(newValue.doubleValue() / 3);
         });
 
-        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Browser Panel"));
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Browser"));
 
+        //TODO stop timer when browser is hidden
         runTimer(grid);
     }
 

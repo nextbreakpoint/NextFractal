@@ -48,7 +48,7 @@ public class RecordingPane extends Pane {
     private int frame;
 
     public RecordingPane() {
-        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Recording", Thread.MIN_PRIORITY + 1);
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Recording", Thread.MIN_PRIORITY);
         executor = ExecutorUtils.newSingleThreadScheduledExecutor(threadFactory);
 
         canvas = new Canvas(50, 50);

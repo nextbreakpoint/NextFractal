@@ -25,5 +25,5 @@
 package com.nextbreakpoint.nextfractal.core.export;
 
 public enum ExportSessionState {
-	READY, DISPATCHED, INTERRUPTED, SUSPENDED, COMPLETED, FAILED, TERMINATED
+	READY, DISPATCHED, SUSPENDED, COMPLETED, INTERRUPTED, FAILED, TERMINATED
 }

@@ -85,6 +85,7 @@ import javafx.stage.Screen;
 import lombok.extern.java.Log;
 
 import java.util.List;
+import java.util.logging.Level;
 
 @Log
 public class MainSidePane extends BorderPane {
@@ -427,7 +428,7 @@ public class MainSidePane extends BorderPane {
     }
 
     private void handleExportSessionStateChanged(JobsPane jobsPane, ExportSession exportSession, ExportSessionState state, Float progress) {
-        log.info("Session " + exportSession.getSessionId() + " state " + state.name());
+        log.log(Level.INFO, "Session {0} updated ({1}): {2}%", new Object[] { exportSession.getSessionId(), state, Math.rint(progress * 100) });
         if (state == ExportSessionState.TERMINATED) {
             jobsPane.removeSession(exportSession);
         } else {

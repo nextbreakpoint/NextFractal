@@ -25,34 +25,47 @@
 package com.nextbreakpoint.nextfractal.core.export;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
-import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderException;
+import com.nextbreakpoint.nextfractal.core.encoder.EncoderHandle;
+import com.nextbreakpoint.nextfractal.core.encoder.RAFEncoderContext;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.java.Log;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+@Log
 public final class ExportSessionHandle {
 	private final Set<ExportJobHandle> jobs = new HashSet<>();
 
 	@Getter
     private final ExportSession session;
 
-	private volatile int frameNumber;
-	private volatile float progress;
-	private volatile boolean cancelled;
-	private volatile long timestamp;
-	private volatile ExportSessionState state;
+	private int frameNumber;
+	private float progress;
+	private boolean cancelled;
+	private boolean suspended;
+	private long timestamp;
+	private ExportSessionState state;
+
+	@Getter
+	@Setter
+	private EncoderHandle encoderHandle;
 
 	public ExportSessionHandle(ExportSession session) {
 		this.session = Objects.requireNonNull(session);
 		this.frameNumber = 0;
-		this.state = ExportSessionState.SUSPENDED;
+		this.state = ExportSessionState.READY;
 		this.timestamp = System.currentTimeMillis();
 		this.jobs.addAll(session.getJobs().stream().map(ExportJobHandle::new).collect(Collectors.toSet()));
 	}
@@ -73,6 +86,14 @@ public final class ExportSessionHandle {
 		this.cancelled = cancelled;
 	}
 
+	public synchronized boolean isSuspended() {
+		return suspended;
+	}
+
+	public synchronized void setSuspended(boolean suspended) {
+		this.suspended = suspended;
+	}
+
 	public synchronized long getTimestamp() {
 		return timestamp;
 	}
@@ -84,38 +105,6 @@ public final class ExportSessionHandle {
 	public synchronized void setState(ExportSessionState state) {
 		timestamp = System.currentTimeMillis();
 		this.state = Objects.requireNonNull(state);
-	}
-
-	public synchronized boolean isReady() {
-		return state == ExportSessionState.READY;
-	}
-
-	public synchronized boolean isDispatched() {
-		return state == ExportSessionState.DISPATCHED;
-	}
-
-	public synchronized boolean isSuspended() {
-		return state == ExportSessionState.SUSPENDED;
-	}
-
-	public synchronized boolean isInterrupted() {
-		return state == ExportSessionState.INTERRUPTED;
-	}
-
-	public synchronized boolean isCompleted() {
-		return state == ExportSessionState.COMPLETED;
-	}
-
-	public synchronized boolean isTerminated() {
-		return state == ExportSessionState.TERMINATED;
-	}
-
-	public synchronized boolean isFailed() {
-		return state == ExportSessionState.FAILED;
-	}
-
-	public synchronized boolean isExpired() {
-		return System.currentTimeMillis() - timestamp > 5000;
 	}
 
 	public synchronized void updateProgress() {
@@ -146,10 +135,6 @@ public final class ExportSessionHandle {
 		return session.getFrameRate();
 	}
 
-	public Encoder getEncoder() {
-		return session.getEncoder();
-	}
-
 	public Size getSize() {
 		return session.getFrameSize();
 	}
@@ -166,8 +151,8 @@ public final class ExportSessionHandle {
 		return session.getJobs().size();
 	}
 
-	public Collection<ExportJobHandle> getJobs() {
-		return Collections.unmodifiableSet(jobs);
+	public int getCompletedJobsCount() {
+		return jobs.stream().filter(job -> job.getState() == ExportJobState.COMPLETED).mapToInt(_ -> 1).sum();
 	}
 
 	public boolean isFrameCompleted() {
@@ -178,7 +163,36 @@ public final class ExportSessionHandle {
         return (getFrameCount() == 0 || getFrameNumber() == getFrameCount() - 1) && isFrameCompleted();
     }
 
-	private int getCompletedJobsCount() {
-		return jobs.stream().filter(ExportJobHandle::isCompleted).mapToInt(_ -> 1).sum();
+	public Collection<ExportJobHandle> getJobs() {
+		return Collections.unmodifiableSet(jobs);
+	}
+
+	public synchronized void openEncoder() throws IOException, EncoderException {
+		if (encoderHandle == null) {
+			final RandomAccessFile raf = new RandomAccessFile(session.getTmpFile(), "r");
+			final String sessionId = session.getSessionId();
+			final int frameRate = session.getFrameRate();
+			final int imageWidth = session.getFrameSize().width();
+			final int imageHeight = session.getFrameSize().height();
+			final RAFEncoderContext context = new RAFEncoderContext(sessionId, raf, imageWidth, imageHeight, frameRate);
+			encoderHandle = session.getEncoder().open(context, session.getFile());
+		}
+	}
+
+	public synchronized void closeEncoder() throws EncoderException {
+		if (encoderHandle != null) {
+			try {
+				session.getEncoder().close(encoderHandle);
+			} finally {
+				if (!session.getTmpFile().delete()) {
+					log.log(Level.WARNING, "Cannot delete temporary file: " + session.getTmpFile());
+				}
+				encoderHandle = null;
+			}
+		}
+	}
+
+	public synchronized void encode(int frameNumber, int repeatFrameCount, int frameCount) throws EncoderException {
+		session.getEncoder().encode(encoderHandle, frameNumber, repeatFrameCount, frameCount);
 	}
 }

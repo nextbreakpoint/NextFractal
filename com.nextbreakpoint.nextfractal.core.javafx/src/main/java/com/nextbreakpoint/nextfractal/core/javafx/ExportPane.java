@@ -391,7 +391,7 @@ public class ExportPane extends BorderPane {
 
 		updateButtonsAndPanels.run();
 
-		executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Export Panel"));
+		executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Export"));
 	}
 
 	private void loadImagePresets(ComboBox<Integer[]> presetsCombobox) {

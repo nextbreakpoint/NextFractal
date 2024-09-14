@@ -54,6 +54,10 @@ public class ExecutorUtils {
         return Executors.newSingleThreadScheduledExecutor(threadFactory);
     }
 
+    public static ExecutorService newThreadPerTaskExecutor(ThreadFactory threadFactory) {
+        return Executors.newThreadPerTaskExecutor(threadFactory);
+    }
+
     public static void shutdown(ExecutorService executor) {
         if (executor != null) {
             try {

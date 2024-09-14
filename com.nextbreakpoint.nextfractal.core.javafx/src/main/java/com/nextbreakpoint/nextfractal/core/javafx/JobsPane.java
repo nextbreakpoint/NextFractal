@@ -130,7 +130,7 @@ public class JobsPane extends BorderPane {
 
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> itemSelected(listView, sizeLabel, formatLabel, durationLabel));
 
-        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Jobs Panel"));
+        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Jobs"));
     }
 
     private boolean isExportSessionSuspended(Bitmap bitmap) {
