@@ -119,13 +119,13 @@ public class JobsPane extends BorderPane {
         final List<Button> buttonsList = Arrays.asList(suspendButton, resumeButton, removeButton);
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> updateButtons(buttonsList, c.getList().isEmpty()));
 
-        suspendButton.setOnAction(e -> selectedItems(listView).filter(bitmap -> !isExportSessionSuspended(bitmap))
+        suspendButton.setOnAction(_ -> selectedItems(listView).filter(bitmap -> !isExportSessionSuspended(bitmap))
             .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionSuspended((ExportSession) bitmap.getProperty("exportSession")))));
 
-        resumeButton.setOnAction(e -> selectedItems(listView).filter(this::isExportSessionSuspended)
+        resumeButton.setOnAction(_ -> selectedItems(listView).filter(this::isExportSessionSuspended)
             .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionResumed((ExportSession) bitmap.getProperty("exportSession")))));
 
-        removeButton.setOnAction(e -> selectedItems(listView)
+        removeButton.setOnAction(_ -> selectedItems(listView)
             .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionStopped((ExportSession) bitmap.getProperty("exportSession")))));
 
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> itemSelected(listView, sizeLabel, formatLabel, durationLabel));
@@ -260,14 +260,15 @@ public class JobsPane extends BorderPane {
         if (exportEntry != null) {
             final JobEntry jobEntry = new JobEntry(exportSession, state, progress, exportEntry.bitmap());
             jobEntry.bitmap().setProgress(exportEntry.progress());
-            final int index = listView.getItems().indexOf(jobEntry.bitmap());
-            if (listView.getSelectionModel().isSelected(index)) {
-                triggerUpdate(listView, jobEntry.bitmap(), index);
-                listView.getSelectionModel().select(index);
-            } else {
-                triggerUpdate(listView, jobEntry.bitmap(),index);
-            }
+//            final int index = listView.getItems().indexOf(jobEntry.bitmap());
+//            if (listView.getSelectionModel().isSelected(index)) {
+//                triggerUpdate(listView, jobEntry.bitmap(), index);
+//                listView.getSelectionModel().select(index);
+//            } else {
+//                triggerUpdate(listView, jobEntry.bitmap(), index);
+//            }
             exportEntries.put(exportSession.getSessionId(), jobEntry);
+            listView.refresh();
         }
     }
 
