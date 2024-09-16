@@ -86,6 +86,7 @@ public class BrowsePane extends BorderPane {
     private final File workspace;
     private final File examples;
     private final Tile tile;
+    private final GridView grid;
     private Thread thread;
     private AnimationTimer timer;
     @Setter
@@ -156,7 +157,7 @@ public class BrowsePane extends BorderPane {
 
         deleteButton.setDisable(true);
 
-        final GridView grid = new GridView(numRows, numCols, size);
+        grid = new GridView(numRows, numCols, size);
 
         grid.setDelegate(new GridViewDelegate() {
             @Override
@@ -234,9 +235,6 @@ public class BrowsePane extends BorderPane {
         });
 
         executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Browser"));
-
-        //TODO stop timer when browser is hidden
-        runTimer(grid);
     }
 
     public File getCurrentSourceFolder() {
@@ -249,6 +247,16 @@ public class BrowsePane extends BorderPane {
 
     private File getDefaultImportFolder() {
         return examples;
+    }
+
+    public void enable() {
+        log.info("Browser enabled");
+        startTimer();
+    }
+
+    public void disable() {
+        log.info("Browser disabled");
+        stopTimer();
     }
 
     public void reload() {
@@ -273,6 +281,7 @@ public class BrowsePane extends BorderPane {
     }
 
     public void dispose() {
+        stopTimer();
         ExecutorUtils.shutdown(executor);
         stopWatching();
         removeItems();
@@ -446,24 +455,32 @@ public class BrowsePane extends BorderPane {
         items.clear();
     }
 
-    private void runTimer(GridView grid) {
-        timer = new AnimationTimer() {
-            private long last;
+    private void startTimer() {
+        if (timer == null) {
+            timer = new AnimationTimer() {
+                private long last;
 
-            @Override
-            public void handle(long now) {
-                final long time = now / 1000000;
-                if (time - last > FRAME_LENGTH_IN_MILLIS) {
-                    try {
-                        updateCells(grid);
-                    } catch (ExecutionException | InterruptedException e) {
-                        log.log(Level.WARNING, "Can't update cells", e);
+                @Override
+                public void handle(long now) {
+                    final long time = now / 1000000;
+                    if (time - last > FRAME_LENGTH_IN_MILLIS) {
+                        try {
+                            updateCells(grid);
+                        } catch (ExecutionException | InterruptedException e) {
+                            log.log(Level.WARNING, "Can't update cells", e);
+                        }
+                        last = time;
                     }
-                    last = time;
                 }
-            }
-        };
+            };
+        }
         timer.start();
+    }
+
+    private void stopTimer() {
+        if (timer != null) {
+            timer.stop();
+        }
     }
 
     private void updateCells(GridView grid) throws ExecutionException, InterruptedException {

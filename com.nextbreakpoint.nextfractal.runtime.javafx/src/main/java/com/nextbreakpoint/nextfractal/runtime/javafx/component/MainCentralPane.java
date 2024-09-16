@@ -161,10 +161,12 @@ public class MainCentralPane extends BorderPane {
 
         toggleProperty.addListener((_, _, newValue) -> {
             if (newValue) {
-                showBrowser(browserTransition, _ -> {});
+                browsePane.enable();
+                showBrowser(browserTransition, _ -> renderPane.disable());
                 browsePane.reload();
             } else {
-                hideBrowser(browserTransition, _ -> {});
+                renderPane.enable();
+                hideBrowser(browserTransition, _ -> browsePane.disable());
             }
         });
 
@@ -199,6 +201,8 @@ public class MainCentralPane extends BorderPane {
             recordingPane.setVisible(false);
             recordingPane.stop();
         });
+
+        renderPane.enable();
     }
 
 //    private void handleHideControls(FadeTransition transition, Boolean hide) {

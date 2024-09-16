@@ -59,12 +59,14 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import lombok.extern.java.Log;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
 
+@Log
 public class Viewer extends BorderPane {
 	private final BooleanObservableValue errorProperty;
 	private final PlatformEventBus eventBus;
@@ -241,8 +243,6 @@ public class Viewer extends BorderPane {
 		eventBus.subscribe(PlaybackStopped.class.getSimpleName(), _ -> toolbar.setDisable(false));
 
 		Platform.runLater(controls::requestFocus);
-
-		startAnimationTimer();
 	}
 
 	private void handleReportChanged(Session session, Boolean continuous, ParserResult result) {
@@ -401,15 +401,24 @@ public class Viewer extends BorderPane {
 	private void startAnimationTimer() {
 		if (animationTimer == null) {
 			animationTimer = new ViewerAnimationTimer();
-			animationTimer.start();
 		}
+		animationTimer.start();
 	}
 
 	private void stopAnimationTimer() {
 		if (animationTimer != null) {
 			animationTimer.stop();
-			animationTimer = null;
 		}
+	}
+
+	public void enable() {
+		log.info("Viewer enabled");
+		startAnimationTimer();
+	}
+
+	public void disable() {
+		log.info("Viewer disabled");
+		stopAnimationTimer();
 	}
 
 	private class ViewerAnimationTimer extends AnimationTimer {
