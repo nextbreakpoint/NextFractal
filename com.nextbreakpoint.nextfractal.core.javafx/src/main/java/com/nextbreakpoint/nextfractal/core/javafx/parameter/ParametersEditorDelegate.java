@@ -22,12 +22,10 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params;
+package com.nextbreakpoint.nextfractal.core.javafx.parameter;
 
-import com.nextbreakpoint.nextfractal.core.params.Attribute;
+import com.nextbreakpoint.nextfractal.core.common.Session;
 
-public interface AttributeEditorFactory {
-	String getId();
-
-	AttributeEditor createAttributeEditor(Attribute attribute);
+public interface ParametersEditorDelegate {
+    void onSessionChanged(Session session);
 }

@@ -22,49 +22,51 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors;
+package com.nextbreakpoint.nextfractal.contextfree.javafx.parameter;
 
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
+import com.nextbreakpoint.nextfractal.core.javafx.misc.AdvancedTextField;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.AttributeEditor;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tooltip;
+import org.reactfx.EventStreams;
 
-public class AlgorithmAttributeEditor extends AttributeEditor {
+import java.time.Duration;
+
+public class SeedAttributeEditor extends AttributeEditor {
     private final Attribute attribute;
-    private final ComboBox<String> comboBox;
+    private final AdvancedTextField textField;
 
-    public AlgorithmAttributeEditor(Attribute attribute) {
+    public SeedAttributeEditor(Attribute attribute) {
         this.attribute = attribute;
 
-		comboBox = new ComboBox<>();
-		comboBox.getItems().add("Mandelbrot");
-		comboBox.getItems().add("Julia/Fatou");
-		comboBox.getStyleClass().add("text-small");
-        comboBox.getSelectionModel().select(0);
+        textField = new AdvancedTextField();
+        textField.setRestrict(getRestriction());
+        textField.setTransform(String::toUpperCase);
+        textField.setTooltip(new Tooltip(attribute.getName()));
 
-        comboBox.setTooltip(new Tooltip(attribute.getName()));
+        setCenter(textField);
 
-        setCenter(comboBox);
-
-        widthProperty().addListener((_, _, newValue) -> {
-            comboBox.setPrefWidth(newValue.doubleValue());
-        });
-
-        comboBox.setOnAction(_ -> {
-            if (getDelegate() != null) {
-                getDelegate().onEditorChanged(this);
-            }
-		});
+        EventStreams.changesOf(textField.textProperty())
+                .successionEnds(Duration.ofMillis(500))
+                .subscribe(change -> {
+                    if (getDelegate() != null) {
+                        getDelegate().onEditorChanged(this);
+                    }
+                });
     }
 
     @Override
     public void loadSession(Session session) {
-        comboBox.getSelectionModel().select(attribute.getMapper().apply(session));
+        textField.setText(attribute.getMapper().apply(session));
     }
 
     @Override
     public Session updateSession(Session session) {
-        return attribute.getCombiner().apply(session, comboBox.getSelectionModel().getSelectedItem());
+        return attribute.getCombiner().apply(session, textField.getText());
+    }
+
+    private String getRestriction() {
+        return "[A-Z]*";
     }
 }

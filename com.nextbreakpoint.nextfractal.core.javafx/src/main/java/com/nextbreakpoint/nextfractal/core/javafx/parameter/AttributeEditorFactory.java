@@ -22,20 +22,12 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors;
+package com.nextbreakpoint.nextfractal.core.javafx.parameter;
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 
-public class AlgorithmAttributeEditorFactory implements AttributeEditorFactory {
-    @Override
-    public String getId() {
-        return "key-mandelbrot-algorithm";
-    }
+public interface AttributeEditorFactory {
+	String getId();
 
-    @Override
-    public AttributeEditor createAttributeEditor(Attribute attribute) {
-        return new AlgorithmAttributeEditor(attribute);
-    }
+	AttributeEditor createAttributeEditor(Attribute attribute);
 }

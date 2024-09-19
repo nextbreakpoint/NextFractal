@@ -22,19 +22,18 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params;
+package com.nextbreakpoint.nextfractal.core.javafx.parameter;
 
-import com.nextbreakpoint.nextfractal.core.common.Session;
-import javafx.scene.layout.BorderPane;
-import lombok.Getter;
-import lombok.Setter;
+import com.nextbreakpoint.nextfractal.core.params.Attribute;
 
-@Setter
-@Getter
-public abstract class AttributeEditor extends BorderPane {
-    private AttributeEditorDelegate delegate;
+public class DoubleAttributeEditorFactory implements AttributeEditorFactory {
+    @Override
+    public String getId() {
+        return "logical-type-double";
+    }
 
-    public abstract void loadSession(Session session);
-
-    public abstract Session updateSession(Session session);
+    @Override
+    public AttributeEditor createAttributeEditor(Attribute attribute) {
+        return new DoubleAttributeEditor(attribute);
+    }
 }

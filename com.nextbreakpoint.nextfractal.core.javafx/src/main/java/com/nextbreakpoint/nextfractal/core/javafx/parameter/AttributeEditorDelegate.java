@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params;
+package com.nextbreakpoint.nextfractal.core.javafx.parameter;
 
 public interface AttributeEditorDelegate {
     void onEditorChanged(AttributeEditor editor);

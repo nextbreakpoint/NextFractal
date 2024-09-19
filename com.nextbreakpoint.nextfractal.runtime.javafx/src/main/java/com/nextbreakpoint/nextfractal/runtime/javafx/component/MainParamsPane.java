@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.event.EditorGrammarSelected;
 import com.nextbreakpoint.nextfractal.core.event.EditorParamsActionFired;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataLoaded;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
-import com.nextbreakpoint.nextfractal.core.javafx.params.MetadataEditor;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.MetadataEditor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;

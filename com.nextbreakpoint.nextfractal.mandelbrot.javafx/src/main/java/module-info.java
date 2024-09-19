@@ -23,9 +23,9 @@
  *
  */
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.AttributeEditorFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotUIFactory;
-import com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors.AlgorithmAttributeEditorFactory;
+import com.nextbreakpoint.nextfractal.mandelbrot.javafx.parameter.AlgorithmAttributeEditorFactory;
 
 module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires static lombok;

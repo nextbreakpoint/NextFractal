@@ -23,8 +23,8 @@
  *
  */
 import com.nextbreakpoint.nextfractal.contextfree.javafx.ContextFreeUIFactory;
-import com.nextbreakpoint.nextfractal.contextfree.javafx.editors.SeedAttributeEditorFactory;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
+import com.nextbreakpoint.nextfractal.contextfree.javafx.parameter.SeedAttributeEditorFactory;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.AttributeEditorFactory;
 
 module com.nextbreakpoint.nextfractal.contextfree.javafx {
     requires static lombok;

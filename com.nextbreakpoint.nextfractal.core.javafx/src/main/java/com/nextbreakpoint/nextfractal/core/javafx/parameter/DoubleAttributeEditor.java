@@ -22,11 +22,10 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+package com.nextbreakpoint.nextfractal.core.javafx.parameter;
 
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.javafx.misc.AdvancedTextField;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 import javafx.scene.control.Tooltip;
 import org.reactfx.EventStreams;

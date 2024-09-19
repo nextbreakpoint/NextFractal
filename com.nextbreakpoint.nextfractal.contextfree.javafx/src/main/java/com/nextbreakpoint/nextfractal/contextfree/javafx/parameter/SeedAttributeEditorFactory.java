@@ -22,20 +22,20 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+package com.nextbreakpoint.nextfractal.contextfree.javafx.parameter;
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.AttributeEditor;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.AttributeEditorFactory;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 
-public class DoubleAttributeEditorFactory implements AttributeEditorFactory {
+public class SeedAttributeEditorFactory implements AttributeEditorFactory {
     @Override
     public String getId() {
-        return "logical-type-double";
+        return "key-contextfree-seed";
     }
 
     @Override
     public AttributeEditor createAttributeEditor(Attribute attribute) {
-        return new DoubleAttributeEditor(attribute);
+        return new SeedAttributeEditor(attribute);
     }
 }
