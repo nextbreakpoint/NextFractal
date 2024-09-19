@@ -23,6 +23,7 @@
  *
  */
 
+import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.MandelbrotUIFactory;
 import com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors.AlgorithmAttributeEditorFactory;
 
@@ -32,5 +33,5 @@ module com.nextbreakpoint.nextfractal.mandelbrot.javafx {
     requires transitive com.nextbreakpoint.nextfractal.core.javafx;
     requires com.nextbreakpoint.convertedlibraries.richtextfx;
     provides com.nextbreakpoint.nextfractal.core.javafx.UIFactory with MandelbrotUIFactory;
-    provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with AlgorithmAttributeEditorFactory;
+    provides AttributeEditorFactory with AlgorithmAttributeEditorFactory;
 }

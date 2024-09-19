@@ -22,20 +22,14 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+package com.nextbreakpoint.nextfractal.core.javafx.playback;
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
-import com.nextbreakpoint.nextfractal.core.params.Attribute;
+import com.nextbreakpoint.nextfractal.core.common.Session;
 
-public class DoubleAttributeEditorFactory implements AttributeEditorFactory {
-    @Override
-    public String getId() {
-        return "logical-type-double";
-    }
+public interface PlaybackDelegate {
+    void playbackStopped();
 
-    @Override
-    public AttributeEditor createAttributeEditor(Attribute attribute) {
-        return new DoubleAttributeEditor(attribute);
-    }
+    void loadSessionData(Session session, boolean continuous, boolean appendToHistory);
+
+    void updateSessionData(Session session, boolean continuous, boolean appendToHistory);
 }

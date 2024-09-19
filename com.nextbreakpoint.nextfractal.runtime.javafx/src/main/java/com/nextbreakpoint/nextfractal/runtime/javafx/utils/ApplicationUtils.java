@@ -35,7 +35,7 @@ import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
 import javafx.geometry.Rectangle2D;

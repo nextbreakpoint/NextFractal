@@ -23,6 +23,7 @@
  *
  */
 import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphicsFactory;
+import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.params.editors.DoubleAttributeEditorFactory;
 
 /*
@@ -61,9 +62,17 @@ module com.nextbreakpoint.nextfractal.core.javafx {
     exports com.nextbreakpoint.nextfractal.core.javafx.viewer;
     exports com.nextbreakpoint.nextfractal.core.javafx.params;
     exports com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+    exports com.nextbreakpoint.nextfractal.core.javafx.observable;
+    exports com.nextbreakpoint.nextfractal.core.javafx.history;
+    exports com.nextbreakpoint.nextfractal.core.javafx.jobs;
+    exports com.nextbreakpoint.nextfractal.core.javafx.export;
+    exports com.nextbreakpoint.nextfractal.core.javafx.browse;
+    exports com.nextbreakpoint.nextfractal.core.javafx.grid;
+    exports com.nextbreakpoint.nextfractal.core.javafx.playback;
+    exports com.nextbreakpoint.nextfractal.core.javafx.misc;
     uses com.nextbreakpoint.nextfractal.core.encoder.Encoder;
     uses com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
-    uses com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory;
-    provides com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory with DoubleAttributeEditorFactory;
+    uses AttributeEditorFactory;
+    provides AttributeEditorFactory with DoubleAttributeEditorFactory;
     provides com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory with JavaFXGraphicsFactory;
 }

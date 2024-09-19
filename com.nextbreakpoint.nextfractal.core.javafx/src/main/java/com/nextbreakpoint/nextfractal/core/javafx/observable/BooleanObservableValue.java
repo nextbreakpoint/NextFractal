@@ -22,20 +22,22 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+package com.nextbreakpoint.nextfractal.core.javafx.observable;
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
-import com.nextbreakpoint.nextfractal.core.params.Attribute;
+import javafx.beans.value.ObservableValueBase;
 
-public class DoubleAttributeEditorFactory implements AttributeEditorFactory {
-    @Override
-    public String getId() {
-        return "logical-type-double";
-    }
+public class BooleanObservableValue extends ObservableValueBase<Boolean> {
+	private Boolean value = Boolean.FALSE;
+	
+	public void setValue(Boolean value) {
+		if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
+			this.value = value;
+			fireValueChangedEvent();
+		}
+	}
 
-    @Override
-    public AttributeEditor createAttributeEditor(Attribute attribute) {
-        return new DoubleAttributeEditor(attribute);
-    }
+	@Override
+	public Boolean getValue() {
+		return value;
+	}
 }

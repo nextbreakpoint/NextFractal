@@ -39,7 +39,7 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackStarted;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataChanged;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
-import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
+import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;

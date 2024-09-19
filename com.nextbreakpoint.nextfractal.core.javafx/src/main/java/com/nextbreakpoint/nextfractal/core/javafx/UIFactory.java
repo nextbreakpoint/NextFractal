@@ -30,6 +30,7 @@ import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
 import javafx.scene.layout.Pane;
 

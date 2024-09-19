@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.viewer;
 
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
+import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;

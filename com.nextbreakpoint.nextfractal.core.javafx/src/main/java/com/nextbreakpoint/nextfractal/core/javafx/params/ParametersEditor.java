@@ -26,9 +26,6 @@ package com.nextbreakpoint.nextfractal.core.javafx.params;
 
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorFactory;
-import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditorPlugins;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 import com.nextbreakpoint.nextfractal.core.params.Group;
 import com.nextbreakpoint.nextfractal.core.params.Parameters;

@@ -22,20 +22,23 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
-import com.nextbreakpoint.nextfractal.core.params.Attribute;
+import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
 
-public class DoubleAttributeEditorFactory implements AttributeEditorFactory {
-    @Override
-    public String getId() {
-        return "logical-type-double";
-    }
+import java.io.File;
+import java.util.List;
 
-    @Override
-    public AttributeEditor createAttributeEditor(Attribute attribute) {
-        return new DoubleAttributeEditor(attribute);
-    }
+public interface BrowseDelegate {
+	void didSelectFile(BrowsePane source, File file);
+
+    void didDeleteFiles(List<File> files);
+
+	void didClose(BrowsePane source);
+
+	GridItemRenderer createRenderer(Bitmap bitmap) throws Exception;
+
+	Bitmap createBitmap(File file, Size size) throws Exception;
 }

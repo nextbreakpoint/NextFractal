@@ -22,20 +22,8 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.params.editors;
+package com.nextbreakpoint.nextfractal.core.javafx.export;
 
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
-import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditorFactory;
-import com.nextbreakpoint.nextfractal.core.params.Attribute;
-
-public class DoubleAttributeEditorFactory implements AttributeEditorFactory {
-    @Override
-    public String getId() {
-        return "logical-type-double";
-    }
-
-    @Override
-    public AttributeEditor createAttributeEditor(Attribute attribute) {
-        return new DoubleAttributeEditor(attribute);
-    }
+public interface ClipListCellDelegate {
+    void clipMoved(int fromIndex, int toIndex);
 }

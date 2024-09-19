@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.mandelbrot.javafx.editors;
 
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.javafx.AttributeEditor;
+import com.nextbreakpoint.nextfractal.core.javafx.params.AttributeEditor;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tooltip;

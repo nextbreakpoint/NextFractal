@@ -28,6 +28,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 import java.nio.IntBuffer;
 
+//TODO this interface is the same as ImageGenerator
 public interface ImageComposer {
 	/**
 	 * @param script
