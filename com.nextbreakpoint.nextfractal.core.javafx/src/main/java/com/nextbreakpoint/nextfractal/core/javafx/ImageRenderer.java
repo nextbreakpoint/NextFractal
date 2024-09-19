@@ -24,26 +24,16 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx;
 
-import java.nio.IntBuffer;
-import java.util.Date;
-import java.util.UUID;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
-public interface Bitmap {
-	IntBuffer getPixels();
+public interface ImageRenderer {
+    void abort();
 
-	int getWidth();
+    void waitFor() throws InterruptedException;
 
-	int getHeight();
+    void dispose();
 
-	Object getProperty(String key);
+    boolean hasImageChanged();
 
-	void setProperty(String key, Object value);
-
-	Date getTimestamp();
-
-	double getProgress();
-
-	void setProgress(double progress);
-
-	UUID getId();
+    void drawImage(GraphicsContext gc, int x, int y);
 }

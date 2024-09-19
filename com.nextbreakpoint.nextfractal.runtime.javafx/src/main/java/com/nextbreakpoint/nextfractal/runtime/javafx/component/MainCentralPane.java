@@ -36,11 +36,11 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowseDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowsePane;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.playback.PlaybackDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.playback.PlaybackPane;
@@ -92,12 +92,12 @@ public class MainCentralPane extends BorderPane {
 			}
 
             @Override
-            public Bitmap createBitmap(File file, Size size) throws Exception {
+            public RenderedImage createBitmap(File file, Size size) throws Exception {
                 return ApplicationUtils.createBitmap(file, size).orThrow().get();
             }
 
 			@Override
-			public GridItemRenderer createRenderer(Bitmap bitmap) throws Exception {
+			public ImageRenderer createRenderer(RenderedImage bitmap) throws Exception {
 				return ApplicationUtils.createRenderer(bitmap).orThrow().get();
 			}
 		});

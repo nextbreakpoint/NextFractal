@@ -25,7 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,8 +39,8 @@ import java.util.concurrent.Future;
 public class GridItem {
 	private final List<ScriptError> errors = new LinkedList<>();
 	private File file;
-	private Bitmap bitmap;
-	private GridItemRenderer renderer;
+	private RenderedImage bitmap;
+	private ImageRenderer renderer;
 	private Future<GridItem> loadItemFuture;
 	private Future<GridItem> initItemFuture;
 	private long lastChanged;
@@ -55,13 +56,13 @@ public class GridItem {
 		dirty = true;
 	}
 
-    public synchronized void setBitmap(Bitmap bitmap) {
+    public synchronized void setBitmap(RenderedImage bitmap) {
 		lastChanged = System.currentTimeMillis();
 		this.bitmap = bitmap;
 		dirty = true;
 	}
 
-    public synchronized void setRenderer(GridItemRenderer renderer) {
+    public synchronized void setRenderer(ImageRenderer renderer) {
 		lastChanged = System.currentTimeMillis();
 		this.renderer = renderer;
 		dirty = true;

@@ -22,18 +22,28 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.grid;
+package com.nextbreakpoint.nextfractal.core.javafx;
 
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import java.nio.IntBuffer;
+import java.util.Date;
+import java.util.UUID;
 
-public interface GridItemRenderer {
-    void abort();
+public interface RenderedImage {
+	IntBuffer getPixels();
 
-    void waitFor() throws InterruptedException;
+	int getWidth();
 
-    void dispose();
+	int getHeight();
 
-    boolean hasImageChanged();
+	Object getProperty(String key);
 
-    void drawImage(GraphicsContext gc, int x, int y);
+	void setProperty(String key, Object value);
+
+	Date getTimestamp();
+
+	double getProgress();
+
+	void setProgress(double progress);
+
+	UUID getId();
 }

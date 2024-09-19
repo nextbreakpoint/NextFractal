@@ -30,7 +30,6 @@ import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
 import javafx.scene.layout.Pane;
 
@@ -39,9 +38,9 @@ import java.util.function.Supplier;
 public interface UIFactory {
 	String getId();
 
-	GridItemRenderer createRenderer(Bitmap bitmap) throws Exception;
+	ImageRenderer createRenderer(RenderedImage bitmap) throws Exception;
 
-	Bitmap createBitmap(Session session, Size size) throws Exception;
+	RenderedImage createBitmap(Session session, Size size) throws Exception;
 
 	Either<String> loadResource(String resourceName);
 

@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.export;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ClipListCell extends ListCell<Bitmap> {
+public class ClipListCell extends ListCell<RenderedImage> {
 	private final BorderPane pane;
 	private final Canvas canvas;
 	private final Label label;
@@ -117,13 +117,13 @@ public class ClipListCell extends ListCell<Bitmap> {
 			boolean success = false;
 
 			if (db.hasString()) {
-				final Map<String, Bitmap> itemsMap = getListView().getItems().stream().collect(Collectors.toMap(bitmap -> bitmap.getId().toString(), bitmap -> bitmap));
+				final Map<String, RenderedImage> itemsMap = getListView().getItems().stream().collect(Collectors.toMap(bitmap -> bitmap.getId().toString(), bitmap -> bitmap));
 				final List<String> itemsIds = getListView().getItems().stream().map(bitmap -> bitmap.getId().toString()).collect(Collectors.toList());
 				final int draggedIdx = itemsIds.indexOf(db.getString());
 				final int thisIdx = itemsIds.indexOf(getItem().getId().toString());
 				itemsIds.remove(draggedIdx);
 				itemsIds.add(thisIdx, db.getString());
-				final List<Bitmap> newItems = new ArrayList();
+				final List<RenderedImage> newItems = new ArrayList();
 				itemsIds.forEach(itemId -> newItems.add(itemsMap.get(itemId)));
 				getListView().getItems().setAll(newItems);
 				success = true;
@@ -141,7 +141,7 @@ public class ClipListCell extends ListCell<Bitmap> {
 	}
 
 	@Override
-	public void updateItem(Bitmap bitmap, boolean empty) {
+	public void updateItem(RenderedImage bitmap, boolean empty) {
 		super.updateItem(bitmap, empty);
 		if (empty) {
 			setGraphic(null);
@@ -170,7 +170,7 @@ public class ClipListCell extends ListCell<Bitmap> {
 		}
 	}
 
-	private WritableImage getWritableImage(Bitmap bitmap) {
+	private WritableImage getWritableImage(RenderedImage bitmap) {
 		final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
 		image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
 		return image;

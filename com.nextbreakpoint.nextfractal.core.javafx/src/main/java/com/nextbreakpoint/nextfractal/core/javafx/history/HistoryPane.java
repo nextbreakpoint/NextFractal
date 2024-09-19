@@ -32,8 +32,8 @@ import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.SimpleBitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.SimpleImage;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ListView;
@@ -52,7 +52,7 @@ public class HistoryPane extends BorderPane {
     private static final int PADDING = 8;
 
     private final ExecutorService executor;
-    private final ListView<Bitmap> listView;
+    private final ListView<RenderedImage> listView;
     private final Tile tile;
     @Setter
     private HistoryDelegate delegate;
@@ -72,16 +72,16 @@ public class HistoryPane extends BorderPane {
 
         setCenter(historyPane);
 
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> _) -> itemSelected(listView));
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends RenderedImage> _) -> itemSelected(listView));
 
         executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("History"));
     }
 
-    private void itemSelected(ListView<Bitmap> listView) {
+    private void itemSelected(ListView<RenderedImage> listView) {
         final int index = listView.getSelectionModel().getSelectedIndex();
         if (index >= 0) {
             if (delegate != null) {
-                final Bitmap bitmap = listView.getItems().get(index);
+                final RenderedImage bitmap = listView.getItems().get(index);
                 final Session session = (Session) bitmap.getProperty("session");
                 Platform.runLater(() -> delegate.sessionChanged(session));
             }
@@ -93,8 +93,8 @@ public class HistoryPane extends BorderPane {
                 .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
     }
 
-    private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, Size size) {
-        final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), pixels);
+    private void addItem(ListView<RenderedImage> listView, Session session, IntBuffer pixels, Size size) {
+        final RenderedImage bitmap = new SimpleImage(size.width(), size.height(), pixels);
         bitmap.setProperty("session", session);
         listView.getItems().addFirst(bitmap);
     }

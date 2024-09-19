@@ -37,14 +37,14 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingStrategy;
-import com.nextbreakpoint.nextfractal.core.javafx.SimpleBitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.SimpleImage;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
@@ -79,7 +79,7 @@ public class MandelbrotUIFactory implements UIFactory {
 	}
 
 	@Override
-	public GridItemRenderer createRenderer(Bitmap bitmap) {
+	public ImageRenderer createRenderer(RenderedImage bitmap) {
 		final MandelbrotSession session = (MandelbrotSession)bitmap.getProperty("session");
 		final Map<String, Integer> hints = new HashMap<>();
 		hints.put(Coordinator.KEY_TYPE, Coordinator.VALUE_REALTIME);
@@ -106,12 +106,12 @@ public class MandelbrotUIFactory implements UIFactory {
 	}
 
 	@Override
-	public Bitmap createBitmap(Session session, Size size) throws Exception {
+	public RenderedImage createBitmap(Session session, Size size) throws Exception {
 		final DSLParser parser = new DSLParser(getPackageName(), getClassName());
 		final DSLParserResult parserResult = parser.parse(session.script());
 		final Orbit orbit = parserResult.orbitClassFactory().create();
 		final Color color = parserResult.colorClassFactory().create();
-		final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), null);
+		final RenderedImage bitmap = new SimpleImage(size.width(), size.height(), null);
 		bitmap.setProperty("orbit", orbit);
 		bitmap.setProperty("color", color);
 		bitmap.setProperty("session", session);
@@ -191,7 +191,7 @@ public class MandelbrotUIFactory implements UIFactory {
 		}
 	}
 
-	private static class GridItemRendererAdapter implements GridItemRenderer {
+	private static class GridItemRendererAdapter implements ImageRenderer {
 		private final Coordinator coordinator;
 
 		public GridItemRendererAdapter(Coordinator coordinator) {

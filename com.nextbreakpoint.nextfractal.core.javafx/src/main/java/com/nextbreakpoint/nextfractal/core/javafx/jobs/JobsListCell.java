@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx.jobs;
 
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -36,7 +36,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.transform.Affine;
 
-public class JobsListCell extends ListCell<Bitmap> {
+public class JobsListCell extends ListCell<RenderedImage> {
 	private final BorderPane pane;
 	private final Label label;
 	private final Canvas canvas;
@@ -54,7 +54,7 @@ public class JobsListCell extends ListCell<Bitmap> {
 	}
 
 	@Override
-	public void updateItem(Bitmap bitmap, boolean empty) {
+	public void updateItem(RenderedImage bitmap, boolean empty) {
 		super.updateItem(bitmap, empty);
 		if (empty) {
 			setGraphic(null);

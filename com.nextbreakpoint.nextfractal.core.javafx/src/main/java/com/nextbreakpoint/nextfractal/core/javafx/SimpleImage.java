@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SimpleBitmap implements Bitmap {
+public class SimpleImage implements RenderedImage {
 	private final Map<String, Object> properties = new HashMap<>();
 	private final UUID uuid;
 	@Getter
@@ -48,7 +48,7 @@ public class SimpleBitmap implements Bitmap {
     @Getter
     private double progress;
 
-	public SimpleBitmap(int width, int height, IntBuffer pixels) {
+	public SimpleImage(int width, int height, IntBuffer pixels) {
 		this.pixels = pixels;
 		this.width = width;
 		this.height = height;

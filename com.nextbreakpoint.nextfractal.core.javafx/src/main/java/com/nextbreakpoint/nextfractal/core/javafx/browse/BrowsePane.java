@@ -33,9 +33,9 @@ import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItem;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridView;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.Icons;
@@ -569,7 +569,7 @@ public class BrowsePane extends BorderPane {
         for (int index = 0; index < firstIndex; index++) {
             final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
-                final GridItemRenderer renderer = item.getRenderer();
+                final ImageRenderer renderer = item.getRenderer();
                 item.setRenderer(null);
                 item.setBitmap(null);
                 renderer.dispose();
@@ -578,7 +578,7 @@ public class BrowsePane extends BorderPane {
         for (int index = lastIndex; index < items.size(); index++) {
             final GridItem item = items.get(index);
             if (item.getRenderer() != null) {
-                final GridItemRenderer renderer = item.getRenderer();
+                final ImageRenderer renderer = item.getRenderer();
                 item.setRenderer(null);
                 item.setBitmap(null);
                 renderer.dispose();
@@ -586,8 +586,8 @@ public class BrowsePane extends BorderPane {
         }
         for (int index = firstIndex; index < Math.min(lastIndex, items.size()); index++) {
             final GridItem item = items.get(index);
-            final Bitmap bitmap = item.getBitmap();
-            final GridItemRenderer renderer = item.getRenderer();
+            final RenderedImage bitmap = item.getBitmap();
+            final ImageRenderer renderer = item.getRenderer();
             final long time = System.currentTimeMillis();
             if (bitmap == null && time - item.getLastChanged() > SCROLL_BOUNCE_DELAY && item.getLoadItemFuture() == null) {
                 loadItemAsync(item);
@@ -610,7 +610,7 @@ public class BrowsePane extends BorderPane {
     private void loadItem(GridItem item, File file) {
         try {
             if (!item.isAborted() && delegate != null) {
-                final Bitmap bitmap = delegate.createBitmap(file, tile.tileSize());
+                final RenderedImage bitmap = delegate.createBitmap(file, tile.tileSize());
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }
         } catch (Exception e) {
@@ -620,17 +620,17 @@ public class BrowsePane extends BorderPane {
     }
 
     private void initItemAsync(GridItem item) {
-        final Bitmap bitmap = item.getBitmap();
+        final RenderedImage bitmap = item.getBitmap();
         item.setInitItemFuture(executor.submit(() -> {
             initItem(item, bitmap);
             return null;
         }));
     }
 
-    private void initItem(GridItem item, Bitmap bitmap) {
+    private void initItem(GridItem item, RenderedImage bitmap) {
         try {
             if (!item.isAborted() && delegate != null) {
-                final GridItemRenderer renderer = delegate.createRenderer(bitmap);
+                final ImageRenderer renderer = delegate.createRenderer(bitmap);
                 Platform.runLater(() -> item.setRenderer(renderer));
             }
         } catch (Exception e) {

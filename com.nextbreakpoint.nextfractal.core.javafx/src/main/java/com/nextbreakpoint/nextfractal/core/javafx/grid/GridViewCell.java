@@ -25,7 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphicsFactory;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.BorderPane;
@@ -58,7 +59,7 @@ public class GridViewCell extends BorderPane {
 				item.setDirty(false);
 				redraw = true;
 			}
-			final GridItemRenderer renderer = item.getRenderer();
+			final ImageRenderer renderer = item.getRenderer();
 			if (renderer != null) {
 				if (redraw || renderer.hasImageChanged()) {
 					final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
@@ -71,7 +72,7 @@ public class GridViewCell extends BorderPane {
 				g2d.fillRect(0, 0, getWidth(), getHeight());
 				g2d.setFill(Color.DARKGRAY);
 				g2d.setTextAlign(TextAlignment.CENTER);
-				final Bitmap bitmap = item.getBitmap();
+				final RenderedImage bitmap = item.getBitmap();
 				if (!item.getErrors().isEmpty()) {
 					g2d.fillText("Error", getWidth() / 2, getHeight() / 2);
 				} else if (bitmap == null) {

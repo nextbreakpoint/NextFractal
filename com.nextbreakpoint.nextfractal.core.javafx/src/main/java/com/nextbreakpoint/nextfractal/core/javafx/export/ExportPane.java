@@ -34,8 +34,8 @@ import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.misc.AdvancedTextField;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.SimpleBitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.SimpleImage;
 import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
@@ -68,7 +68,7 @@ public class ExportPane extends BorderPane {
 
 	private final Tile tile;
 	private final ExecutorService executor;
-	private final ListView<Bitmap> listView;
+	private final ListView<RenderedImage> listView;
 	private final BooleanObservableValue captureProperty;
 	private final BooleanObservableValue videoProperty;
 	private final ToggleButton captureButton;
@@ -164,7 +164,7 @@ public class ExportPane extends BorderPane {
 		listView.setTooltip(new Tooltip("List of captured clips"));
 		listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-		listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Bitmap> c) -> itemSelected(listView));
+		listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends RenderedImage> c) -> itemSelected(listView));
 
 		final VBox exportPane = new VBox(8);
 		exportPane.setAlignment(Pos.TOP_CENTER);
@@ -430,11 +430,11 @@ public class ExportPane extends BorderPane {
 		presetsCombobox.getSelectionModel().select(1);
 	}
 
-	private void itemSelected(ListView<Bitmap> listView) {
+	private void itemSelected(ListView<RenderedImage> listView) {
 	}
 
-	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, Size size, boolean notifyAddClip) {
-		final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), pixels);
+	private void addItem(ListView<RenderedImage> listView, AnimationClip clip, IntBuffer pixels, Size size, boolean notifyAddClip) {
+		final RenderedImage bitmap = new SimpleImage(size.width(), size.height(), pixels);
 		bitmap.setProperty("clip", clip);
 		listView.getItems().add(bitmap);
 		if (listView.getItems().size() == 1) {
@@ -449,8 +449,8 @@ public class ExportPane extends BorderPane {
 		}
 	}
 
-	private void removeItem(ListView<Bitmap> listView, int index) {
-		final Bitmap bitmap = listView.getItems().remove(index);
+	private void removeItem(ListView<RenderedImage> listView, int index) {
+		final RenderedImage bitmap = listView.getItems().remove(index);
 		if (bitmap == null) {
 			return;
 		}

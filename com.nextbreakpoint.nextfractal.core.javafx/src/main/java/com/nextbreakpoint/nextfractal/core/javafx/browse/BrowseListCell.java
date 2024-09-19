@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ListCell;
@@ -35,7 +35,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
 import javafx.scene.transform.Affine;
 
-public class BrowseListCell extends ListCell<Bitmap[]> {
+public class BrowseListCell extends ListCell<RenderedImage[]> {
 	private final HBox pane;
 	private final Canvas[] canvas;
 	private final Size size;
@@ -55,13 +55,13 @@ public class BrowseListCell extends ListCell<Bitmap[]> {
 	}
 
 	@Override
-	public void updateItem(Bitmap[] bitmaps, boolean empty) {
+	public void updateItem(RenderedImage[] bitmaps, boolean empty) {
 		super.updateItem(bitmaps, empty);
 		if (empty) {
 			setGraphic(null);
 		} else {
 			for (int i = 0 ; i < numOfColumns; i++) {
-				Bitmap bitmap = bitmaps[i];
+				RenderedImage bitmap = bitmaps[i];
 				if (bitmap != null && bitmap.getPixels() != null) {
 					renderFractal(canvas[i].getGraphicsContext2D(), bitmap);
 				}
@@ -70,7 +70,7 @@ public class BrowseListCell extends ListCell<Bitmap[]> {
 		}
 	}
 
-	private void renderFractal(GraphicsContext g2d, Bitmap bitmap) {
+	private void renderFractal(GraphicsContext g2d, RenderedImage bitmap) {
 		WritableImage image = new WritableImage(size.width(), size.height());
 		image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
 		Affine affine = new Affine();

@@ -34,8 +34,8 @@ import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
 import javafx.geometry.Rectangle2D;
@@ -77,14 +77,14 @@ public class ApplicationUtils {
         Plugins.factories().forEach(plugin -> log.fine("Found plugin " + plugin.getId()));
     }
 
-    public static Either<Bitmap> createBitmap(File file, Size size) {
+    public static Either<RenderedImage> createBitmap(File file, Size size) {
         return Command.of(FileManager.loadBundle(file))
                 .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().pluginId()))
                 .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))
                 .execute();
     }
 
-    public static Either<GridItemRenderer> createRenderer(Bitmap bitmap) {
+    public static Either<ImageRenderer> createRenderer(RenderedImage bitmap) {
         return Command.of(tryFindFactory(((Session) bitmap.getProperty("session")).pluginId()))
                 .flatMap(factory -> Command.of(() -> factory.createRenderer(bitmap)))
                 .execute();

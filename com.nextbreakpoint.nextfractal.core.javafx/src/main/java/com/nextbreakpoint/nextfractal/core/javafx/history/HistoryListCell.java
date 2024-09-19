@@ -25,7 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx.history;
 
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -39,7 +39,7 @@ import javafx.scene.transform.Affine;
 
 import java.text.SimpleDateFormat;
 
-public class HistoryListCell extends ListCell<Bitmap> {
+public class HistoryListCell extends ListCell<RenderedImage> {
 	private final BorderPane pane;
 	private final Canvas canvas;
 	private final Label label;
@@ -62,7 +62,7 @@ public class HistoryListCell extends ListCell<Bitmap> {
 	}
 
 	@Override
-	public void updateItem(Bitmap bitmap, boolean empty) {
+	public void updateItem(RenderedImage bitmap, boolean empty) {
 		super.updateItem(bitmap, empty);
 		if (empty) {
 			setGraphic(null);

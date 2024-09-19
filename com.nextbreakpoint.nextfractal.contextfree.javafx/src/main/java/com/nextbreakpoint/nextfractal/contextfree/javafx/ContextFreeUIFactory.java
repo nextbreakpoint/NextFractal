@@ -43,10 +43,10 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.SimpleBitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.SimpleImage;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
@@ -71,7 +71,7 @@ public class ContextFreeUIFactory implements UIFactory {
 	}
 
 	@Override
-	public GridItemRenderer createRenderer(Bitmap bitmap) {
+	public ImageRenderer createRenderer(RenderedImage bitmap) {
 		final Map<String, Integer> hints = new HashMap<>();
 		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
 		final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("ContextFree Browser");
@@ -86,10 +86,10 @@ public class ContextFreeUIFactory implements UIFactory {
 	}
 
 	@Override
-	public Bitmap createBitmap(Session session, Size size) throws Exception {
+	public RenderedImage createBitmap(Session session, Size size) throws Exception {
 		final CFParser compiler = new CFParser();
 		final CFParserResult report = compiler.parse(session.script());
-		final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), null);
+		final RenderedImage bitmap = new SimpleImage(size.width(), size.height(), null);
 		bitmap.setProperty("image", report.classFactory().create());
 		bitmap.setProperty("session", session);
 		return bitmap;
@@ -147,7 +147,7 @@ public class ContextFreeUIFactory implements UIFactory {
 		return new ContextFreeToolContext(renderingContext, (ContextFreeRenderingStrategy) renderingStrategy, delegate, width, height);
 	}
 
-	private static class GridItemRendererAdapter implements GridItemRenderer {
+	private static class GridItemRendererAdapter implements ImageRenderer {
 		private final Coordinator coordinator;
 
 		public GridItemRendererAdapter(Coordinator coordinator) {

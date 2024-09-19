@@ -25,8 +25,8 @@
 package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 
 import java.io.File;
 import java.util.List;
@@ -38,7 +38,7 @@ public interface BrowseDelegate {
 
 	void didClose(BrowsePane source);
 
-	GridItemRenderer createRenderer(Bitmap bitmap) throws Exception;
+	ImageRenderer createRenderer(RenderedImage bitmap) throws Exception;
 
-	Bitmap createBitmap(File file, Size size) throws Exception;
+	RenderedImage createBitmap(File file, Size size) throws Exception;
 }
