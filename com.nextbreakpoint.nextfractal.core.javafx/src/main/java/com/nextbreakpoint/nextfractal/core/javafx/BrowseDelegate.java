@@ -38,5 +38,5 @@ public interface BrowseDelegate {
 
 	GridItemRenderer createRenderer(Bitmap bitmap) throws Exception;
 
-	BrowseBitmap createBitmap(File file, Size size) throws Exception;
+	Bitmap createBitmap(File file, Size size) throws Exception;
 }

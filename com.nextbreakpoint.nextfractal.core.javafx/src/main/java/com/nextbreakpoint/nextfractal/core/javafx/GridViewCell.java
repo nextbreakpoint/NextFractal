@@ -36,7 +36,7 @@ public class GridViewCell extends BorderPane {
 	private final JavaFXGraphicsFactory renderFactory = new JavaFXGraphicsFactory();
 	private final Canvas canvas;
 	private boolean redraw;
-	private Object data;
+	private GridItem item;
 	@Getter
     private final int index;
 
@@ -52,7 +52,6 @@ public class GridViewCell extends BorderPane {
 	}
 
 	public void update() {
-		final GridItem item = (GridItem)data;
 		if (item != null) {
 			if (item.isDirty()) {
 				item.setDirty(false);
@@ -71,7 +70,7 @@ public class GridViewCell extends BorderPane {
 				g2d.fillRect(0, 0, getWidth(), getHeight());
 				g2d.setFill(Color.DARKGRAY);
 				g2d.setTextAlign(TextAlignment.CENTER);
-				final BrowseBitmap bitmap = item.getBitmap();
+				final Bitmap bitmap = item.getBitmap();
 				if (!item.getErrors().isEmpty()) {
 					g2d.fillText("Error", getWidth() / 2, getHeight() / 2);
 				} else if (bitmap == null) {
@@ -95,9 +94,9 @@ public class GridViewCell extends BorderPane {
 		}
 	}
 
-	public void setData(Object data) {
-		if (this.data != data) {
-			this.data = data;
+	public void setItem(GridItem item) {
+		if (this.item != item) {
+			this.item = item;
 			redraw = true;
 			//update();
 		}

@@ -92,7 +92,7 @@ public class HistoryPane extends BorderPane {
     }
 
     private void addItem(ListView<Bitmap> listView, Session session, IntBuffer pixels, Size size) {
-        final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
+        final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), pixels);
         bitmap.setProperty("session", session);
         listView.getItems().addFirst(bitmap);
     }

@@ -44,7 +44,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
+import com.nextbreakpoint.nextfractal.core.javafx.SimpleBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
 import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
@@ -86,10 +86,10 @@ public class ContextFreeUIFactory implements UIFactory {
 	}
 
 	@Override
-	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
+	public Bitmap createBitmap(Session session, Size size) throws Exception {
 		final CFParser compiler = new CFParser();
 		final CFParserResult report = compiler.parse(session.script());
-		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
+		final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), null);
 		bitmap.setProperty("image", report.classFactory().create());
 		bitmap.setProperty("session", session);
 		return bitmap;

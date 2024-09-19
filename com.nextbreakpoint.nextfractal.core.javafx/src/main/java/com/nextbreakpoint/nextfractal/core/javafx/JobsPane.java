@@ -228,7 +228,7 @@ public class JobsPane extends BorderPane {
     }
 
     private void addItem(ListView<Bitmap> listView, ExportSession session, IntBuffer pixels, Size size) {
-        final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
+        final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), pixels);
         final JobEntry jobEntry = new JobEntry(session, ExportSessionState.READY, 0f, bitmap);
         exportEntries.put(session.getSessionId(), jobEntry);
         bitmap.setProperty("exportSession", session);

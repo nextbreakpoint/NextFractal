@@ -40,7 +40,7 @@ public interface UIFactory {
 
 	GridItemRenderer createRenderer(Bitmap bitmap) throws Exception;
 
-	BrowseBitmap createBitmap(Session session, Size size) throws Exception;
+	Bitmap createBitmap(Session session, Size size) throws Exception;
 
 	Either<String> loadResource(String resourceName);
 

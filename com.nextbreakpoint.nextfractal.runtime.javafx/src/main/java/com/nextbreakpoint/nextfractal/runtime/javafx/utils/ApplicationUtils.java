@@ -35,7 +35,6 @@ import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
@@ -78,7 +77,7 @@ public class ApplicationUtils {
         Plugins.factories().forEach(plugin -> log.fine("Found plugin " + plugin.getId()));
     }
 
-    public static Either<BrowseBitmap> createBitmap(File file, Size size) {
+    public static Either<Bitmap> createBitmap(File file, Size size) {
         return Command.of(FileManager.loadBundle(file))
                 .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().pluginId()))
                 .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))

@@ -38,7 +38,6 @@ import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowseDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.BrowsePane;
 import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
@@ -93,7 +92,7 @@ public class MainCentralPane extends BorderPane {
 			}
 
             @Override
-            public BrowseBitmap createBitmap(File file, Size size) throws Exception {
+            public Bitmap createBitmap(File file, Size size) throws Exception {
                 return ApplicationUtils.createBitmap(file, size).orThrow().get();
             }
 

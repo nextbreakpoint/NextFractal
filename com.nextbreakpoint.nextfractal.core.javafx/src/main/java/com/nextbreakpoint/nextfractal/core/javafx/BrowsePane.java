@@ -579,7 +579,7 @@ public class BrowsePane extends BorderPane {
         }
         for (int index = firstIndex; index < Math.min(lastIndex, items.size()); index++) {
             final GridItem item = items.get(index);
-            final BrowseBitmap bitmap = item.getBitmap();
+            final Bitmap bitmap = item.getBitmap();
             final GridItemRenderer renderer = item.getRenderer();
             final long time = System.currentTimeMillis();
             if (bitmap == null && time - item.getLastChanged() > SCROLL_BOUNCE_DELAY && item.getLoadItemFuture() == null) {
@@ -603,7 +603,7 @@ public class BrowsePane extends BorderPane {
     private void loadItem(GridItem item, File file) {
         try {
             if (!item.isAborted() && delegate != null) {
-                final BrowseBitmap bitmap = delegate.createBitmap(file, tile.tileSize());
+                final Bitmap bitmap = delegate.createBitmap(file, tile.tileSize());
                 Platform.runLater(() -> item.setBitmap(bitmap));
             }
         } catch (Exception e) {
@@ -613,14 +613,14 @@ public class BrowsePane extends BorderPane {
     }
 
     private void initItemAsync(GridItem item) {
-        final BrowseBitmap bitmap = item.getBitmap();
+        final Bitmap bitmap = item.getBitmap();
         item.setInitItemFuture(executor.submit(() -> {
             initItem(item, bitmap);
             return null;
         }));
     }
 
-    private void initItem(GridItem item, BrowseBitmap bitmap) {
+    private void initItem(GridItem item, Bitmap bitmap) {
         try {
             if (!item.isAborted() && delegate != null) {
                 final GridItemRenderer renderer = delegate.createRenderer(bitmap);

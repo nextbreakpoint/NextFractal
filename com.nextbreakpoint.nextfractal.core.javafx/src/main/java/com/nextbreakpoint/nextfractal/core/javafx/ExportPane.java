@@ -430,7 +430,7 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void addItem(ListView<Bitmap> listView, AnimationClip clip, IntBuffer pixels, Size size, boolean notifyAddClip) {
-		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), pixels);
+		final Bitmap bitmap = new SimpleBitmap(size.width(), size.height(), pixels);
 		bitmap.setProperty("clip", clip);
 		listView.getItems().add(bitmap);
 		if (listView.getItems().size() == 1) {

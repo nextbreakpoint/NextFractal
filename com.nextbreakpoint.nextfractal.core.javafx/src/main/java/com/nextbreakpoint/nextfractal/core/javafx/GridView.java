@@ -38,7 +38,7 @@ public class GridView extends Pane {
 	private double prevOffsetY;
 	private double prevOffsetX;
 	@Getter
-	private Object[] data;
+	private GridItem[] data;
 	@Getter
     protected int selectedRow = -1;
 	@Getter
@@ -109,9 +109,9 @@ public class GridView extends Pane {
 				cell.setLayoutX(col * cellSize + (offsetX - ((int)(offsetX / cellSize)) * cellSize));
 				final int index = (firstRow + row) * numCols + col;
 				if (data != null && index < data.length) {
-					cell.setData(data[index]);
+					cell.setItem(data[index]);
 				} else {
-					cell.setData(null);
+					cell.setItem(null);
 				}
 				if (delegate != null) {
 					delegate.didCellChange(this, row, col);
@@ -164,7 +164,7 @@ public class GridView extends Pane {
 		return new GridViewCell(index, cellSize, cellSize);
 	}
 
-    public void setData(Object[] data) {
+    public void setData(GridItem[] data) {
 		this.data = data;
 		resetScroll();
 		updateRows();

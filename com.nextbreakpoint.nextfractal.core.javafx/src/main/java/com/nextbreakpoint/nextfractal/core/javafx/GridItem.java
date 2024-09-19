@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
 public class GridItem {
 	private final List<ScriptError> errors = new LinkedList<>();
 	private File file;
-	private BrowseBitmap bitmap;
+	private Bitmap bitmap;
 	private GridItemRenderer renderer;
 	private Future<GridItem> loadItemFuture;
 	private Future<GridItem> initItemFuture;
@@ -54,7 +54,7 @@ public class GridItem {
 		dirty = true;
 	}
 
-    public synchronized void setBitmap(BrowseBitmap bitmap) {
+    public synchronized void setBitmap(Bitmap bitmap) {
 		lastChanged = System.currentTimeMillis();
 		this.bitmap = bitmap;
 		dirty = true;
