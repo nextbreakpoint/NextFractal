@@ -22,12 +22,34 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.grid;
+package com.nextbreakpoint.nextfractal.core.javafx;
 
-public interface GridViewDelegate {
-	void didCellChange(GridView source, int row, int col);
+import com.nextbreakpoint.nextfractal.core.common.Session;
+import lombok.Getter;
 
-	void didRangeChange(GridView source, int first, int last);
+import java.util.HashMap;
+import java.util.Map;
 
-	void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks);
+public class ImageDescriptor {
+	private final Map<String, Object> properties = new HashMap<>();
+	@Getter
+	private final Session session;
+	@Getter
+    private final int width;
+	@Getter
+    private final int height;
+
+	public ImageDescriptor(Session session, int width, int height) {
+        this.session = session;
+        this.width = width;
+		this.height = height;
+	}
+
+    public Object getProperty(String key) {
+		return properties.get(key);
+	}
+
+	public void setProperty(String key, Object value) {
+		properties.put(key, value);
+	}
 }

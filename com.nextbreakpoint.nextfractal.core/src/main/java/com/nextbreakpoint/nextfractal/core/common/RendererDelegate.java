@@ -22,12 +22,11 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.grid;
+package com.nextbreakpoint.nextfractal.core.common;
 
-public interface GridViewDelegate {
-	void didCellChange(GridView source, int row, int col);
+import java.util.List;
 
-	void didRangeChange(GridView source, int first, int last);
-
-	void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks);
+@FunctionalInterface
+public interface RendererDelegate {
+	void onImageUpdated(float progress, List<ScriptError> errors);
 }

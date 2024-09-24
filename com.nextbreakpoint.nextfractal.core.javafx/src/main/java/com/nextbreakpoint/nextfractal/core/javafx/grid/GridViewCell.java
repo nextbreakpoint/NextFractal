@@ -24,83 +24,30 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
-import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphicsFactory;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import lombok.Getter;
 
-public class GridViewCell extends BorderPane {
-	private final JavaFXGraphicsFactory renderFactory = new JavaFXGraphicsFactory();
-	private final Canvas canvas;
-	private boolean redraw;
-	private GridItem item;
+public abstract class GridViewCell extends BorderPane {
+	protected GridViewItem item;
 	@Getter
-    private final int index;
+	protected final int index;
 
 	public GridViewCell(int index, int width, int height) {
 		this.index = index;
 
-		canvas = new Canvas(width, height);
-		
-		setCenter(canvas);
-		
+		setMinSize(width, height);
+		setMaxSize(width, height);
+		setPrefSize(width, height);
+
 		widthProperty().addListener((_, _, _) -> update());
 		heightProperty().addListener((_, _, _) -> update());
 	}
 
-	public void update() {
-		if (item != null) {
-			if (item.isDirty()) {
-				item.setDirty(false);
-				redraw = true;
-			}
-			final ImageRenderer renderer = item.getRenderer();
-			if (renderer != null) {
-				if (redraw || renderer.hasImageChanged()) {
-					final GraphicsContext gc = renderFactory.createGraphicsContext(canvas.getGraphicsContext2D());
-					renderer.drawImage(gc, 0, 0);
-					redraw = false;
-				}
-			} else if (redraw) {
-				javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
-				g2d.setFill(Color.WHITE);
-				g2d.fillRect(0, 0, getWidth(), getHeight());
-				g2d.setFill(Color.DARKGRAY);
-				g2d.setTextAlign(TextAlignment.CENTER);
-				final RenderedImage bitmap = item.getBitmap();
-				if (!item.getErrors().isEmpty()) {
-					g2d.fillText("Error", getWidth() / 2, getHeight() / 2);
-				} else if (bitmap == null) {
-					g2d.fillText("Rendering...", getWidth() / 2, getHeight() / 2);
-				}
-				redraw = false;
-			}
-			if (item.isSelected()) {
-				final javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
-				g2d.setStroke(Color.YELLOW);
-				g2d.setLineWidth(5);
-				g2d.strokeRect(0, 0, getWidth(), getHeight());
-			}
-		} else {
-			if (redraw) {
-				final javafx.scene.canvas.GraphicsContext g2d = canvas.getGraphicsContext2D();
-				g2d.setFill(Color.WHITE);
-				g2d.fillRect(0, 0, getWidth(), getHeight());
-				redraw = false;
-			}
-		}
-	}
+	public abstract void update();
 
-	public void setItem(GridItem item) {
+	public void bindItem(GridViewItem item) {
 		if (this.item != item) {
 			this.item = item;
-			redraw = true;
-			//update();
 		}
 	}
 }

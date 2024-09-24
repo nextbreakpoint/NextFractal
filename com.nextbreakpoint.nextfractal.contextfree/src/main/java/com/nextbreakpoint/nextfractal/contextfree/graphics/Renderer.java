@@ -28,6 +28,7 @@ import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFRenderer;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.SimpleCanvas;
 import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;

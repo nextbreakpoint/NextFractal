@@ -28,6 +28,7 @@ import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
@@ -38,9 +39,9 @@ import java.util.function.Supplier;
 public interface UIFactory {
 	String getId();
 
-	ImageRenderer createRenderer(RenderedImage bitmap) throws Exception;
+	ImageRenderer createImageRenderer(ImageDescriptor descriptor, RendererDelegate delegate) throws Exception;
 
-	RenderedImage createBitmap(Session session, Size size) throws Exception;
+	ImageDescriptor createImageDescriptor(Session session, Size size) throws Exception;
 
 	Either<String> loadResource(String resourceName);
 

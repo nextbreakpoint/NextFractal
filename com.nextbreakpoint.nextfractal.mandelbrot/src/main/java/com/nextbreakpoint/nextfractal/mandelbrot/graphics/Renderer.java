@@ -26,6 +26,7 @@ package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
 import com.nextbreakpoint.nextfractal.core.common.Colors;
 import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.AffineTransform;
@@ -91,7 +92,7 @@ public class Renderer {
 	protected boolean julia;
 	protected ComplexNumber point;
 	@Setter
-	protected RendererDelegate rendererDelegate;
+	protected RendererDelegate delegate;
     @Setter
     protected boolean multiThread;
     @Setter
@@ -680,14 +681,14 @@ public class Renderer {
 			buffer.getBuffer().update(pixels);
 		}
 		lock.unlock();
-		if (rendererDelegate != null) {
-			rendererDelegate.onImageUpdated(progress, List.of());
+		if (delegate != null) {
+			delegate.onImageUpdated(progress, List.of());
 		}
 	}
 
 	protected void update(float progress, List<ScriptError> errors) {
-		if (rendererDelegate != null) {
-			rendererDelegate.onImageUpdated(progress, errors);
+		if (delegate != null) {
+			delegate.onImageUpdated(progress, errors);
 		}
 	}
 

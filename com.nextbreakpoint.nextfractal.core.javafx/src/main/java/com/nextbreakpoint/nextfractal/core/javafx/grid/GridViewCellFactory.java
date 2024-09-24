@@ -22,13 +22,8 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.graphics;
+package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
-
-import java.util.List;
-
-@FunctionalInterface
-public interface RendererDelegate {
-	void onImageUpdated(float progress, List<ScriptError> errors);
+public interface GridViewCellFactory {
+	GridViewCell createCell(int index, int width, int height);
 }

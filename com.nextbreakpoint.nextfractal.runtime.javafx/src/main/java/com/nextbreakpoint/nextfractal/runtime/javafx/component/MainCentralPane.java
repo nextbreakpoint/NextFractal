@@ -35,17 +35,13 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackStarted;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
-import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowseDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowsePane;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
-import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
+import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.playback.PlaybackDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.playback.PlaybackPane;
 import com.nextbreakpoint.nextfractal.core.javafx.playback.RecordingPane;
-import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
@@ -89,16 +85,6 @@ public class MainCentralPane extends BorderPane {
             @Override
 			public void didClose(BrowsePane source) {
                 eventBus.postEvent(ToggleBrowserRequested.builder().build());
-			}
-
-            @Override
-            public RenderedImage createBitmap(File file, Size size) throws Exception {
-                return ApplicationUtils.createBitmap(file, size).orThrow().get();
-            }
-
-			@Override
-			public ImageRenderer createRenderer(RenderedImage bitmap) throws Exception {
-				return ApplicationUtils.createRenderer(bitmap).orThrow().get();
 			}
 		});
 

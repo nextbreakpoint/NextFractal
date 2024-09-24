@@ -22,13 +22,14 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
+package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCell;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCellFactory;
 
-import java.util.List;
-
-@FunctionalInterface
-public interface RendererDelegate {
-	void onImageUpdated(float progress, List<ScriptError> errors);
+public class BrowseGridViewCellFactory implements GridViewCellFactory {
+	@Override
+	public GridViewCell createCell(int index, int width, int height) {
+		return new BrowseGridViewCell(index, width, height);
+	}
 }

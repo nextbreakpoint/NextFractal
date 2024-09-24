@@ -28,14 +28,11 @@ import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.Plugins;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
 import javafx.geometry.Rectangle2D;
@@ -62,7 +59,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindEncoder;
-import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log
@@ -75,19 +71,6 @@ public class ApplicationUtils {
 
     public static void printPlugins() {
         Plugins.factories().forEach(plugin -> log.fine("Found plugin " + plugin.getId()));
-    }
-
-    public static Either<RenderedImage> createBitmap(File file, Size size) {
-        return Command.of(FileManager.loadBundle(file))
-                .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().pluginId()))
-                .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))
-                .execute();
-    }
-
-    public static Either<ImageRenderer> createRenderer(RenderedImage bitmap) {
-        return Command.of(tryFindFactory(((Session) bitmap.getProperty("session")).pluginId()))
-                .flatMap(factory -> Command.of(() -> factory.createRenderer(bitmap)))
-                .execute();
     }
 
     public static void loadStyleSheets(Scene scene) {

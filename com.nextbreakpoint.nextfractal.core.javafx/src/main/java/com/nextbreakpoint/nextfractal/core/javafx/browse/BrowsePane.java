@@ -28,19 +28,15 @@ import com.nextbreakpoint.nextfractal.core.common.Block;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
-import com.nextbreakpoint.nextfractal.core.javafx.grid.GridItem;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.Icons;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageLoader;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridView;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewDelegate;
-import com.nextbreakpoint.nextfractal.core.javafx.Icons;
 import com.nextbreakpoint.nextfractal.core.javafx.observable.StringObservableValue;
-import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -66,7 +62,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
@@ -75,15 +70,11 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.nextbreakpoint.nextfractal.core.common.ErrorType.EXECUTE;
-
 @Log
 public class BrowsePane extends BorderPane {
     private static final String FILE_EXTENSION = ".nf.zip";
-    private static final int FRAME_LENGTH_IN_MILLIS = 50;
-    private static final int SCROLL_BOUNCE_DELAY = 500;
 
-    private final List<GridItem> items = new ArrayList<>();
+    private final List<BrowseGridViewItem> items = new ArrayList<>();
     private final List<String> filter = new LinkedList<>();
     private final StringObservableValue sourcePathProperty;
     private final StringObservableValue importPathProperty;
@@ -95,7 +86,6 @@ public class BrowsePane extends BorderPane {
     private final Tile tile;
     private final GridView grid;
     private Thread thread;
-    private AnimationTimer timer;
     @Setter
     private BrowseDelegate delegate;
 
@@ -164,33 +154,29 @@ public class BrowsePane extends BorderPane {
 
         deleteButton.setDisable(true);
 
-        grid = new GridView(numRows, numCols, size);
+        executor = ExecutorUtils.newFixedThreadPool(15, ThreadUtils.createVirtualThreadFactory("Browser"));
+
+        grid = new GridView(executor, new BrowseGridViewCellFactory(), numRows, numCols, size);
 
         grid.setDelegate(new GridViewDelegate() {
             @Override
-            public void didRangeChange(GridView source, int firstRow, int lastRow) {
-//				source.updateCells();
+            public void didRangeChange(GridView source, int first, int last) {
             }
 
             @Override
             public void didCellChange(GridView source, int row, int col) {
-                source.updateCell(row * numCols + col);
             }
 
             @Override
             public void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks) {
-                final int index = selectedRow * numCols + selectedCol;
+                final int index = grid.getCellIndex(selectedRow, selectedCol);
                 if (index >= 0 && index < items.size()) {
-                    final GridItem item = items.get(index);
+                    final BrowseGridViewItem item = items.get(index);
                     final File file = item.getFile();
                     if (file != null) {
                         if (clicks == 1) {
                             item.setSelected(!item.isSelected());
-                            if (items.stream().anyMatch(GridItem::isSelected)) {
-                                deleteButton.setDisable(false);
-                            } else {
-                                deleteButton.setDisable(true);
-                            }
+                            deleteButton.setDisable(items.stream().noneMatch(BrowseGridViewItem::isSelected));
                         } else {
                             item.setSelected(false);
                             if (delegate != null) {
@@ -240,8 +226,6 @@ public class BrowsePane extends BorderPane {
             toolbar2.setPrefWidth(newValue.doubleValue() / 3);
             toolbar3.setPrefWidth(newValue.doubleValue() / 3);
         });
-
-        executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Browser"));
     }
 
     public File getCurrentSourceFolder() {
@@ -258,12 +242,10 @@ public class BrowsePane extends BorderPane {
 
     public void enable() {
         log.info("Browser enabled");
-        startTimer();
     }
 
     public void disable() {
         log.info("Browser disabled");
-        stopTimer();
     }
 
     public void reload() {
@@ -282,13 +264,15 @@ public class BrowsePane extends BorderPane {
         loadFiles(statusLabel, grid, path);
     }
 
-    private void deleteSelected(List<GridItem> items) {
-        final List<File> files = items.stream().filter(GridItem::isSelected).map(GridItem::getFile).toList();
+    private void deleteSelected(List<BrowseGridViewItem> items) {
+        final List<File> files = items.stream()
+                .filter(BrowseGridViewItem::isSelected)
+                .map(BrowseGridViewItem::getFile)
+                .toList();
         delegate.didDeleteFiles(files);
     }
 
     public void dispose() {
-        stopTimer();
         ExecutorUtils.shutdown(executor);
         stopWatching();
         removeItems();
@@ -340,7 +324,7 @@ public class BrowsePane extends BorderPane {
 
     private void loadFiles(Label statusLabel, GridView grid, File folder) {
         removeItems();
-        grid.setData(new GridItem[0]);
+        grid.setData(List.of());
         final List<File> files = listFiles(folder);
         if (!files.isEmpty()) {
             statusLabel.setText(files.size() + " project file" + (files.size() > 1 ? "s" : "") + " found");
@@ -405,11 +389,9 @@ public class BrowsePane extends BorderPane {
     }
 
     private void loadItems(GridView grid, List<File> files) {
-        final GridItem[] items = new GridItem[files.size()];
-        for (int i = 0; i < files.size(); i++) {
-            items[i] = new GridItem();
-            items[i].setFile(files.get(i));
-            this.items.add(items[i]);
+        items.clear();
+        for (File file : files) {
+            items.add(new BrowseGridViewItem(new ImageLoader(file, tile.tileSize())));
         }
         grid.setData(items);
     }
@@ -429,214 +411,8 @@ public class BrowsePane extends BorderPane {
     }
 
     private void removeItems() {
-        for (int index = 0; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getLoadItemFuture() != null && !item.getLoadItemFuture().isDone()) {
-                item.getLoadItemFuture().cancel(true);
-            }
-        }
-
-        for (int index = 0; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                item.getRenderer().abort();
-            }
-        }
-
-//		for (int index = 0; index < items.size(); index++) {
-//			final GridItem item = items.get(index);
-//			if (item.getRenderer() != null) {
-//				item.getRenderer().waitFor();
-//			}
-//		}
-
-        for (int index = 0; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-//				final GridItemRenderer renderer = item.getRenderer();
-                item.setRenderer(null);
-//				renderer.dispose();
-            }
-        }
-
+        grid.setData(List.of());
         items.clear();
-    }
-
-    private void startTimer() {
-        if (timer == null) {
-            timer = new AnimationTimer() {
-                private long last;
-
-                @Override
-                public void handle(long now) {
-                    final long time = now / 1000000;
-                    if (time - last > FRAME_LENGTH_IN_MILLIS) {
-                        try {
-                            updateCells(grid);
-                        } catch (ExecutionException | InterruptedException e) {
-                            log.log(Level.WARNING, "Can't update cells", e);
-                        }
-                        last = time;
-                    }
-                }
-            };
-        }
-        timer.start();
-    }
-
-    private void stopTimer() {
-        if (timer != null) {
-            timer.stop();
-        }
-    }
-
-    private void updateCells(GridView grid) throws ExecutionException, InterruptedException {
-        if (grid.getData() == null) {
-            return;
-        }
-        int firstRow = grid.getFirstRow();
-        int lastRow = grid.getLastRow();
-        if (firstRow > 0) {
-            firstRow -= 1;
-        }
-        if (lastRow < grid.getData().length / numCols - 1) {
-            lastRow += 1;
-        }
-        final int firstIndex = Math.min(firstRow * numCols, items.size());
-        final int lastIndex = lastRow * numCols + numCols;
-        for (int index = 0; index < firstIndex; index++) {
-            final GridItem item = items.get(index);
-            item.setAborted(true);
-        }
-        for (int index = lastIndex; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            item.setAborted(true);
-        }
-        for (int index = 0; index < firstIndex; index++) {
-            final GridItem item = items.get(index);
-            if (item.getLoadItemFuture() != null) {
-                item.getLoadItemFuture().get();
-                item.setLoadItemFuture(null);
-            }
-            if (item.getInitItemFuture() != null) {
-                item.getInitItemFuture().get();
-                item.setInitItemFuture(null);
-            }
-        }
-        for (int index = lastIndex; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getLoadItemFuture() != null) {
-                item.getLoadItemFuture().get();
-                item.setLoadItemFuture(null);
-            }
-            if (item.getInitItemFuture() != null) {
-                item.getInitItemFuture().get();
-                item.setInitItemFuture(null);
-            }
-        }
-        for (int index = 0; index < firstIndex; index++) {
-            final GridItem item = items.get(index);
-            item.setAborted(false);
-        }
-        for (int index = lastIndex; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            item.setAborted(false);
-        }
-        for (int index = 0; index < firstIndex; index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                item.getRenderer().abort();
-            }
-        }
-        for (int index = lastIndex; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                item.getRenderer().abort();
-            }
-        }
-        for (int index = 0; index < firstIndex; index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                item.getRenderer().waitFor();
-            }
-        }
-        for (int index = lastIndex; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                item.getRenderer().waitFor();
-            }
-        }
-        for (int index = 0; index < firstIndex; index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                final ImageRenderer renderer = item.getRenderer();
-                item.setRenderer(null);
-                item.setBitmap(null);
-                renderer.dispose();
-            }
-        }
-        for (int index = lastIndex; index < items.size(); index++) {
-            final GridItem item = items.get(index);
-            if (item.getRenderer() != null) {
-                final ImageRenderer renderer = item.getRenderer();
-                item.setRenderer(null);
-                item.setBitmap(null);
-                renderer.dispose();
-            }
-        }
-        for (int index = firstIndex; index < Math.min(lastIndex, items.size()); index++) {
-            final GridItem item = items.get(index);
-            final RenderedImage bitmap = item.getBitmap();
-            final ImageRenderer renderer = item.getRenderer();
-            final long time = System.currentTimeMillis();
-            if (bitmap == null && time - item.getLastChanged() > SCROLL_BOUNCE_DELAY && item.getLoadItemFuture() == null) {
-                loadItemAsync(item);
-            }
-            if (bitmap != null && renderer == null && time - item.getLastChanged() > SCROLL_BOUNCE_DELAY && item.getInitItemFuture() == null) {
-                initItemAsync(item);
-            }
-        }
-        grid.updateCells();
-    }
-
-    private void loadItemAsync(GridItem item) {
-        final File file = item.getFile();
-        item.setLoadItemFuture(executor.submit(() -> {
-            loadItem(item, file);
-            return null;
-        }));
-    }
-
-    private void loadItem(GridItem item, File file) {
-        try {
-            if (!item.isAborted() && delegate != null) {
-                final RenderedImage bitmap = delegate.createBitmap(file, tile.tileSize());
-                Platform.runLater(() -> item.setBitmap(bitmap));
-            }
-        } catch (Exception e) {
-            item.setErrors(List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, e.getMessage())));
-            log.log(Level.WARNING, "Can't create bitmap: " + e.getMessage());
-        }
-    }
-
-    private void initItemAsync(GridItem item) {
-        final RenderedImage bitmap = item.getBitmap();
-        item.setInitItemFuture(executor.submit(() -> {
-            initItem(item, bitmap);
-            return null;
-        }));
-    }
-
-    private void initItem(GridItem item, RenderedImage bitmap) {
-        try {
-            if (!item.isAborted() && delegate != null) {
-                final ImageRenderer renderer = delegate.createRenderer(bitmap);
-                Platform.runLater(() -> item.setRenderer(renderer));
-            }
-        } catch (Exception e) {
-            item.setErrors(List.of(new ScriptError(EXECUTE, 0, 0, 0, 0, e.getMessage())));
-            log.log(Level.WARNING, "Can't initialize renderer", e);
-        }
     }
 
     private void stopWatching() {
@@ -644,7 +420,8 @@ public class BrowsePane extends BorderPane {
             thread.interrupt();
             try {
                 thread.join();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
+                Thread.currentThread().interrupt();
             }
             thread = null;
         }

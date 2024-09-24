@@ -24,48 +24,55 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
+import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowseGridViewItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.java.Log;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+
+@Log
 public class GridView extends Pane {
+	private final int EXTRA = 2;
+	private final int cellSize;
+	private final int numRows;
+	private final int numCols;
 	private final GridViewCell[] cells;
-	private final int numExtraRows = 2;
+	private final ExecutorService executor;
+	private final GridViewCellFactory factory;
+	private GridViewItem[] data;
 	private double offsetX;
 	private double offsetY;
-	private double prevOffsetY;
-	private double prevOffsetX;
 	@Getter
-	private GridItem[] data;
+	private int selectedRow = -1;
 	@Getter
-    protected int selectedRow = -1;
+	private int selectedCol = -1;
 	@Getter
-    protected int selectedCol = -1;
-	protected final int cellSize;
-	protected int numRows;
-	protected int numCols;
 	@Setter
-    @Getter
-    private GridViewDelegate delegate;
+	private GridViewDelegate delegate;
+	@Getter
+	@Setter
+	private boolean horizontal;
 
-	public GridView(int numRows, int numCols, int cellSize) {
+	public GridView(ExecutorService executor, GridViewCellFactory factory, int numRows, int numCols, int cellSize) {
+		this.executor = Objects.requireNonNull(executor);
+		this.factory = Objects.requireNonNull(factory);
 		this.numRows = numRows;
 		this.numCols = numCols;
 		this.cellSize = cellSize;
+
 		getStyleClass().add("grid-view");
 
-		cells = new GridViewCell[(numRows + numExtraRows) * numCols];
+		cells = new GridViewCell[horizontal ? (numCols + EXTRA) * numRows : (numRows + EXTRA) * numCols];
 
 		for (int i = 0; i < cells.length; i++) {
-			final GridViewCell cell = createCell(i);
-			cell.setMaxWidth(cellSize);
-			cell.setMaxHeight(cellSize);
-			cell.setMinWidth(cellSize);
-			cell.setMinHeight(cellSize);
-			cell.setPrefWidth(cellSize);
-			cell.setPrefHeight(cellSize);
+			final GridViewCell cell = factory.createCell(i, cellSize, cellSize);
 			getChildren().add(cell);
 			cells[i] = cell;
 		}
@@ -86,63 +93,211 @@ public class GridView extends Pane {
                     if (delegate != null) {
                         delegate.didSelectionChange(GridView.this, selectedRow, selectedCol, mouseEvent.getClickCount());
                     }
+					final int index = getCellIndex(selectedRow - getFirstRow(), selectedCol - getFirstCol());
+					if (index >= 0 && index < cells.length) {
+						cells[index].update();
+					}
                 });
 
 		widthProperty().addListener((_, _, _) -> {
             resetScroll();
-            updateRows();
+            update();
         });
 
 		heightProperty().addListener((_, _, _) -> {
             resetScroll();
-            updateRows();
+            update();
         });
 	}
 
-	private void updateRows() {
-		final int firstRow = (int) Math.abs(offsetY / cellSize);
-		final int lastRow = firstRow + numRows;
-		for (int row = 0; row < numRows + numExtraRows; row++) {
-			for (int col = 0; col < numCols; col++) {
-				final GridViewCell cell = cells[row * numCols + col];
-				cell.setLayoutY(row * cellSize + (offsetY - ((int)(offsetY / cellSize)) * cellSize));
-				cell.setLayoutX(col * cellSize + (offsetX - ((int)(offsetX / cellSize)) * cellSize));
-				final int index = (firstRow + row) * numCols + col;
-				if (data != null && index < data.length) {
-					cell.setItem(data[index]);
-				} else {
-					cell.setItem(null);
+	public void setData(List<BrowseGridViewItem> data) {
+		final BrowseGridViewItem[] items = new BrowseGridViewItem[data.size()];
+		for (int i = 0; i < data.size(); i++) {
+			items[i] = data.get(i);
+		}
+		this.data = items;
+		resetScroll();
+		update();
+	}
+
+	public int getFirstRow() {
+		return (int) Math.abs(offsetY / cellSize);
+	}
+
+	public int getLastRow() {
+		return getFirstRow() + numRows;
+	}
+
+	public int getFirstCol() {
+		return (int) Math.abs(offsetX / cellSize);
+	}
+
+	public int getLastCol() {
+		return getFirstCol() + numCols;
+	}
+
+	public int getSize() {
+		return data != null ? data.length : 0;
+	}
+
+	public boolean isEmpty() {
+		return getSize() == 0;
+	}
+
+	private void update() {
+		try {
+			if (horizontal) {
+				final int firstCol = (int) Math.abs(offsetX / cellSize);
+				final int lastCol = firstCol + numCols;
+				for (int col = 0; col < numCols + EXTRA; col++) {
+					for (int row = 0; row < numRows; row++) {
+						final GridViewCell cell = cells[col * numRows + row];
+						cell.setLayoutY(row * cellSize + (offsetY - ((int) (offsetY / cellSize)) * cellSize));
+						cell.setLayoutX(col * cellSize + (offsetX - ((int) (offsetX / cellSize)) * cellSize));
+						final int index = (firstCol + col) * numRows + row;
+						if (data != null && index < data.length) {
+							final GridViewItem item = data[index];
+							cell.bindItem(item);
+						} else {
+							cell.bindItem(null);
+						}
+						cell.update();
+						if (delegate != null) {
+							delegate.didCellChange(this, row, col);
+						}
+					}
 				}
 				if (delegate != null) {
-					delegate.didCellChange(this, row, col);
+					delegate.didRangeChange(this, firstCol, lastCol);
+				}
+			} else {
+				final int firstRow = (int) Math.abs(offsetY / cellSize);
+				final int lastRow = firstRow + numRows;
+				for (int row = 0; row < numRows + EXTRA; row++) {
+					for (int col = 0; col < numCols; col++) {
+						final GridViewCell cell = cells[row * numCols + col];
+						cell.setLayoutY(row * cellSize + (offsetY - ((int) (offsetY / cellSize)) * cellSize));
+						cell.setLayoutX(col * cellSize + (offsetX - ((int) (offsetX / cellSize)) * cellSize));
+						final int index = (firstRow + row) * numCols + col;
+						if (data != null && index < data.length) {
+							final GridViewItem item = data[index];
+							cell.bindItem(item);
+						} else {
+							cell.bindItem(null);
+						}
+						cell.update();
+						if (delegate != null) {
+							delegate.didCellChange(this, row, col);
+						}
+					}
+				}
+				if (delegate != null) {
+					delegate.didRangeChange(this, firstRow, lastRow);
 				}
 			}
-		}
-		if (delegate != null) {
-			delegate.didRangeChange(this, firstRow, lastRow);
+
+			if (data != null) {
+				final int firstIndex = getFirstIndex();
+				final int lastIndex = getLastIndex();
+
+				log.log(Level.INFO, "firstIndex = {0}, lastIndex = {1}", new Object[] { firstIndex, lastIndex});
+
+				for (int index = 0; index < firstIndex; index++) {
+					final GridViewItem item = data[index];
+					item.cancel();
+				}
+
+				for (int index = lastIndex; index < data.length; index++) {
+					final GridViewItem item = data[index];
+					item.cancel();
+				}
+
+				for (int index = 0; index < firstIndex; index++) {
+					final GridViewItem item = data[index];
+					item.waitFor();
+				}
+
+				for (int index = lastIndex; index < data.length; index++) {
+					final GridViewItem item = data[index];
+					item.waitFor();
+				}
+
+				for (int index = firstIndex; index < lastIndex; index++) {
+					final GridViewItem item = data[index];
+					item.run(executor);
+				}
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.log(Level.WARNING, "Can't render grid", e);
 		}
 	}
 
-//	private void layoutCells() {
-//		for (int row = 0; row < numRows + numExtraRows; row++) {
-//			for (int col = 0; col < numCols; col++) {
-//				final GridViewCell cell = cells[row * numCols + col];
-//				cell.setLayoutY(row * cellSize + (offsetY - ((int)(offsetY / cellSize)) * cellSize));
-//				cell.setLayoutX(col * cellSize + (offsetX - ((int)(offsetX / cellSize)) * cellSize));
-//			}
-//		}
-//	}
+	private int getFirstIndex() {
+		if (horizontal) {
+			int firstCol = getFirstCol();
+			if (firstCol > 0) {
+				firstCol -= 1;
+			}
+			return Math.min(firstCol * numRows, data.length);
+		} else {
+			int firstRow = getFirstRow();
+			if (firstRow > 0) {
+				firstRow -= 1;
+			}
+			return Math.min(firstRow * numCols, data.length);
+		}
+	}
+
+	private int getLastIndex() {
+		if (horizontal) {
+			int lastCol = getLastCol();
+			if (lastCol < getSize() / numRows - 1) {
+				lastCol += 1;
+			}
+			return Math.min(lastCol * numRows + numRows, data.length);
+		} else {
+			int lastRow = getLastRow();
+			if (lastRow < getSize() / numCols - 1) {
+				lastRow += 1;
+			}
+			return Math.min(lastRow * numCols + numCols, data.length);
+		}
+	}
+
+	public int getCellIndex(int row, int col) {
+		if (horizontal) {
+			return col * numRows + row;
+		} else {
+			return row * numCols + col;
+		}
+	}
 
 	private void resetScroll() {
 		offsetX = 0;
 		offsetY = 0;
-		prevOffsetX = 0;
-		prevOffsetY = 0;
 	}
 
 	private void scrollCells(double deltaX, double deltaY) {
-		if (data != null) {
-			final double y = Math.rint(((double) data.length / numCols)) * cellSize + (data.length % numCols > 0 ? cellSize : 0) - numRows * cellSize;
+		if (data == null) {
+			return;
+		}
+
+		if (horizontal) {
+			offsetY = 0;
+			final int x = ((data.length / numRows) * cellSize + (data.length % numRows > 0 ? cellSize : 0) - numCols * cellSize);
+			if (x > 0) {
+				offsetX += deltaX;
+				if (offsetX < -x) {
+					offsetX = -x;
+				}
+				if (offsetX > 0) {
+					offsetX = 0;
+				}
+			}
+        } else {
+			offsetX = 0;
+			final int y = ((data.length / numCols) * cellSize + (data.length % numCols > 0 ? cellSize : 0) - numRows * cellSize);
 			if (y > 0) {
 				offsetY += deltaY;
 				if (offsetY < -y) {
@@ -152,39 +307,8 @@ public class GridView extends Pane {
 					offsetY = 0;
 				}
 			}
-			if (prevOffsetX != offsetX || prevOffsetY != offsetY) {
-				prevOffsetY = offsetY;
-				prevOffsetX = offsetX;
-				updateRows();
-			}
-		}
-	}
-
-	protected GridViewCell createCell(int index) {
-		return new GridViewCell(index, cellSize, cellSize);
-	}
-
-    public void setData(GridItem[] data) {
-		this.data = data;
-		resetScroll();
-		updateRows();
-	}
-
-    public int getFirstRow() {
-        return (int) Math.abs(offsetY / cellSize);
-	}
-
-	public int getLastRow() {
-        return getFirstRow() + numRows;
-	}
-
-	public void updateCells() {
-        for (GridViewCell cell : cells) {
-            cell.update();
         }
-	}
-	
-	public void updateCell(int index) {
-		cells[index].update();
-	}
+
+		update();
+    }
 }
