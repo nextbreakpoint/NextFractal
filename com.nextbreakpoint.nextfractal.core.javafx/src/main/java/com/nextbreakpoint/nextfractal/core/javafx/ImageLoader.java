@@ -102,7 +102,7 @@ public class ImageLoader {
 	// this method is executed in a worker thread
 	private Void renderImage() {
 		try {
-			log.log(Level.INFO, "Start rendering image {0}", file);
+			log.log(Level.FINE, "Start rendering image {0}", file);
 			renderer = loadBundle(file)
 					.flatMap(bundle -> createImageDescriptor(bundle, size))
 					.flatMap(descriptor -> createImageRenderer(descriptor, this::onImageUpdated))
@@ -112,9 +112,9 @@ public class ImageLoader {
 			renderer.run();
 			renderer.waitFor();
 			if (renderer.isCompleted()) {
-				log.log(Level.INFO, "Finish rendering image {0}", file);
+				log.log(Level.FINE, "Finish rendering image {0}", file);
 			} else {
-				log.log(Level.INFO, "Abort rendering image {0}", file);
+				log.log(Level.FINE, "Abort rendering image {0}", file);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -145,13 +145,5 @@ public class ImageLoader {
 	private static Command<ImageRenderer> createImageRenderer(ImageDescriptor descriptor, RendererDelegate delegate) {
 		return Command.of(tryFindFactory(descriptor.getSession().pluginId()))
 				.flatMap(factory -> Command.of(() -> factory.createImageRenderer(descriptor, delegate)));
-	}
-
-	public void dump() {
-		if (renderer != null) {
-			log.info("completed " + renderer.isCompleted());
-		} else {
-			log.info("not completed");
-		}
 	}
 }

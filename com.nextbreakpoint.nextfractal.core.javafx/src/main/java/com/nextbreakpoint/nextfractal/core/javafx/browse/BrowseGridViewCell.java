@@ -27,11 +27,12 @@ package com.nextbreakpoint.nextfractal.core.javafx.browse;
 import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCell;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItemDelegate;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
-public class BrowseGridViewCell extends GridViewCell {
+public class BrowseGridViewCell extends GridViewCell implements GridViewItemDelegate {
 	private final JavaFXGraphicsFactory factory;
 	private final Canvas canvas;
 
@@ -54,21 +55,43 @@ public class BrowseGridViewCell extends GridViewCell {
 	public void bindItem(GridViewItem item) {
 		super.bindItem(item);
 		if (item != null) {
-			item.setDelegate(this::update);
+			item.setDelegate(this);
 		}
 	}
 
 	@Override
 	public void update() {
+		updateCell();
+	}
+
+	@Override
+	public void onItemUpdated() {
+		setDirty(true);
+		updateCell();
+	}
+
+	@Override
+	public void onItemSelected() {
+		setDirty(true);
+		updateCell();
+	}
+
+	private void updateCell() {
 		if (item != null && item instanceof BrowseGridViewItem browseItem) {
-			final var g2d = canvas.getGraphicsContext2D();
-			final var gc = factory.createGraphicsContext(g2d);
-			g2d.setFill(Color.WHITE);
-			browseItem.drawImage(gc, 0, 0);
-			drawMessage(browseItem);
-			drawOverlay(browseItem);
+			if (isDirty()) {
+				final var g2d = canvas.getGraphicsContext2D();
+				final var gc = factory.createGraphicsContext(g2d);
+				g2d.setFill(Color.WHITE);
+				browseItem.drawImage(gc, 0, 0);
+				drawMessage(browseItem);
+				drawOverlay(browseItem);
+				setDirty(false);
+			}
 		} else {
-			clearCanvas();
+			if (isDirty()) {
+				clearCanvas();
+				setDirty(false);
+			}
 		}
 	}
 

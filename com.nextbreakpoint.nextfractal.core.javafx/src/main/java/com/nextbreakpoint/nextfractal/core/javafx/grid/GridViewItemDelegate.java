@@ -25,5 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 public interface GridViewItemDelegate {
-	void onUpdated();
+	void onItemUpdated();
+
+	void onItemSelected();
 }

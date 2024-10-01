@@ -480,11 +480,16 @@ public class ExportPane extends BorderPane {
 	}
 
 	private void addClip(AnimationClip clip, boolean notifyAddClip) {
-		Command.of(tryFindFactory(clip.getFirstEvent().pluginId()))
-				.map(this::createImageComposer)
-				.execute()
-				.optional()
-				.ifPresent(composer -> submitItem(clip, composer, notifyAddClip));
+		//TODO verify: clip can e empty
+		if (!clip.isEmpty()) {
+			Command.of(tryFindFactory(clip.getFirstEvent().pluginId()))
+					.map(this::createImageComposer)
+					.execute()
+					.optional()
+					.ifPresent(composer -> submitItem(clip, composer, notifyAddClip));
+		} else {
+			log.warning("Clip is empty");
+		}
 	}
 
 	private void submitItem(AnimationClip clip, ImageComposer composer, boolean notifyAddClip) {

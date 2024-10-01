@@ -59,12 +59,14 @@ public class BrowseGridViewItem extends GridViewItem {
 
 	public synchronized void setSelected(boolean selected) {
 		this.selected = selected;
+		onItemSelected();
 	}
 
-	protected synchronized void onImageUpdated(float progress, List<ScriptError> errors) {
+	@Override
+	protected synchronized void onItemUpdated(float progress, List<ScriptError> errors) {
 		this.progress = progress;
 		this.errors.clear();
 		this.errors.addAll(errors);
-		super.onImageUpdated(progress, errors);
+		super.onItemUpdated(progress, errors);
 	}
 }

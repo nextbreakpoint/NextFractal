@@ -42,7 +42,7 @@ public class GridViewItem {
 
     public GridViewItem(ImageLoader imageLoader) {
         this.imageLoader = Objects.requireNonNull(imageLoader);
-        imageLoader.setDelegate(this::onImageUpdated);
+        imageLoader.setDelegate(this::onItemUpdated);
     }
 
     public Object get(String key) {
@@ -69,13 +69,15 @@ public class GridViewItem {
         imageLoader.drawImage(gc, x, y);
     }
 
-    protected void onImageUpdated(float progress, List<ScriptError> errors) {
+    protected void onItemUpdated(float progress, List<ScriptError> errors) {
         if (delegate != null) {
-            delegate.onUpdated();
+            delegate.onItemUpdated();
         }
     }
 
-    public void dump() {
-        imageLoader.dump();
+    protected void onItemSelected() {
+        if (delegate != null) {
+            delegate.onItemSelected();
+        }
     }
 }

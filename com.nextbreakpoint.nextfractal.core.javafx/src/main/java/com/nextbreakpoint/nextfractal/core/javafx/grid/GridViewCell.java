@@ -26,11 +26,15 @@ package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 import javafx.scene.layout.BorderPane;
 import lombok.Getter;
+import lombok.Setter;
 
 public abstract class GridViewCell extends BorderPane {
 	protected GridViewItem item;
 	@Getter
 	protected final int index;
+	@Getter
+	@Setter
+	private boolean dirty;
 
 	public GridViewCell(int index, int width, int height) {
 		this.index = index;
@@ -47,11 +51,13 @@ public abstract class GridViewCell extends BorderPane {
 
 	public void unbindItem() {
 		item = null;
+		dirty = true;
 	}
 
 	public void bindItem(GridViewItem item) {
 		if (this.item != item) {
 			this.item = item;
 		}
+		dirty = true;
 	}
 }

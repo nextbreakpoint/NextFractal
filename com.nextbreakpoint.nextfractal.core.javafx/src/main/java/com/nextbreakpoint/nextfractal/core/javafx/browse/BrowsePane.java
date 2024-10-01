@@ -160,15 +160,7 @@ public class BrowsePane extends BorderPane {
 
         grid.setDelegate(new GridViewDelegate() {
             @Override
-            public void didRangeChange(GridView source, int first, int last) {
-            }
-
-            @Override
-            public void didCellChange(GridView source, int row, int col) {
-            }
-
-            @Override
-            public void didSelectionChange(GridView source, int selectedRow, int selectedCol, int clicks) {
+            public void onSelectionChanged(GridView source, int selectedRow, int selectedCol, int clicks) {
                 final int index = grid.getCellIndex(selectedRow, selectedCol);
                 if (index >= 0 && index < items.size()) {
                     final BrowseGridViewItem item = items.get(index);
@@ -185,6 +177,10 @@ public class BrowsePane extends BorderPane {
                         }
                     }
                 }
+            }
+
+            @Override
+            public void onGridUpdated() {
             }
         });
 
