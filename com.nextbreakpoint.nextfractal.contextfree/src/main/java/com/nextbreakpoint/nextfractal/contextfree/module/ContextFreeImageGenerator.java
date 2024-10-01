@@ -73,7 +73,7 @@ public class ContextFreeImageGenerator implements ImageGenerator {
 			renderer.runTask();
 			renderer.waitForTask();
 			renderer.getPixels(pixels);
-			if (renderer.isAborted() || renderer.isInterrupted()) {
+			if (renderer.getProgress() != 1) {
 				aborted = true;
 				return buffer;
 			}

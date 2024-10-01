@@ -28,13 +28,16 @@ import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
+import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
+import javafx.application.Platform;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -46,23 +49,24 @@ import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactor
 
 @Log
 public class ImageLoader {
+	private final ExecutorService executor;
+	private Future<Void> future;
 	@Getter
 	private final File file;
+	@Getter
 	private final Size size;
-	private Future<Void> future;
 	@Setter
-	// the delegate must be configured before invoking run
-	private RendererDelegate delegate;
+	private volatile RendererDelegate delegate;
 	private volatile ImageRenderer renderer;
 
-	public ImageLoader(File file, Size size) {
+	public ImageLoader(ExecutorService executor, File file, Size size) {
+		this.executor = Objects.requireNonNull(executor);
 		this.file = Objects.requireNonNull(file);
 		this.size = Objects.requireNonNull(size);
 	}
 
-	public void run(ExecutorService executor) {
+	public void run() {
 		if (future == null) {
-			// we load and parse the file in a new thread
 			future = executor.submit(this::renderImage);
 		}
 	}
@@ -81,19 +85,17 @@ public class ImageLoader {
 		} catch (CancellationException _) {
 		} catch (ExecutionException e) {
 			log.log(Level.WARNING, "Can't load image", e);
+		} finally {
+	        future = null;
+			renderer = null;
 		}
-		future = null;
-		renderer = null;
 	}
 
 	public void drawImage(GraphicsContext gc, int x, int y) {
-		try {
-			// please note that the renderer is assigned from another thread
-			if (renderer != null) {
-				renderer.drawImage(gc, x, y);
-			}
-		} catch (Exception e) {
-			log.log(Level.WARNING, "Can't draw image", e);
+		if (renderer != null) {
+			renderer.drawImage(gc, x, y);
+		} else {
+			gc.clearRect(0, 0, size.width(), size.height());
 		}
 	}
 
@@ -103,19 +105,32 @@ public class ImageLoader {
 			log.log(Level.INFO, "Start rendering image {0}", file);
 			renderer = loadBundle(file)
 					.flatMap(bundle -> createImageDescriptor(bundle, size))
-					.flatMap(descriptor -> createImageRenderer(descriptor, delegate))
+					.flatMap(descriptor -> createImageRenderer(descriptor, this::onImageUpdated))
 					.execute()
 					.orThrow()
 					.get();
+			renderer.run();
 			renderer.waitFor();
-			log.log(Level.INFO, "Finish rendering image {0}", file);
+			if (renderer.isCompleted()) {
+				log.log(Level.INFO, "Finish rendering image {0}", file);
+			} else {
+				log.log(Level.INFO, "Abort rendering image {0}", file);
+			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			log.log(Level.WARNING, "Can't render image", e);
-		} catch (Exception e) {
-			log.log(Level.WARNING, "Can't render image", e);
+		} catch (Exception _) {
+			// TODO ideally we want to ignore only the parse exceptions caused by thread interruption
 		}
 		return null;
+	}
+
+	// this method is executed in a worker thread
+	private void onImageUpdated(float progress, List<ScriptError> errors) {
+		Platform.runLater(() -> {
+			if (delegate != null) {
+				delegate.onImageUpdated(progress, errors);
+			}
+		});
 	}
 
 	private static Command<Bundle> loadBundle(File file) {
@@ -130,5 +145,13 @@ public class ImageLoader {
 	private static Command<ImageRenderer> createImageRenderer(ImageDescriptor descriptor, RendererDelegate delegate) {
 		return Command.of(tryFindFactory(descriptor.getSession().pluginId()))
 				.flatMap(factory -> Command.of(() -> factory.createImageRenderer(descriptor, delegate)));
+	}
+
+	public void dump() {
+		if (renderer != null) {
+			log.info("completed " + renderer.isCompleted());
+		} else {
+			log.info("not completed");
+		}
 	}
 }

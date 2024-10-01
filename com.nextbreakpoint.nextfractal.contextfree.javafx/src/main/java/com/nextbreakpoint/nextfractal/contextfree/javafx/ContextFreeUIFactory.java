@@ -84,7 +84,6 @@ public class ContextFreeUIFactory implements UIFactory {
 		coordinator.setImage(cfdgImage, metadata.getSeed());
 		coordinator.setDelegate(delegate);
 		coordinator.init();
-		coordinator.run();
 		return new RendererAdapter(coordinator);
 	}
 
@@ -157,6 +156,11 @@ public class ContextFreeUIFactory implements UIFactory {
 		}
 
 		@Override
+		public void run() {
+			coordinator.run();
+		}
+
+		@Override
 		public void abort() {
 			coordinator.abort();
 		}
@@ -179,6 +183,16 @@ public class ContextFreeUIFactory implements UIFactory {
 		@Override
 		public void drawImage(GraphicsContext gc, int x, int y) {
 			coordinator.drawImage(gc, x, y);
+		}
+
+		@Override
+		public boolean isInterrupted() {
+			return coordinator.isInterrupted();
+		}
+
+		@Override
+		public boolean isCompleted() {
+			return coordinator.getProgress() == 1;
 		}
 	}
 }

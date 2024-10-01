@@ -25,5 +25,5 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 public interface CFDGImage {
-    CFRenderer open(int width, int height, String seed);
+    CFRenderer createRenderer(int width, int height, String seed);
 }

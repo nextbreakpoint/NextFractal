@@ -27,6 +27,8 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public interface ImageRenderer {
+    void run();
+
     void abort();
 
     void waitFor() throws InterruptedException;
@@ -36,4 +38,8 @@ public interface ImageRenderer {
     boolean hasImageChanged();
 
     void drawImage(GraphicsContext gc, int x, int y);
+
+    boolean isInterrupted();
+
+    boolean isCompleted();
 }

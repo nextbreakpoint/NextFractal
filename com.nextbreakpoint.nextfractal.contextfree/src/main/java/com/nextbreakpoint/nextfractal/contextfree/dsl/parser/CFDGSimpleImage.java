@@ -41,7 +41,7 @@ public class CFDGSimpleImage implements CFDGImage {
     }
 
     @Override
-    public CFRenderer open(int width, int height, String seed) {
+    public CFRenderer createRenderer(int width, int height, String seed) {
         cfdg.rulesLoaded();
         final CFDGRenderer renderer = cfdg.createRenderer(width, height, 1, seed.hashCode(), 0.1);
         return new DefaultRenderer(cfdg, renderer);

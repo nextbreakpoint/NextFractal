@@ -57,11 +57,13 @@ public class Coordinator {
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
 	@Getter
+	private volatile float progress;
+	@Getter
 	private volatile List<ScriptError> errors;
 	private volatile boolean imageChanged;
 	private Renderer renderer;
 	@Setter
-	private RendererDelegate delegate;
+	private volatile RendererDelegate delegate;
 
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
 		this.threadFactory = threadFactory;
@@ -163,6 +165,7 @@ public class Coordinator {
 	}
 
 	protected void onImageUpdated(float progress, List<ScriptError> errors) {
+		this.progress = progress;
 		this.errors = errors;
 		this.imageChanged = true;
 		if (delegate != null) {
@@ -184,5 +187,9 @@ public class Coordinator {
 		} else {
 			return new Renderer(threadFactory, renderFactory, tile);
 		}
+	}
+
+	public boolean isInterrupted() {
+		return renderer.isInterrupted();
 	}
 }

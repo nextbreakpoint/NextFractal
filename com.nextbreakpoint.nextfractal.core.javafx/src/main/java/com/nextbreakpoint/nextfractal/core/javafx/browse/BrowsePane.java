@@ -156,7 +156,7 @@ public class BrowsePane extends BorderPane {
 
         executor = ExecutorUtils.newFixedThreadPool(15, ThreadUtils.createVirtualThreadFactory("Browser"));
 
-        grid = new GridView(executor, new BrowseGridViewCellFactory(), numRows, numCols, size);
+        grid = new GridView(new BrowseGridViewCellFactory(), numRows, numCols, size);
 
         grid.setDelegate(new GridViewDelegate() {
             @Override
@@ -391,7 +391,7 @@ public class BrowsePane extends BorderPane {
     private void loadItems(GridView grid, List<File> files) {
         items.clear();
         for (File file : files) {
-            items.add(new BrowseGridViewItem(new ImageLoader(file, tile.tileSize())));
+            items.add(new BrowseGridViewItem(new ImageLoader(executor, file, tile.tileSize())));
         }
         grid.setData(items);
     }

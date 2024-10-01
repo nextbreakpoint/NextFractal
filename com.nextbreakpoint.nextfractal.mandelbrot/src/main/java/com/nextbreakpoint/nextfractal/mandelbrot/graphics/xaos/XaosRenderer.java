@@ -167,7 +167,6 @@ public final class XaosRenderer extends Renderer {
 			colorChanged = false;
 			juliaChanged = false;
 			regionChanged = false;
-			aborted = false;
 			progress = 0;
 			contentRendererFractal.getOrbit().setTime(time);
 			contentRendererFractal.getColor().setTime(time);
@@ -238,7 +237,6 @@ public final class XaosRenderer extends Renderer {
 		} catch (Throwable e) {
 			log.log(Level.WARNING, "Rendering error", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
-			aborted = true;
 		}
 		if (!errors.isEmpty()) {
 			update(progress, errors);
@@ -1129,7 +1127,7 @@ public final class XaosRenderer extends Renderer {
 			}
 			Thread.yield();
 		}
-		if (!aborted) {
+		if (!interrupted) {
 			progress = 1f;
 		}
 		fill();

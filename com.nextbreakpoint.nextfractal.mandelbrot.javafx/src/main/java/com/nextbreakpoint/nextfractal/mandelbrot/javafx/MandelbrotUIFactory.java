@@ -102,7 +102,6 @@ public class MandelbrotUIFactory implements UIFactory {
 		view.setPoint(new ComplexNumber(metadata.getPoint().x(), metadata.getPoint().y()));
 		view.setJulia(metadata.isJulia());
 		coordinator.setView(view);
-		coordinator.run();
 		return new RendererAdapter(coordinator);
 	}
 
@@ -199,6 +198,11 @@ public class MandelbrotUIFactory implements UIFactory {
 		}
 
 		@Override
+		public void run() {
+			coordinator.run();
+		}
+
+		@Override
 		public void abort() {
 			coordinator.abort();
 		}
@@ -221,6 +225,16 @@ public class MandelbrotUIFactory implements UIFactory {
 		@Override
 		public void drawImage(GraphicsContext gc, int x, int y) {
 			coordinator.drawImage(gc, x, y);
+		}
+
+		@Override
+		public boolean isInterrupted() {
+			return coordinator.isInterrupted();
+		}
+
+		@Override
+		public boolean isCompleted() {
+			return coordinator.getProgress() == 1;
 		}
 	}
 

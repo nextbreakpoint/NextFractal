@@ -36,22 +36,13 @@ public class BrowseGridViewItem extends GridViewItem {
 	private final List<ScriptError> errors = new LinkedList<>();
 	private float progress;
 	private boolean selected;
-	private boolean dirty;
 
 	public BrowseGridViewItem(ImageLoader imageLoader) {
 		super(imageLoader);
 	}
 
-	public synchronized boolean isDirty() {
-		return dirty;
-	}
-
-	public synchronized void setDirty(boolean dirty) {
-		this.dirty = dirty;
-	}
-
-	public synchronized boolean isNotCompleted() {
-		return progress != 1f;
+	public File getFile() {
+		return imageLoader.getFile();
 	}
 
 	public synchronized boolean hasErrors() {
@@ -62,20 +53,18 @@ public class BrowseGridViewItem extends GridViewItem {
 		return selected;
 	}
 
-    public synchronized void setSelected(boolean selected) {
+	public synchronized boolean isCompleted() {
+		return progress == 1f;
+	}
+
+	public synchronized void setSelected(boolean selected) {
 		this.selected = selected;
-		dirty = true;
 	}
 
 	protected synchronized void onImageUpdated(float progress, List<ScriptError> errors) {
 		this.progress = progress;
 		this.errors.clear();
 		this.errors.addAll(errors);
-		dirty = true;
 		super.onImageUpdated(progress, errors);
-	}
-
-	public File getFile() {
-		return imageLoader.getFile();
 	}
 }

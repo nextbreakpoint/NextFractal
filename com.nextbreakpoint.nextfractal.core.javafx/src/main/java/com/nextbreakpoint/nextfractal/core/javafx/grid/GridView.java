@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowseGridViewItem;
+import javafx.application.Platform;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
@@ -33,22 +34,20 @@ import lombok.Setter;
 import lombok.extern.java.Log;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 
 @Log
 public class GridView extends Pane {
-	private final int EXTRA = 2;
+	private final int EXTRA = 1;
 	private final int cellSize;
 	private final int numRows;
 	private final int numCols;
 	private final GridViewCell[] cells;
-	private final ExecutorService executor;
-	private final GridViewCellFactory factory;
 	private GridViewItem[] data;
 	private double offsetX;
 	private double offsetY;
+	private double prevOffsetX;
+	private double prevOffsetY;
 	@Getter
 	private int selectedRow = -1;
 	@Getter
@@ -60,9 +59,7 @@ public class GridView extends Pane {
 	@Setter
 	private boolean horizontal;
 
-	public GridView(ExecutorService executor, GridViewCellFactory factory, int numRows, int numCols, int cellSize) {
-		this.executor = Objects.requireNonNull(executor);
-		this.factory = Objects.requireNonNull(factory);
+	public GridView(GridViewCellFactory factory, int numRows, int numCols, int cellSize) {
 		this.numRows = numRows;
 		this.numCols = numCols;
 		this.cellSize = cellSize;
@@ -145,50 +142,61 @@ public class GridView extends Pane {
 	}
 
 	private void update() {
+		//TODO remove
+//		for (int index = 0; index < data.length; index++) {
+//			final GridViewItem item = data[index];
+//			item.dump();
+//		}
+
 		try {
+			if (data != null) {
+				final int firstIndex = getFirstIndex();
+				final int lastIndex = getLastIndex();
+				for (int index = 0; index < firstIndex; index++) {
+					final GridViewItem item = data[index];
+					item.cancel();
+				}
+				for (int index = lastIndex; index < data.length; index++) {
+					final GridViewItem item = data[index];
+					item.cancel();
+				}
+				for (int index = 0; index < firstIndex; index++) {
+					final GridViewItem item = data[index];
+					item.waitFor();
+				}
+				for (int index = lastIndex; index < data.length; index++) {
+					final GridViewItem item = data[index];
+					item.waitFor();
+				}
+			}
+
 			if (horizontal) {
-				final int firstCol = (int) Math.abs(offsetX / cellSize);
-				final int lastCol = firstCol + numCols;
+				final int firstCol = getFirstCol();
+				final int lastCol = getLastCol();
 				for (int col = 0; col < numCols + EXTRA; col++) {
 					for (int row = 0; row < numRows; row++) {
-						final GridViewCell cell = cells[col * numRows + row];
-						cell.setLayoutY(row * cellSize + (offsetY - ((int) (offsetY / cellSize)) * cellSize));
-						cell.setLayoutX(col * cellSize + (offsetX - ((int) (offsetX / cellSize)) * cellSize));
-						final int index = (firstCol + col) * numRows + row;
-						if (data != null && index < data.length) {
-							final GridViewItem item = data[index];
-							cell.bindItem(item);
-						} else {
-							cell.bindItem(null);
-						}
-						cell.update();
-						if (delegate != null) {
-							delegate.didCellChange(this, row, col);
-						}
+						resetCell(row, col);
+					}
+				}
+				for (int col = 0; col < numCols + EXTRA; col++) {
+					for (int row = 0; row < numRows; row++) {
+						updateCell(row, col, firstCol);
 					}
 				}
 				if (delegate != null) {
 					delegate.didRangeChange(this, firstCol, lastCol);
 				}
 			} else {
-				final int firstRow = (int) Math.abs(offsetY / cellSize);
-				final int lastRow = firstRow + numRows;
+				final int firstRow = getFirstRow();
+				final int lastRow = getLastRow();
 				for (int row = 0; row < numRows + EXTRA; row++) {
 					for (int col = 0; col < numCols; col++) {
-						final GridViewCell cell = cells[row * numCols + col];
-						cell.setLayoutY(row * cellSize + (offsetY - ((int) (offsetY / cellSize)) * cellSize));
-						cell.setLayoutX(col * cellSize + (offsetX - ((int) (offsetX / cellSize)) * cellSize));
-						final int index = (firstRow + row) * numCols + col;
-						if (data != null && index < data.length) {
-							final GridViewItem item = data[index];
-							cell.bindItem(item);
-						} else {
-							cell.bindItem(null);
-						}
-						cell.update();
-						if (delegate != null) {
-							delegate.didCellChange(this, row, col);
-						}
+						resetCell(row, col);
+					}
+				}
+				for (int row = 0; row < numRows + EXTRA; row++) {
+					for (int col = 0; col < numCols; col++) {
+						updateCell(row, col, firstRow);
 					}
 				}
 				if (delegate != null) {
@@ -196,40 +204,57 @@ public class GridView extends Pane {
 				}
 			}
 
-			if (data != null) {
-				final int firstIndex = getFirstIndex();
-				final int lastIndex = getLastIndex();
-
-				log.log(Level.INFO, "firstIndex = {0}, lastIndex = {1}", new Object[] { firstIndex, lastIndex});
-
-				for (int index = 0; index < firstIndex; index++) {
-					final GridViewItem item = data[index];
-					item.cancel();
+			Platform.runLater(() -> {
+				for (int col = 0; col < numCols + EXTRA; col++) {
+					for (int row = 0; row < numRows; row++) {
+						final GridViewCell cell = cells[col * numRows + row];
+						cell.update();
+					}
 				}
-
-				for (int index = lastIndex; index < data.length; index++) {
-					final GridViewItem item = data[index];
-					item.cancel();
-				}
-
-				for (int index = 0; index < firstIndex; index++) {
-					final GridViewItem item = data[index];
-					item.waitFor();
-				}
-
-				for (int index = lastIndex; index < data.length; index++) {
-					final GridViewItem item = data[index];
-					item.waitFor();
-				}
-
-				for (int index = firstIndex; index < lastIndex; index++) {
-					final GridViewItem item = data[index];
-					item.run(executor);
-				}
-			}
+			});
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			log.log(Level.WARNING, "Can't render grid", e);
+		}
+	}
+
+	private void resetCell(int row, int col) {
+		if (horizontal) {
+			final GridViewCell cell = cells[col * numRows + row];
+			cell.unbindItem();
+		} else {
+			final GridViewCell cell = cells[row * numCols + col];
+			cell.unbindItem();
+		}
+	}
+
+	private void updateCell(int row, int col, int first) {
+		if (horizontal) {
+			final GridViewCell cell = cells[col * numRows + row];
+			cell.setLayoutX(col * cellSize + (offsetX - ((int) (offsetX / (cellSize))) * cellSize));
+			cell.setLayoutY(row * cellSize + (offsetY - ((int) (offsetY / (cellSize))) * cellSize));
+			final int index = (first + col) * numRows + row;
+			if (data != null && index < data.length) {
+				final GridViewItem item = data[index];
+				cell.bindItem(item);
+				item.run();
+			}
+			if (delegate != null) {
+				delegate.didCellChange(this, row, col);
+			}
+		} else {
+			final GridViewCell cell = cells[row * numCols + col];
+			cell.setLayoutX(col * cellSize + (offsetX - ((int) (offsetX / (cellSize))) * cellSize));
+			cell.setLayoutY(row * cellSize + (offsetY - ((int) (offsetY / (cellSize))) * cellSize));
+			final int index = (first + row) * numCols + col;
+			if (data != null && index < data.length) {
+				final GridViewItem item = data[index];
+				cell.bindItem(item);
+				item.run();
+			}
+			if (delegate != null) {
+				delegate.didCellChange(this, row, col);
+			}
 		}
 	}
 
@@ -276,6 +301,8 @@ public class GridView extends Pane {
 	private void resetScroll() {
 		offsetX = 0;
 		offsetY = 0;
+		prevOffsetX = 0;
+		prevOffsetY = 0;
 	}
 
 	private void scrollCells(double deltaX, double deltaY) {
@@ -310,5 +337,7 @@ public class GridView extends Pane {
         }
 
 		update();
+		prevOffsetX = offsetX;
+		prevOffsetY = offsetY;
     }
 }

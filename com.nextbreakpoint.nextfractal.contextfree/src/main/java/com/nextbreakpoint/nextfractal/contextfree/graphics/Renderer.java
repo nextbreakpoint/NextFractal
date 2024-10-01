@@ -68,7 +68,7 @@ public class Renderer {
 	private CFRenderer renderer;
 	private Future<?> future;
 	@Getter
-	private volatile boolean aborted;
+	private volatile float progress;
 	@Getter
 	private volatile boolean interrupted;
 	@Getter
@@ -113,17 +113,15 @@ public class Renderer {
 		if (!initialized) {
 			throw new IllegalStateException("Operation not permitted");
 		}
-		if (future != null) {
-			throw new IllegalStateException("Operation not permitted");
+		if (future == null) {
+			interrupted = false;
+			future = executor.submit(this::render);
 		}
-		interrupted = false;
-		future = executor.submit(this::render);
 	}
 
     public void abortTask() {
 		interrupted = true;
 		if (future != null) {
-			//TODO cancel future?
 			if (renderer != null) {
 				renderer.stop();
 			}
@@ -134,18 +132,14 @@ public class Renderer {
 		try {
 			if (future != null) {
 				future.get();
-				future = null;
 			}
-		} catch (InterruptedException e) {
-			log.warning("Interrupted while awaiting for task");
+		} catch (InterruptedException _) {
 			Thread.currentThread().interrupt();
-			aborted = true;
-		} catch (CancellationException e) {
-			log.log(Level.WARNING, "Task was cancelled", e);
-			aborted = true;
+		} catch (CancellationException _) {
 		} catch (ExecutionException e) {
 			log.log(Level.WARNING, "Task has failed", e);
-			aborted = true;
+		} finally {
+			future = null;
 		}
 	}
 
@@ -153,7 +147,7 @@ public class Renderer {
 		if (future != null) {
 			throw new IllegalStateException("Operation not permitted");
 		}
-		renderer = image.open(size.width(), size.height(), seed);
+		renderer = image.createRenderer(size.width(), size.height(), seed);
 		//TODO propagate progress from CF renderer
 		renderer.setListener(() -> update(0, pixels));
 	}
@@ -259,7 +253,6 @@ public class Renderer {
 		final List<ScriptError> errors = new ArrayList<>();
 		Graphics2D g2d = null;
 		try {
-			aborted = false;
 			g2d = image.createGraphics();
 			g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 			g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
@@ -271,20 +264,19 @@ public class Renderer {
 				//TODO what errors are being collected?
 				errors.addAll(renderer.errors());
 			}
-			if (!interrupted && !aborted) {
+			if (!interrupted) {
 				update(1, pixels);
 			}
 		} catch (Exception e) {
 			log.log(Level.WARNING, "Can't render image", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
-			aborted = true;
 		} finally {
 			if (g2d != null) {
 				g2d.dispose();
 			}
 		}
 		if (!errors.isEmpty()) {
-			update(1, errors);
+			update(0, errors);
 		}
 	}
 
@@ -333,12 +325,11 @@ public class Renderer {
 		} finally {
 			lock.unlock();
 		}
-		if (delegate != null) {
-			delegate.onImageUpdated(progress, List.of());
-		}
+		update(progress, List.of());
 	}
 
 	private void update(float progress, List<ScriptError> errors) {
+		this.progress = progress;
 		if (delegate != null) {
 			delegate.onImageUpdated(progress, errors);
 		}

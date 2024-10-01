@@ -82,7 +82,7 @@ public class ContextFreeImageComposer implements ImageComposer {
             renderer.init();
             renderer.runTask();
             renderer.waitForTask();
-            if (renderer.isAborted() || renderer.isInterrupted()) {
+            if (renderer.getProgress() != 1) {
                 aborted = true;
                 return buffer;
             }

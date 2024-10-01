@@ -33,46 +33,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 
 public class GridViewItem {
-	private final Map<String, Object> properties = new HashMap<>();
-	protected final ImageLoader imageLoader;
-	@Setter
-	private volatile GridViewItemDelegate delegate;
+    private final Map<String, Object> properties = new HashMap<>();
+    protected final ImageLoader imageLoader;
+    @Setter
+    private volatile GridViewItemDelegate delegate;
 
-	public GridViewItem(ImageLoader imageLoader) {
-		this.imageLoader = Objects.requireNonNull(imageLoader);
-		imageLoader.setDelegate(this::onImageUpdated);
-	}
+    public GridViewItem(ImageLoader imageLoader) {
+        this.imageLoader = Objects.requireNonNull(imageLoader);
+        imageLoader.setDelegate(this::onImageUpdated);
+    }
 
-	public Object get(String key) {
-		return properties.get(key);
-	}
+    public Object get(String key) {
+        return properties.get(key);
+    }
 
-	public void put(String key, Object value) {
-		properties.put(key, value);
-	}
+    public void put(String key, Object value) {
+        properties.put(key, value);
+    }
 
-	public void run(ExecutorService executor) {
-		imageLoader.run(executor);
-	}
+    public void run() {
+        imageLoader.run();
+    }
 
-	public void cancel() {
-		imageLoader.cancel();
-	}
+    public void cancel() {
+        imageLoader.cancel();
+    }
 
-	public void waitFor() throws InterruptedException {
-		imageLoader.waitFor();
-	}
+    public void waitFor() throws InterruptedException {
+        imageLoader.waitFor();
+    }
 
-	public void drawImage(GraphicsContext gc, int x, int y) {
-		imageLoader.drawImage(gc, x, y);
-	}
+    public void drawImage(GraphicsContext gc, int x, int y) {
+        imageLoader.drawImage(gc, x, y);
+    }
 
-	protected void onImageUpdated(float progress, List<ScriptError> errors) {
-		if (delegate != null) {
-			delegate.onUpdated();
-		}
-	}
+    protected void onImageUpdated(float progress, List<ScriptError> errors) {
+        if (delegate != null) {
+            delegate.onUpdated();
+        }
+    }
+
+    public void dump() {
+        imageLoader.dump();
+    }
 }

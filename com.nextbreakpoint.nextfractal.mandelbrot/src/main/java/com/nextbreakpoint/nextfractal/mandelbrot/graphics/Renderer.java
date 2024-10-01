@@ -71,7 +71,7 @@ public class Renderer {
 	protected Transform transform;
 	protected Surface buffer;
 	@Getter
-	protected volatile boolean aborted;
+	protected volatile float progress;
     @Getter
     protected volatile boolean interrupted;
 	@Getter
@@ -84,7 +84,6 @@ public class Renderer {
 	protected boolean timeChanged;
 	protected double rotation;
 	protected Time time;
-	protected float progress;
 	@Setter
     protected Tile previewTile;
 	@Setter
@@ -155,40 +154,35 @@ public class Renderer {
 			buffer = null;
 		}
 		future = null;
+		initialized = false;
 	}
 
 	public void runTask() {
 		if (!initialized) {
 			throw new IllegalStateException("Operation not permitted");
 		}
-		if (future != null) {
-			throw new IllegalStateException("Operation not permitted");
+		if (future == null) {
+			interrupted = false;
+			future = executor.submit(this::render);
 		}
-		interrupted = false;
-		future = executor.submit(this::render);
 	}
 
 	public void abortTask() {
 		interrupted = true;
-		//TODO cancel future?
 	}
 
 	public void waitForTask() {
 		try {
 			if (future != null) {
 				future.get();
-				future = null;
 			}
-		} catch (InterruptedException e) {
-			log.warning("Interrupted while awaiting for task");
+		} catch (InterruptedException _) {
 			Thread.currentThread().interrupt();
-			aborted = true;
-		} catch (CancellationException e) {
-			log.log(Level.WARNING, "Task was cancelled", e);
-			aborted = true;
+		} catch (CancellationException _) {
 		} catch (ExecutionException e) {
 			log.log(Level.WARNING, "Task has failed", e);
-			aborted = true;
+		} finally {
+			future = null;
 		}
     }
 
@@ -455,7 +449,6 @@ public class Renderer {
 			colorChanged = false;
 			juliaChanged = false;
 			regionChanged = false;
-			aborted = false;
 			progress = 0;
 			contentRendererFractal.getOrbit().setTime(time);
 			contentRendererFractal.getColor().setTime(time);
@@ -563,7 +556,7 @@ public class Renderer {
 				}
 				Thread.yield();
 			}
-			if (!interrupted && !aborted) {
+			if (!interrupted) {
 				progress = 1f;
 				update(progress, contentRendererData.getPixels());
 			}
@@ -571,7 +564,6 @@ public class Renderer {
 		} catch (Throwable e) {
 			log.log(Level.WARNING, "Can't render fractal", e);
 			errors.add(RendererErrors.makeError(0, 0, 0, 0, e.getMessage()));
-			aborted = true;
 		}
 		if (!errors.isEmpty()) {
 			update(progress, errors);
@@ -674,25 +666,24 @@ public class Renderer {
 		affine.append(renderFactory.createTranslateAffineTransform(tileOffset.x() - offsetX, tileOffset.y() - offsetY));
 		return affine;
 	}
-	
+
+	protected RendererData createRendererData() {
+		return new RendererData();
+	}
+
 	protected void update(float progress, int[] pixels) {
 		lock.lock();
 		if (buffer != null) {
 			buffer.getBuffer().update(pixels);
 		}
 		lock.unlock();
-		if (delegate != null) {
-			delegate.onImageUpdated(progress, List.of());
-		}
+		update(progress, List.of());
 	}
 
 	protected void update(float progress, List<ScriptError> errors) {
+		this.progress = progress;
 		if (delegate != null) {
 			delegate.onImageUpdated(progress, errors);
 		}
-	}
-
-	protected RendererData createRendererData() {
-		return new RendererData();
 	}
 }

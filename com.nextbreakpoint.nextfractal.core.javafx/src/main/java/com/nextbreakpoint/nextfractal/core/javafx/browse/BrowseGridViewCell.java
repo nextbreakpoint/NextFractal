@@ -24,7 +24,6 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
-import com.nextbreakpoint.nextfractal.core.javafx.ImageLoader;
 import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCell;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
@@ -44,32 +43,32 @@ public class BrowseGridViewCell extends GridViewCell {
 	}
 
 	@Override
-	public void bindItem(GridViewItem item) {
-		if (this.item instanceof BrowseGridViewItem browseItem) {
-			browseItem.setDelegate(null);
+	public void unbindItem() {
+		if (item != null) {
+			item.setDelegate(null);
 		}
+		super.unbindItem();
+	}
+
+	@Override
+	public void bindItem(GridViewItem item) {
 		super.bindItem(item);
-		if (this.item instanceof BrowseGridViewItem browseItem) {
-			browseItem.setDelegate(this::update);
-			browseItem.setDirty(true);
+		if (item != null) {
+			item.setDelegate(this::update);
 		}
 	}
 
 	@Override
 	public void update() {
-		clearCanvas();
-
 		if (item != null && item instanceof BrowseGridViewItem browseItem) {
-			if (browseItem.isDirty()) {
-				final var gc = factory.createGraphicsContext(canvas.getGraphicsContext2D());
-				browseItem.drawImage(gc, 0, 0);
-				final String message = getMessage(browseItem);
-				drawMessage(message);
-				drawOverlay(browseItem);
-				browseItem.setDirty(false);
-			} else {
-				drawMessage("Loading...");
-			}
+			final var g2d = canvas.getGraphicsContext2D();
+			final var gc = factory.createGraphicsContext(g2d);
+			g2d.setFill(Color.WHITE);
+			browseItem.drawImage(gc, 0, 0);
+			drawMessage(browseItem);
+			drawOverlay(browseItem);
+		} else {
+			clearCanvas();
 		}
 	}
 
@@ -88,7 +87,8 @@ public class BrowseGridViewCell extends GridViewCell {
 		}
 	}
 
-	private void drawMessage(String message) {
+	private void drawMessage(BrowseGridViewItem browseItem) {
+		final String message = getMessage(browseItem);
         if (message != null) {
 			final var g2d = canvas.getGraphicsContext2D();
 			g2d.setFill(Color.DARKGRAY);
@@ -100,8 +100,8 @@ public class BrowseGridViewCell extends GridViewCell {
 	private String getMessage(BrowseGridViewItem browseItem) {
 		if (browseItem.hasErrors()) {
 			return "Error";
-		} else if (browseItem.isNotCompleted()) {
-			return "Loading...";
+		} else if (!browseItem.isCompleted()) {
+			return "Rendering...";
 		} else {
 			return null;
 		}

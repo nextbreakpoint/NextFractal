@@ -45,6 +45,10 @@ public abstract class GridViewCell extends BorderPane {
 
 	public abstract void update();
 
+	public void unbindItem() {
+		item = null;
+	}
+
 	public void bindItem(GridViewItem item) {
 		if (this.item != item) {
 			this.item = item;

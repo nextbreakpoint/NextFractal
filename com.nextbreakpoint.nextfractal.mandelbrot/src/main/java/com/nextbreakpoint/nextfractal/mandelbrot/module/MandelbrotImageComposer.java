@@ -123,7 +123,7 @@ public class MandelbrotImageComposer implements ImageComposer {
             renderer.setTime(time);
             renderer.runTask();
             renderer.waitForTask();
-            if (renderer.isAborted() || renderer.isInterrupted()) {
+            if (renderer.getProgress() != 1) {
                 aborted = true;
                 return buffer;
             }
