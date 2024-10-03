@@ -24,39 +24,17 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
-import javafx.scene.layout.BorderPane;
-import lombok.Getter;
-import lombok.Setter;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
-public abstract class GridViewCell extends BorderPane {
-	protected final int index;
-	protected GridViewItem item;
-	@Getter
-	@Setter
-	private boolean dirty;
+public interface GridViewCellRenderer {
+	void run();
 
-	public GridViewCell(int index, int width, int height) {
-		this.index = index;
+	void cancel();
 
-		setMinSize(width, height);
-		setMaxSize(width, height);
-		setPrefSize(width, height);
+	void waitFor() throws InterruptedException;
 
-		widthProperty().addListener((_, _, _) -> update());
-		heightProperty().addListener((_, _, _) -> update());
-	}
+	void draw(GraphicsContext gc, int x, int y);
 
-	public abstract void update();
-
-	public void unbindItem() {
-		item = null;
-		dirty = true;
-	}
-
-	public void bindItem(GridViewItem item) {
-		if (this.item != item) {
-			this.item = item;
-		}
-		dirty = true;
-	}
+    void setDelegate(RendererDelegate delegate);
 }

@@ -28,13 +28,14 @@ import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.Screen;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -45,14 +46,15 @@ import java.io.InputStream;
 import java.util.logging.Level;
 
 @Log
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Icons {
-    private Icons() {}
+    public static final Color DEFAULT_COLOR = Color.web("020202");
 
-    public static ImageView createIconImage(String name, int size) {
+    public static ImageView createIconImage(String name, double size) {
         return createIconImage(Icons.class.getResourceAsStream(name), size);
     }
 
-    public static ImageView createIconImage(InputStream stream, int size) {
+    public static ImageView createIconImage(InputStream stream, double size) {
         if (stream != null) {
             final ImageView image = new ImageView(new Image(stream));
             image.setSmooth(true);
@@ -68,17 +70,25 @@ public class Icons {
         }
     }
 
-    public static Node createSVGIcon(String name, int size) {
-        return createSVGIcon(Icons.class.getResourceAsStream(name), size);
+    public static Node createSVGIcon(String name, double size) {
+        return createSVGIcon(name, size, DEFAULT_COLOR);
     }
 
-    public static Node createSVGIcon(InputStream stream, int size) {
+    public static Node createSVGIcon(InputStream stream, double size) {
+        return createSVGIcon(stream, size, DEFAULT_COLOR);
+    }
+
+    public static Node createSVGIcon(String name, double size, Color color) {
+        return createSVGIcon(Icons.class.getResourceAsStream(name), size, color);
+    }
+
+    public static Node createSVGIcon(InputStream stream, double size, Color color) {
         if (stream != null) {
             final SVGPath path = new SVGPath();
             path.setSmooth(true);
             path.setStrokeWidth(3);
             path.setFill(Color.TRANSPARENT);
-            path.setStroke(Color.web("020202"));
+            path.setStroke(color);
             path.setStrokeType(StrokeType.CENTERED);
             path.setStrokeLineCap(StrokeLineCap.ROUND);
             path.setStrokeLineJoin(StrokeLineJoin.ROUND);

@@ -65,13 +65,13 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
 	}
 
 	@Override
-	public void onItemUpdated() {
+	public void onItemUpdated(float progress, boolean failed) {
 		setDirty(true);
 		updateCell();
 	}
 
 	@Override
-	public void onItemSelected() {
+	public void onItemSelected(boolean selected) {
 		setDirty(true);
 		updateCell();
 	}
@@ -82,7 +82,7 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
 				final var g2d = canvas.getGraphicsContext2D();
 				final var gc = factory.createGraphicsContext(g2d);
 				g2d.setFill(Color.WHITE);
-				browseItem.drawImage(gc, 0, 0);
+				browseItem.draw(gc, 0, 0);
 				drawMessage(browseItem);
 				drawOverlay(browseItem);
 				setDirty(false);

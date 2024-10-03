@@ -24,49 +24,55 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
-import com.nextbreakpoint.nextfractal.core.common.ScriptError;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageLoader;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
+import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformImageLoader;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCellRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
+import lombok.Getter;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Objects;
 
+@Getter
 public class BrowseGridViewItem extends GridViewItem {
-	private final List<ScriptError> errors = new LinkedList<>();
-	private float progress;
-	private boolean selected;
+	private final File file;
 
-	public BrowseGridViewItem(ImageLoader imageLoader) {
-		super(imageLoader);
+	public BrowseGridViewItem(File file, PlatformImageLoader imageLoader) {
+		super(new GridViewCellRendererAdapter(imageLoader));
+		this.file = Objects.requireNonNull(file);
 	}
 
-	public File getFile() {
-		return imageLoader.getFile();
-	}
+	private static class GridViewCellRendererAdapter implements GridViewCellRenderer {
+		private final PlatformImageLoader imageLoader;
 
-	public synchronized boolean hasErrors() {
-		return !errors.isEmpty();
-	}
+        private GridViewCellRendererAdapter(PlatformImageLoader imageLoader) {
+            this.imageLoader = Objects.requireNonNull(imageLoader);
+        }
 
-	public synchronized boolean isSelected() {
-		return selected;
-	}
+        @Override
+		public void run() {
+			imageLoader.run();
+		}
 
-	public synchronized boolean isCompleted() {
-		return progress == 1f;
-	}
+		@Override
+		public void cancel() {
+			imageLoader.cancel();
+		}
 
-	public synchronized void setSelected(boolean selected) {
-		this.selected = selected;
-		onItemSelected();
-	}
+		@Override
+		public void waitFor() throws InterruptedException {
+			imageLoader.waitFor();
+		}
 
-	@Override
-	protected synchronized void onItemUpdated(float progress, List<ScriptError> errors) {
-		this.progress = progress;
-		this.errors.clear();
-		this.errors.addAll(errors);
-		super.onItemUpdated(progress, errors);
+		@Override
+		public void draw(GraphicsContext gc, int x, int y) {
+			imageLoader.drawImage(gc, x, y);
+		}
+
+		@Override
+		public void setDelegate(RendererDelegate delegate) {
+			imageLoader.setDelegate(delegate);
+		}
 	}
 }

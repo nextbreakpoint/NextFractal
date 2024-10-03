@@ -33,7 +33,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Point;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import com.nextbreakpoint.nextfractal.core.javafx.Icons;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageLoader;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformImageLoader;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridView;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.observable.StringObservableValue;
@@ -180,7 +180,7 @@ public class BrowsePane extends BorderPane {
             }
 
             @Override
-            public void onGridUpdated() {
+            public void onCellsUpdated(GridView source) {
             }
         });
 
@@ -387,7 +387,8 @@ public class BrowsePane extends BorderPane {
     private void loadItems(GridView grid, List<File> files) {
         items.clear();
         for (File file : files) {
-            items.add(new BrowseGridViewItem(new ImageLoader(executor, file, tile.tileSize())));
+            final var imageLoader = new PlatformImageLoader(executor, file, tile.tileSize());
+            items.add(new BrowseGridViewItem(file, imageLoader));
         }
         grid.setData(items);
     }

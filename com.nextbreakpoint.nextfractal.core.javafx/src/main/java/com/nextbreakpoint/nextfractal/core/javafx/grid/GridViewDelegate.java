@@ -27,5 +27,5 @@ package com.nextbreakpoint.nextfractal.core.javafx.grid;
 public interface GridViewDelegate {
 	void onSelectionChanged(GridView source, int selectedRow, int selectedCol, int clicks);
 
-	void onGridUpdated();
+	void onCellsUpdated(GridView source);
 }

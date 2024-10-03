@@ -26,7 +26,8 @@ package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
-import com.nextbreakpoint.nextfractal.core.javafx.ImageLoader;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
@@ -36,13 +37,37 @@ import java.util.Objects;
 
 public class GridViewItem {
     private final Map<String, Object> properties = new HashMap<>();
-    protected final ImageLoader imageLoader;
+    @Getter(AccessLevel.PROTECTED)
+    private final GridViewCellRenderer renderer;
     @Setter
+    @Getter(AccessLevel.PROTECTED)
     private volatile GridViewItemDelegate delegate;
+    @Getter
+    private float progress;
+    @Getter
+    private boolean hasErrors;
+    @Getter
+    private boolean selected;
 
-    public GridViewItem(ImageLoader imageLoader) {
-        this.imageLoader = Objects.requireNonNull(imageLoader);
-        imageLoader.setDelegate(this::onItemUpdated);
+    public GridViewItem(GridViewCellRenderer renderer) {
+        this.renderer = Objects.requireNonNull(renderer);
+        renderer.setDelegate(this::onItemUpdated);
+    }
+
+    public void run() {
+        renderer.run();
+    }
+
+    public void cancel() {
+        renderer.cancel();
+    }
+
+    public void waitFor() throws InterruptedException {
+        renderer.waitFor();
+    }
+
+    public void draw(GraphicsContext gc, int x, int y) {
+        renderer.draw(gc, x, y);
     }
 
     public Object get(String key) {
@@ -53,31 +78,34 @@ public class GridViewItem {
         properties.put(key, value);
     }
 
-    public void run() {
-        imageLoader.run();
+    public synchronized boolean hasErrors() {
+        return hasErrors;
     }
 
-    public void cancel() {
-        imageLoader.cancel();
+    public synchronized boolean isSelected() {
+        return selected;
     }
 
-    public void waitFor() throws InterruptedException {
-        imageLoader.waitFor();
+    public synchronized boolean isCompleted() {
+        return progress == 1f;
     }
 
-    public void drawImage(GraphicsContext gc, int x, int y) {
-        imageLoader.drawImage(gc, x, y);
+    public void setSelected(boolean selected) {
+        onItemSelected(selected);
     }
 
     protected void onItemUpdated(float progress, List<ScriptError> errors) {
+        this.progress = progress;
+        this.hasErrors = !errors.isEmpty();
         if (delegate != null) {
-            delegate.onItemUpdated();
+            delegate.onItemUpdated(progress, hasErrors);
         }
     }
 
-    protected void onItemSelected() {
+    protected synchronized void onItemSelected(boolean selected) {
+        this.selected = selected;
         if (delegate != null) {
-            delegate.onItemSelected();
+            delegate.onItemSelected(selected);
         }
     }
 }

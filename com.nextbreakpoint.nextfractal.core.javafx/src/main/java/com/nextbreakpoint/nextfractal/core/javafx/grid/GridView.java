@@ -37,7 +37,8 @@ import java.util.logging.Level;
 
 @Log
 public class GridView extends Pane {
-	private final int EXTRA = 1;
+	private static final int CACHED = 4;
+	private static final int EXTRA = 1;
 	private final int cellSize;
 	private final int numRows;
 	private final int numCols;
@@ -149,21 +150,40 @@ public class GridView extends Pane {
 			if (data != null) {
 				final int firstIndex = getFirstIndex();
 				final int lastIndex = getLastIndex();
-				for (int index = 0; index < firstIndex; index++) {
-					final GridViewItem item = data[index];
-					item.cancel();
-				}
-				for (int index = lastIndex; index < data.length; index++) {
-					final GridViewItem item = data[index];
-					item.cancel();
-				}
-				for (int index = 0; index < firstIndex; index++) {
-					final GridViewItem item = data[index];
-					item.waitFor();
-				}
-				for (int index = lastIndex; index < data.length; index++) {
-					final GridViewItem item = data[index];
-					item.waitFor();
+				if (offsetX > prevOffsetX) {
+					for (int index = lastIndex; index < data.length; index++) {
+						final GridViewItem item = data[index];
+						item.cancel();
+					}
+					for (int index = firstIndex - 1; index >= 0; index--) {
+						final GridViewItem item = data[index];
+						item.cancel();
+					}
+					for (int index = lastIndex; index < data.length; index++) {
+						final GridViewItem item = data[index];
+						item.waitFor();
+					}
+					for (int index = firstIndex - 1; index >= 0; index--) {
+						final GridViewItem item = data[index];
+						item.waitFor();
+					}
+				} else {
+					for (int index = firstIndex - 1; index >= 0; index--) {
+						final GridViewItem item = data[index];
+						item.cancel();
+					}
+					for (int index = lastIndex; index < data.length; index++) {
+						final GridViewItem item = data[index];
+						item.cancel();
+					}
+					for (int index = firstIndex - 1; index >= 0; index--) {
+						final GridViewItem item = data[index];
+						item.waitFor();
+					}
+					for (int index = lastIndex; index < data.length; index++) {
+						final GridViewItem item = data[index];
+						item.waitFor();
+					}
 				}
 			}
 
@@ -219,15 +239,8 @@ public class GridView extends Pane {
 				}
 			}
 
-//			for (int col = 0; col < numCols + EXTRA; col++) {
-//				for (int row = 0; row < numRows; row++) {
-//					final GridViewCell cell = cells[col * numRows + row];
-//					cell.update();
-//				}
-//			}
-
 			if (delegate != null) {
-				delegate.onGridUpdated();
+				delegate.onCellsUpdated(this);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -276,14 +289,22 @@ public class GridView extends Pane {
 	private int getFirstIndex() {
 		if (horizontal) {
 			int firstCol = getFirstCol();
-			if (firstCol > 0) {
-				firstCol -= 1;
+			for (int k = 0; k < CACHED; k++) {
+				if (firstCol > 0) {
+					firstCol -= 1;
+				} else {
+					break;
+				}
 			}
 			return Math.min(firstCol * numRows, data.length);
 		} else {
 			int firstRow = getFirstRow();
-			if (firstRow > 0) {
-				firstRow -= 1;
+			for (int k = 0; k < CACHED; k++) {
+				if (firstRow > 0) {
+					firstRow -= 1;
+				} else {
+					break;
+				}
 			}
 			return Math.min(firstRow * numCols, data.length);
 		}
@@ -292,14 +313,22 @@ public class GridView extends Pane {
 	private int getLastIndex() {
 		if (horizontal) {
 			int lastCol = getLastCol();
-			if (lastCol < getSize() / numRows - 1) {
-				lastCol += 1;
+			for (int k = 0; k < CACHED; k++) {
+				if (lastCol < getSize() / numRows - 1) {
+					lastCol += 1;
+				} else {
+					break;
+				}
 			}
 			return Math.min(lastCol * numRows + numRows, data.length);
 		} else {
 			int lastRow = getLastRow();
-			if (lastRow < getSize() / numCols - 1) {
-				lastRow += 1;
+			for (int k = 0; k < CACHED; k++) {
+				if (lastRow < getSize() / numCols - 1) {
+					lastRow += 1;
+				} else {
+					break;
+				}
 			}
 			return Math.min(lastRow * numCols + numCols, data.length);
 		}

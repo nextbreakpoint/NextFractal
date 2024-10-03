@@ -48,7 +48,7 @@ import java.util.logging.Level;
 import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
 
 @Log
-public class ImageLoader {
+public class PlatformImageLoader {
 	private final ExecutorService executor;
 	private Future<Void> future;
 	@Getter
@@ -59,25 +59,34 @@ public class ImageLoader {
 	private volatile RendererDelegate delegate;
 	private volatile ImageRenderer renderer;
 
-	public ImageLoader(ExecutorService executor, File file, Size size) {
+	public PlatformImageLoader(ExecutorService executor, File file, Size size) {
 		this.executor = Objects.requireNonNull(executor);
 		this.file = Objects.requireNonNull(file);
 		this.size = Objects.requireNonNull(size);
 	}
 
 	public void run() {
+		if (!Platform.isFxApplicationThread()) {
+			throw new IllegalStateException("Must be invoked from JavaFX main thread");
+		}
 		if (future == null) {
 			future = executor.submit(this::renderImage);
 		}
 	}
 
 	public void cancel() {
+		if (!Platform.isFxApplicationThread()) {
+			throw new IllegalStateException("Must be invoked from JavaFX main thread");
+		}
 		if (future != null) {
 			future.cancel(true);
 		}
 	}
 
 	public void waitFor() throws InterruptedException {
+		if (!Platform.isFxApplicationThread()) {
+			throw new IllegalStateException("Must be invoked from JavaFX main thread");
+		}
 		try {
 			if (future != null) {
 				future.get();
@@ -92,6 +101,9 @@ public class ImageLoader {
 	}
 
 	public void drawImage(GraphicsContext gc, int x, int y) {
+		if (!Platform.isFxApplicationThread()) {
+			throw new IllegalStateException("Must be invoked from JavaFX main thread");
+		}
 		if (renderer != null) {
 			renderer.drawImage(gc, x, y);
 		} else {
