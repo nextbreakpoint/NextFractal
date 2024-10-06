@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="317.69229"
-   height="317.69229"
-   viewBox="0 0 82.599996 82.599996"
+   width="356.15384"
+   height="163.84616"
+   viewBox="0 0 92.599998 42.600002"
    version="1.1"
    id="svg1"
    xmlns="http://www.w3.org/2000/svg"
@@ -14,10 +14,10 @@
   <g
      id="g1"
      style="display:inline"
-     transform="translate(-23.700001,-23.700001)">
+     transform="translate(-18.700001,-38.700001)">
     <path
-       id="path19"
+       id="path16"
        style="fill:none;stroke:#2d2d2d;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
-       d="M 44.999999,85.000001 83.700001,84.896409 M 44.999999,44.999999 H 85.000001 M 30,90 h 10 v 10 H 30 Z M 30,75 H 40 V 85 H 30 Z M 30,60 H 40 V 70 H 30 Z M 30,45 H 40 V 55 H 30 Z M 30,30 H 40 V 40 H 30 Z m 60,60 h 10 v 10 H 90 Z m 0,-15 h 10 V 85 H 90 Z m 0,-15 h 10 V 70 H 90 Z m 0,-15 h 10 V 55 H 90 Z m 0,-15 h 10 V 40 H 90 Z m -4.999999,-5 v 80 M 44.999999,25 v 80 0 M 25,25 h 80 v 80 H 25 Z" />
+       d="m 90.000001,55 v 10 m -5,-5 h 10 m -60.000002,0 h 10 m -5,-5 V 65 M 60,75 62,71 h 6 l 2,4 z M 39.999999,80.000001 H 90.000001 M 45,60 a 5,5 0 0 1 -5,5 5,5 0 0 1 -5,-5 5,5 0 0 1 5,-5 5,5 0 0 1 5,5 z m 50,0 a 5,5 0 0 1 -5,5 5,5 0 0 1 -5,-5 5,5 0 0 1 5,-5 5,5 0 0 1 5,5 z m 15,0 A 20,20 0 0 1 90,80 20,20 0 0 1 70,60 20,20 0 0 1 90,40 20,20 0 0 1 110,60 Z M 60,60 A 20,20 0 0 1 40,80 20,20 0 0 1 20,60 20,20 0 0 1 40,40 20,20 0 0 1 60,60 Z" />
   </g>
 </svg>

@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import lombok.AccessLevel;
@@ -44,14 +45,16 @@ public class GridViewItem {
     private volatile GridViewItemDelegate delegate;
     @Getter
     private float progress;
-    @Getter
     private boolean hasErrors;
-    @Getter
     private boolean selected;
 
     public GridViewItem(GridViewCellRenderer renderer) {
         this.renderer = Objects.requireNonNull(renderer);
         renderer.setDelegate(this::onItemUpdated);
+    }
+
+    public Bundle getBundle() {
+        return renderer.getBundle();
     }
 
     public void run() {

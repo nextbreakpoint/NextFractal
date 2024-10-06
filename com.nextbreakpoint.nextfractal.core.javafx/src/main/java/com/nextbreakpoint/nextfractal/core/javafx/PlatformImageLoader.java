@@ -25,6 +25,7 @@
 package com.nextbreakpoint.nextfractal.core.javafx;
 
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
@@ -58,6 +59,8 @@ public class PlatformImageLoader {
 	@Setter
 	private volatile RendererDelegate delegate;
 	private volatile ImageRenderer renderer;
+	@Getter
+    private volatile Bundle bundle;
 
 	public PlatformImageLoader(ExecutorService executor, File file, Size size) {
 		this.executor = Objects.requireNonNull(executor);
@@ -111,11 +114,15 @@ public class PlatformImageLoader {
 		}
 	}
 
-	// this method is executed in a worker thread
+    // this method is executed in a worker thread
 	private Void renderImage() {
 		try {
 			log.log(Level.FINE, "Start rendering image {0}", file);
-			renderer = loadBundle(file)
+			final Either<Bundle> either = loadBundle(file)
+					.execute()
+					.orThrow();
+			bundle = either.get();
+			renderer = Command.of(either)
 					.flatMap(bundle -> createImageDescriptor(bundle, size))
 					.flatMap(descriptor -> createImageRenderer(descriptor, this::onImageUpdated))
 					.execute()

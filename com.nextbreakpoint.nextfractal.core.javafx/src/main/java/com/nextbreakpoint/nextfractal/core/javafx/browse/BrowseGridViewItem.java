@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.browse;
 
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformImageLoader;
@@ -50,7 +51,12 @@ public class BrowseGridViewItem extends GridViewItem {
             this.imageLoader = Objects.requireNonNull(imageLoader);
         }
 
-        @Override
+		@Override
+		public Bundle getBundle() {
+			return imageLoader.getBundle();
+		}
+
+		@Override
 		public void run() {
 			imageLoader.run();
 		}

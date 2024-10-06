@@ -24,10 +24,13 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public interface GridViewCellRenderer {
+	Bundle getBundle();
+
 	void run();
 
 	void cancel();

@@ -28,19 +28,59 @@ import com.nextbreakpoint.nextfractal.core.javafx.graphics.internal.JavaFXGraphi
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCell;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItemDelegate;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+
+import static com.nextbreakpoint.nextfractal.core.javafx.Icons.createSVGIcon;
 
 public class BrowseGridViewCell extends GridViewCell implements GridViewItemDelegate {
 	private final JavaFXGraphicsFactory factory;
 	private final Canvas canvas;
+	private final StackPane iconOverlay;
 
 	public BrowseGridViewCell(int index, int width, int height) {
 		super(index, width, height);
 		factory = new JavaFXGraphicsFactory();
 		canvas = new Canvas(width, height);
-		setCenter(canvas);
+		final double margin = width / 40d;
+		final double size = width / 6d;
+		final Color color1 = Color.web("rgb(255,255,255)");
+		final Color color2 = Color.web("rgb(0,0,0)");
+		final Node icon1 = createSVGIcon("/movie.svg", size, color1);
+		final Node icon2 = createSVGIcon("/movie.svg", size, color2);
+		final StackPane stack = new StackPane();
+		final HBox overlay = new HBox(4);
+		final VBox icons = new VBox(4);
+		iconOverlay = new StackPane();
+		iconOverlay.getChildren().add(icon2);
+		iconOverlay.getChildren().add(icon1);
+		iconOverlay.setVisible(false);
+		icon2.setTranslateX(1);
+		icon2.setTranslateY(1);
+        overlay.setAlignment(Pos.CENTER_RIGHT);
+		icons.setAlignment(Pos.TOP_LEFT);
+		icons.setMinWidth(size);
+		icons.setMinHeight(height);
+		icons.setMaxWidth(size);
+		icons.setMaxHeight(size);
+		icons.setPrefWidth(size);
+		icons.setPrefHeight(height);
+		icons.getChildren().add(makeVSpacer(margin));
+		icons.getChildren().add(iconOverlay);
+		icons.getChildren().add(makeVSpacer(margin));
+		overlay.getChildren().add(makeHSpacer(margin));
+		overlay.getChildren().add(icons);
+		overlay.getChildren().add(makeHSpacer(margin));
+		stack.getChildren().add(canvas);
+		stack.getChildren().add(overlay);
+		setCenter(stack);
 	}
 
 	@Override
@@ -76,6 +116,18 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
 		updateCell();
 	}
 
+	private static Region makeVSpacer(double margin) {
+		final Region spacer = new Region();
+		spacer.setPrefHeight(margin);
+		return spacer;
+	}
+
+	private static Region makeHSpacer(double margin) {
+		final Region spacer = new Region();
+		spacer.setPrefWidth(margin);
+		return spacer;
+	}
+
 	private void updateCell() {
 		if (item != null && item instanceof BrowseGridViewItem browseItem) {
 			if (isDirty()) {
@@ -86,6 +138,7 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
 				drawMessage(browseItem);
 				drawOverlay(browseItem);
 				setDirty(false);
+                iconOverlay.setVisible(hasClips(browseItem));
 			}
 		} else {
 			if (isDirty()) {
@@ -93,6 +146,10 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
 				setDirty(false);
 			}
 		}
+	}
+
+	private boolean hasClips(BrowseGridViewItem browseItem) {
+		return browseItem.getBundle() != null && browseItem.getBundle().clips() != null && !browseItem.getBundle().clips().isEmpty();
 	}
 
 	private void clearCanvas() {
