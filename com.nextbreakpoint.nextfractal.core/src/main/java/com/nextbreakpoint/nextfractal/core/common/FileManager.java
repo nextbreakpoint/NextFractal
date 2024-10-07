@@ -201,11 +201,12 @@ public class FileManager {
     private static Command<AnimationClip> decodeClip(JsonNode clip) {
         final Map<String, Object> stateMap = new HashMap<>();
         final JsonNode events = clip.get("events");
-        final List<Either<AnimationEvent>> results = events != null ? JsonUtils.asStream(events)
+        // the old format used to represent a clip as an array. the new format uses an object instead (the events property contains the same data as the array)
+        final List<Either<AnimationEvent>> results = (events != null ? JsonUtils.asStream(events) : JsonUtils.asStream(clip))
                 .map(clipEvent -> decodeClipEvent(stateMap, clipEvent))
                 .map(Command::execute)
                 .takeWhile(Either::isSuccess)
-                .toList() : List.of();
+                .toList();
         final Optional<Either<AnimationEvent>> error = results.stream().filter(Either::isFailure).findFirst();
         return error.<Command<AnimationClip>>map(result -> createFailure("Can't decode clip", result))
                 .orElseGet(() -> Command.value(new AnimationClip(results.stream().map(Either::get).toList())));
