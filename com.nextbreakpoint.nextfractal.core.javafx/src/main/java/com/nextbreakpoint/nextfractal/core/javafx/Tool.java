@@ -28,21 +28,21 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 
 public interface Tool {
-	void clicked(MouseEvent e);
+    void clicked(MouseEvent e);
 
-	void moved(MouseEvent e);
+    void moved(MouseEvent e);
 
-	void dragged(MouseEvent e);
+    void dragged(MouseEvent e);
 
-	void released(MouseEvent e);
+    void released(MouseEvent e);
 
-	void pressed(MouseEvent e);
+    void pressed(MouseEvent e);
 
-	void update(long time, boolean timeAnimation);
+    void update(long time, boolean timeAnimation);
 
-	void forceChanged();
+    void forceChanged();
 
-	boolean isChanged();
+    boolean isChanged();
 
-	void draw(GraphicsContext gc);
+    void draw(GraphicsContext gc);
 }

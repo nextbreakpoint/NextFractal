@@ -28,4 +28,5 @@ import com.nextbreakpoint.nextfractal.core.javafx.Tool;
 import lombok.Builder;
 
 @Builder
-public record ActiveToolChanged(Tool tool) {}
+public record ActiveToolChanged(Tool tool) {
+}

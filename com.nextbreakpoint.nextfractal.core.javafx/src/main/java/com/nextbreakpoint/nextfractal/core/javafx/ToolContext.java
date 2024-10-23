@@ -27,17 +27,17 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 public interface ToolContext<T> {
-	double getWidth();
+    double getWidth();
 
-	double getHeight();
+    double getHeight();
 
-	GraphicsFactory getGraphicsFactory();
+    GraphicsFactory getGraphicsFactory();
 
-	T getMetadata();
+    T getMetadata();
 
-	void setView(T metadata, boolean continuous, boolean appendHistory);
+    void setView(T metadata, boolean continuous, boolean appendHistory);
 
-	void setTime(T metadata, boolean continuous, boolean appendHistory);
+    void setTime(T metadata, boolean continuous, boolean appendHistory);
 
-	void setPoint(T metadata, boolean continuous, boolean appendHistory);
+    void setPoint(T metadata, boolean continuous, boolean appendHistory);
 }

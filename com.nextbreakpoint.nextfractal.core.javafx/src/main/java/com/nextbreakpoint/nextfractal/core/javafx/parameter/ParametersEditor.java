@@ -43,77 +43,77 @@ import java.util.logging.Level;
 
 @Log
 public class ParametersEditor extends VBox {
-	private static final int SPACING = 5;
+    private static final int SPACING = 5;
 
-	private final Map<String, AttributeEditor> editors = new HashMap<>();
+    private final Map<String, AttributeEditor> editors = new HashMap<>();
 
-	@Setter
-	@Getter
-	private ParametersEditorDelegate delegate;
+    @Setter
+    @Getter
+    private ParametersEditorDelegate delegate;
 
-	private Session session;
+    private Session session;
 
-	public ParametersEditor(Parameters parameters) {
-		super(SPACING * 2);
+    public ParametersEditor(Parameters parameters) {
+        super(SPACING * 2);
 
-		final var groupPanes = parameters.getGroups()
-				.stream()
-				.map(group -> createGroupPane(group, editors))
-				.toList();
+        final var groupPanes = parameters.getGroups()
+                .stream()
+                .map(group -> createGroupPane(group, editors))
+                .toList();
 
-		getChildren().addAll(groupPanes);
-	}
+        getChildren().addAll(groupPanes);
+    }
 
-	public void bindSession(Session session) {
-		this.session = session;
+    public void bindSession(Session session) {
+        this.session = session;
 
-		editors.values().forEach(editor -> editor.loadSession(session));
-	}
+        editors.values().forEach(editor -> editor.loadSession(session));
+    }
 
-	private void onEditorChanged(AttributeEditor editor) {
-		this.session = editor.updateSession(session);
+    private void onEditorChanged(AttributeEditor editor) {
+        this.session = editor.updateSession(session);
 
-		if (delegate != null) {
-			delegate.onSessionChanged(session);
-		}
-	}
+        if (delegate != null) {
+            delegate.onSessionChanged(session);
+        }
+    }
 
-	private VBox createGroupPane(Group group, Map<String, AttributeEditor> editors) {
-		final var groupPane = new VBox(SPACING);
+    private VBox createGroupPane(Group group, Map<String, AttributeEditor> editors) {
+        final var groupPane = new VBox(SPACING);
 
-		final var label = new Label(group.getName());
+        final var label = new Label(group.getName());
 
-		groupPane.getChildren().addAll(label);
+        groupPane.getChildren().addAll(label);
 
-		final var attributeEditors = group.getAttributes().stream()
-				.map(attribute -> createAttributeEditor(attribute, editors))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.toList();
+        final var attributeEditors = group.getAttributes().stream()
+                .map(attribute -> createAttributeEditor(attribute, editors))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
-		groupPane.getChildren().addAll(attributeEditors);
+        groupPane.getChildren().addAll(attributeEditors);
 
-		return groupPane;
-	}
+        return groupPane;
+    }
 
-	private Optional<AttributeEditor> createAttributeEditor(Attribute attribute, Map<String, AttributeEditor> editors) {
-		final AttributeEditor editor = findAttributeEditorFactory(attribute)
-				.map(plugin -> Objects.requireNonNull(plugin.createAttributeEditor(attribute)))
-				.observe()
-				.onFailure(e -> log.log(Level.INFO, "Cannot create attribute editor: " + attribute.getKey()))
-				.get()
-				.orElse(null);
+    private Optional<AttributeEditor> createAttributeEditor(Attribute attribute, Map<String, AttributeEditor> editors) {
+        final AttributeEditor editor = findAttributeEditorFactory(attribute)
+                .map(plugin -> Objects.requireNonNull(plugin.createAttributeEditor(attribute)))
+                .observe()
+                .onFailure(e -> log.log(Level.INFO, "Cannot create attribute editor: " + attribute.getKey()))
+                .get()
+                .orElse(null);
 
-		if (editor != null) {
-			editors.put(attribute.getKey(), editor);
-			editor.setDelegate(this::onEditorChanged);
-		}
+        if (editor != null) {
+            editors.put(attribute.getKey(), editor);
+            editor.setDelegate(this::onEditorChanged);
+        }
 
-		return Optional.ofNullable(editor);
-	}
+        return Optional.ofNullable(editor);
+    }
 
-	private static Either<AttributeEditorFactory> findAttributeEditorFactory(Attribute attribute) {
-		return AttributeEditorPlugins.tryFindFactory("key-" + attribute.getKey())
-				.or(() -> AttributeEditorPlugins.tryFindFactory("logical-type-" + attribute.getLogicalType()));
-	}
+    private static Either<AttributeEditorFactory> findAttributeEditorFactory(Attribute attribute) {
+        return AttributeEditorPlugins.tryFindFactory("key-" + attribute.getKey())
+                .or(() -> AttributeEditorPlugins.tryFindFactory("logical-type-" + attribute.getLogicalType()));
+    }
 }

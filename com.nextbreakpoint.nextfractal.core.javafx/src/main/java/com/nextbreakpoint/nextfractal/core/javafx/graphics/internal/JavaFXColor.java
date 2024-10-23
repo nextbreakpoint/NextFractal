@@ -28,19 +28,19 @@ import com.nextbreakpoint.nextfractal.core.graphics.Color;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public class JavaFXColor implements Color {
-	private final javafx.scene.paint.Color color;
-	
-	public JavaFXColor(double red, double green, double blue, double opacity) {
-		color = new javafx.scene.paint.Color(red, green, blue, opacity);
-	}
+    private final javafx.scene.paint.Color color;
 
-	@Override
-	public void setStroke(GraphicsContext context) {
-		((JavaFXGraphicsContext)context).getGraphicsContext().setStroke(color);
-	}
-	
-	@Override
-	public void setFill(GraphicsContext context) {
-		((JavaFXGraphicsContext)context).getGraphicsContext().setFill(color);
-	}
+    public JavaFXColor(double red, double green, double blue, double opacity) {
+        color = new javafx.scene.paint.Color(red, green, blue, opacity);
+    }
+
+    @Override
+    public void setStroke(GraphicsContext context) {
+        ((JavaFXGraphicsContext) context).getGraphicsContext().setStroke(color);
+    }
+
+    @Override
+    public void setFill(GraphicsContext context) {
+        ((JavaFXGraphicsContext) context).getGraphicsContext().setFill(color);
+    }
 }

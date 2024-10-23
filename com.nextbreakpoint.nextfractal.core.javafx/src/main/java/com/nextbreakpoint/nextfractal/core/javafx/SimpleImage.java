@@ -34,38 +34,38 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SimpleImage implements RenderedImage {
-	private final Map<String, Object> properties = new HashMap<>();
-	private final UUID uuid;
-	@Getter
+    private final Map<String, Object> properties = new HashMap<>();
+    private final UUID uuid;
+    @Getter
     private final int width;
-	@Getter
+    @Getter
     private final int height;
-	@Getter
+    @Getter
     private final Date timestamp;
-	@Getter
+    @Getter
     private final IntBuffer pixels;
-	@Setter
+    @Setter
     @Getter
     private double progress;
 
-	public SimpleImage(int width, int height, IntBuffer pixels) {
-		this.pixels = pixels;
-		this.width = width;
-		this.height = height;
-		timestamp = new Date();
-		uuid = UUID.randomUUID();
-	}
+    public SimpleImage(int width, int height, IntBuffer pixels) {
+        this.pixels = pixels;
+        this.width = width;
+        this.height = height;
+        timestamp = new Date();
+        uuid = UUID.randomUUID();
+    }
 
     public Object getProperty(String key) {
-		return properties.get(key);
-	}
+        return properties.get(key);
+    }
 
-	public void setProperty(String key, Object value) {
-		properties.put(key, value);
-	}
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
 
     @Override
-	public UUID getId() {
-		return uuid;
-	}
+    public UUID getId() {
+        return uuid;
+    }
 }

@@ -33,7 +33,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class UIPlugins {
-    private UIPlugins() {}
+    private UIPlugins() {
+    }
 
     private static ServiceLoader<UIFactory> factoryLoader() {
         return ServiceLoader.load(UIFactory.class);

@@ -27,17 +27,17 @@ package com.nextbreakpoint.nextfractal.core.javafx.observable;
 import javafx.beans.value.ObservableValueBase;
 
 public class BooleanObservableValue extends ObservableValueBase<Boolean> {
-	private Boolean value = Boolean.FALSE;
-	
-	public void setValue(Boolean value) {
-		if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
-			this.value = value;
-			fireValueChangedEvent();
-		}
-	}
+    private Boolean value = Boolean.FALSE;
 
-	@Override
-	public Boolean getValue() {
-		return value;
-	}
+    public void setValue(Boolean value) {
+        if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
+            this.value = value;
+            fireValueChangedEvent();
+        }
+    }
+
+    @Override
+    public Boolean getValue() {
+        return value;
+    }
 }

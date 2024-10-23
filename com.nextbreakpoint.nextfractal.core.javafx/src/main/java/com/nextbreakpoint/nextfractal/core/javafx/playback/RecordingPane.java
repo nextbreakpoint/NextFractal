@@ -56,7 +56,7 @@ public class RecordingPane extends Pane {
         getChildren().add(canvas);
 
         widthProperty().addListener((_, _, newValue) -> {
-          canvas.setLayoutX(newValue.doubleValue() - 50 - 30);
+            canvas.setLayoutX(newValue.doubleValue() - 50 - 30);
         });
 
         heightProperty().addListener((_, _, _) -> {
@@ -67,11 +67,11 @@ public class RecordingPane extends Pane {
     private void updateUI() {
         frame += 1;
         final GraphicsContext g2d = canvas.getGraphicsContext2D();
-        g2d.clearRect(0 ,0, canvas.getWidth(), canvas.getHeight());
+        g2d.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         if (frame % 2 == 1) {
             g2d.setFill(Color.RED);
             g2d.setGlobalAlpha(0.8);
-            g2d.fillOval(0 ,0, canvas.getWidth(), canvas.getHeight());
+            g2d.fillOval(0, 0, canvas.getWidth(), canvas.getHeight());
         }
     }
 

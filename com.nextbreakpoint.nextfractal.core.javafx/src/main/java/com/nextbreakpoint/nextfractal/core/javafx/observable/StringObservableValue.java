@@ -27,17 +27,17 @@ package com.nextbreakpoint.nextfractal.core.javafx.observable;
 import javafx.beans.value.ObservableValueBase;
 
 public class StringObservableValue extends ObservableValueBase<String> {
-	private String value;
+    private String value;
 
-	public void setValue(String value) {
-		if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
-			this.value = value;
-			fireValueChangedEvent();
-		}
-	}
+    public void setValue(String value) {
+        if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
+            this.value = value;
+            fireValueChangedEvent();
+        }
+    }
 
-	@Override
-	public String getValue() {
-		return value;
-	}
+    @Override
+    public String getValue() {
+        return value;
+    }
 }

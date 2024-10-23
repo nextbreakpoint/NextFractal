@@ -28,17 +28,17 @@ import com.nextbreakpoint.nextfractal.core.javafx.Tool;
 import javafx.beans.value.ObservableValueBase;
 
 public class ToolObservableValue extends ObservableValueBase<Tool> {
-	private Tool value = null;
-	
-	public void setValue(Tool value) {
-		if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
-			this.value = value;
-			fireValueChangedEvent();
-		}
-	}
+    private Tool value = null;
 
-	@Override
-	public Tool getValue() {
-		return value;
-	}
+    public void setValue(Tool value) {
+        if ((value != null && !value.equals(this.value)) || (value == null && this.value != null)) {
+            this.value = value;
+            fireValueChangedEvent();
+        }
+    }
+
+    @Override
+    public Tool getValue() {
+        return value;
+    }
 }

@@ -32,24 +32,24 @@ import javafx.scene.image.WritablePixelFormat;
 import java.nio.IntBuffer;
 
 public class JavaFXImage implements Image {
-	private final WritableImage image;
-	
-	public JavaFXImage(WritableImage image) {
-		this.image = image;
-	}
+    private final WritableImage image;
 
-	@Override
-	public void draw(GraphicsContext context, int x, int y) {
-		((JavaFXGraphicsContext)context).getGraphicsContext().drawImage(image, x, y);
-	}
-	
-	@Override
-	public void draw(GraphicsContext context, int x, int y, int w, int h) {
-		((JavaFXGraphicsContext)context).getGraphicsContext().drawImage(image, x, y, w, h);
-	}
+    public JavaFXImage(WritableImage image) {
+        this.image = image;
+    }
 
-	@Override
-	public void getPixels(IntBuffer pixels) {
-		image.getPixelReader().getPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), WritablePixelFormat.getIntArgbInstance(), pixels, (int)image.getWidth());
-	}
+    @Override
+    public void draw(GraphicsContext context, int x, int y) {
+        ((JavaFXGraphicsContext) context).getGraphicsContext().drawImage(image, x, y);
+    }
+
+    @Override
+    public void draw(GraphicsContext context, int x, int y, int w, int h) {
+        ((JavaFXGraphicsContext) context).getGraphicsContext().drawImage(image, x, y, w, h);
+    }
+
+    @Override
+    public void getPixels(IntBuffer pixels) {
+        image.getPixelReader().getPixels(0, 0, (int) image.getWidth(), (int) image.getHeight(), WritablePixelFormat.getIntArgbInstance(), pixels, (int) image.getWidth());
+    }
 }

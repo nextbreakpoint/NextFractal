@@ -93,12 +93,16 @@ public class TabPane extends Pane {
         final double width = getWidth();
         final double height = getHeight();
         final GraphicsContext g2d = canvas.getGraphicsContext2D();
-        g2d.clearRect(0,0, width, height);
-        g2d.setFill(new Color(1,1,1,entered ? 0.9 : 0.7));
+        g2d.clearRect(0, 0, width, height);
+        g2d.setFill(new Color(1, 1, 1, entered ? 0.9 : 0.7));
         g2d.fillOval(0, -height, width, height * 2);
     }
 
-    public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() { return onAction; }
+    public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
+        return onAction;
+    }
 
-    public final void setOnAction(EventHandler<ActionEvent> value) { onActionProperty().set(value); }
+    public final void setOnAction(EventHandler<ActionEvent> value) {
+        onActionProperty().set(value);
+    }
 }

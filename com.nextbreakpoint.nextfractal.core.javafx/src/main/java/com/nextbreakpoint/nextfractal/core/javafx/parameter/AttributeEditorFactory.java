@@ -27,7 +27,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.parameter;
 import com.nextbreakpoint.nextfractal.core.params.Attribute;
 
 public interface AttributeEditorFactory {
-	String getId();
+    String getId();
 
-	AttributeEditor createAttributeEditor(Attribute attribute);
+    AttributeEditor createAttributeEditor(Attribute attribute);
 }

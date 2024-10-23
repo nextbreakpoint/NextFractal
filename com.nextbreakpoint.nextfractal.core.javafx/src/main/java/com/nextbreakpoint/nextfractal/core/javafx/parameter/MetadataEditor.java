@@ -41,65 +41,65 @@ import java.util.Objects;
 import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
 
 public class MetadataEditor extends BorderPane {
-	private final PlatformEventBus eventBus;
-	private Session activeSession;
-	private Session editedSession;
-	private ParamsStrategy paramsStrategy;
-	private ParametersEditor editor;
+    private final PlatformEventBus eventBus;
+    private Session activeSession;
+    private Session editedSession;
+    private ParamsStrategy paramsStrategy;
+    private ParametersEditor editor;
 
-	public MetadataEditor(PlatformEventBus eventBus) {
-		this.eventBus = eventBus;
+    public MetadataEditor(PlatformEventBus eventBus) {
+        this.eventBus = eventBus;
 
-		setDisabled(true);
+        setDisabled(true);
 
-		eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionDataLoaded((SessionDataLoaded) event));
+        eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionDataLoaded((SessionDataLoaded) event));
 
-		eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> handleSessionDataChanged((SessionDataChanged) event));
+        eventBus.subscribe(SessionDataChanged.class.getSimpleName(), event -> handleSessionDataChanged((SessionDataChanged) event));
 
-		eventBus.subscribe(EditorParamsActionFired.class.getSimpleName(), event -> {
-			final String action = ((EditorParamsActionFired) event).action();
-			if (activeSession != null && action.equals("cancel")) editor.bindSession(activeSession);
-			if (editedSession != null && action.equals("apply")) notifyEditorDataChanged(editedSession);
-		});
-	}
+        eventBus.subscribe(EditorParamsActionFired.class.getSimpleName(), event -> {
+            final String action = ((EditorParamsActionFired) event).action();
+            if (activeSession != null && action.equals("cancel")) editor.bindSession(activeSession);
+            if (editedSession != null && action.equals("apply")) notifyEditorDataChanged(editedSession);
+        });
+    }
 
-	private void notifyEditorDataChanged(Session session) {
-		eventBus.postEvent(EditorDataChanged.builder().session(session).continuous(false).appendToHistory(true).build());
-	}
+    private void notifyEditorDataChanged(Session session) {
+        eventBus.postEvent(EditorDataChanged.builder().session(session).continuous(false).appendToHistory(true).build());
+    }
 
-	private void onSessionChanged(Session session) {
-		editedSession = session;
-	}
+    private void onSessionChanged(Session session) {
+        editedSession = session;
+    }
 
-	private void handleSessionDataLoaded(SessionDataLoaded event) {
-		updateSession(event.session(), event.continuous());
-	}
+    private void handleSessionDataLoaded(SessionDataLoaded event) {
+        updateSession(event.session(), event.continuous());
+    }
 
-	private void handleSessionDataChanged(SessionDataChanged event) {
-		updateSession(event.session(), event.continuous());
-	}
+    private void handleSessionDataChanged(SessionDataChanged event) {
+        updateSession(event.session(), event.continuous());
+    }
 
-	private void updateSession(Session session, boolean continuous) {
-		if (paramsStrategy == null || !this.activeSession.pluginId().equals(session.pluginId())) {
-			paramsStrategy = createParamsStrategy(session).orElse(null);
+    private void updateSession(Session session, boolean continuous) {
+        if (paramsStrategy == null || !this.activeSession.pluginId().equals(session.pluginId())) {
+            paramsStrategy = createParamsStrategy(session).orElse(null);
 
-			final Parameters parameters = paramsStrategy.create(this.activeSession);
-			editor = new ParametersEditor(parameters);
-			editor.setDelegate(this::onSessionChanged);
-			setCenter(editor);
+            final Parameters parameters = paramsStrategy.create(this.activeSession);
+            editor = new ParametersEditor(parameters);
+            editor.setDelegate(this::onSessionChanged);
+            setCenter(editor);
 
-			setDisabled(false);
-		}
+            setDisabled(false);
+        }
 
-		this.activeSession = session;
-		if (continuous == Boolean.FALSE) {
-			editor.bindSession(this.activeSession);
-		}
-	}
+        this.activeSession = session;
+        if (continuous == Boolean.FALSE) {
+            editor.bindSession(this.activeSession);
+        }
+    }
 
-	private static Either<ParamsStrategy> createParamsStrategy(Session session) {
-		return Command.of(tryFindFactory(session.pluginId()))
-				.map(plugin -> Objects.requireNonNull(plugin.createParamsStrategy()))
-				.execute();
-	}
+    private static Either<ParamsStrategy> createParamsStrategy(Session session) {
+        return Command.of(tryFindFactory(session.pluginId()))
+                .map(plugin -> Objects.requireNonNull(plugin.createParamsStrategy()))
+                .execute();
+    }
 }

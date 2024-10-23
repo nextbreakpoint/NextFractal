@@ -32,30 +32,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RenderingContext {
-	private final Map<String, Canvas> canvasMap = new HashMap<>();
+    private final Map<String, Canvas> canvasMap = new HashMap<>();
 
-	@Getter
-	@Setter
-	private boolean timeAnimation;
-	@Getter
-	@Setter
-	private boolean playback;
-	@Getter
-	@Setter
-	private double zoomSpeed;
-	@Getter
-	@Setter
-	private Tool tool;
+    @Getter
+    @Setter
+    private boolean timeAnimation;
+    @Getter
+    @Setter
+    private boolean playback;
+    @Getter
+    @Setter
+    private double zoomSpeed;
+    @Getter
+    @Setter
+    private Tool tool;
 
-	public void registerCanvas(String name, Canvas canvas) {
-		canvasMap.put(name, canvas);
-	}
+    public void registerCanvas(String name, Canvas canvas) {
+        canvasMap.put(name, canvas);
+    }
 
-	public Canvas getCanvas(String name) {
-		return canvasMap.get(name);
-	}
+    public Canvas getCanvas(String name) {
+        return canvasMap.get(name);
+    }
 
-	public void dispose() {
-		canvasMap.clear();
-	}
+    public void dispose() {
+        canvasMap.clear();
+    }
 }

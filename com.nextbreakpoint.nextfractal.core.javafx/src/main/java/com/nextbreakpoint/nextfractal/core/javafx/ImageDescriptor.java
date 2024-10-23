@@ -31,25 +31,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ImageDescriptor {
-	private final Map<String, Object> properties = new HashMap<>();
-	@Getter
-	private final Session session;
-	@Getter
+    private final Map<String, Object> properties = new HashMap<>();
+    @Getter
+    private final Session session;
+    @Getter
     private final int width;
-	@Getter
+    @Getter
     private final int height;
 
-	public ImageDescriptor(Session session, int width, int height) {
+    public ImageDescriptor(Session session, int width, int height) {
         this.session = session;
         this.width = width;
-		this.height = height;
-	}
+        this.height = height;
+    }
 
     public Object getProperty(String key) {
-		return properties.get(key);
-	}
+        return properties.get(key);
+    }
 
-	public void setProperty(String key, Object value) {
-		properties.put(key, value);
-	}
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
 }

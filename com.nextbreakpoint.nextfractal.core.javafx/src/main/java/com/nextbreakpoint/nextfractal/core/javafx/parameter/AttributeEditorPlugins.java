@@ -33,7 +33,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class AttributeEditorPlugins {
-    private AttributeEditorPlugins() {}
+    private AttributeEditorPlugins() {
+    }
 
     private static ServiceLoader<AttributeEditorFactory> factoryLoader() {
         return ServiceLoader.load(AttributeEditorFactory.class);

@@ -32,29 +32,29 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 public class StatusPane extends BorderPane {
-	private final StringObservableValue messageProperty;
+    private final StringObservableValue messageProperty;
 
-	public StatusPane() {
-		messageProperty = new StringObservableValue();
+    public StatusPane() {
+        messageProperty = new StringObservableValue();
 
-		final TextArea message = new TextArea();
-		message.setEditable(false);
+        final TextArea message = new TextArea();
+        message.setEditable(false);
 
-		final VBox box = new VBox();
-		box.setAlignment(Pos.TOP_CENTER);
-		box.getChildren().add(message);
-		box.getStyleClass().add("status");
+        final VBox box = new VBox();
+        box.setAlignment(Pos.TOP_CENTER);
+        box.getChildren().add(message);
+        box.getStyleClass().add("status");
 
-		setCenter(box);
+        setCenter(box);
 
-		messageProperty().addListener((_, _, newValue) -> message.setText(newValue));
-	}
+        messageProperty().addListener((_, _, newValue) -> message.setText(newValue));
+    }
 
-	public void setMessage(String text) {
-		messageProperty.setValue(text);
-	}
+    public void setMessage(String text) {
+        messageProperty.setValue(text);
+    }
 
-	public ObservableValue<String> messageProperty() {
-		return messageProperty;
-	}
+    public ObservableValue<String> messageProperty() {
+        return messageProperty;
+    }
 }

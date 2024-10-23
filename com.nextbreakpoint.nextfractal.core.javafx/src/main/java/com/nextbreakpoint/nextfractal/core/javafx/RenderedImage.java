@@ -29,21 +29,21 @@ import java.util.Date;
 import java.util.UUID;
 
 public interface RenderedImage {
-	IntBuffer getPixels();
+    IntBuffer getPixels();
 
-	int getWidth();
+    int getWidth();
 
-	int getHeight();
+    int getHeight();
 
-	Object getProperty(String key);
+    Object getProperty(String key);
 
-	void setProperty(String key, Object value);
+    void setProperty(String key, Object value);
 
-	Date getTimestamp();
+    Date getTimestamp();
 
-	double getProgress();
+    double getProgress();
 
-	void setProgress(double progress);
+    void setProgress(double progress);
 
-	UUID getId();
+    UUID getId();
 }

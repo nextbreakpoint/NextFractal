@@ -36,27 +36,27 @@ import lombok.Setter;
 import java.util.function.Function;
 
 public class AdvancedTextField extends TextField {
-	private final StringProperty restrict = new SimpleStringProperty();
+    private final StringProperty restrict = new SimpleStringProperty();
 
-	@Setter
+    @Setter
     @Getter
     private Function<String, String> transform = t -> t;
 
-	public void setRestrict(String restrict) {
-		this.restrict.set(restrict);
-	}
+    public void setRestrict(String restrict) {
+        this.restrict.set(restrict);
+    }
 
-	public String getRestrict() {
-		return restrict.get();
-	}
+    public String getRestrict() {
+        return restrict.get();
+    }
 
     public StringProperty restrictProperty() {
-		return restrict;
-	}
+        return restrict;
+    }
 
-	public AdvancedTextField() {
-		setAlignment(Pos.CENTER_RIGHT);
-		textProperty().addListener(new ChangeListener<>() {
+    public AdvancedTextField() {
+        setAlignment(Pos.CENTER_RIGHT);
+        textProperty().addListener(new ChangeListener<>() {
             private boolean ignore;
 
             @Override
@@ -79,5 +79,5 @@ public class AdvancedTextField extends TextField {
                 ignore = false;
             }
         });
-	}
+    }
 }
