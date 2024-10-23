@@ -76,17 +76,22 @@ public class TabPane extends Pane {
             redraw(canvas);
         });
 
-        addEventFilter(MouseEvent.MOUSE_ENTERED, _ -> {
+        addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
             entered = true;
             redraw(canvas);
+            e.consume();
         });
 
-        addEventFilter(MouseEvent.MOUSE_EXITED, _ -> {
+        addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
             entered = false;
             redraw(canvas);
+            e.consume();
         });
 
-        addEventFilter(MouseEvent.MOUSE_CLICKED, _ -> onActionProperty().getValue().handle(new ActionEvent(TabPane.this, null)));
+        addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            onActionProperty().getValue().handle(new ActionEvent(TabPane.this, null));
+            e.consume();
+        });
     }
 
     private void redraw(Canvas canvas) {

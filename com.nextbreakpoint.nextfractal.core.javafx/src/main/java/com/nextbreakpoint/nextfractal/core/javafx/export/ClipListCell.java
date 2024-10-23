@@ -50,129 +50,129 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ClipListCell extends ListCell<RenderedImage> {
-	private final BorderPane pane;
-	private final Canvas canvas;
-	private final Label label;
-	private final Tile tile;
-	@Setter
-	private ClipListCellDelegate delegate;
+    private final BorderPane pane;
+    private final Canvas canvas;
+    private final Label label;
+    private final Tile tile;
+    @Setter
+    private ClipListCellDelegate delegate;
 
-	public ClipListCell(Tile tile) {
-		this.tile = tile;
-		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
-		label = new Label();
-		label.getStyleClass().add("text-small");
-		pane = new BorderPane();
-		final VBox image = new VBox(4);
-		image.setAlignment(Pos.CENTER);
-		image.getChildren().add(canvas);
-		pane.setLeft(image);
-		final VBox labels = new VBox(4);
-		labels.setAlignment(Pos.CENTER_RIGHT);
-		labels.getChildren().add(label);
-		pane.setCenter(labels);
+    public ClipListCell(Tile tile) {
+        this.tile = tile;
+        canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
+        label = new Label();
+        label.getStyleClass().add("text-small");
+        pane = new BorderPane();
+        final VBox image = new VBox(4);
+        image.setAlignment(Pos.CENTER);
+        image.getChildren().add(canvas);
+        pane.setLeft(image);
+        final VBox labels = new VBox(4);
+        labels.setAlignment(Pos.CENTER_RIGHT);
+        labels.getChildren().add(label);
+        pane.setCenter(labels);
 
-		final ClipListCell thisCell = this;
+        final ClipListCell thisCell = this;
 
-		setOnDragDetected(event -> {
-			if (getItem() == null) {
-				return;
-			}
+        setOnDragDetected(event -> {
+            if (getItem() == null) {
+                return;
+            }
 
-			final Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
-			dragboard.setDragView(getWritableImage(getItem()));
-			final ClipboardContent content = new ClipboardContent();
-			content.put(DataFormat.PLAIN_TEXT, getItem().getId().toString());
-			dragboard.setContent(content);
+            final Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+            dragboard.setDragView(getWritableImage(getItem()));
+            final ClipboardContent content = new ClipboardContent();
+            content.put(DataFormat.PLAIN_TEXT, getItem().getId().toString());
+            dragboard.setContent(content);
 
-			event.consume();
-		});
+            event.consume();
+        });
 
-		setOnDragOver(event -> {
-			if (event.getGestureSource() != thisCell && event.getDragboard().hasString()) {
-				event.acceptTransferModes(TransferMode.MOVE);
-			}
-			event.consume();
-		});
+        setOnDragOver(event -> {
+            if (event.getGestureSource() != thisCell && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
 
-		setOnDragEntered(event -> {
-			if (event.getGestureSource() != thisCell && event.getDragboard().hasString()) {
-				setOpacity(0.3);
-			}
-		});
+        setOnDragEntered(event -> {
+            if (event.getGestureSource() != thisCell && event.getDragboard().hasString()) {
+                setOpacity(0.3);
+            }
+        });
 
-		setOnDragExited(event -> {
-			if (event.getGestureSource() != thisCell && event.getDragboard().hasString()) {
-				setOpacity(1);
-			}
-		});
+        setOnDragExited(event -> {
+            if (event.getGestureSource() != thisCell && event.getDragboard().hasString()) {
+                setOpacity(1);
+            }
+        });
 
-		setOnDragDropped(event -> {
-			if (getItem() == null) {
-				return;
-			}
+        setOnDragDropped(event -> {
+            if (getItem() == null) {
+                return;
+            }
 
-			final Dragboard db = event.getDragboard();
+            final Dragboard db = event.getDragboard();
 
-			boolean success = false;
+            boolean success = false;
 
-			if (db.hasString()) {
-				final Map<String, RenderedImage> itemsMap = getListView().getItems().stream().collect(Collectors.toMap(bitmap -> bitmap.getId().toString(), bitmap -> bitmap));
-				final List<String> itemsIds = getListView().getItems().stream().map(bitmap -> bitmap.getId().toString()).collect(Collectors.toList());
-				final int draggedIdx = itemsIds.indexOf(db.getString());
-				final int thisIdx = itemsIds.indexOf(getItem().getId().toString());
-				itemsIds.remove(draggedIdx);
-				itemsIds.add(thisIdx, db.getString());
-				final List<RenderedImage> newItems = new ArrayList();
-				itemsIds.forEach(itemId -> newItems.add(itemsMap.get(itemId)));
-				getListView().getItems().setAll(newItems);
-				success = true;
-				if (delegate != null) {
-					delegate.clipMoved(draggedIdx, thisIdx);
-				}
-			}
+            if (db.hasString()) {
+                final Map<String, RenderedImage> itemsMap = getListView().getItems().stream().collect(Collectors.toMap(bitmap -> bitmap.getId().toString(), bitmap -> bitmap));
+                final List<String> itemsIds = getListView().getItems().stream().map(bitmap -> bitmap.getId().toString()).collect(Collectors.toList());
+                final int draggedIdx = itemsIds.indexOf(db.getString());
+                final int thisIdx = itemsIds.indexOf(getItem().getId().toString());
+                itemsIds.remove(draggedIdx);
+                itemsIds.add(thisIdx, db.getString());
+                final List<RenderedImage> newItems = new ArrayList();
+                itemsIds.forEach(itemId -> newItems.add(itemsMap.get(itemId)));
+                getListView().getItems().setAll(newItems);
+                success = true;
+                if (delegate != null) {
+                    delegate.clipMoved(draggedIdx, thisIdx);
+                }
+            }
 
-			event.setDropCompleted(success);
+            event.setDropCompleted(success);
 
-			event.consume();
-		});
+            event.consume();
+        });
 
-		setOnDragDone(DragEvent::consume);
-	}
+        setOnDragDone(DragEvent::consume);
+    }
 
-	@Override
-	public void updateItem(RenderedImage bitmap, boolean empty) {
-		super.updateItem(bitmap, empty);
-		if (empty) {
-			setGraphic(null);
-		} else {
-			if (bitmap.getPixels() != null) {
-				final WritableImage image = getWritableImage(bitmap);
-				final GraphicsContext g2d = canvas.getGraphicsContext2D();
-				final Affine affine = new Affine();
-				final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
-				final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
-				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
-				affine.append(Affine.scale(1, -1));
-				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
-				g2d.setTransform(affine);
-				g2d.drawImage(image, x, y);
-			}
-			final AnimationClip clip = (AnimationClip)bitmap.getProperty("clip");
-			final long durationInSeconds = clip.duration() / 1000;
-			final long minutes = (long) Math.rint(durationInSeconds / 60.0);
-			if (minutes <= 2) {
-				label.setText(durationInSeconds == 0 ? clip.duration() + " millis" : durationInSeconds == 1 ? "1 second" : durationInSeconds + " seconds");
-			} else {
-				label.setText(minutes + " minutes");
-			}
-			this.setGraphic(pane);
-		}
-	}
+    @Override
+    public void updateItem(RenderedImage bitmap, boolean empty) {
+        super.updateItem(bitmap, empty);
+        if (empty) {
+            setGraphic(null);
+        } else {
+            if (bitmap.getPixels() != null) {
+                final WritableImage image = getWritableImage(bitmap);
+                final GraphicsContext g2d = canvas.getGraphicsContext2D();
+                final Affine affine = new Affine();
+                final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+                final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
+                affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
+                affine.append(Affine.scale(1, -1));
+                affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
+                g2d.setTransform(affine);
+                g2d.drawImage(image, x, y);
+            }
+            final AnimationClip clip = (AnimationClip) bitmap.getProperty("clip");
+            final long durationInSeconds = clip.duration() / 1000;
+            final long minutes = (long) Math.rint(durationInSeconds / 60.0);
+            if (minutes <= 2) {
+                label.setText(durationInSeconds == 0 ? clip.duration() + " millis" : durationInSeconds == 1 ? "1 second" : durationInSeconds + " seconds");
+            } else {
+                label.setText(minutes + " minutes");
+            }
+            this.setGraphic(pane);
+        }
+    }
 
-	private WritableImage getWritableImage(RenderedImage bitmap) {
-		final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
-		image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
-		return image;
-	}
+    private WritableImage getWritableImage(RenderedImage bitmap) {
+        final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
+        image.getPixelWriter().setPixels(0, 0, (int) image.getWidth(), (int) image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int) image.getWidth());
+        return image;
+    }
 }

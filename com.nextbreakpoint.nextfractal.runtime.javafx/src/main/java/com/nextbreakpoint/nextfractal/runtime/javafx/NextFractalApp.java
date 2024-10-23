@@ -94,7 +94,6 @@ public class NextFractalApp extends Application {
         final DoubleProperty fontSize = new SimpleDoubleProperty(optimalFontSize);
         rootPane.styleProperty().bind(Bindings.format("-fx-font-size: %.2fpt;", fontSize));
 
-        //TODO review
         final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Export Renderer");
         final DefaultExportService exportService = new DefaultExportService(new SimpleExportRenderer(threadFactory));
         exportService.setDelegate((session, state, progress) -> Platform.runLater(() -> onSessionChanged(session, state, progress)));
@@ -145,7 +144,7 @@ public class NextFractalApp extends Application {
     }
 
     private Pane createCentralPane(PlatformEventBus eventBus, int width, int height) {
-        final MainCentralPane pane = new MainCentralPane(eventBus, width, height, workspace, examples);
+        final MainCentralPane pane = new MainCentralPane(eventBus, workspace, examples);
         pane.setPrefWidth(width);
         pane.setPrefHeight(height);
         pane.setMinWidth(width);

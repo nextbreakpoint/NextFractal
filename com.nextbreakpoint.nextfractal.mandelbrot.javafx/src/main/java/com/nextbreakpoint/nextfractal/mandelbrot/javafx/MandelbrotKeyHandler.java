@@ -84,5 +84,6 @@ public class MandelbrotKeyHandler implements KeyHandler {
                 break;
             }
         }
+        keyEvent.consume();
     }
 }

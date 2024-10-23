@@ -24,91 +24,75 @@
  */
 package com.nextbreakpoint.nextfractal.core.javafx.history;
 
-import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
+import com.nextbreakpoint.common.either.Either;
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
-import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
-import com.nextbreakpoint.nextfractal.core.javafx.SimpleImage;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformImageLoader;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridView;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Tooltip;
+import javafx.collections.ObservableList;
 import javafx.scene.layout.BorderPane;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
-import java.nio.IntBuffer;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
-
-import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
 @Log
 public class HistoryPane extends BorderPane {
-    private static final int PADDING = 8;
-
+    private final GridView<HistoryGridViewItem> gridView;
     private final ExecutorService executor;
-    private final ListView<RenderedImage> listView;
-    private final Tile tile;
     @Setter
     private HistoryDelegate delegate;
 
-    public HistoryPane(Tile tile) {
-        this.tile = tile;
-
-        listView = new ListView<>();
-        listView.setFixedCellSize(tile.tileSize().height() + PADDING);
-        listView.setCellFactory(_ -> new HistoryListCell(tile));
-        listView.setTooltip(new Tooltip("Previous images"));
+    public HistoryPane() {
+        gridView = new GridView<>(new HistoryGridViewCellFactory(), false, 1);
 
         final BorderPane historyPane = new BorderPane();
-        historyPane.setCenter(listView);
+
+        historyPane.setCenter(gridView);
 
         getStyleClass().add("history");
 
         setCenter(historyPane);
 
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends RenderedImage> _) -> itemSelected(listView));
+        gridView.getSelectionModel().getSelectedIndices()
+                .addListener((ListChangeListener.Change<? extends Integer> change) -> itemSelected(change.getList()));
 
         executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("History"));
     }
 
-    private void itemSelected(ListView<RenderedImage> listView) {
-        final int index = listView.getSelectionModel().getSelectedIndex();
-        if (index >= 0) {
-            if (delegate != null) {
-                final RenderedImage bitmap = listView.getItems().get(index);
-                final Session session = (Session) bitmap.getProperty("session");
+    public void appendSession(Session session) {
+        final PlatformImageLoader imageLoader = createImageLoader(session);
+        final HistoryGridViewItem item = new HistoryGridViewItem(imageLoader);
+        item.putProperty("session", session);
+        if (gridView.getItems() != null) {
+            gridView.getItems().addFirst(item);
+        }
+    }
+
+    private void itemSelected(ObservableList<? extends Integer> list) {
+        if (delegate != null && gridView.getItems() != null && !list.isEmpty()) {
+            final int index = list.getFirst();
+            if (index >= 0 && index < gridView.getItems().size()) {
+                final GridViewItem item = gridView.getItems().get(index);
+                final Session session = (Session) item.getProperty("session");
                 Platform.runLater(() -> delegate.sessionChanged(session));
             }
         }
     }
 
-    private void submitItem(Session session, ImageComposer composer) {
-        executor.submit(() -> Command.of(() -> composer.renderImage(session.script(), session.metadata()))
-                .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
+    private PlatformImageLoader createImageLoader(Session session) {
+        return new PlatformImageLoader(executor, () -> createBundle(session), () -> new Size((int) getWidth(), (int) getWidth()));
     }
 
-    private void addItem(ListView<RenderedImage> listView, Session session, IntBuffer pixels, Size size) {
-        final RenderedImage bitmap = new SimpleImage(size.width(), size.height(), pixels);
-        bitmap.setProperty("session", session);
-        listView.getItems().addFirst(bitmap);
-    }
-
-    public void appendSession(Session session) {
-        Command.of(tryFindFactory(session.pluginId()))
-                .map(this::createImageComposer)
-                .execute()
-                .optional()
-                .ifPresent(composer -> submitItem(session, composer));
-    }
-
-    private ImageComposer createImageComposer(CoreFactory factory) {
-        return factory.createImageComposer(ThreadUtils.createPlatformThreadFactory("History Image Composer"), tile, true);
+    private Either<Bundle> createBundle(Session session) {
+        return Either.success(new Bundle(session, List.of()));
     }
 
     public void dispose() {

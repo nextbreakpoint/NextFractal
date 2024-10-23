@@ -54,19 +54,17 @@ import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
-import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
+import com.nextbreakpoint.nextfractal.core.javafx.Icons;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
+import com.nextbreakpoint.nextfractal.core.javafx.editor.ScriptEditor;
 import com.nextbreakpoint.nextfractal.core.javafx.export.ExportDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.export.ExportPane;
 import com.nextbreakpoint.nextfractal.core.javafx.history.HistoryPane;
-import com.nextbreakpoint.nextfractal.core.javafx.Icons;
 import com.nextbreakpoint.nextfractal.core.javafx.jobs.JobsDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.jobs.JobsPane;
-import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
 import com.nextbreakpoint.nextfractal.core.javafx.misc.StatusPane;
 import com.nextbreakpoint.nextfractal.core.javafx.observable.StringObservableValue;
-import com.nextbreakpoint.nextfractal.core.javafx.editor.ScriptEditor;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -94,8 +92,6 @@ public class MainSidePane extends BorderPane {
     }
 
     private Pane createRootPane(PlatformEventBus eventBus) {
-        final Tile tile = createRendererTile();
-
         final StringObservableValue errorProperty = new StringObservableValue();
 
         final ScriptEditor editorPane = new ScriptEditor(eventBus);
@@ -104,11 +100,11 @@ public class MainSidePane extends BorderPane {
 
         final StatusPane statusPane = new StatusPane();
 
-        final ExportPane exportPane = new ExportPane(tile);
+        final ExportPane exportPane = new ExportPane();
 
-        final HistoryPane historyPane = new HistoryPane(tile);
+        final HistoryPane historyPane = new HistoryPane();
 
-        final JobsPane jobsPane = new JobsPane(tile);
+        final JobsPane jobsPane = new JobsPane();
 
         final StackPane sidebarPane = new StackPane();
         sidebarPane.getStyleClass().add("sidebar");
@@ -142,32 +138,32 @@ public class MainSidePane extends BorderPane {
         historyButton.setTooltip(new Tooltip("Show/hide changes history"));
         statusButton.setTooltip(new Tooltip("Show/hide errors console"));
 
-        final HBox sourceButtons = new HBox(0);
-        sourceButtons.setAlignment(Pos.CENTER);
-        sourceButtons.getChildren().add(browseButton);
-        sourceButtons.getChildren().add(storeButton);
-        sourceButtons.getChildren().add(loadButton);
-        sourceButtons.getChildren().add(saveButton);
-        sourceButtons.getChildren().add(renderButton);
-        sourceButtons.getChildren().add(paramsButton);
-        sourceButtons.getChildren().add(historyButton);
-        sourceButtons.getChildren().add(exportButton);
-        sourceButtons.getChildren().add(jobsButton);
-        sourceButtons.getChildren().add(statusButton);
-        sourceButtons.getStyleClass().add("toolbar");
-        sourceButtons.getStyleClass().add("menubar");
+        final HBox buttons = new HBox(0);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.getChildren().add(browseButton);
+        buttons.getChildren().add(storeButton);
+        buttons.getChildren().add(loadButton);
+        buttons.getChildren().add(saveButton);
+        buttons.getChildren().add(renderButton);
+        buttons.getChildren().add(paramsButton);
+        buttons.getChildren().add(historyButton);
+        buttons.getChildren().add(exportButton);
+        buttons.getChildren().add(jobsButton);
+        buttons.getChildren().add(statusButton);
+        buttons.getStyleClass().add("toolbar");
+        buttons.getStyleClass().add("menubar");
 
-        final Pane sourcePane = new Pane();
-        sourcePane.getChildren().add(editorPane);
-        sourcePane.getChildren().add(sourceButtons);
-        sourcePane.getChildren().add(statusPane);
-        sourcePane.getChildren().add(sidebarPane);
+        final Pane mainPane = new Pane();
+        mainPane.getChildren().add(editorPane);
+        mainPane.getChildren().add(buttons);
+        mainPane.getChildren().add(statusPane);
+        mainPane.getChildren().add(sidebarPane);
 
-        browseButton.setOnAction(e -> eventBus.postEvent(ToggleBrowserRequested.builder().build()));
-        storeButton.setOnAction(e -> eventBus.postEvent(EditorActionFired.builder().action("store").build()));
-        renderButton.setOnAction(e -> eventBus.postEvent(EditorActionFired.builder().action("reload").build()));
-        loadButton.setOnAction(e -> eventBus.postEvent(EditorActionFired.builder().action("load").build()));
-        saveButton.setOnAction(e -> eventBus.postEvent(EditorActionFired.builder().action("save").build()));
+        browseButton.setOnAction(_ -> eventBus.postEvent(ToggleBrowserRequested.builder().build()));
+        storeButton.setOnAction(_ -> eventBus.postEvent(EditorActionFired.builder().action("store").build()));
+        renderButton.setOnAction(_ -> eventBus.postEvent(EditorActionFired.builder().action("reload").build()));
+        loadButton.setOnAction(_ -> eventBus.postEvent(EditorActionFired.builder().action("load").build()));
+        saveButton.setOnAction(_ -> eventBus.postEvent(EditorActionFired.builder().action("save").build()));
 
         final TranslateTransition sidebarTransition = createTranslateTransition(sidebarPane);
         final TranslateTransition statusTransition = createTranslateTransition(statusPane);
@@ -175,21 +171,21 @@ public class MainSidePane extends BorderPane {
         statusButton.setSelected(true);
 
         final ToggleGroup viewGroup = new ToggleGroup();
-        viewGroup.getToggles().add(jobsButton);
-        viewGroup.getToggles().add(historyButton);
         viewGroup.getToggles().add(paramsButton);
+        viewGroup.getToggles().add(historyButton);
         viewGroup.getToggles().add(exportButton);
+        viewGroup.getToggles().add(jobsButton);
 
         final StackPane rootPane = new StackPane();
-        rootPane.getChildren().add(sourcePane);
+        rootPane.getChildren().add(mainPane);
 
         rootPane.widthProperty().addListener((_, _, newValue) -> {
             double width = newValue.doubleValue();
-            sourceButtons.setPrefWidth(width);
+            buttons.setPrefWidth(width);
             editorPane.setPrefWidth(width);
             sidebarPane.setPrefWidth(width * 0.4);
             statusPane.setPrefWidth(width);
-            sourceButtons.setLayoutX(0);
+            buttons.setLayoutX(0);
             editorPane.setLayoutX(0);
             sidebarPane.setLayoutX(width);
             statusPane.setLayoutX(0);
@@ -197,11 +193,11 @@ public class MainSidePane extends BorderPane {
 
         rootPane.heightProperty().addListener((_, _, newValue) -> {
             double height = newValue.doubleValue();
-            sourceButtons.setPrefHeight(height * 0.07);
+            buttons.setPrefHeight(height * 0.07);
             editorPane.setPrefHeight(height * 0.78);
             sidebarPane.setPrefHeight(height * 0.78);
             statusPane.setPrefHeight(height * 0.15);
-            sourceButtons.setLayoutY(0);
+            buttons.setLayoutY(0);
             editorPane.setLayoutY(height * 0.07);
             sidebarPane.setLayoutY(height * 0.07);
             statusPane.setLayoutY(height * 0.85);
@@ -292,7 +288,7 @@ public class MainSidePane extends BorderPane {
         });
 
         statusPane.translateYProperty().addListener((_, _, newValue) -> {
-            final double height = rootPane.getHeight() - statusPane.getHeight() - sourceButtons.getHeight() + newValue.doubleValue();
+            final double height = rootPane.getHeight() - statusPane.getHeight() - buttons.getHeight() + newValue.doubleValue();
             editorPane.prefHeightProperty().setValue(height);
             sidebarPane.prefHeightProperty().setValue(height);
         });
@@ -512,8 +508,4 @@ public class MainSidePane extends BorderPane {
 //            transition.play();
 //        }
 //    }
-
-    private static Tile createRendererTile() {
-        return GraphicsUtils.createTile(Screen.getPrimary().getVisualBounds().getWidth());
-    }
 }

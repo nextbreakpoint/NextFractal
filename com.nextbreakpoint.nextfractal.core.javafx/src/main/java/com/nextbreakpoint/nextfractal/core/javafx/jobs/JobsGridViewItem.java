@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.browse;
+package com.nextbreakpoint.nextfractal.core.javafx.jobs;
 
 import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
@@ -32,16 +32,29 @@ import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCellRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
 import lombok.Getter;
 
-import java.io.File;
 import java.util.Objects;
 
 @Getter
-public class BrowseGridViewItem extends GridViewItem {
-    private final File file;
+public class JobsGridViewItem extends GridViewItem {
+    private float jobProgress;
 
-    public BrowseGridViewItem(File file, PlatformImageLoader imageLoader) {
+    public JobsGridViewItem(PlatformImageLoader imageLoader) {
         super(new GridViewCellRendererAdapter(imageLoader));
-        this.file = Objects.requireNonNull(file);
+    }
+
+    public synchronized float getJobProgress() {
+        return jobProgress;
+    }
+
+    public synchronized void setJobProgress(float progress) {
+        onJobUpdated(progress);
+    }
+
+    protected synchronized void onJobUpdated(float progress) {
+        this.jobProgress = progress;
+        if (getDelegate() instanceof JobsGridViewItemDelegate delegate) {
+            delegate.onJobUpdated(progress);
+        }
     }
 
     private static class GridViewCellRendererAdapter implements GridViewCellRenderer {

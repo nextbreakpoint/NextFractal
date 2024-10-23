@@ -33,6 +33,8 @@ import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.function.Supplier;
 
 public class ContextFreeMetadataDelegate implements MetadataDelegate {
@@ -46,7 +48,7 @@ public class ContextFreeMetadataDelegate implements MetadataDelegate {
 
     @Override
     public void onMetadataChanged(Metadata metadata, boolean continuous, boolean appendHistory) {
-        final ContextFreeSession newSession = ((ContextFreeSession) supplier.get()).toBuilder().withMetadata((ContextFreeMetadata) metadata).build();
+        final ContextFreeSession newSession = ((ContextFreeSession) supplier.get()).toBuilder().withTimestamp(Instant.now(Clock.systemUTC())).withMetadata((ContextFreeMetadata) metadata).build();
         publisher.postEvent(RenderDataChanged.builder().session(newSession).continuous(continuous).appendToHistory(appendHistory).build());
     }
 
@@ -57,7 +59,7 @@ public class ContextFreeMetadataDelegate implements MetadataDelegate {
 
     @Override
     public Session newSession(Metadata metadata) {
-        return ((ContextFreeSession) supplier.get()).toBuilder().withMetadata((ContextFreeMetadata) metadata).build();
+        return ((ContextFreeSession) supplier.get()).toBuilder().withTimestamp(Instant.now(Clock.systemUTC())).withMetadata((ContextFreeMetadata) metadata).build();
     }
 
     @Override

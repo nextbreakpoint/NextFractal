@@ -46,7 +46,6 @@ public class GridViewItem {
     @Getter
     private float progress;
     private boolean hasErrors;
-    private boolean selected;
 
     public GridViewItem(GridViewCellRenderer renderer) {
         this.renderer = Objects.requireNonNull(renderer);
@@ -73,11 +72,11 @@ public class GridViewItem {
         renderer.draw(gc, x, y);
     }
 
-    public Object get(String key) {
+    public Object getProperty(String key) {
         return properties.get(key);
     }
 
-    public void put(String key, Object value) {
+    public void putProperty(String key, Object value) {
         properties.put(key, value);
     }
 
@@ -85,30 +84,15 @@ public class GridViewItem {
         return hasErrors;
     }
 
-    public synchronized boolean isSelected() {
-        return selected;
-    }
-
     public synchronized boolean isCompleted() {
         return progress == 1f;
     }
 
-    public void setSelected(boolean selected) {
-        onItemSelected(selected);
-    }
-
-    protected void onItemUpdated(float progress, List<ScriptError> errors) {
+    protected synchronized void onItemUpdated(float progress, List<ScriptError> errors) {
         this.progress = progress;
         this.hasErrors = !errors.isEmpty();
         if (delegate != null) {
             delegate.onItemUpdated(progress, hasErrors);
-        }
-    }
-
-    protected synchronized void onItemSelected(boolean selected) {
-        this.selected = selected;
-        if (delegate != null) {
-            delegate.onItemSelected(selected);
         }
     }
 }

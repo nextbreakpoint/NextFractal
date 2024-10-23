@@ -30,7 +30,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import java.util.List;
 
 public interface ExportDelegate {
-	void createSession(Size size, String format);
+    void createSession(Size size, String format);
 
     void startCaptureSession();
 

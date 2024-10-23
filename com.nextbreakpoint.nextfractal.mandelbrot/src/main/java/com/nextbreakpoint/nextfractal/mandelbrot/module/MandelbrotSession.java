@@ -36,6 +36,8 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
 import java.io.InputStream;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +50,7 @@ public class MandelbrotSession extends Session {
 
 	private final MandelbrotMetadata metadata;
 	private final String script;
+	private final Instant timestamp;
 
 	public MandelbrotSession() {
 		this(getInitialScript(), new MandelbrotMetadata(new Double4D(0, 0, 1,0), new Double4D(0, 0, 0,0), new Double4D(1, 1, 1,1), new Double2D(0, 0), new Time(0, 1), false, new MandelbrotOptions()));
@@ -58,6 +61,7 @@ public class MandelbrotSession extends Session {
 		Objects.requireNonNull(script);
 		this.metadata = metadata;
 		this.script = script;
+		timestamp = Instant.now(Clock.systemUTC());
 	}
 
 	@Override
@@ -78,6 +82,11 @@ public class MandelbrotSession extends Session {
 	@Override
 	public Metadata metadata() {
 		return metadata;
+	}
+
+	@Override
+	public Instant getTimestamp() {
+		return timestamp;
 	}
 
 	@Override

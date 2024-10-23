@@ -34,6 +34,8 @@ import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotMetadata;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotOptions;
 import com.nextbreakpoint.nextfractal.mandelbrot.module.MandelbrotSession;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.function.Supplier;
 
 class MandelbrotMetadataDelegate implements MetadataDelegate {
@@ -47,7 +49,7 @@ class MandelbrotMetadataDelegate implements MetadataDelegate {
 
     @Override
     public void onMetadataChanged(Metadata metadata, boolean continuous, boolean appendHistory) {
-        final MandelbrotSession newSession = ((MandelbrotSession) supplier.get()).toBuilder().withMetadata((MandelbrotMetadata) metadata).build();
+        final MandelbrotSession newSession = ((MandelbrotSession) supplier.get()).toBuilder().withTimestamp(Instant.now(Clock.systemUTC())).withMetadata((MandelbrotMetadata) metadata).build();
         publisher.postEvent(RenderDataChanged.builder().session(newSession).continuous(continuous).appendToHistory(appendHistory).build());
     }
 
@@ -58,7 +60,7 @@ class MandelbrotMetadataDelegate implements MetadataDelegate {
 
     @Override
     public Session newSession(Metadata metadata) {
-        return ((MandelbrotSession) supplier.get()).toBuilder().withMetadata((MandelbrotMetadata) metadata).build();
+        return ((MandelbrotSession) supplier.get()).toBuilder().withTimestamp(Instant.now(Clock.systemUTC())).withMetadata((MandelbrotMetadata) metadata).build();
     }
 
     @Override

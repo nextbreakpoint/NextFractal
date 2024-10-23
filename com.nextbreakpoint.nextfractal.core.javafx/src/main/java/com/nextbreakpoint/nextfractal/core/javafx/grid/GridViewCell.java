@@ -29,34 +29,58 @@ import lombok.Getter;
 import lombok.Setter;
 
 public abstract class GridViewCell extends BorderPane {
-	protected final int index;
-	protected GridViewItem item;
-	@Getter
-	@Setter
-	private boolean dirty;
+    protected final int index;
+    protected GridViewItem item;
+    @Getter
+    @Setter
+    private boolean dirty;
+    @Setter
+    @Getter
+    private boolean focus;
+    @Setter
+    @Getter
+    private boolean selected;
 
-	public GridViewCell(int index, int width, int height) {
-		this.index = index;
+    public GridViewCell(int index, int width, int height) {
+        this.index = index;
 
-		setMinSize(width, height);
-		setMaxSize(width, height);
-		setPrefSize(width, height);
+        getStyleClass().add("grid-view-cell");
 
-		widthProperty().addListener((_, _, _) -> update());
-		heightProperty().addListener((_, _, _) -> update());
-	}
+        setMinSize(width, height);
+        setMaxSize(width, height);
+        setPrefSize(width, height);
 
-	public abstract void update();
+        widthProperty().addListener((_, _, _) -> onSizeChanged());
+        heightProperty().addListener((_, _, _) -> onSizeChanged());
+        insetsProperty().addListener((_, _, _) -> onSizeChanged());
+    }
 
-	public void unbindItem() {
-		item = null;
-		dirty = true;
-	}
+    protected abstract void onSizeChanged();
 
-	public void bindItem(GridViewItem item) {
-		if (this.item != item) {
-			this.item = item;
-		}
-		dirty = true;
-	}
+    protected double getInnerWidth() {
+        return getWidth() - getInsets().getLeft() - getInsets().getRight();
+    }
+
+    protected double getInnerHeight() {
+        return getHeight() - getInsets().getTop() - getInsets().getBottom();
+    }
+
+    public void forceUpdate() {
+        dirty = true;
+        update();
+    }
+
+    public abstract void update();
+
+    public void unbindItem() {
+        item = null;
+        dirty = true;
+    }
+
+    public void bindItem(GridViewItem item) {
+        if (this.item != item) {
+            this.item = item;
+            dirty = true;
+        }
+    }
 }

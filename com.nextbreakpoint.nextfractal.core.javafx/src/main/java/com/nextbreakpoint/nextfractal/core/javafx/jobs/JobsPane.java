@@ -25,34 +25,30 @@
 package com.nextbreakpoint.nextfractal.core.javafx.jobs;
 
 import com.nextbreakpoint.common.command.Command;
-import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
+import com.nextbreakpoint.common.either.Either;
+import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
+import com.nextbreakpoint.nextfractal.core.common.Bundle;
 import com.nextbreakpoint.nextfractal.core.common.ExecutorUtils;
-import com.nextbreakpoint.nextfractal.core.common.ImageComposer;
+import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderedImage;
 import com.nextbreakpoint.nextfractal.core.javafx.Icons;
-import com.nextbreakpoint.nextfractal.core.javafx.SimpleImage;
+import com.nextbreakpoint.nextfractal.core.javafx.PlatformImageLoader;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridView;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
-import java.nio.IntBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,24 +60,16 @@ import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindFactory;
 
 @Log
 public class JobsPane extends BorderPane {
-    private static final int PADDING = 8;
-
     private final Map<String, JobEntry> exportEntries = new HashMap<>();
+    private final GridView<JobsGridViewItem> gridView;
     private final ExecutorService executor;
-    private final ListView<RenderedImage> listView;
-    private final Tile tile;
     @Setter
     private JobsDelegate delegate;
 
-    public JobsPane(Tile tile) {
-        this.tile = tile;
+    public JobsPane() {
+        gridView = new GridView<>(new JobsGridViewCellFactory(), false, 1);
 
-        listView = new ListView<>();
-        listView.setFixedCellSize(tile.tileSize().height() + PADDING);
-        listView.setCellFactory(_ -> new JobsListCell(tile));
-
-        final double percentage = Icons.computeOptimalIconPercentage();
-        final int buttonSize = (int) Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
+        final int buttonSize = computeSize(Icons.computeOptimalIconPercentage());
 
         final HBox exportControls = new HBox(0);
         exportControls.setAlignment(Pos.CENTER);
@@ -99,45 +87,53 @@ public class JobsPane extends BorderPane {
         exportControls.getChildren().add(removeButton);
         exportControls.getStyleClass().add("toolbar");
 
-        final Label sizeLabel = new Label();
-        final Label formatLabel = new Label();
-        final Label durationLabel = new Label();
-
-        final VBox detailsPane = new VBox(10);
-        detailsPane.setAlignment(Pos.TOP_LEFT);
-        detailsPane.getChildren().add(formatLabel);
-        detailsPane.getChildren().add(sizeLabel);
-        detailsPane.getChildren().add(durationLabel);
-        detailsPane.getStyleClass().add("details");
-
-        final BorderPane jobsPane = new BorderPane();
-        jobsPane.setCenter(listView);
-        jobsPane.setBottom(detailsPane);
-
-        setCenter(jobsPane);
+        setCenter(gridView);
         setBottom(exportControls);
 
         getStyleClass().add("jobs");
 
-        final List<Button> buttonsList = Arrays.asList(suspendButton, resumeButton, removeButton);
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends RenderedImage> c) -> updateButtons(buttonsList, c.getList().isEmpty()));
+        gridView.setDisable(false);
 
-        suspendButton.setOnAction(_ -> selectedItems(listView).filter(bitmap -> !isExportSessionSuspended(bitmap))
-            .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionSuspended((ExportSession) bitmap.getProperty("exportSession")))));
+        final List<Button> buttonsList = List.of(suspendButton, resumeButton, removeButton);
 
-        resumeButton.setOnAction(_ -> selectedItems(listView).filter(this::isExportSessionSuspended)
-            .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionResumed((ExportSession) bitmap.getProperty("exportSession")))));
+        gridView.getSelectionModel().getSelectedItems()
+                .addListener((ListChangeListener.Change<? extends JobsGridViewItem> change) -> updateButtons(buttonsList, change.getList().isEmpty()));
 
-        removeButton.setOnAction(_ -> selectedItems(listView)
-            .forEach(bitmap -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionStopped((ExportSession) bitmap.getProperty("exportSession")))));
+        suspendButton.setOnAction(_ -> selectedItems(gridView).filter(bitmap -> !isExportSessionSuspended(bitmap))
+                .forEach(item -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionSuspended((ExportSession) item.getProperty("exportSession")))));
 
-        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends RenderedImage> c) -> itemSelected(listView, sizeLabel, formatLabel, durationLabel));
+        resumeButton.setOnAction(_ -> selectedItems(gridView).filter(this::isExportSessionSuspended)
+                .forEach(item -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionResumed((ExportSession) item.getProperty("exportSession")))));
+
+        removeButton.setOnAction(_ -> selectedItems(gridView)
+                .forEach(item -> Optional.ofNullable(delegate).ifPresent(delegate -> delegate.sessionStopped((ExportSession) item.getProperty("exportSession")))));
 
         executor = ExecutorUtils.newSingleThreadExecutor(ThreadUtils.createVirtualThreadFactory("Jobs"));
     }
 
-    private boolean isExportSessionSuspended(RenderedImage bitmap) {
-        final ExportSession exportSession = (ExportSession) bitmap.getProperty("exportSession");
+    public void dispose() {
+        ExecutorUtils.shutdown(executor);
+    }
+
+    public void appendSession(ExportSession exportSession) {
+        Platform.runLater(() -> addItem(gridView, exportSession));
+    }
+
+    public void removeSession(ExportSession exportSession) {
+        Platform.runLater(() -> removeItem(gridView, exportSession));
+    }
+
+    public void updateSession(ExportSession exportSession, ExportSessionState state, Float progress) {
+        final JobEntry exportEntry = exportEntries.get(exportSession.getSessionId());
+        if (exportEntry != null) {
+            final JobEntry jobEntry = new JobEntry(exportSession, state, exportEntry.item());
+            jobEntry.item().setJobProgress(progress);
+            exportEntries.put(exportSession.getSessionId(), jobEntry);
+        }
+    }
+
+    private boolean isExportSessionSuspended(JobsGridViewItem item) {
+        final ExportSession exportSession = (ExportSession) item.getProperty("exportSession");
         final JobEntry exportEntry = exportEntries.get(exportSession.getSessionId());
         return exportEntry != null && exportEntry.state() == ExportSessionState.SUSPENDED;
     }
@@ -146,141 +142,53 @@ public class JobsPane extends BorderPane {
         buttons.forEach(button -> button.setDisable(disabled));
     }
 
-    private Stream<RenderedImage> selectedItems(ListView<RenderedImage> jobsList) {
-        return jobsList.getSelectionModel().getSelectedItems().stream();
+    private Stream<JobsGridViewItem> selectedItems(GridView<JobsGridViewItem> gridView) {
+        final MultipleSelectionModel<JobsGridViewItem> selectionModel = gridView.getSelectionModel();
+        return selectionModel != null ? selectionModel.getSelectedItems().stream() : Stream.empty();
     }
 
-    private int computePercentage(double percentage) {
+    private void addItem(GridView<JobsGridViewItem> gridView, ExportSession exportSession) {
+        final JobEntry exportEntry = exportEntries.remove(exportSession.getSessionId());
+        if (exportEntry == null) {
+            final PlatformImageLoader imageLoader = createImageLoader(exportSession);
+            final JobsGridViewItem item = new JobsGridViewItem(imageLoader);
+            final JobEntry jobEntry = new JobEntry(exportSession, ExportSessionState.READY, item);
+            item.putProperty("exportSession", exportSession);
+            exportEntries.put(exportSession.getSessionId(), jobEntry);
+            if (gridView.getItems() != null) {
+                gridView.getItems().addLast(item);
+            }
+        }
+    }
+
+    private void removeItem(GridView<JobsGridViewItem> gridView, ExportSession session) {
+        final JobEntry exportEntry = exportEntries.remove(session.getSessionId());
+        if (exportEntry != null) {
+            if (gridView.getItems() != null) {
+                gridView.getItems().remove(exportEntry.item());
+            }
+        }
+    }
+
+    private PlatformImageLoader createImageLoader(ExportSession session) {
+        return new PlatformImageLoader(executor, () -> createBundle(session), () -> new Size((int) getWidth(), (int) getWidth()));
+    }
+
+    private Either<Bundle> createBundle(ExportSession exportSession) {
+        return createSession(exportSession.getFrames().getFirst())
+                .map(session -> new Bundle(session, List.of()));
+    }
+
+    private Either<Session> createSession(AnimationFrame frame) {
+        return Command.of(tryFindFactory(frame.pluginId()))
+                .map(factory -> factory.createSession(frame.script(), frame.metadata()))
+                .execute();
+    }
+
+    private int computeSize(double percentage) {
         return (int) Math.rint(Screen.getPrimary().getVisualBounds().getWidth() * percentage);
     }
 
-//    private ImageView createIconImage(String name, double percentage) {
-//        final int size = computePercentage(percentage);
-//        final InputStream stream = getClass().getResourceAsStream(name);
-//        if (stream != null) {
-//            final ImageView image = new ImageView(new Image(stream));
-//            image.setSmooth(true);
-//            image.setFitWidth(size);
-//            image.setFitHeight(size);
-//            return image;
-//        } else {
-//            final ImageView image = new ImageView();
-//            image.setSmooth(true);
-//            image.setFitWidth(size);
-//            image.setFitHeight(size);
-//            return image;
-//        }
-//    }
-
-    private void updateJobList(ListView<RenderedImage> jobsList) {
-        final ObservableList<RenderedImage> bitmaps = jobsList.getItems();
-        for (int i = bitmaps.size() - 1; i >= 0; i--) {
-            final RenderedImage bitmap = bitmaps.get(i);
-            final ExportSession session = (ExportSession) bitmap.getProperty("exportSession");
-            final JobEntry exportEntry = exportEntries.get(session.getSessionId());
-            if (exportEntry == null) {
-                bitmaps.remove(i);
-            } else {
-                bitmap.setProgress(exportEntry.progress());
-                if (jobsList.getSelectionModel().isSelected(i)) {
-                    triggerUpdate(jobsList, bitmap, i);
-                    jobsList.getSelectionModel().select(i);
-                } else {
-                    triggerUpdate(jobsList, bitmap, i);
-                }
-            }
-        }
+    private record JobEntry(ExportSession exportSession, ExportSessionState state, JobsGridViewItem item) {
     }
-
-    private <T> void triggerUpdate(ListView<T> listView, T newValue, int index) {
-        listView.fireEvent(new ListView.EditEvent<>(listView, ListView.editCommitEvent(), newValue, index));
-    }
-
-    private void itemSelected(ListView<RenderedImage> listView, Label sizeLabel, Label formatLabel, Label durationLabel) {
-        final RenderedImage bitmap = listView.getSelectionModel().getSelectedItem();
-        if (bitmap != null) {
-            final ExportSession session = (ExportSession) bitmap.getProperty("exportSession");
-            if (session.getFrameCount() <= 1) {
-                sizeLabel.setText(session.getFrameSize().width() + "\u00D7" + session.getFrameSize().height() + " pixels");
-                formatLabel.setText(session.getEncoder().getName() + " Image");
-            } else {
-                sizeLabel.setText(session.getFrameSize().width() + "\u00D7" + session.getFrameSize().height() + " pixels");
-                formatLabel.setText(session.getEncoder().getName() + " Video");
-                final long durationInSeconds = (long)Math.rint(session.getFrameCount() / (float) session.getFrameRate());
-                final long minutes = (long)Math.rint(durationInSeconds / 60.0);
-                if (minutes <= 2) {
-                    durationLabel.setText("Duration " + durationInSeconds + " seconds");
-                } else {
-                    durationLabel.setText("Duration " + minutes + " minutes");
-                }
-            }
-        } else {
-            sizeLabel.setText("");
-            formatLabel.setText("");
-            durationLabel.setText("");
-        }
-    }
-
-    private void submitItem(ExportSession session, ImageComposer composer) {
-        executor.submit(() -> Command.of(() -> renderImage(session, composer))
-                .execute().optional().ifPresent(pixels -> Platform.runLater(() -> addItem(listView, session, pixels, composer.getSize()))));
-    }
-
-    private IntBuffer renderImage(ExportSession session, ImageComposer composer) {
-        return composer.renderImage(session.getFrames().getFirst().script(), session.getFrames().getFirst().metadata());
-    }
-
-    private void addItem(ListView<RenderedImage> listView, ExportSession session, IntBuffer pixels, Size size) {
-        final RenderedImage bitmap = new SimpleImage(size.width(), size.height(), pixels);
-        final JobEntry jobEntry = new JobEntry(session, ExportSessionState.READY, 0f, bitmap);
-        exportEntries.put(session.getSessionId(), jobEntry);
-        bitmap.setProperty("exportSession", session);
-        listView.getItems().addFirst(bitmap);
-    }
-
-    public void updateSessions() {
-        updateJobList(listView);
-    }
-
-    public void dispose() {
-        ExecutorUtils.shutdown(executor);
-    }
-
-    public void appendSession(ExportSession session) {
-        Command.of(tryFindFactory(session.getFrames().getFirst().pluginId()))
-                .map(this::createImageComposer)
-                .execute()
-                .optional()
-                .ifPresent(composer -> submitItem(session, composer));
-    }
-
-    private ImageComposer createImageComposer(CoreFactory factory) {
-        return factory.createImageComposer(ThreadUtils.createPlatformThreadFactory("Jobs Image Composer"), tile, true);
-    }
-
-    public void updateSession(ExportSession exportSession, ExportSessionState state, Float progress) {
-        final JobEntry exportEntry = exportEntries.get(exportSession.getSessionId());
-        if (exportEntry != null) {
-            final JobEntry jobEntry = new JobEntry(exportSession, state, progress, exportEntry.bitmap());
-            jobEntry.bitmap().setProgress(exportEntry.progress());
-//            final int index = listView.getItems().indexOf(jobEntry.bitmap());
-//            if (listView.getSelectionModel().isSelected(index)) {
-//                triggerUpdate(listView, jobEntry.bitmap(), index);
-//                listView.getSelectionModel().select(index);
-//            } else {
-//                triggerUpdate(listView, jobEntry.bitmap(), index);
-//            }
-            exportEntries.put(exportSession.getSessionId(), jobEntry);
-            listView.refresh();
-        }
-    }
-
-    public void removeSession(ExportSession exportSession) {
-        final JobEntry exportEntry = exportEntries.remove(exportSession.getSessionId());
-        if (exportEntry != null) {
-            listView.getItems().remove(exportEntry.bitmap());
-        }
-    }
-
-    private record JobEntry(ExportSession exportSession, ExportSessionState state, Float progress, RenderedImage bitmap) {}
 }

@@ -143,13 +143,13 @@ public class Viewer extends BorderPane {
             }
         });
 
-        this.setOnMouseEntered(_ -> {
+        setOnMouseEntered(_ -> {
             fadeIn(toolsTransition, _ -> {
             });
             controls.requestFocus();
         });
 
-        this.setOnMouseExited(_ -> {
+        setOnMouseExited(_ -> {
             fadeOut(toolsTransition, _ -> {
             });
         });

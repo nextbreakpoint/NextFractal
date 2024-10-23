@@ -38,12 +38,15 @@ import com.nextbreakpoint.nextfractal.core.javafx.grid.GridView;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.observable.StringObservableValue;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Screen;
 import lombok.Setter;
@@ -79,26 +82,16 @@ public class BrowsePane extends BorderPane {
     private final StringObservableValue sourcePathProperty;
     private final StringObservableValue importPathProperty;
     private final ExecutorService executor;
-    private final int numRows = 3;
-    private final int numCols = 3;
     private final File workspace;
     private final File examples;
-    private final Tile tile;
-    private final GridView grid;
+    private final GridView<BrowseGridViewItem> gridView;
     private Thread thread;
     @Setter
     private BrowseDelegate delegate;
 
-    public BrowsePane(int width, int height, File workspace, File examples) {
+    public BrowsePane(File workspace, File examples) {
         this.workspace = workspace;
         this.examples = examples;
-
-        setMinWidth(width);
-        setMaxWidth(width);
-        setPrefWidth(width);
-        setMinHeight(height);
-        setMaxHeight(height);
-        setPrefHeight(height);
 
         filter.add(FILE_EXTENSION);
 
@@ -109,10 +102,6 @@ public class BrowsePane extends BorderPane {
         importPathProperty = new StringObservableValue();
 
         importPathProperty.setValue(null);
-
-        final int size = width / numCols;
-
-        tile = createSingleTile(size, size);
 
         final HBox toolbar1 = new HBox(2);
         toolbar1.setAlignment(Pos.CENTER_LEFT);
@@ -146,8 +135,6 @@ public class BrowsePane extends BorderPane {
 
         final BorderPane toolbar = new BorderPane();
         toolbar.getStyleClass().add("toolbar");
-        toolbar.getStyleClass().add("translucent");
-        toolbar.setPrefHeight(height * 0.07);
         toolbar.setLeft(toolbar1);
         toolbar.setCenter(toolbar2);
         toolbar.setRight(toolbar3);
@@ -156,22 +143,22 @@ public class BrowsePane extends BorderPane {
 
         executor = ExecutorUtils.newFixedThreadPool(15, ThreadUtils.createVirtualThreadFactory("Browser"));
 
-        grid = new GridView(new BrowseGridViewCellFactory(), numRows, numCols, size);
+        gridView = new GridView<>(new BrowseGridViewCellFactory(), false, 3);
 
-        grid.setDelegate(new GridViewDelegate() {
+        gridView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        gridView.getSelectionModel().getSelectedIndices()
+                .addListener((ListChangeListener<? super Integer>) change -> deleteButton.setDisable(change.getList().isEmpty()));
+
+        gridView.setDelegate(new GridViewDelegate<>() {
             @Override
-            public void onSelectionChanged(GridView source, int selectedRow, int selectedCol, int clicks) {
-                final int index = grid.getCellIndex(selectedRow, selectedCol);
-                if (index >= 0 && index < items.size()) {
-                    final BrowseGridViewItem item = items.get(index);
-                    final File file = item.getFile();
-                    if (file != null) {
-                        if (clicks == 1) {
-                            item.setSelected(!item.isSelected());
-                            deleteButton.setDisable(items.stream().noneMatch(BrowseGridViewItem::isSelected));
-                        } else {
-                            item.setSelected(false);
-                            if (delegate != null) {
+            public void onCellSelected(GridView<BrowseGridViewItem> source, int selectedRow, int selectedCol, int itemIndex) {
+                if (delegate != null) {
+                    if (gridView.getItems() != null) {
+                        if (itemIndex >= 0 && itemIndex < gridView.getItems().size()) {
+                            final BrowseGridViewItem item = gridView.getItems().get(itemIndex);
+                            final File file = item.getFile();
+                            if (file != null) {
                                 delegate.didSelectFile(BrowsePane.this, file);
                             }
                         }
@@ -180,13 +167,13 @@ public class BrowsePane extends BorderPane {
             }
 
             @Override
-            public void onCellsUpdated(GridView source) {
+            public void onCellsUpdated(GridView<BrowseGridViewItem> source) {
             }
         });
 
-        final BorderPane box = new BorderPane();
-        box.setCenter(grid);
-        box.setBottom(toolbar);
+        final StackPane box = new StackPane();
+        box.getChildren().add(gridView);
+        box.getChildren().add(toolbar);
         box.getStyleClass().add("browse");
 
         setCenter(box);
@@ -198,22 +185,22 @@ public class BrowsePane extends BorderPane {
         reloadButton.setOnMouseClicked(_ -> {
             final File path = getCurrentSourceFolder();
             deleteButton.setDisable(true);
-            loadFiles(statusLabel, grid, path);
+            loadFiles(statusLabel, gridView, path);
         });
 
-        deleteButton.setOnMouseClicked(_ -> deleteSelected(items));
+        deleteButton.setOnMouseClicked(_ -> deleteSelected(gridView));
 
         sourcePathProperty.addListener((_, _, newValue) -> {
             if (newValue != null) {
                 File path = new File(newValue);
-                reloadFiles(deleteButton, statusLabel, grid, path);
+                reloadFiles(deleteButton, statusLabel, gridView, path);
             }
         });
 
         importPathProperty.addListener((_, _, newValue) -> {
             if (newValue != null) {
                 File path = new File(newValue);
-                importFiles(deleteButton, statusLabel, grid, path);
+                importFiles(deleteButton, statusLabel, gridView, path);
             }
         });
 
@@ -221,6 +208,13 @@ public class BrowsePane extends BorderPane {
             toolbar1.setPrefWidth(newValue.doubleValue() / 3);
             toolbar2.setPrefWidth(newValue.doubleValue() / 3);
             toolbar3.setPrefWidth(newValue.doubleValue() / 3);
+        });
+
+        heightProperty().addListener((_, _, newValue) -> {
+            toolbar.setMinHeight(newValue.doubleValue() * 0.07);
+            toolbar.setMaxHeight(newValue.doubleValue() * 0.07);
+            toolbar.setPrefHeight(newValue.doubleValue() * 0.07);
+            toolbar.setTranslateY((newValue.doubleValue() - newValue.doubleValue() * 0.07) / 2);
         });
     }
 
@@ -254,18 +248,19 @@ public class BrowsePane extends BorderPane {
         }
     }
 
-    public void reload(Button deleteButton, Label statusLabel, GridView grid) {
+    public void reload(Button deleteButton, Label statusLabel, GridView<BrowseGridViewItem> grid) {
         final File path = getCurrentSourceFolder();
         deleteButton.setDisable(true);
         loadFiles(statusLabel, grid, path);
     }
 
-    private void deleteSelected(List<BrowseGridViewItem> items) {
-        final List<File> files = items.stream()
-                .filter(BrowseGridViewItem::isSelected)
-                .map(BrowseGridViewItem::getFile)
-                .toList();
-        delegate.didDeleteFiles(files);
+    private void deleteSelected(GridView<BrowseGridViewItem> gridView) {
+        if (gridView.getSelectionModel() != null && gridView.getSelectionModel().getSelectedItems() != null) {
+            final List<File> files = gridView.getSelectionModel().getSelectedItems().stream()
+                    .map(BrowseGridViewItem::getFile)
+                    .toList();
+            delegate.didDeleteFiles(files);
+        }
     }
 
     public void dispose() {
@@ -318,7 +313,7 @@ public class BrowsePane extends BorderPane {
         return new Tile(imageSize, tileSize, tileOffset, tileBorder);
     }
 
-    private void loadFiles(Label statusLabel, GridView grid, File folder) {
+    private void loadFiles(Label statusLabel, GridView<BrowseGridViewItem> grid, File folder) {
         removeItems();
         grid.setData(List.of());
         final List<File> files = listFiles(folder);
@@ -330,18 +325,18 @@ public class BrowsePane extends BorderPane {
         }
     }
 
-    private void importFiles(Button deleteButton, Label statusLabel, GridView grid, File folder) {
+    private void importFiles(Button deleteButton, Label statusLabel, GridView<BrowseGridViewItem> grid, File folder) {
         final List<File> files = listFiles(folder);
         if (!files.isEmpty()) {
             copyFilesAsync(deleteButton, statusLabel, grid, files, getCurrentSourceFolder());
         }
     }
 
-    private Future<?> copyFilesAsync(Button deleteButton, Label statusLabel, GridView grid, List<File> files, File dest) {
+    private Future<?> copyFilesAsync(Button deleteButton, Label statusLabel, GridView<BrowseGridViewItem> grid, List<File> files, File dest) {
         return executor.submit(() -> copyFiles(deleteButton, statusLabel, grid, files, dest));
     }
 
-    private void copyFiles(Button deleteButton, Label statusLabel, GridView grid, List<File> files, File dest) {
+    private void copyFiles(Button deleteButton, Label statusLabel, GridView<BrowseGridViewItem> grid, List<File> files, File dest) {
         Platform.runLater(() -> grid.setDisable(true));
 
         for (File file : files) {
@@ -355,7 +350,7 @@ public class BrowsePane extends BorderPane {
         Platform.runLater(() -> reloadFiles(deleteButton, statusLabel, grid, dest));
     }
 
-    private void reloadFiles(Button deleteButton, Label statusLabel, GridView grid, File path) {
+    private void reloadFiles(Button deleteButton, Label statusLabel, GridView<BrowseGridViewItem> grid, File path) {
         deleteButton.setDisable(true);
         stopWatching();
         startWatching(deleteButton, statusLabel, grid);
@@ -384,13 +379,17 @@ public class BrowsePane extends BorderPane {
         return tmpFile;
     }
 
-    private void loadItems(GridView grid, List<File> files) {
+    private void loadItems(GridView<BrowseGridViewItem> grid, List<File> files) {
         items.clear();
         for (File file : files) {
-            final var imageLoader = new PlatformImageLoader(executor, file, tile.tileSize());
+            final var imageLoader = new PlatformImageLoader(executor, () -> FileManager.loadBundle(file), this::computeSize);
             items.add(new BrowseGridViewItem(file, imageLoader));
         }
         grid.setData(items);
+    }
+
+    private Size computeSize() {
+        return new Size((int) Math.rint(getWidth() / 3), (int) Math.rint(getWidth() / 3));
     }
 
     private List<File> listFiles(File folder) {
@@ -408,7 +407,7 @@ public class BrowsePane extends BorderPane {
     }
 
     private void removeItems() {
-        grid.setData(List.of());
+        gridView.setData(List.of());
         items.clear();
     }
 
@@ -424,7 +423,7 @@ public class BrowsePane extends BorderPane {
         }
     }
 
-    private void startWatching(Button deleteButton, Label statusLabel, GridView grid) {
+    private void startWatching(Button deleteButton, Label statusLabel, GridView<BrowseGridViewItem> grid) {
         if (thread == null) {
             final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Watcher");
             final Path path = getCurrentSourceFolder().toPath();

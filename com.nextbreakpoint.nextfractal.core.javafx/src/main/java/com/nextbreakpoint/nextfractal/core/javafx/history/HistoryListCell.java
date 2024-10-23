@@ -40,49 +40,49 @@ import javafx.scene.transform.Affine;
 import java.text.SimpleDateFormat;
 
 public class HistoryListCell extends ListCell<RenderedImage> {
-	private final BorderPane pane;
-	private final Canvas canvas;
-	private final Label label;
-	private final Tile tile;
+    private final BorderPane pane;
+    private final Canvas canvas;
+    private final Label label;
+    private final Tile tile;
 
-	public HistoryListCell(Tile tile) {
-		this.tile = tile;
-		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
-		label = new Label();
-		label.getStyleClass().add("text-small");
-		pane = new BorderPane();
-		final VBox image = new VBox(4);
-		image.setAlignment(Pos.CENTER);
-		image.getChildren().add(canvas);
-		pane.setLeft(image);
-		final VBox labels = new VBox(4);
-		labels.setAlignment(Pos.CENTER_RIGHT);
-		labels.getChildren().add(label);
-		pane.setCenter(labels);
-	}
+    public HistoryListCell(Tile tile) {
+        this.tile = tile;
+        canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
+        label = new Label();
+        label.getStyleClass().add("text-small");
+        pane = new BorderPane();
+        final VBox image = new VBox(4);
+        image.setAlignment(Pos.CENTER);
+        image.getChildren().add(canvas);
+        pane.setLeft(image);
+        final VBox labels = new VBox(4);
+        labels.setAlignment(Pos.CENTER_RIGHT);
+        labels.getChildren().add(label);
+        pane.setCenter(labels);
+    }
 
-	@Override
-	public void updateItem(RenderedImage bitmap, boolean empty) {
-		super.updateItem(bitmap, empty);
-		if (empty) {
-			setGraphic(null);
-		} else {
-			if (bitmap.getPixels() != null) {
-				final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
-				image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
-				final GraphicsContext g2d = canvas.getGraphicsContext2D();
-				final Affine affine = new Affine();
-				final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
-				final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
-				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
-				affine.append(Affine.scale(1, -1));
-				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
-				g2d.setTransform(affine);
-				g2d.drawImage(image, x, y);
-			}
-			final SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-			label.setText(df2.format(bitmap.getTimestamp()));
-			this.setGraphic(pane);
-		}
-	}
+    @Override
+    public void updateItem(RenderedImage bitmap, boolean empty) {
+        super.updateItem(bitmap, empty);
+        if (empty) {
+            setGraphic(null);
+        } else {
+            if (bitmap.getPixels() != null) {
+                final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
+                image.getPixelWriter().setPixels(0, 0, (int) image.getWidth(), (int) image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int) image.getWidth());
+                final GraphicsContext g2d = canvas.getGraphicsContext2D();
+                final Affine affine = new Affine();
+                final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+                final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
+                affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
+                affine.append(Affine.scale(1, -1));
+                affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
+                g2d.setTransform(affine);
+                g2d.drawImage(image, x, y);
+            }
+            final SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+            label.setText(df2.format(bitmap.getTimestamp()));
+            this.setGraphic(pane);
+        }
+    }
 }

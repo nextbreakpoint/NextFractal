@@ -33,8 +33,8 @@ import lombok.extern.java.Log;
 public class MainRenderPane extends BorderPane {
     private final Viewer viewer;
 
-    public MainRenderPane(PlatformEventBus eventBus, int width, int height) {
-        viewer = new Viewer(eventBus, width, height);
+    public MainRenderPane(PlatformEventBus eventBus) {
+        viewer = new Viewer(eventBus);
         setCenter(viewer);
     }
 

@@ -22,7 +22,7 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.core.javafx.browse;
+package com.nextbreakpoint.nextfractal.core.javafx.export;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.javafx.TextUtils;
@@ -32,22 +32,20 @@ import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItem;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewItemDelegate;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
-public class BrowseGridViewCell extends GridViewCell implements GridViewItemDelegate {
+public class ExportGridViewCell extends GridViewCell implements GridViewItemDelegate {
     private final JavaFXGraphicsFactory factory;
     private final Canvas overlayCanvas;
     private final Canvas itemCanvas;
     private final Label label1;
     private final Label label2;
     private final BorderPane overlay;
-    private final BorderPane details;
 
-    public BrowseGridViewCell(int index, int width, int height) {
+    public ExportGridViewCell(int index, int width, int height) {
         super(index, width, height);
         factory = new JavaFXGraphicsFactory();
         overlayCanvas = new Canvas(0, 0);
@@ -55,10 +53,10 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
         label1 = new Label();
         label2 = new Label();
         BorderPane title = new BorderPane();
-        title.setBottom(label1);
+        title.setBottom(label2);
         title.getStyleClass().add("grid-view-cell-title");
-        details = new BorderPane();
-        details.setBottom(label2);
+        BorderPane details = new BorderPane();
+        details.setBottom(label1);
         details.getStyleClass().add("grid-view-cell-details");
         overlay = new BorderPane();
         overlay.setTop(title);
@@ -121,48 +119,41 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
     }
 
     private void updateCell() {
-        if (item != null && item instanceof BrowseGridViewItem viewItem) {
+        if (item != null && item instanceof ExportGridViewItem viewItem) {
             if (isDirty()) {
                 drawItem(viewItem);
                 drawOverlay(viewItem);
                 updateLabel(viewItem);
                 overlay.setVisible(true);
-                details.setVisible(hasClips(viewItem));
                 setDirty(false);
             }
         } else {
             if (isDirty()) {
                 clearCanvas();
                 overlay.setVisible(false);
-                details.setVisible(false);
                 setDirty(false);
             }
         }
     }
 
-    private void drawItem(BrowseGridViewItem viewItem) {
+    private void drawItem(ExportGridViewItem viewItem) {
         final var g2d = itemCanvas.getGraphicsContext2D();
         final var gc = factory.createGraphicsContext(g2d);
         viewItem.draw(gc, 0, 0);
     }
 
-    private void updateLabel(BrowseGridViewItem viewItem) {
-        label1.setText(TextUtils.formatInstant(viewItem.getFile().lastModified()));
-        label1.setTooltip(new Tooltip(viewItem.getFile().getAbsolutePath()));
-        label2.setText(hasClips(viewItem) ? TextUtils.formatDuration(getDurationInSeconds(viewItem)) : "");
-        label2.setTooltip(new Tooltip(viewItem.getFile().getAbsolutePath()));
+    private void updateLabel(ExportGridViewItem viewItem) {
+        if (viewItem.getProperty("clip") instanceof AnimationClip clip) {
+            label1.setText(TextUtils.formatDuration(getDurationInSeconds(clip)));
+            label2.setText(TextUtils.formatInstant(clip.getFirstEvent().date().toInstant()));
+        } else {
+            label1.setText("");
+            label2.setText("");
+        }
     }
 
-    private float getDurationInSeconds(BrowseGridViewItem viewItem) {
-        return clipsDuration(viewItem) / 1000f;
-    }
-
-    private boolean hasClips(BrowseGridViewItem viewItem) {
-        return viewItem.getBundle() != null && viewItem.getBundle().clips() != null && !viewItem.getBundle().clips().isEmpty();
-    }
-
-    private long clipsDuration(BrowseGridViewItem viewItem) {
-        return hasClips(viewItem) ? viewItem.getBundle().clips().stream().mapToLong(AnimationClip::duration).sum() : 0L;
+    private float getDurationInSeconds(AnimationClip clip) {
+        return clip.duration() / 1000f;
     }
 
     private void clearCanvas() {
@@ -172,7 +163,7 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
                 .clearRect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
     }
 
-    private void drawOverlay(BrowseGridViewItem viewItem) {
+    private void drawOverlay(ExportGridViewItem viewItem) {
         final var g2d = overlayCanvas.getGraphicsContext2D();
         g2d.clearRect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
 
@@ -194,7 +185,7 @@ public class BrowseGridViewCell extends GridViewCell implements GridViewItemDele
         }
     }
 
-    private String getMessage(BrowseGridViewItem viewItem) {
+    private String getMessage(ExportGridViewItem viewItem) {
         if (viewItem.hasErrors()) {
             return "Error";
         } else if (!viewItem.isCompleted()) {

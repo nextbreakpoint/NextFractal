@@ -49,18 +49,16 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.File;
 import java.util.List;
 
 public class MainCentralPane extends BorderPane {
-    public MainCentralPane(PlatformEventBus eventBus, int width, int height, File workspace, File examples) {
-        final MainRenderPane renderPane = new MainRenderPane(eventBus, width, height);
+    public MainCentralPane(PlatformEventBus eventBus, File workspace, File examples) {
+        final MainRenderPane renderPane = new MainRenderPane(eventBus);
 
-        final BrowsePane browsePane = new BrowsePane(width, height, workspace, examples);
-        browsePane.setClip(new Rectangle(0, 0, width, height));
+        final BrowsePane browsePane = new BrowsePane(workspace, examples);
 
         final PlaybackPane playbackPane = new PlaybackPane();
         final RecordingPane recordingPane = new RecordingPane();
@@ -128,20 +126,21 @@ public class MainCentralPane extends BorderPane {
 
         setCenter(stackPane);
 
-        browsePane.setTranslateY(-height);
-
         widthProperty().addListener((_, _, newValue) -> {
-            renderPane.setPrefWidth(newValue.doubleValue());
-            browsePane.setPrefWidth(newValue.doubleValue());
-            playbackPane.setPrefWidth(newValue.doubleValue());
-            recordingPane.setPrefWidth(newValue.doubleValue());
+            final double width = newValue.doubleValue();
+            renderPane.setPrefWidth(width);
+            browsePane.setPrefWidth(width);
+            playbackPane.setPrefWidth(width);
+            recordingPane.setPrefWidth(width);
         });
 
         heightProperty().addListener((_, _, newValue) -> {
-            renderPane.setPrefHeight(newValue.doubleValue());
-            browsePane.setPrefHeight(newValue.doubleValue());
-            playbackPane.setPrefHeight(newValue.doubleValue());
-            recordingPane.setPrefHeight(newValue.doubleValue());
+            final double height = newValue.doubleValue();
+            renderPane.setPrefHeight(height);
+            browsePane.setPrefHeight(height);
+            playbackPane.setPrefHeight(height);
+            recordingPane.setPrefHeight(height);
+            browsePane.setTranslateY(-height);
         });
 
         toggleProperty.addListener((_, _, newValue) -> {

@@ -28,8 +28,8 @@ import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCell;
 import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCellFactory;
 
 public class BrowseGridViewCellFactory implements GridViewCellFactory {
-	@Override
-	public GridViewCell createCell(int index, int width, int height) {
-		return new BrowseGridViewCell(index, width, height);
-	}
+    @Override
+    public GridViewCell createCell(int index, int width, int height) {
+        return new BrowseGridViewCell(index, width, height);
+    }
 }

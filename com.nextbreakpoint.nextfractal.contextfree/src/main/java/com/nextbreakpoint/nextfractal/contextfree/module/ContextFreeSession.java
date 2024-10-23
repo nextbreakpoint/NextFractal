@@ -33,6 +33,8 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 
 import java.io.InputStream;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +47,7 @@ public class ContextFreeSession extends Session {
 
 	private final ContextFreeMetadata metadata;
 	private final String script;
+	private final Instant timestamp;
 
 	public ContextFreeSession() {
 		this(getInitialSource(), new ContextFreeMetadata());
@@ -55,6 +58,7 @@ public class ContextFreeSession extends Session {
 		Objects.requireNonNull(script);
 		this.metadata = metadata;
 		this.script = script;
+		timestamp = Instant.now(Clock.systemUTC());
 	}
 
 	@Override
@@ -75,6 +79,11 @@ public class ContextFreeSession extends Session {
 	@Override
 	public Metadata metadata() {
 		return metadata;
+	}
+
+	@Override
+	public Instant getTimestamp() {
+		return timestamp;
 	}
 
 	@Override

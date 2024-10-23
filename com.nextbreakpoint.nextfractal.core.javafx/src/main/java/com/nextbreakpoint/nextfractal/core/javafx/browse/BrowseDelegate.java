@@ -28,9 +28,9 @@ import java.io.File;
 import java.util.List;
 
 public interface BrowseDelegate {
-	void didSelectFile(BrowsePane source, File file);
+    void didSelectFile(BrowsePane source, File file);
 
     void didDeleteFiles(List<File> files);
 
-	void didClose(BrowsePane source);
+    void didClose(BrowsePane source);
 }

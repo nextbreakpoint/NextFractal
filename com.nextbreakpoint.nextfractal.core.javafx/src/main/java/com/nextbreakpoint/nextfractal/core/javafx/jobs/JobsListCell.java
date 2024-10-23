@@ -37,43 +37,43 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.transform.Affine;
 
 public class JobsListCell extends ListCell<RenderedImage> {
-	private final BorderPane pane;
-	private final Label label;
-	private final Canvas canvas;
-	private final Tile tile;
+    private final BorderPane pane;
+    private final Label label;
+    private final Canvas canvas;
+    private final Tile tile;
 
-	public JobsListCell(Tile tile) {
-		this.tile = tile;
-		canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
-		label = new Label();
-		pane = new BorderPane();
-		pane.setLeft(canvas);
-		pane.setRight(label);
-		BorderPane.setAlignment(canvas, Pos.CENTER);
-		BorderPane.setAlignment(label, Pos.CENTER);
-	}
+    public JobsListCell(Tile tile) {
+        this.tile = tile;
+        canvas = new Canvas(tile.tileSize().width(), tile.tileSize().height());
+        label = new Label();
+        pane = new BorderPane();
+        pane.setLeft(canvas);
+        pane.setRight(label);
+        BorderPane.setAlignment(canvas, Pos.CENTER);
+        BorderPane.setAlignment(label, Pos.CENTER);
+    }
 
-	@Override
-	public void updateItem(RenderedImage bitmap, boolean empty) {
-		super.updateItem(bitmap, empty);
-		if (empty) {
-			setGraphic(null);
-		} else {
-			if (bitmap.getPixels() != null) {
-				final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
-				image.getPixelWriter().setPixels(0, 0, (int)image.getWidth(), (int)image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int)image.getWidth());
-				final GraphicsContext g2d = canvas.getGraphicsContext2D();
-				final Affine affine = new Affine();
-				final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
-				final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
-				affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
-				affine.append(Affine.scale(1, -1));
-				affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
-				g2d.setTransform(affine);
-				g2d.drawImage(image, x, y);
-			}
-			label.setText(String.format("%d%%", (int)Math.rint(bitmap.getProgress() * 100)));
-			this.setGraphic(pane);
-		}
-	}
+    @Override
+    public void updateItem(RenderedImage bitmap, boolean empty) {
+        super.updateItem(bitmap, empty);
+        if (empty) {
+            setGraphic(null);
+        } else {
+            if (bitmap.getPixels() != null) {
+                final WritableImage image = new WritableImage(bitmap.getWidth(), bitmap.getHeight());
+                image.getPixelWriter().setPixels(0, 0, (int) image.getWidth(), (int) image.getHeight(), PixelFormat.getIntArgbInstance(), bitmap.getPixels(), (int) image.getWidth());
+                final GraphicsContext g2d = canvas.getGraphicsContext2D();
+                final Affine affine = new Affine();
+                final int x = (tile.tileSize().width() - bitmap.getWidth()) / 2;
+                final int y = (tile.tileSize().height() - bitmap.getHeight()) / 2;
+                affine.append(Affine.translate(0, +image.getHeight() / 2 + y));
+                affine.append(Affine.scale(1, -1));
+                affine.append(Affine.translate(0, -image.getHeight() / 2 - y));
+                g2d.setTransform(affine);
+                g2d.drawImage(image, x, y);
+            }
+            label.setText(String.format("%d%%", (int) Math.rint(bitmap.getProgress() * 100)));
+            this.setGraphic(pane);
+        }
+    }
 }

@@ -29,15 +29,15 @@ import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public interface GridViewCellRenderer {
-	Bundle getBundle();
+    Bundle getBundle();
 
-	void run();
+    void run();
 
-	void cancel();
+    void cancel();
 
-	void waitFor() throws InterruptedException;
+    void waitFor() throws InterruptedException;
 
-	void draw(GraphicsContext gc, int x, int y);
+    void draw(GraphicsContext gc, int x, int y);
 
     void setDelegate(RendererDelegate delegate);
 }

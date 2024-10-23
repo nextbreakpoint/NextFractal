@@ -25,5 +25,5 @@
 package com.nextbreakpoint.nextfractal.core.javafx.grid;
 
 public interface GridViewCellFactory {
-	GridViewCell createCell(int index, int width, int height);
+    GridViewCell createCell(int index, int width, int height);
 }

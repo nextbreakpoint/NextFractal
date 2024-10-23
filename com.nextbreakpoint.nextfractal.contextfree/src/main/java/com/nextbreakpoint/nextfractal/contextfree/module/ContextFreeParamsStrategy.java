@@ -30,6 +30,8 @@ import com.nextbreakpoint.nextfractal.core.params.Attribute;
 import com.nextbreakpoint.nextfractal.core.params.Group;
 import com.nextbreakpoint.nextfractal.core.params.Parameters;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 
 public class ContextFreeParamsStrategy implements ParamsStrategy {
@@ -54,7 +56,7 @@ public class ContextFreeParamsStrategy implements ParamsStrategy {
                         .withKey("contextfree-seed")
                         .withLogicalType("string")
                         .withMapper(session -> String.valueOf(((ContextFreeMetadata) session.metadata()).getSeed()))
-                        .withCombiner((session, value)  -> getSessionBuilder(session).withMetadata(getMetadataBuilder(session).withSeed(value).build()).build())
+                        .withCombiner((session, value)  -> getSessionBuilder(session).withTimestamp(Instant.now(Clock.systemUTC())).withMetadata(getMetadataBuilder(session).withSeed(value).build()).build())
                         .build()
         );
     }

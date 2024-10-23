@@ -22,24 +22,14 @@
  * along with NextFractal.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.nextbreakpoint.nextfractal.contextfree.javafx;
+package com.nextbreakpoint.nextfractal.core.javafx.jobs;
 
-import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
-import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
-import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
-import javafx.scene.input.KeyEvent;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCell;
+import com.nextbreakpoint.nextfractal.core.javafx.grid.GridViewCellFactory;
 
-public class ContextFreeKeyHandler implements KeyHandler {
-    private final RenderingContext renderingContext;
-    private final MetadataDelegate delegate;
-
-    public ContextFreeKeyHandler(RenderingContext renderingContext, MetadataDelegate delegate) {
-        this.renderingContext = renderingContext;
-        this.delegate = delegate;
-    }
-
+public class JobsGridViewCellFactory implements GridViewCellFactory {
     @Override
-    public void handle(KeyEvent keyEvent) {
-        keyEvent.consume();
+    public GridViewCell createCell(int index, int width, int height) {
+        return new JobsGridViewCell(index, width, height);
     }
 }
