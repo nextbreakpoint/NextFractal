@@ -2,11 +2,11 @@
     <toolchain>
         <type>jdk</type>
         <provides>
-            <version>23</version>
+            <version>22</version>
             <vendor>temurin</vendor>
         </provides>
         <configuration>
-            <jdkHome>/home/parallels/Documents/jdk-23.0.1+8</jdkHome>
+            <jdkHome>/home/parallels/Documents/jdk-22.0.1+8</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
