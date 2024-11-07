@@ -37,10 +37,10 @@
         <module>com.nextbreakpoint.nextfractal.main</module>
     </modules>
     <properties>
-        <java.version>22</java.version>
-        <java.release>22</java.release>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
+        <java.version>23</java.version>
+        <java.release>23</java.release>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.version>3.6</maven.version>
