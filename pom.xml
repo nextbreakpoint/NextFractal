@@ -240,12 +240,9 @@
                 <configuration>
                     <parallel>none</parallel>
                     <forkCount>0</forkCount>
-                    <systemProperties>
-                        <property>
-                            <name>cfdg.root</name>
-                            <value>${project.basedir}/src/test/resources</value>
-                        </property>
-                    </systemProperties>
+                    <systemPropertyVariables>
+                        <cfdg.root>${project.basedir}/src/test/resources</cfdg.root>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
