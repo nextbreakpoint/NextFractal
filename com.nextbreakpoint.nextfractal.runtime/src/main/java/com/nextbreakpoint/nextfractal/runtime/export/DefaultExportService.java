@@ -272,7 +272,7 @@ public class DefaultExportService implements ExportService {
 		@Override
 		public void run() {
 			try {
-				Thread.sleep(30000);
+				Thread.sleep(10000);
 
 				log.log(Level.INFO, "Session {0} terminated", session.getSessionId());
 
