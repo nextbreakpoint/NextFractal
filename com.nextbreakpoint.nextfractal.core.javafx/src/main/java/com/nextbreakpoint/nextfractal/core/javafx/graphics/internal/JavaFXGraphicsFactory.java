@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -33,48 +33,48 @@ import javafx.scene.transform.Affine;
 import javafx.scene.transform.MatrixType;
 
 public class JavaFXGraphicsFactory implements GraphicsFactory {
-	@Override
-	public String getName() {
-		return "JavaFX";
-	}
+    @Override
+    public String getName() {
+        return "JavaFX";
+    }
 
-	@Override
-	public Buffer createBuffer(int width, int height) {
-		return new JavaFXBuffer(width, height);
-	}
+    @Override
+    public Buffer createBuffer(int width, int height) {
+        return new JavaFXBuffer(width, height);
+    }
 
-	@Override
-	public GraphicsContext createGraphicsContext(Object context) {
-		return new JavaFXGraphicsContext((javafx.scene.canvas.GraphicsContext)context);
-	}
+    @Override
+    public GraphicsContext createGraphicsContext(Object context) {
+        return new JavaFXGraphicsContext((javafx.scene.canvas.GraphicsContext) context);
+    }
 
-	@Override
-	public AffineTransform createTranslateAffineTransform(double x, double y) {
-		return new JavaFXAffineTransform(new Affine(Affine.translate(x, y)));
-	}
+    @Override
+    public AffineTransform createTranslateAffineTransform(double x, double y) {
+        return new JavaFXAffineTransform(new Affine(Affine.translate(x, y)));
+    }
 
-	@Override
-	public AffineTransform createRotateAffineTransform(double a, double centerX, double centerY) {
-		return new JavaFXAffineTransform(new Affine(Affine.rotate(a, centerX, centerY)));
-	}
+    @Override
+    public AffineTransform createRotateAffineTransform(double a, double centerX, double centerY) {
+        return new JavaFXAffineTransform(new Affine(Affine.rotate(a, centerX, centerY)));
+    }
 
-	@Override
-	public AffineTransform createScaleAffineTransform(double x, double y) {
-		return new JavaFXAffineTransform(new Affine(Affine.scale(x, y)));
-	}
+    @Override
+    public AffineTransform createScaleAffineTransform(double x, double y) {
+        return new JavaFXAffineTransform(new Affine(Affine.scale(x, y)));
+    }
 
-	@Override
-	public AffineTransform createAffineTransform() {
-		return new JavaFXAffineTransform(new Affine());
-	}
+    @Override
+    public AffineTransform createAffineTransform() {
+        return new JavaFXAffineTransform(new Affine());
+    }
 
-	@Override
-	public AffineTransform createAffineTransform(double[] matrix) {
-		return new JavaFXAffineTransform(new Affine(matrix, MatrixType.MT_2D_2x3, 0));
-	}
+    @Override
+    public AffineTransform createAffineTransform(double[] matrix) {
+        return new JavaFXAffineTransform(new Affine(matrix, MatrixType.MT_2D_2x3, 0));
+    }
 
-	@Override
-	public Color createColor(double red, double green, double blue, double opacity) {
-		return new JavaFXColor(red, green, blue, opacity);
-	}
+    @Override
+    public Color createColor(double red, double green, double blue, double opacity) {
+        return new JavaFXColor(red, green, blue, opacity);
+    }
 }

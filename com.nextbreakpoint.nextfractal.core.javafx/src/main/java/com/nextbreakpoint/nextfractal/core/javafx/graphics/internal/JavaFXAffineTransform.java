@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -29,19 +29,19 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import javafx.scene.transform.Affine;
 
 public class JavaFXAffineTransform implements AffineTransform {
-	private final Affine affineTransform;
-	
-	public JavaFXAffineTransform(Affine affineTransform) {
-		this.affineTransform = affineTransform;
-	}
+    private final Affine affineTransform;
 
-	@Override
-	public void setAffineTransform(GraphicsContext context) {
-		((JavaFXGraphicsContext)context).getGraphicsContext().setTransform(affineTransform);
-	}
+    public JavaFXAffineTransform(Affine affineTransform) {
+        this.affineTransform = affineTransform;
+    }
 
-	@Override
-	public void append(AffineTransform affineTransform) {
-		this.affineTransform.append(((JavaFXAffineTransform)affineTransform).affineTransform);
-	}
+    @Override
+    public void setAffineTransform(GraphicsContext context) {
+        ((JavaFXGraphicsContext) context).getGraphicsContext().setTransform(affineTransform);
+    }
+
+    @Override
+    public void append(AffineTransform affineTransform) {
+        this.affineTransform.append(((JavaFXAffineTransform) affineTransform).affineTransform);
+    }
 }

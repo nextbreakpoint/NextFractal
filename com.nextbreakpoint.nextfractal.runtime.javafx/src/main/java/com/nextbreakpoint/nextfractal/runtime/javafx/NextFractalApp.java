@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,19 +24,19 @@
  */
 package com.nextbreakpoint.nextfractal.runtime.javafx;
 
+import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.event.ExportSessionStateChanged;
 import com.nextbreakpoint.nextfractal.core.event.WorkspaceChanged;
-import com.nextbreakpoint.nextfractal.core.export.ExportService;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.export.ExportSessionState;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
+import com.nextbreakpoint.nextfractal.runtime.export.DefaultExportService;
 import com.nextbreakpoint.nextfractal.runtime.export.SimpleExportRenderer;
 import com.nextbreakpoint.nextfractal.runtime.javafx.component.MainCentralPane;
 import com.nextbreakpoint.nextfractal.runtime.javafx.component.MainSidePane;
 import com.nextbreakpoint.nextfractal.runtime.javafx.core.ApplicationHandler;
 import com.nextbreakpoint.nextfractal.runtime.javafx.core.PlaybackSourceHandler;
 import com.nextbreakpoint.nextfractal.runtime.javafx.core.SessionSourceHandler;
-import com.nextbreakpoint.nextfractal.runtime.javafx.core.SimpleExportService;
 import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -52,6 +52,7 @@ import javafx.stage.Stage;
 import lombok.extern.java.Log;
 
 import java.io.File;
+import java.util.concurrent.ThreadFactory;
 
 @Log
 public class NextFractalApp extends Application {
@@ -93,7 +94,9 @@ public class NextFractalApp extends Application {
         final DoubleProperty fontSize = new SimpleDoubleProperty(optimalFontSize);
         rootPane.styleProperty().bind(Bindings.format("-fx-font-size: %.2fpt;", fontSize));
 
-        final ExportService exportService = new SimpleExportService(new SimpleExportRenderer(), this::onSessionChanged);
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Export Renderer");
+        final DefaultExportService exportService = new DefaultExportService(new SimpleExportRenderer(threadFactory));
+        exportService.setDelegate((session, state, progress) -> Platform.runLater(() -> onSessionChanged(session, state, progress)));
 
         final Pane mainPane = createMainPane(eventBus, editorWidth, renderSize, renderSize);
 
@@ -141,7 +144,7 @@ public class NextFractalApp extends Application {
     }
 
     private Pane createCentralPane(PlatformEventBus eventBus, int width, int height) {
-        final MainCentralPane pane = new MainCentralPane(eventBus, width, height, workspace, examples);
+        final MainCentralPane pane = new MainCentralPane(eventBus, workspace, examples);
         pane.setPrefWidth(width);
         pane.setPrefHeight(height);
         pane.setMinWidth(width);

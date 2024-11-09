@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -24,6 +24,7 @@
  */
 package com.nextbreakpoint.nextfractal.mandelbrot.graphics;
 
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.common.Time;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -36,6 +37,7 @@ import com.nextbreakpoint.nextfractal.mandelbrot.core.Orbit;
 import com.nextbreakpoint.nextfractal.mandelbrot.core.Trap;
 import com.nextbreakpoint.nextfractal.mandelbrot.graphics.xaos.XaosRenderer;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
-public class Coordinator implements RendererDelegate {
+public class Coordinator {
 	public static final String KEY_TYPE = "TYPE";
 	public static final Integer VALUE_REALTIME = 1;
 	public static final String KEY_PROGRESS = "PROGRESS";
@@ -55,16 +57,20 @@ public class Coordinator implements RendererDelegate {
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
 	@Getter
+	private volatile float progress;
+	@Getter
 	private volatile List<ScriptError> errors;
 	private volatile boolean imageChanged;
 	private Renderer renderer;
+	@Setter
+	private volatile RendererDelegate delegate;
 
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
 		this.hints.putAll(hints);
 		renderer = createRenderer(tile);
-		renderer.setRendererDelegate(this);
+		renderer.setDelegate(this::onImageUpdated);
 		renderer.setMultiThread(true);
 		errors = new ArrayList<>();
 		if (hints.get(KEY_PROGRESS) != null && hints.get(KEY_PROGRESS) == VALUE_SINGLE_PASS) {
@@ -89,12 +95,6 @@ public class Coordinator implements RendererDelegate {
 	
 	public void run() {
 		renderer.runTask();
-	}
-
-	@Override
-	public void onImageUpdated(float progress, List<ScriptError> errors) {
-		this.errors = errors;
-		this.imageChanged = true;
 	}
 
 	public boolean hasImageChanged() {
@@ -156,6 +156,23 @@ public class Coordinator implements RendererDelegate {
 //		renderer.drawImage(gc, x, y, w, h);
 //	}
 
+	public List<Trap> getTraps() {
+		return renderer.getTraps();
+	}
+
+	public boolean isInitialized() {
+		return renderer.isInitialized();
+	}
+
+	protected void onImageUpdated(float progress, List<ScriptError> errors) {
+		this.progress = progress;
+		this.errors = errors;
+		this.imageChanged = true;
+		if (delegate != null) {
+			delegate.onImageUpdated(progress, errors);
+		}
+	}
+
 	protected void free() {
 		if (renderer != null) {
 			renderer.dispose();
@@ -172,11 +189,7 @@ public class Coordinator implements RendererDelegate {
 		}
 	}
 
-	public List<Trap> getTraps() {
-		return renderer.getTraps();
-	}
-
-	public boolean isInitialized() {
-		return renderer.isInitialized();
+	public boolean isInterrupted() {
+		return renderer.isInterrupted();
 	}
 }

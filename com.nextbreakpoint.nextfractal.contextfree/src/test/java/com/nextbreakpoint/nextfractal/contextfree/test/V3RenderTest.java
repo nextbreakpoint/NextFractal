@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class V3RenderTest extends BaseTest {
 	public static Stream<Arguments> parameters() {
@@ -71,7 +72,7 @@ public class V3RenderTest extends BaseTest {
 
 	@ParameterizedTest
 	@MethodSource("parameters")
-	public void shouldRenderImage(String sourceName, String imageName) throws IOException, InterruptedException {
+	public void shouldRenderImage(String sourceName, String imageName) throws IOException {
 		System.out.println(sourceName);
 
 		BufferedImage actualImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
@@ -82,20 +83,24 @@ public class V3RenderTest extends BaseTest {
 		Tile tile = new Tile(new Size(200, 200), new Size(200, 200), new Point(0, 0), new Size(0, 0));
 		Renderer renderer = new Renderer(threadFactory, rendererFactory, tile);
 
-		CFDG cfdg = parseSource(sourceName);
+		try {
+			CFDG cfdg = parseSource(sourceName);
 
-		renderer.setOpaque(true);
-		renderer.setImage(new CFDGSimpleImage(cfdg), "ABCD");
-		renderer.init();
-		renderer.runTask();
-		renderer.waitForTask();
+			renderer.setOpaque(true);
+			renderer.setImage(new CFDGSimpleImage(cfdg), "ABCD");
+			renderer.init();
+			renderer.runTask();
+			renderer.waitForTask();
 
-		renderer.drawImage(rendererFactory.createGraphicsContext(actualImage.createGraphics()), 0, 0);
+			renderer.drawImage(rendererFactory.createGraphicsContext(actualImage.createGraphics()), 0, 0);
 
-		saveImage("tmp" + imageName, actualImage);
+			saveImage("tmp" + imageName, actualImage);
 
-		BufferedImage expectedImage = loadImage(imageName);
-		assertThat(compareImages(expectedImage, actualImage)).isEqualTo(0.0);
+			BufferedImage expectedImage = loadImage(imageName);
+			assertThat(compareImages(expectedImage, actualImage)).isEqualTo(0.0);
+		} catch (Exception e) {
+			fail("Can't parse file " + sourceName, e);
+		}
 	}
 
 	private double compareImages(BufferedImage expectedImage, BufferedImage actualImage) {

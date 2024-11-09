@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -82,7 +82,7 @@ public class ContextFreeImageComposer implements ImageComposer {
             renderer.init();
             renderer.runTask();
             renderer.waitForTask();
-            if (renderer.isAborted() || renderer.isInterrupted()) {
+            if (renderer.getProgress() != 1) {
                 aborted = true;
                 return buffer;
             }

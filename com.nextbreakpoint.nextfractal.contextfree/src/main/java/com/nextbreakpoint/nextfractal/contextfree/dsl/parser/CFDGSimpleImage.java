@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -41,7 +41,7 @@ public class CFDGSimpleImage implements CFDGImage {
     }
 
     @Override
-    public CFRenderer open(int width, int height, String seed) {
+    public CFRenderer createRenderer(int width, int height, String seed) {
         cfdg.rulesLoaded();
         final CFDGRenderer renderer = cfdg.createRenderer(width, height, 1, seed.hashCode(), 0.1);
         return new DefaultRenderer(cfdg, renderer);

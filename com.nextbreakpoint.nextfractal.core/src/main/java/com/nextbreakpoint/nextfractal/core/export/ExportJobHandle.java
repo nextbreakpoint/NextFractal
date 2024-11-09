@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -32,8 +32,8 @@ public class ExportJobHandle {
     @Getter
     private final ExportJob job;
 
-    private volatile ExportJobState state;
-    private volatile Throwable error;
+    private ExportJobState state;
+    private Throwable error;
 
     public ExportJobHandle(ExportJob job) {
         this.job = Objects.requireNonNull(job);
@@ -55,17 +55,5 @@ public class ExportJobHandle {
 
     public void setState(ExportJobState state) {
         setState(state, null);
-    }
-
-    public synchronized boolean isInterrupted() {
-        return state == ExportJobState.INTERRUPTED;
-    }
-
-    public synchronized boolean isCompleted() {
-        return state == ExportJobState.COMPLETED;
-    }
-
-    public synchronized boolean isReady() {
-        return state == ExportJobState.READY;
     }
 }

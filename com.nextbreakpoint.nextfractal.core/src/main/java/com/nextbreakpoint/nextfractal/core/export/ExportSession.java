@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -34,6 +34,8 @@ import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import lombok.Getter;
 
 import java.io.File;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +61,8 @@ public final class ExportSession {
 	private final int frameRate;
 	@Getter
 	private final float quality;
+	@Getter
+	private final Instant timestamp;
 
 	private final List<ExportJob> jobs = new ArrayList<>();
 	private final List<AnimationFrame> frames = new ArrayList<>();
@@ -74,10 +78,15 @@ public final class ExportSession {
 		this.frameRate = Constants.FRAMES_PER_SECOND;
 		createFrames(session, clips);
 		jobs.addAll(createJobs());
+		timestamp = Instant.now(Clock.systemUTC());
 	}
 
     public int getFrameCount() {
 		return frames.size();
+	}
+
+	public long getDurationInSeconds() {
+		return (long) Math.rint(getFrameCount() / (float) getFrameRate());
 	}
 
 	public List<ExportJob> getJobs() {

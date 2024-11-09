@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -52,6 +52,10 @@ public class ExecutorUtils {
 
     public static ScheduledExecutorService newSingleThreadScheduledExecutor(ThreadFactory threadFactory) {
         return Executors.newSingleThreadScheduledExecutor(threadFactory);
+    }
+
+    public static ExecutorService newThreadPerTaskExecutor(ThreadFactory threadFactory) {
+        return Executors.newThreadPerTaskExecutor(threadFactory);
     }
 
     public static void shutdown(ExecutorService executor) {

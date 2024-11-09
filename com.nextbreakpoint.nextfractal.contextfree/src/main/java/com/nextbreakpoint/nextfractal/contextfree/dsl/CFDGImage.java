@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,5 +25,5 @@
 package com.nextbreakpoint.nextfractal.contextfree.dsl;
 
 public interface CFDGImage {
-    CFRenderer open(int width, int height, String seed);
+    CFRenderer createRenderer(int width, int height, String seed);
 }

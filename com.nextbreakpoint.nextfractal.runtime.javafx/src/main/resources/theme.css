@@ -1,11 +1,25 @@
 .root {
-	-fx-background-color: #444444;
+	-fx-background-color: #FFFFFF;
+}
+
+.text-area {
+	-fx-focus-color: transparent;
+	-fx-faint-focus-color: transparent;
+}
+
+.text-area .content {
+    -fx-background-color: -fx-control-inner-background;
+}
+
+.text-area:focused .content {
+    -fx-background-color: -fx-control-inner-background;
 }
 
 .scroll-pane {
-	-fx-background-color: transparent;
+	-fx-background-color: white;
 	-fx-hbar-policy: never;
 	-fx-vbar-policy: never;
+	-fx-padding: 0;
 }
 
 .scroll-pane > .viewport {
@@ -14,42 +28,6 @@
 
 .button :disabled {
     -fx-opacity: 0.5;
-}
-
-.source-editor ParagraphText {
-    -fx-tab-size: 2;
-    -fx-fill: #202020;
-}
-
-.source-editor .error {
-    -fx-fill: #FF2020;
-    -fx-font-weight: bold;
-}
-
-.list-view {
-	-fx-background-color: white white black black;
-	-fx-background-insets: 0, 0, 1, 2;
-	-fx-border-width: 0 0 0 0;
-}
-
-.list-view:focused {
-	-fx-background-color: white white black black;
-	-fx-background-insets: 0, 0, 1, 2;
-	-fx-border-width: 0 0 0 0;
-}
-
-.application .side-pane {
-	-fx-background-color: #FFFFFF;
-	-fx-border-width: 0 0 0 1;
-	-fx-border-color: #b0b0b0;
-}
-
-.application .central-pane {
-	-fx-background-color: #FFFFFF;
-}
-
-.application .filler-pane {
-	-fx-background-color: #FFFFFF;
 }
 
 .application .toolbar {
@@ -96,8 +74,28 @@
 
 .application .sidebar {
 	-fx-background-color: white;
-	-fx-border-width: 0 0 1 1;
+	-fx-border-width: 0 0 0 1;
 	-fx-border-color: #f0f0f0;
+}
+
+.application .history .grid-view {
+	-fx-background-color: white;
+    -fx-opacity: 1.0;
+}
+
+.application .history .grid-view-cell {
+    -fx-padding: 2;
+}
+
+.application .history .grid-view-cell-overlay {
+    -fx-padding: 0;
+}
+
+.application .history .grid-view-cell-details {
+	-fx-background-color: white;
+    -fx-opacity: 0.7;
+    -fx-font-size: 0.8em;
+    -fx-padding: 6;
 }
 
 .application .browse {
@@ -114,6 +112,7 @@
 
 .application .browse .toolbar {
 	-fx-padding: 0px 0px 0px 10px;
+	-fx-opacity: 0.9;
 }
 
 .application .browse .controls {
@@ -124,12 +123,34 @@
 	-fx-alignment: center-left;
 	-fx-background-color: white;
 	-fx-min-height: 60px;
-	-fx-opacity: 0.95;
 	-fx-padding: 0 20px 0 20px;
 }
 
 .application .browse .grid-view {
 	-fx-background-color: white;
+    -fx-opacity: 0.9;
+}
+
+.application .browse .grid-view-cell {
+    -fx-padding: 2;
+}
+
+.application .browse .grid-view-cell-overlay {
+    -fx-padding: 0;
+}
+
+.application .browse .grid-view-cell-title {
+	-fx-background-color: white;
+    -fx-opacity: 0.7;
+    -fx-font-size: 0.8em;
+    -fx-padding: 6;
+}
+
+.application .browse .grid-view-cell-details {
+	-fx-background-color: white;
+    -fx-opacity: 0.8;
+    -fx-font-size: 0.8em;
+    -fx-padding: 6;
 }
 
 .application .browse .items-label {
@@ -170,36 +191,80 @@
 	-fx-background-color: white;
 }
 
-.application .export .list-view .label {
-	-fx-padding: 0 8px 0 0;
-}
-
 .application .export .controls {
 	-fx-border-width: 1 0 0 0;
 	-fx-border-color: #f0f0f0;
 	-fx-padding: 8px;
 }
 
+.application .export .grid-view {
+	-fx-background-color: white;
+    -fx-opacity: 1.0;
+}
+
+.application .export .grid-view-cell {
+    -fx-padding: 2;
+}
+
+.application .export .grid-view-cell-overlay {
+    -fx-padding: 0;
+}
+
+.application .export .grid-view-cell-title {
+	-fx-background-color: white;
+    -fx-opacity: 0.7;
+    -fx-font-size: 0.8em;
+    -fx-padding: 6;
+}
+
+.application .export .grid-view-cell-details {
+	-fx-background-color: white;
+    -fx-opacity: 0.8;
+    -fx-font-size: 0.9em;
+    -fx-padding: 6;
+}
+
 .application .jobs {
 	-fx-background-color: white;
 }
 
-.application .jobs .list-view .label {
-	-fx-padding: 0 8px 0 0;
-}
-
 .application .jobs .details {
-	-fx-border-width: 1 0 1 0;
+	-fx-border-width: 1 0 0 0;
 	-fx-border-color: #f0f0f0;
 	-fx-padding: 16px;
 }
 
 .application .jobs .toolbar {
+	-fx-border-width: 1 0 0 0;
+	-fx-border-color: #f0f0f0;
 	-fx-padding: 8px;
 }
 
-.application .history .list-view .label {
-	-fx-padding: 0 8px 0 0;
+.application .jobs .grid-view {
+	-fx-background-color: white;
+    -fx-opacity: 1.0;
+}
+
+.application .jobs .grid-view-cell {
+    -fx-padding: 2;
+}
+
+.application .jobs .grid-view-cell-overlay {
+    -fx-padding: 0;
+}
+
+.application .jobs .grid-view-cell-title {
+	-fx-background-color: white;
+    -fx-opacity: 0.7;
+    -fx-font-size: 0.8em;
+    -fx-padding: 6;
+}
+
+.application .jobs .grid-view-cell-details {
+	-fx-background-color: white;
+    -fx-opacity: 0.8;
+    -fx-font-size: 0.9em;
+    -fx-padding: 8;
 }
 
 .application .source {
@@ -216,15 +281,17 @@
 	-fx-border-color: red;
 }
 
-.application .translucent {
-	-fx-background-color: white;
-	-fx-opacity: 0.9;
-}
-
-.application .opaque {
-	-fx-background-color: white;
-}
-
 .application .text-small {
     -fx-font-size: 0.9em;
 }
+
+.application .source-editor ParagraphText {
+    -fx-tab-size: 2;
+    -fx-fill: #202020;
+}
+
+.application .source-editor .error {
+    -fx-fill: #FF2020;
+    -fx-font-weight: bold;
+}
+

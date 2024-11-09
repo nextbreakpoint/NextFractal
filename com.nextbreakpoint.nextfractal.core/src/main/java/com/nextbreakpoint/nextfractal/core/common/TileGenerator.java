@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -42,8 +42,6 @@ import java.util.concurrent.ThreadFactory;
 //TODO move to other package
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TileGenerator {
-    private static final ThreadFactory THREAD_FACTORY = ThreadUtils.createPlatformThreadFactory(TileGenerator.class.getName());
-
     public static TileRequest createTileRequest(int size, int rows, int cols, int row, int col, Bundle bundle) {
         validateParameters(size, cols, rows, row, col);
 
@@ -65,8 +63,10 @@ public class TileGenerator {
 
         final Session session = request.session();
 
+        final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory(TileGenerator.class.getName());
+
         final ImageComposer composer = Command.of(Plugins.tryFindFactory(session.pluginId()))
-                .map(factory -> factory.createImageComposer(THREAD_FACTORY, renderTile, true))
+                .map(factory -> factory.createImageComposer(threadFactory, renderTile, true))
                 .execute()
                 .orThrow()
                 .optional()

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -28,4 +28,5 @@ import com.nextbreakpoint.nextfractal.core.javafx.Tool;
 import lombok.Builder;
 
 @Builder
-public record ActiveToolChanged(Tool tool) {}
+public record ActiveToolChanged(Tool tool) {
+}

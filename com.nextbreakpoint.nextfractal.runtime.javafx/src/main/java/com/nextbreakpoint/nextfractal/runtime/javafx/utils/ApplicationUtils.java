@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -28,15 +28,11 @@ import com.nextbreakpoint.common.command.Command;
 import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.AnimationClip;
 import com.nextbreakpoint.nextfractal.core.common.CoreFactory;
-import com.nextbreakpoint.nextfractal.core.common.FileManager;
 import com.nextbreakpoint.nextfractal.core.common.Plugins;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.encoder.Encoder;
 import com.nextbreakpoint.nextfractal.core.export.ExportSession;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.UIFactory;
 import com.nextbreakpoint.nextfractal.core.javafx.UIPlugins;
 import javafx.geometry.Rectangle2D;
@@ -63,7 +59,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import static com.nextbreakpoint.nextfractal.core.common.Plugins.tryFindEncoder;
-import static com.nextbreakpoint.nextfractal.core.javafx.UIPlugins.tryFindFactory;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log
@@ -76,19 +71,6 @@ public class ApplicationUtils {
 
     public static void printPlugins() {
         Plugins.factories().forEach(plugin -> log.fine("Found plugin " + plugin.getId()));
-    }
-
-    public static Either<BrowseBitmap> createBitmap(File file, Size size) {
-        return Command.of(FileManager.loadBundle(file))
-                .flatMap(bundle -> Command.of(tryFindFactory(bundle.session().pluginId()))
-                .flatMap(factory -> Command.of(() -> factory.createBitmap(bundle.session(), size))))
-                .execute();
-    }
-
-    public static Either<GridItemRenderer> createRenderer(Bitmap bitmap) {
-        return Command.of(tryFindFactory(((Session) bitmap.getProperty("session")).pluginId()))
-                .flatMap(factory -> Command.of(() -> factory.createRenderer(bitmap)))
-                .execute();
     }
 
     public static void loadStyleSheets(Scene scene) {
@@ -164,13 +146,13 @@ public class ApplicationUtils {
     }
 
     public static String getApplicationName() {
-        return "NextFractal 2.3.2";
+        return "NextFractal 2.4.0";
     }
 
     public static String getNoticeMessage() {
         return """
 
-                NextFractal 2.3.2
+                NextFractal 2.4.0
 
                 https://github.com/nextbreakpoint/nextfractal
 

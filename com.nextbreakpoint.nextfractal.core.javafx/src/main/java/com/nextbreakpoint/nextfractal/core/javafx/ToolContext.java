@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -27,17 +27,17 @@ package com.nextbreakpoint.nextfractal.core.javafx;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 
 public interface ToolContext<T> {
-	double getWidth();
+    double getWidth();
 
-	double getHeight();
+    double getHeight();
 
-	GraphicsFactory getGraphicsFactory();
+    GraphicsFactory getGraphicsFactory();
 
-	T getMetadata();
+    T getMetadata();
 
-	void setView(T metadata, boolean continuous, boolean appendHistory);
+    void setView(T metadata, boolean continuous, boolean appendHistory);
 
-	void setTime(T metadata, boolean continuous, boolean appendHistory);
+    void setTime(T metadata, boolean continuous, boolean appendHistory);
 
-	void setPoint(T metadata, boolean continuous, boolean appendHistory);
+    void setPoint(T metadata, boolean continuous, boolean appendHistory);
 }

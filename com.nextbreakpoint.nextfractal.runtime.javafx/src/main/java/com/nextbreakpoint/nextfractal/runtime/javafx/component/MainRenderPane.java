@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -31,7 +31,18 @@ import lombok.extern.java.Log;
 
 @Log
 public class MainRenderPane extends BorderPane {
-    public MainRenderPane(PlatformEventBus eventBus, int width, int height) {
-        setCenter(new Viewer(eventBus, width, height));
+    private final Viewer viewer;
+
+    public MainRenderPane(PlatformEventBus eventBus) {
+        viewer = new Viewer(eventBus);
+        setCenter(viewer);
+    }
+
+    public void enable() {
+        viewer.enable();
+    }
+
+    public void disable() {
+        viewer.disable();
     }
 }

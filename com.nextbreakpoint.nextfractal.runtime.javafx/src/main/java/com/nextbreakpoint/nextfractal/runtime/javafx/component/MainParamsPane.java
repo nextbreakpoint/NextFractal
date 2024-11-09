@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -29,7 +29,7 @@ import com.nextbreakpoint.nextfractal.core.event.EditorGrammarSelected;
 import com.nextbreakpoint.nextfractal.core.event.EditorParamsActionFired;
 import com.nextbreakpoint.nextfractal.core.event.SessionDataLoaded;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
-import com.nextbreakpoint.nextfractal.core.javafx.params.MetadataEditor;
+import com.nextbreakpoint.nextfractal.core.javafx.parameter.MetadataEditor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -45,16 +45,14 @@ import static com.nextbreakpoint.nextfractal.core.common.Plugins.listGrammars;
 
 @Log
 public class MainParamsPane extends Pane {
-	private static final int SPACING = 5;
-
 	private final VBox paramsBox;
 	private Session session;
 
 	public MainParamsPane(PlatformEventBus eventBus) {
-		final VBox box = new VBox(SPACING * 2);
+		final VBox box = new VBox();
 		box.getStyleClass().add("params");
 
-		final VBox grammarPane = new VBox(SPACING);
+		final VBox grammarPane = new VBox(5);
 
 		final Label grammarLabel = new Label("Project grammar");
 		grammarPane.getChildren().add(grammarLabel);
@@ -114,9 +112,9 @@ public class MainParamsPane extends Pane {
 			}
 		});
 
-		cancelButton.setOnAction(e -> eventBus.postEvent(EditorParamsActionFired.builder().action("cancel").build()));
+		cancelButton.setOnAction(_ -> eventBus.postEvent(EditorParamsActionFired.builder().action("cancel").build()));
 		
-		applyButton.setOnAction((e) -> eventBus.postEvent(EditorParamsActionFired.builder().action("apply").build()));
+		applyButton.setOnAction(_ -> eventBus.postEvent(EditorParamsActionFired.builder().action("apply").build()));
 
 		eventBus.subscribe(SessionDataLoaded.class.getSimpleName(), event -> handleSessionDataLoaded(grammarCombobox, (SessionDataLoaded) event));
 	}

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -28,14 +28,14 @@ import com.nextbreakpoint.nextfractal.core.graphics.Font;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 
 public class JavaFXFont implements Font {
-	private final javafx.scene.text.Font font;
+    private final javafx.scene.text.Font font;
 
-	public JavaFXFont(javafx.scene.text.Font font) {
-		this.font = font;
-	}
+    public JavaFXFont(javafx.scene.text.Font font) {
+        this.font = font;
+    }
 
-	@Override
-	public void setFont(GraphicsContext context) {
-		((JavaFXGraphicsContext)context).getGraphicsContext().setFont(font);
-	}
+    @Override
+    public void setFont(GraphicsContext context) {
+        ((JavaFXGraphicsContext) context).getGraphicsContext().setFont(font);
+    }
 }

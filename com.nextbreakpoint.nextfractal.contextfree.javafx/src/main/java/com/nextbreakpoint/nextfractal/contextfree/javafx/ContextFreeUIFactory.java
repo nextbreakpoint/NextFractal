@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -33,9 +33,11 @@ import com.nextbreakpoint.nextfractal.contextfree.graphics.Coordinator;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeMetadata;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParamsStrategy;
 import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeParserStrategy;
+import com.nextbreakpoint.nextfractal.contextfree.module.ContextFreeSession;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -43,10 +45,9 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
-import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageDescriptor;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
@@ -71,28 +72,28 @@ public class ContextFreeUIFactory implements UIFactory {
 	}
 
 	@Override
-	public GridItemRenderer createRenderer(Bitmap bitmap) {
+	public ImageRenderer createImageRenderer(ImageDescriptor descriptor, RendererDelegate delegate) {
+		final ContextFreeSession session = (ContextFreeSession) descriptor.getSession();
+		final ContextFreeMetadata metadata = (ContextFreeMetadata) session.metadata();
 		final Map<String, Integer> hints = new HashMap<>();
-		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
+		final Tile tile = GraphicsUtils.createTile(descriptor.getWidth(), descriptor.getHeight());
 		final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("ContextFree Browser");
 		final GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 		final Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
-		final CFDGImage cfdgImage = (CFDGImage)bitmap.getProperty("image");
-		final Session session = (Session)bitmap.getProperty("session");
-		coordinator.setImage(cfdgImage, ((ContextFreeMetadata)session.metadata()).getSeed());
+		final CFDGImage cfdgImage = (CFDGImage)descriptor.getProperty("image");
+		coordinator.setImage(cfdgImage, metadata.getSeed());
+		coordinator.setDelegate(delegate);
 		coordinator.init();
-		coordinator.run();
-		return new GridItemRendererAdapter(coordinator);
+		return new RendererAdapter(coordinator);
 	}
 
 	@Override
-	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
+	public ImageDescriptor createImageDescriptor(Session session, Size size) throws Exception {
 		final CFParser compiler = new CFParser();
 		final CFParserResult report = compiler.parse(session.script());
-		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
-		bitmap.setProperty("image", report.classFactory().create());
-		bitmap.setProperty("session", session);
-		return bitmap;
+		final ImageDescriptor descriptor = new ImageDescriptor(session, size.width(), size.height());
+		descriptor.setProperty("image", report.classFactory().create());
+		return descriptor;
 	}
 
 	@Override
@@ -147,11 +148,16 @@ public class ContextFreeUIFactory implements UIFactory {
 		return new ContextFreeToolContext(renderingContext, (ContextFreeRenderingStrategy) renderingStrategy, delegate, width, height);
 	}
 
-	private static class GridItemRendererAdapter implements GridItemRenderer {
+	private static class RendererAdapter implements ImageRenderer {
 		private final Coordinator coordinator;
 
-		public GridItemRendererAdapter(Coordinator coordinator) {
+		public RendererAdapter(Coordinator coordinator) {
 			this.coordinator = coordinator;
+		}
+
+		@Override
+		public void run() {
+			coordinator.run();
 		}
 
 		@Override
@@ -177,6 +183,16 @@ public class ContextFreeUIFactory implements UIFactory {
 		@Override
 		public void drawImage(GraphicsContext gc, int x, int y) {
 			coordinator.drawImage(gc, x, y);
+		}
+
+		@Override
+		public boolean isInterrupted() {
+			return coordinator.isInterrupted();
+		}
+
+		@Override
+		public boolean isCompleted() {
+			return coordinator.getProgress() == 1;
 		}
 	}
 }

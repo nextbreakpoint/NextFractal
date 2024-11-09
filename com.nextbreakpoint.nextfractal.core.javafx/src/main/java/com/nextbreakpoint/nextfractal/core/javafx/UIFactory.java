@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -28,6 +28,7 @@ import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.javafx.viewer.Toolbar;
@@ -36,29 +37,29 @@ import javafx.scene.layout.Pane;
 import java.util.function.Supplier;
 
 public interface UIFactory {
-	String getId();
+    String getId();
 
-	GridItemRenderer createRenderer(Bitmap bitmap) throws Exception;
+    ImageRenderer createImageRenderer(ImageDescriptor descriptor, RendererDelegate delegate) throws Exception;
 
-	BrowseBitmap createBitmap(Session session, Size size) throws Exception;
+    ImageDescriptor createImageDescriptor(Session session, Size size) throws Exception;
 
-	Either<String> loadResource(String resourceName);
+    Either<String> loadResource(String resourceName);
 
-	ParserStrategy createParserStrategy();
+    ParserStrategy createParserStrategy();
 
-	ParamsStrategy createParamsStrategy();
+    ParamsStrategy createParamsStrategy();
 
-	RenderingContext createRenderingContext();
+    RenderingContext createRenderingContext();
 
-	MetadataDelegate createMetadataDelegate(EventBusPublisher publisher, Supplier<Session> supplier);
+    MetadataDelegate createMetadataDelegate(EventBusPublisher publisher, Supplier<Session> supplier);
 
-	RenderingStrategy createRenderingStrategy(RenderingContext renderingContext, MetadataDelegate delegate, int width, int height);
+    RenderingStrategy createRenderingStrategy(RenderingContext renderingContext, MetadataDelegate delegate, int width, int height);
 
-	KeyHandler createKeyHandler(RenderingContext renderingContext, MetadataDelegate delegate);
+    KeyHandler createKeyHandler(RenderingContext renderingContext, MetadataDelegate delegate);
 
-	Pane createRenderingPanel(RenderingContext renderingContext, int width, int height);
+    Pane createRenderingPanel(RenderingContext renderingContext, int width, int height);
 
-	Toolbar createToolbar(EventBusPublisher publisher, MetadataDelegate delegate, ToolContext<? extends Metadata> toolContext);
+    Toolbar createToolbar(EventBusPublisher publisher, MetadataDelegate delegate, ToolContext<? extends Metadata> toolContext);
 
-	ToolContext<? extends Metadata> createToolContext(RenderingContext renderingContext, RenderingStrategy renderingStrategy, MetadataDelegate delegate, int width, int height);
+    ToolContext<? extends Metadata> createToolContext(RenderingContext renderingContext, RenderingStrategy renderingStrategy, MetadataDelegate delegate, int width, int height);
 }

@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -28,6 +28,7 @@ import com.nextbreakpoint.nextfractal.core.graphics.Size;
 
 import java.nio.IntBuffer;
 
+//TODO this interface is the same as ImageGenerator
 public interface ImageComposer {
 	/**
 	 * @param script

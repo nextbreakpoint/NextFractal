@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -35,18 +35,13 @@ import com.nextbreakpoint.nextfractal.core.event.PlaybackStarted;
 import com.nextbreakpoint.nextfractal.core.event.PlaybackStopped;
 import com.nextbreakpoint.nextfractal.core.event.SessionTerminated;
 import com.nextbreakpoint.nextfractal.core.event.ToggleBrowserRequested;
-import com.nextbreakpoint.nextfractal.core.graphics.Size;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseDelegate;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowsePane;
-import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.PlatformEventBus;
-import com.nextbreakpoint.nextfractal.core.javafx.PlaybackDelegate;
-import com.nextbreakpoint.nextfractal.core.javafx.PlaybackPane;
-import com.nextbreakpoint.nextfractal.core.javafx.RecordingPane;
-import com.nextbreakpoint.nextfractal.runtime.javafx.utils.ApplicationUtils;
+import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowseDelegate;
+import com.nextbreakpoint.nextfractal.core.javafx.browse.BrowsePane;
+import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
+import com.nextbreakpoint.nextfractal.core.javafx.playback.PlaybackDelegate;
+import com.nextbreakpoint.nextfractal.core.javafx.playback.PlaybackPane;
+import com.nextbreakpoint.nextfractal.core.javafx.playback.RecordingPane;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
@@ -54,18 +49,16 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.File;
 import java.util.List;
 
 public class MainCentralPane extends BorderPane {
-    public MainCentralPane(PlatformEventBus eventBus, int width, int height, File workspace, File examples) {
-        final MainRenderPane renderPane = new MainRenderPane(eventBus, width, height);
+    public MainCentralPane(PlatformEventBus eventBus, File workspace, File examples) {
+        final MainRenderPane renderPane = new MainRenderPane(eventBus);
 
-        final BrowsePane browsePane = new BrowsePane(width, height, workspace, examples);
-        browsePane.setClip(new Rectangle(0, 0, width, height));
+        final BrowsePane browsePane = new BrowsePane(workspace, examples);
 
         final PlaybackPane playbackPane = new PlaybackPane();
         final RecordingPane recordingPane = new RecordingPane();
@@ -90,16 +83,6 @@ public class MainCentralPane extends BorderPane {
             @Override
 			public void didClose(BrowsePane source) {
                 eventBus.postEvent(ToggleBrowserRequested.builder().build());
-			}
-
-            @Override
-            public BrowseBitmap createBitmap(File file, Size size) throws Exception {
-                return ApplicationUtils.createBitmap(file, size).orThrow().get();
-            }
-
-			@Override
-			public GridItemRenderer createRenderer(Bitmap bitmap) throws Exception {
-				return ApplicationUtils.createRenderer(bitmap).orThrow().get();
 			}
 		});
 
@@ -143,28 +126,31 @@ public class MainCentralPane extends BorderPane {
 
         setCenter(stackPane);
 
-        browsePane.setTranslateY(-height);
-
         widthProperty().addListener((_, _, newValue) -> {
-            renderPane.setPrefWidth(newValue.doubleValue());
-            browsePane.setPrefWidth(newValue.doubleValue());
-            playbackPane.setPrefWidth(newValue.doubleValue());
-            recordingPane.setPrefWidth(newValue.doubleValue());
+            final double width = newValue.doubleValue();
+            renderPane.setPrefWidth(width);
+            browsePane.setPrefWidth(width);
+            playbackPane.setPrefWidth(width);
+            recordingPane.setPrefWidth(width);
         });
 
         heightProperty().addListener((_, _, newValue) -> {
-            renderPane.setPrefHeight(newValue.doubleValue());
-            browsePane.setPrefHeight(newValue.doubleValue());
-            playbackPane.setPrefHeight(newValue.doubleValue());
-            recordingPane.setPrefHeight(newValue.doubleValue());
+            final double height = newValue.doubleValue();
+            renderPane.setPrefHeight(height);
+            browsePane.setPrefHeight(height);
+            playbackPane.setPrefHeight(height);
+            recordingPane.setPrefHeight(height);
+            browsePane.setTranslateY(-height);
         });
 
         toggleProperty.addListener((_, _, newValue) -> {
             if (newValue) {
-                showBrowser(browserTransition, _ -> {});
+                browsePane.enable();
+                showBrowser(browserTransition, _ -> renderPane.disable());
                 browsePane.reload();
             } else {
-                hideBrowser(browserTransition, _ -> {});
+                renderPane.enable();
+                hideBrowser(browserTransition, _ -> browsePane.disable());
             }
         });
 
@@ -199,6 +185,8 @@ public class MainCentralPane extends BorderPane {
             recordingPane.setVisible(false);
             recordingPane.stop();
         });
+
+        renderPane.enable();
     }
 
 //    private void handleHideControls(FadeTransition transition, Boolean hide) {

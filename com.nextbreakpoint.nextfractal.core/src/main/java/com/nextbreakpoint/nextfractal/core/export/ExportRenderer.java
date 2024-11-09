@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -26,10 +26,6 @@ package com.nextbreakpoint.nextfractal.core.export;
 
 import com.nextbreakpoint.nextfractal.core.common.AnimationFrame;
 
-import java.util.concurrent.Future;
-
 public interface ExportRenderer {
-	Future<ExportJobHandle> dispatch(ExportJobHandle job, AnimationFrame frame);
-
-	void dispose();
+	ExportJobHandle execute(ExportJobHandle job, AnimationFrame frame);
 }

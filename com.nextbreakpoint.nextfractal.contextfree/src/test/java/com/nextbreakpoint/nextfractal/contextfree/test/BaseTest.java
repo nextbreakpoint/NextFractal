@@ -1,6 +1,7 @@
 package com.nextbreakpoint.nextfractal.contextfree.test;
 
 import com.nextbreakpoint.common.command.Command;
+import com.nextbreakpoint.common.either.Either;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDG;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGBuilder;
 import com.nextbreakpoint.nextfractal.contextfree.dsl.parser.CFDGSystem;
@@ -23,10 +24,17 @@ import java.util.function.Function;
 
 public abstract class BaseTest {
 	protected CFDG parseSource(String resourceName) {
-		return Command.of(() -> parseSource(resourceName, "CFDG3", ContextFreeParser::cfdg3)).execute()
-				.or(() -> Command.of(() -> parseSource(resourceName, "CFDG2", ContextFreeParser::cfdg2)).execute())
-				.optional()
-				.orElseThrow();
+		return parseCFDG3(resourceName).or(() -> parseCFDG2(resourceName)).optional().orElseThrow();
+	}
+
+	private Either<CFDG> parseCFDG3(String resourceName) {
+		return Command.of(() -> parseSource(resourceName, "CFDG3", ContextFreeParser::cfdg3))
+				.execute().observe().onFailure(System.out::println).get();
+	}
+
+	private Either<CFDG> parseCFDG2(String resourceName) {
+		return Command.of(() -> parseSource(resourceName, "CFDG2", ContextFreeParser::cfdg2))
+				.execute().observe().onFailure(System.out::println).get();
 	}
 
 	private CFDG parseSource(String resourceName, String version, Function<ContextFreeParser, ParseTree> callback) throws IOException {

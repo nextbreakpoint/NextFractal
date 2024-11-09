@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.nextbreakpoint</groupId>
         <artifactId>com.nextbreakpoint.nextfractal</artifactId>
-        <version>2.3.2</version>
+        <version>2.4.0</version>
     </parent>
     <artifactId>com.nextbreakpoint.nextfractal.main</artifactId>
     <packaging>pom</packaging>
@@ -77,7 +77,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>${maven-dependency-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-jars</id>
@@ -166,7 +165,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>${maven-dependency-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-jars</id>
@@ -255,7 +253,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>${maven-dependency-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-jars</id>

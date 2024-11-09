@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -30,6 +30,7 @@ import com.nextbreakpoint.nextfractal.core.common.Integer4D;
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.ParamsStrategy;
 import com.nextbreakpoint.nextfractal.core.common.ParserStrategy;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.Session;
 import com.nextbreakpoint.nextfractal.core.common.ThreadUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
@@ -37,10 +38,9 @@ import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsUtils;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
-import com.nextbreakpoint.nextfractal.core.javafx.Bitmap;
-import com.nextbreakpoint.nextfractal.core.javafx.BrowseBitmap;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
-import com.nextbreakpoint.nextfractal.core.javafx.GridItemRenderer;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageDescriptor;
+import com.nextbreakpoint.nextfractal.core.javafx.ImageRenderer;
 import com.nextbreakpoint.nextfractal.core.javafx.KeyHandler;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.RenderingContext;
@@ -79,43 +79,42 @@ public class MandelbrotUIFactory implements UIFactory {
 	}
 
 	@Override
-	public GridItemRenderer createRenderer(Bitmap bitmap) {
-		final MandelbrotSession session = (MandelbrotSession)bitmap.getProperty("session");
+	public ImageRenderer createImageRenderer(ImageDescriptor descriptor, RendererDelegate delegate) {
+		final MandelbrotSession session = (MandelbrotSession) descriptor.getSession();
+		final MandelbrotMetadata metadata = (MandelbrotMetadata) session.metadata();
 		final Map<String, Integer> hints = new HashMap<>();
 		hints.put(Coordinator.KEY_TYPE, Coordinator.VALUE_REALTIME);
 		hints.put(Coordinator.KEY_MULTITHREAD, Coordinator.VALUE_SINGLE_THREAD);
-		final Tile tile = GraphicsUtils.createTile(bitmap.getWidth(), bitmap.getHeight());
+		final Tile tile = GraphicsUtils.createTile(descriptor.getWidth(), descriptor.getHeight());
 		final ThreadFactory threadFactory = ThreadUtils.createPlatformThreadFactory("Mandelbrot Browser");
 		final GraphicsFactory graphicsFactory = GraphicsUtils.findGraphicsFactory("JavaFX");
 		final Coordinator coordinator = new Coordinator(threadFactory, graphicsFactory, tile, hints);
-		final Orbit orbit = (Orbit)bitmap.getProperty("orbit");
-		final Color color = (Color)bitmap.getProperty("color");
+		final Orbit orbit = (Orbit)descriptor.getProperty("orbit");
+		final Color color = (Color)descriptor.getProperty("color");
 		coordinator.setOrbitAndColor(orbit, color);
+		coordinator.setDelegate(delegate);
 		coordinator.init();
-		final MandelbrotMetadata data = (MandelbrotMetadata) session.metadata();
 		final View view = new View();
-		view.setTranslation(data.getTranslation());
-		view.setRotation(data.getRotation());
-		view.setScale(data.getScale());
+		view.setTranslation(metadata.getTranslation());
+		view.setRotation(metadata.getRotation());
+		view.setScale(metadata.getScale());
 		view.setState(new Integer4D(0, 0, 0, 0));
-		view.setPoint(new ComplexNumber(data.getPoint().x(), data.getPoint().y()));
-		view.setJulia(data.isJulia());
+		view.setPoint(new ComplexNumber(metadata.getPoint().x(), metadata.getPoint().y()));
+		view.setJulia(metadata.isJulia());
 		coordinator.setView(view);
-		coordinator.run();
-		return new GridItemRendererAdapter(coordinator);
+		return new RendererAdapter(coordinator);
 	}
 
 	@Override
-	public BrowseBitmap createBitmap(Session session, Size size) throws Exception {
+	public ImageDescriptor createImageDescriptor(Session session, Size size) throws Exception {
 		final DSLParser parser = new DSLParser(getPackageName(), getClassName());
 		final DSLParserResult parserResult = parser.parse(session.script());
 		final Orbit orbit = parserResult.orbitClassFactory().create();
 		final Color color = parserResult.colorClassFactory().create();
-		final BrowseBitmap bitmap = new BrowseBitmap(size.width(), size.height(), null);
-		bitmap.setProperty("orbit", orbit);
-		bitmap.setProperty("color", color);
-		bitmap.setProperty("session", session);
-		return bitmap;
+		final ImageDescriptor descriptor = new ImageDescriptor(session, size.width(), size.height());
+		descriptor.setProperty("orbit", orbit);
+		descriptor.setProperty("color", color);
+		return descriptor;
 	}
 
 	@Override
@@ -191,11 +190,16 @@ public class MandelbrotUIFactory implements UIFactory {
 		}
 	}
 
-	private static class GridItemRendererAdapter implements GridItemRenderer {
+	private static class RendererAdapter implements ImageRenderer {
 		private final Coordinator coordinator;
 
-		public GridItemRendererAdapter(Coordinator coordinator) {
+		public RendererAdapter(Coordinator coordinator) {
 			this.coordinator = coordinator;
+		}
+
+		@Override
+		public void run() {
+			coordinator.run();
 		}
 
 		@Override
@@ -221,6 +225,16 @@ public class MandelbrotUIFactory implements UIFactory {
 		@Override
 		public void drawImage(GraphicsContext gc, int x, int y) {
 			coordinator.drawImage(gc, x, y);
+		}
+
+		@Override
+		public boolean isInterrupted() {
+			return coordinator.isInterrupted();
+		}
+
+		@Override
+		public boolean isCompleted() {
+			return coordinator.getProgress() == 1;
 		}
 	}
 

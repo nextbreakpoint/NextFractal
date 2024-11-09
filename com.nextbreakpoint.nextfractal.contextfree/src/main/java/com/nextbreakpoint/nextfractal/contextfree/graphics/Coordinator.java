@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -25,32 +25,38 @@
 package com.nextbreakpoint.nextfractal.contextfree.graphics;
 
 import com.nextbreakpoint.nextfractal.contextfree.dsl.CFDGImage;
+import com.nextbreakpoint.nextfractal.core.common.RendererDelegate;
 import com.nextbreakpoint.nextfractal.core.common.ScriptError;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsContext;
 import com.nextbreakpoint.nextfractal.core.graphics.GraphicsFactory;
 import com.nextbreakpoint.nextfractal.core.graphics.Size;
 import com.nextbreakpoint.nextfractal.core.graphics.Tile;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
-public class Coordinator implements RendererDelegate {
+public class Coordinator {
 	private final ThreadFactory threadFactory;
 	private final GraphicsFactory renderFactory;
+	@Getter
+	private volatile float progress;
 	@Getter
 	private volatile List<ScriptError> errors;
 	private volatile boolean imageChanged;
 	private Renderer renderer;
+	@Setter
+	private volatile RendererDelegate delegate;
 
 	public Coordinator(ThreadFactory threadFactory, GraphicsFactory renderFactory, Tile tile, Map<String, Integer> hints) {
 		this.threadFactory = threadFactory;
 		this.renderFactory = renderFactory;
 		errors = new ArrayList<>();
 		renderer = createRenderer(tile);
-		renderer.setDelegate(this);
+		renderer.setDelegate(this::onImageUpdated);
 	}
 
 	public final void dispose() {
@@ -67,12 +73,6 @@ public class Coordinator implements RendererDelegate {
 
 	public void run() {
 		renderer.runTask();
-	}
-
-	@Override
-	public void onImageUpdated(float progress, List<ScriptError> errors) {
-		this.errors = errors;
-		this.imageChanged = true;
 	}
 
 	public boolean hasImageChanged() {
@@ -101,6 +101,10 @@ public class Coordinator implements RendererDelegate {
 		renderer.drawImage(gc, x, y);
 	}
 
+	public boolean isInitialized() {
+		return renderer.isInitialized();
+	}
+
 //	public void drawImage(final GraphicsContext gc, final int x, final int y, final int w, final int h) {
 //		renderer.drawImage(gc, x, y, w, h);
 //	}
@@ -116,7 +120,16 @@ public class Coordinator implements RendererDelegate {
 		return new Renderer(threadFactory, renderFactory, tile);
 	}
 
-    public boolean isInitialized() {
-		return renderer.isInitialized();
-    }
+	private void onImageUpdated(float progress, List<ScriptError> errors) {
+		this.progress = progress;
+		this.errors = errors;
+		this.imageChanged = true;
+		if (delegate != null) {
+			delegate.onImageUpdated(progress, errors);
+		}
+	}
+
+	public boolean isInterrupted() {
+		return renderer.isInterrupted();
+	}
 }

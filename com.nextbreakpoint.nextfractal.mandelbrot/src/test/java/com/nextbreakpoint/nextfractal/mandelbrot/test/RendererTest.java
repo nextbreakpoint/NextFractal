@@ -42,7 +42,7 @@ public class RendererTest {
 			renderer.init();
 			renderer.setContentRegion(renderer.getInitialRegion());
 			List<Float> output = new ArrayList<>(); 
-			renderer.setRendererDelegate((progress, errors) -> {
+			renderer.setDelegate((progress, errors) -> {
 				System.out.println(progress);
 				output.add(progress);
 			});

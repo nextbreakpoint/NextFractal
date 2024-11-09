@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -84,5 +84,6 @@ public class MandelbrotKeyHandler implements KeyHandler {
                 break;
             }
         }
+        keyEvent.consume();
     }
 }

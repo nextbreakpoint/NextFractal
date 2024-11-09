@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -26,7 +26,7 @@ package com.nextbreakpoint.nextfractal.core.javafx.viewer;
 
 import com.nextbreakpoint.nextfractal.core.common.Metadata;
 import com.nextbreakpoint.nextfractal.core.common.Session;
-import com.nextbreakpoint.nextfractal.core.javafx.BooleanObservableValue;
+import com.nextbreakpoint.nextfractal.core.javafx.observable.BooleanObservableValue;
 import com.nextbreakpoint.nextfractal.core.javafx.EventBusPublisher;
 import com.nextbreakpoint.nextfractal.core.javafx.MetadataDelegate;
 import com.nextbreakpoint.nextfractal.core.javafx.ToolContext;

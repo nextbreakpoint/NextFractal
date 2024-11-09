@@ -1,5 +1,5 @@
 /*
- * NextFractal 2.3.2
+ * NextFractal 2.4.0
  * https://github.com/nextbreakpoint/nextfractal
  *
  * Copyright 2015-2024 Andrea Medeghini
@@ -31,6 +31,7 @@ import javafx.scene.layout.Pane;
 
 public class MandelbrotRenderingPanel extends Pane {
     public MandelbrotRenderingPanel(RenderingContext renderingContext, int width, int height) {
+        //TODO remove width and height
         final Canvas fractalCanvas = new Canvas(width, height);
         final GraphicsContext gcFractalCanvas = fractalCanvas.getGraphicsContext2D();
         gcFractalCanvas.setFill(javafx.scene.paint.Color.WHITESMOKE);
